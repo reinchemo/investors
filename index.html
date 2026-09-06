@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[19:41, 06/09/2026] Toly Starlink: <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,6 +8,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, …
+[19:53, 06/09/2026] Toly Starlink: <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>STARLINK LLC · equity visual</title>
+    <!-- Chart.js CDN - using HTTPS and specific version -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <!-- Font Awesome for icons - using HTTPS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -121,6 +142,7 @@
             letter-spacing: 0.02em;
             white-space: nowrap;
             min-height: 40px;
+            cursor: pointer;
         }
 
         .nav-link i {
@@ -492,6 +514,18 @@
             height: 100% !important;
             display: block;
         }
+
+        /* Loading fallback */
+        .loading-fallback {
+            text-align: center;
+            padding: 2rem;
+            color: #1a3a58;
+        }
+        .loading-fallback i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #1e4a7a;
+        }
     </style>
 </head>
 <body>
@@ -503,7 +537,7 @@
                 <i class="fas fa-satellite-dish"></i>
                 <span>STARLINK LLC</span>
             </div>
-            <a href="#" class="nav-link" id="externalLinkBtn">
+            <a href="https://starlink-llc.netlify.app/" class="nav-link" id="externalLinkBtn" target="_blank">
                 <i class="fas fa-sign-in-alt"></i>
                 <span>Login · Expenditures</span>
                 <i class="fas fa-external-link-alt" style="font-size: 0.6rem; opacity: 0.7; margin-left: 0.05rem;"></i>
@@ -602,7 +636,22 @@
     </div>
 
     <script>
-        (function() {
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                // If Chart.js failed to load, show a message and try loading again
+                document.querySelector('.chart-grid').innerHTML = `
+                            <div class="loading-fallback" style="grid-column: 1 / -1;">
+                                <i class="fas fa-chart-simple"></i>
+                                <p>Loading charts... Please refresh if this persists.</p>
+                                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1.5rem; background: #1a5a9c; color: white; border: none; border-radius: 8px; cursor: pointer;">Refresh Page</button>
+                            </div>
+                        `;
+                return;
+            }
+
+            // Your data
             const labels = ['Toly Brian', 'Sam Musembi', 'Richard Isika', 'STARLINK LLC VIRTUAL', 'Shyla', 'Elvis Echwa'];
             const equityValues = [764591, 390778, 290202, 377259, 87377, 50000];
 
@@ -610,121 +659,128 @@
                 '#1f4a7a', '#3d7a9e', '#6d9eb0', '#aac7d9', '#d3a87e', '#b1a6a0'
             ];
 
-            // Pie Chart
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: equityValues,
-                        backgroundColor: backgroundColors,
-                        borderColor: 'rgba(255,255,255,0.6)',
-                        borderWidth: 2.5,
-                        hoverOffset: 18,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                padding: 10,
-                                font: { size: 10, weight: '500' },
-                                color: '#1a334a',
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    let value = context.parsed || 0;
-                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    let percentage = ((value / total) * 100).toFixed(2);
-                                    return ${label}: KSh ${value.toLocaleString()} (${percentage}%);
+            try {
+                // Pie Chart
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: equityValues,
+                            backgroundColor: backgroundColors,
+                            borderColor: 'rgba(255,255,255,0.6)',
+                            borderWidth: 2.5,
+                            hoverOffset: 18,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 10,
+                                    font: { size: 10, weight: '500' },
+                                    color: '#1a334a',
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        let value = context.parsed || 0;
+                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        let percentage = ((value / total) * 100).toFixed(2);
+                                        return ${label}: KSh ${value.toLocaleString()} (${percentage}%);
+                                    }
                                 }
                             }
-                        }
-                    },
-                    cutout: '8%',
-                }
-            });
-
-            // Bar Chart
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Equity (KSh)',
-                        data: equityValues,
-                        backgroundColor: backgroundColors.map(c => c + 'cc'),
-                        borderColor: backgroundColors,
-                        borderWidth: 1.8,
-                        borderRadius: 6,
-                        barPercentage: 0.7,
-                        categoryPercentage: 0.8,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return KSh ${context.parsed.y.toLocaleString()};
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.04)' },
-                            ticks: {
-                                callback: function(value) { return 'KSh ' + value.toLocaleString(); },
-                                font: { size: 9 },
-                                color: '#2a4b66'
-                            }
                         },
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 9, weight: '500' },
-                                color: '#1f405f',
-                                maxRotation: 20,
-                                minRotation: 10
-                            }
-                        }
-                    },
-                    layout: {
-                        padding: { top: 6, bottom: 6 }
+                        cutout: '8%',
                     }
-                }
-            });
+                });
 
-            // External button - redirects to your actual expenditures page
+                // Bar Chart
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Equity (KSh)',
+                            data: equityValues,
+                            backgroundColor: backgroundColors.map(c => c + 'cc'),
+                            borderColor: backgroundColors,
+                            borderWidth: 1.8,
+                            borderRadius: 6,
+                            barPercentage: 0.7,
+                            categoryPercentage: 0.8,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return KSh ${context.parsed.y.toLocaleString()};
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.04)' },
+                                ticks: {
+                                    callback: function(value) { return 'KSh ' + value.toLocaleString(); },
+                                    font: { size: 9 },
+                                    color: '#2a4b66'
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    font: { size: 9, weight: '500' },
+                                    color: '#1f405f',
+                                    maxRotation: 20,
+                                    minRotation: 10
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: { top: 6, bottom: 6 }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Chart creation error:', error);
+                document.querySelector('.chart-grid').innerHTML = `
+                            <div class="loading-fallback" style="grid-column: 1 / -1;">
+                                <i class="fas fa-triangle-exclamation"></i>
+                                <p>Error loading charts. Please refresh the page.</p>
+                                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1.5rem; background: #1a5a9c; color: white; border: none; border-radius: 8px; cursor: pointer;">Refresh Page</button>
+                            </div>
+                        `;
+            }
+
+            // The button now uses a direct href link - no JavaScript needed
+            // But we keep this as a fallback for any other functionality
             const externalBtn = document.getElementById('externalLinkBtn');
-            externalBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // YOUR ACTUAL EXPENDITURES PAGE URL
-                window.location.href = 'https://starlink-llc.netlify.app/';
-            });
+            if (externalBtn) {
+                // Just in case, ensure it opens in new tab
+                externalBtn.setAttribute('target', '_blank');
+                externalBtn.setAttribute('rel', 'noopener noreferrer');
+            }
 
-            // Force resize on orientation change
-            window.addEventListener('resize', function() {
-                // Chart.js handles responsive automatically with maintainAspectRatio: false
-            });
-
-        })();
+        });
     </script>
 
 </body>
