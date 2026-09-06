@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>STARLINK LLC · equity visual</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 0.6rem;
+        }
+
+        .dashboard {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+            padding: 1.5rem 1.2rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .dashboard {
+                padding: 1rem 0.7rem 1.5rem;
+                border-radius: 24px;
+                backdrop-filter: blur(6px);
+                -webkit-backdrop-filter: blur(6px);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .dashboard {
+                padding: 0.8rem 0.5rem 1.2rem;
+                border-radius: 20px;
+            }
+        }
+
+        /* NAVIGATION */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem 0.8rem;
+            margin-bottom: 1.4rem;
+            padding-bottom: 0.7rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1.3rem;
+            letter-spacing: -0.02em;
+            color: #0b1e33;
+        }
+
+        .brand i {
+            color: #1e4a7a;
+            font-size: 1.6rem;
+            filter: drop-shadow(0 4px 6px rgba(0, 20, 40, 0.08));
+        }
+
+        @media (max-width: 480px) {
+            .brand {
+                font-size: 1.1rem;
+                gap: 0.4rem;
+            }
+            .brand i {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .brand {
+                font-size: 0.95rem;
+            }
+            .brand i {
+                font-size: 1.1rem;
+            }
+        }
+
+        .nav-link {
+            background: #1a5a9c;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.55rem 1.2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: 0.15s ease;
+            box-shadow: 0 8px 16px -6px rgba(26, 90, 156, 0.25);
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            min-height: 40px;
+        }
+
+        .nav-link i {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .nav-link:hover {
+            background: #0f4a7e;
+            box-shadow: 0 10px 20px -8px rgba(26, 90, 156, 0.4);
+            transform: scale(1.02);
+            color: white;
+        }
+
+        .nav-link:active {
+            transform: scale(0.97);
+        }
+
+        @media (max-width: 480px) {
+            .nav-link {
+                padding: 0.45rem 0.9rem;
+                font-size: 0.78rem;
+                gap: 0.3rem;
+                min-height: 36px;
+            }
+            .nav-link i {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .nav-link {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.7rem;
+                gap: 0.2rem;
+                min-height: 32px;
+            }
+            .nav-link i {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* headline */
+        .headline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .headline h1 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #102b44, #1d4b74);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+
+        .headline h1 small {
+            font-size: 0.75rem;
+            font-weight: 400;
+            background: rgba(30, 74, 122, 0.08);
+            padding: 0.1rem 0.7rem;
+            border-radius: 40px;
+            -webkit-text-fill-color: #2f557a;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 480px) {
+            .headline h1 {
+                font-size: 1.4rem;
+            }
+            .headline h1 small {
+                font-size: 0.6rem;
+                padding: 0.1rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .headline h1 {
+                font-size: 1.2rem;
+            }
+            .headline h1 small {
+                font-size: 0.55rem;
+                padding: 0.05rem 0.4rem;
+            }
+        }
+
+        .total-badge {
+            background: #0b2b4a;
+            color: white;
+            padding: 0.35rem 1.2rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 8px 16px -8px rgba(0, 20, 40, 0.2);
+            background: rgba(11, 43, 74, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            white-space: nowrap;
+        }
+
+        .total-badge span {
+            font-weight: 300;
+            margin-right: 0.2rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 480px) {
+            .total-badge {
+                font-size: 0.8rem;
+                padding: 0.25rem 0.9rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .total-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.7rem;
+            }
+        }
+
+        /* CHART GRID - FULLY RESPONSIVE */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin: 1.5rem 0 1.2rem;
+        }
+
+        @media (max-width: 700px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+                gap: 1.8rem;
+            }
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 24px;
+            padding: 1rem 1rem 0.6rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.06);
+            transition: 0.2s ease;
+            width: 100%;
+        }
+
+        .chart-card:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .chart-card h3 {
+            font-weight: 500;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            color: #1f405f;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .chart-card h3 i {
+            color: #1e4a7a;
+            opacity: 0.7;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+
+        .chart-wrapper.pie-wrapper {
+            height: 210px;
+        }
+
+        @media (max-width: 600px) {
+            .chart-wrapper {
+                height: 200px;
+            }
+            .chart-wrapper.pie-wrapper {
+                height: 190px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chart-wrapper {
+                height: 180px;
+            }
+            .chart-wrapper.pie-wrapper {
+                height: 170px;
+            }
+            .chart-card {
+                padding: 0.8rem 0.6rem 0.4rem;
+                border-radius: 20px;
+            }
+            .chart-card h3 {
+                font-size: 0.85rem;
+                margin-bottom: 0.4rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .chart-wrapper {
+                height: 160px;
+            }
+            .chart-wrapper.pie-wrapper {
+                height: 150px;
+            }
+            .chart-card {
+                padding: 0.6rem 0.4rem 0.3rem;
+                border-radius: 16px;
+            }
+            .chart-card h3 {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* TABLE */
+        .table-section {
+            margin-top: 1.5rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            overflow-x: auto;
+            padding: 0.1rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+
+        .investor-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.12);
+            min-width: 340px;
+        }
+
+        .investor-table th {
+            text-align: left;
+            padding: 0.7rem 0.8rem;
+            font-weight: 600;
+            color: #1a3a58;
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            letter-spacing: 0.02em;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .investor-table td {
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+            color: #162d44;
+            font-weight: 450;
+        }
+
+        .investor-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .investor-table .highlight-row {
+            background: rgba(30, 74, 122, 0.06);
+            font-weight: 500;
+        }
+
+        .investor-table .highlight-row td {
+            border-bottom: 1px solid rgba(30, 74, 122, 0.08);
+        }
+
+        .investor-table .starlink-tag {
+            background: #1e4a7a18;
+            padding: 0.1rem 0.6rem;
+            border-radius: 40px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #1e4a7a;
+            border: 1px solid #1e4a7a20;
+            display: inline-block;
+            margin-left: 0.2rem;
+            white-space: nowrap;
+        }
+
+        .investor-table .equity-ratio {
+            font-weight: 600;
+            color: #0b2b4a;
+        }
+
+        @media (max-width: 480px) {
+            .investor-table {
+                font-size: 0.75rem;
+                min-width: 280px;
+            }
+            .investor-table th,
+            .investor-table td {
+                padding: 0.45rem 0.5rem;
+            }
+            .investor-table .starlink-tag {
+                font-size: 0.55rem;
+                padding: 0.05rem 0.4rem;
+            }
+            .investor-table th {
+                font-size: 0.6rem;
+                padding: 0.5rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .investor-table {
+                font-size: 0.7rem;
+                min-width: 240px;
+            }
+            .investor-table th,
+            .investor-table td {
+                padding: 0.35rem 0.4rem;
+            }
+            .investor-table .starlink-tag {
+                font-size: 0.5rem;
+                padding: 0.05rem 0.3rem;
+            }
+        }
+
+        .footer-note {
+            margin-top: 1.2rem;
+            display: flex;
+            justify-content: flex-end;
+            font-size: 0.75rem;
+            color: #3b5e7e;
+            opacity: 0.8;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-note i {
+            color: #1e4a7a;
+        }
+
+        @media (max-width: 480px) {
+            .footer-note {
+                font-size: 0.65rem;
+                gap: 0.3rem;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .footer-note {
+                font-size: 0.55rem;
+                gap: 0.2rem;
+            }
+        }
+
+        /* Force canvas to fill container */
+        .chart-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+
+        <!-- navigation -->
+        <nav class="nav">
+            <div class="brand">
+                <i class="fas fa-satellite-dish"></i>
+                <span>STARLINK LLC</span>
+            </div>
+            <a href="#" class="nav-link" id="externalLinkBtn">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Login · Expenditures</span>
+                <i class="fas fa-external-link-alt" style="font-size: 0.6rem; opacity: 0.7; margin-left: 0.05rem;"></i>
+            </a>
+        </nav>
+
+        <!-- headline + total equity -->
+        <div class="headline">
+            <h1>
+                <i class="fas fa-chart-pie" style="font-size: 1.6rem; -webkit-text-fill-color: #1e4a7a;"></i>
+                equity overview
+                <small>investors</small>
+            </h1>
+            <div class="total-badge">
+                <span>₿</span> KSh 1,960,207
+            </div>
+        </div>
+
+        <!-- charts grid -->
+        <div class="chart-grid">
+            <!-- Pie chart -->
+            <div class="chart-card">
+                <h3><i class="fas fa-circle"></i> distribution · pie</h3>
+                <div class="chart-wrapper pie-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <!-- Bar chart -->
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-bar"></i> equity · bar</h3>
+                <div class="chart-wrapper">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- investor table -->
+        <div class="table-section">
+            <table class="investor-table">
+                <thead>
+                    <tr>
+                        <th>Shareholder</th>
+                        <th>Equity (KSh)</th>
+                        <th>Equity Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Toly Brian</td>
+                        <td>764,591</td>
+                        <td class="equity-ratio">39.01%</td>
+                    </tr>
+                    <tr>
+                        <td>Sam Musembi</td>
+                        <td>390,778</td>
+                        <td class="equity-ratio">19.94%</td>
+                    </tr>
+                    <tr>
+                        <td>Richard Isika</td>
+                        <td>290,202</td>
+                        <td class="equity-ratio">14.80%</td>
+                    </tr>
+                    <tr class="highlight-row">
+                        <td>
+                            STARLINK LLC VIRTUAL
+                            <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right: 2px;"></i>+102,066</span>
+                        </td>
+                        <td><strong>377,259</strong></td>
+                        <td class="equity-ratio">19.25%</td>
+                    </tr>
+                    <tr>
+                        <td>Shyla</td>
+                        <td>87,377</td>
+                        <td class="equity-ratio">4.46%</td>
+                    </tr>
+                    <tr>
+                        <td>Elvis Echwa</td>
+                        <td>50,000</td>
+                        <td class="equity-ratio">2.55%</td>
+                    </tr>
+                    <tr style="border-top: 2px solid rgba(0,0,0,0.06);">
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong>1,960,207</strong></td>
+                        <td><strong>100.00%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer-note">
+            <i class="fas fa-calculator"></i> STARLINK LLC VIRTUAL: 275,193 + 102,066 = <strong>377,259</strong> KSh
+            <span style="opacity: 0.3; margin: 0 0.2rem;">·</span>
+            <i class="fas fa-arrow-trend-up" style="opacity: 0.6;"></i>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            const labels = ['Toly Brian', 'Sam Musembi', 'Richard Isika', 'STARLINK LLC VIRTUAL', 'Shyla', 'Elvis Echwa'];
+            const equityValues = [764591, 390778, 290202, 377259, 87377, 50000];
+
+            const backgroundColors = [
+                '#1f4a7a', '#3d7a9e', '#6d9eb0', '#aac7d9', '#d3a87e', '#b1a6a0'
+            ];
+
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: equityValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: 'rgba(255,255,255,0.6)',
+                        borderWidth: 2.5,
+                        hoverOffset: 18,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: { size: 10, weight: '500' },
+                                color: '#1a334a',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed || 0;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(2);
+                                    return `${label}: KSh ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '8%',
+                }
+            });
+
+            // Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Equity (KSh)',
+                        data: equityValues,
+                        backgroundColor: backgroundColors.map(c => c + 'cc'),
+                        borderColor: backgroundColors,
+                        borderWidth: 1.8,
+                        borderRadius: 6,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `KSh ${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.04)' },
+                            ticks: {
+                                callback: function(value) { return 'KSh ' + value.toLocaleString(); },
+                                font: { size: 9 },
+                                color: '#2a4b66'
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 9, weight: '500' },
+                                color: '#1f405f',
+                                maxRotation: 20,
+                                minRotation: 10
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: { top: 6, bottom: 6 }
+                    }
+                }
+            });
+
+            // External button
+            const externalBtn = document.getElementById('externalLinkBtn');
+            externalBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const externalUrl = 'https://starlink-expenditures.example.com/dashboard';
+                alert(`🔗 Redirecting to Expenditures page:\n${externalUrl}\n\n(Replace this URL in the script.)`);
+                // window.open(externalUrl, '_blank');
+            });
+
+            // Force resize on orientation change
+            window.addEventListener('resize', function() {
+                // Chart.js handles responsive automatically with maintainAspectRatio: false
+            });
+
+        })();
+    </script>
+
+</body>
+</html>
