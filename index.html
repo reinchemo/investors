@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>STARLINK LLC · equity visual</title>
-    <!-- Chart.js CDN - using HTTPS and specific version with fallback -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
-    <!-- Font Awesome for icons - using HTTPS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -16,7 +16,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
         }
-
+        
         body {
             background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
             min-height: 100vh;
@@ -26,7 +26,7 @@
             justify-content: center;
             padding: 0.8rem 0.6rem;
         }
-
+        
         .dashboard {
             max-width: 1300px;
             width: 100%;
@@ -38,24 +38,21 @@
             padding: 1.5rem 1.2rem 2rem;
             border: 1px solid rgba(255, 255, 255, 0.4);
         }
-
-        @media (max-width: 600px) {
+        
+        @media (max-width:600px) {
             .dashboard {
                 padding: 1rem 0.7rem 1.5rem;
                 border-radius: 24px;
-                backdrop-filter: blur(6px);
-                -webkit-backdrop-filter: blur(6px);
             }
         }
-
-        @media (max-width: 400px) {
+        
+        @media (max-width:400px) {
             .dashboard {
                 padding: 0.8rem 0.5rem 1.2rem;
                 border-radius: 20px;
             }
         }
-
-        /* NAVIGATION */
+        
         .nav {
             display: flex;
             justify-content: space-between;
@@ -66,105 +63,88 @@
             padding-bottom: 0.7rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
         }
-
+        
         .brand {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             font-weight: 600;
             font-size: 1.3rem;
-            letter-spacing: -0.02em;
             color: #0b1e33;
         }
-
+        
         .brand i {
             color: #1e4a7a;
             font-size: 1.6rem;
-            filter: drop-shadow(0 4px 6px rgba(0, 20, 40, 0.08));
         }
-
-        @media (max-width: 480px) {
+        
+        @media (max-width:480px) {
             .brand {
                 font-size: 1.1rem;
-                gap: 0.4rem;
             }
             .brand i {
                 font-size: 1.3rem;
             }
         }
-
-        @media (max-width: 380px) {
-            .brand {
-                font-size: 0.95rem;
-            }
-            .brand i {
-                font-size: 1.1rem;
-            }
+        
+        .nav-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-
-        .nav-link {
-            background: #1a5a9c;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+        
+        .btn {
             border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.55rem 1.2rem;
+            padding: 0.5rem 1rem;
             border-radius: 60px;
             font-weight: 600;
-            color: white;
-            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.15s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            transition: 0.15s ease;
+            min-height: 38px;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: #1a5a9c;
+            color: white;
             box-shadow: 0 8px 16px -6px rgba(26, 90, 156, 0.25);
-            font-size: 0.9rem;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-            min-height: 40px;
-            cursor: pointer;
         }
-
-        .nav-link i {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .nav-link:hover {
+        
+        .btn-primary:hover {
             background: #0f4a7e;
-            box-shadow: 0 10px 20px -8px rgba(26, 90, 156, 0.4);
             transform: scale(1.02);
+        }
+        
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.6);
+            color: #1a3a58;
+        }
+        
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .btn-danger {
+            background: #c04a3a;
             color: white;
         }
-
-        .nav-link:active {
-            transform: scale(0.97);
+        
+        .btn-danger:hover {
+            background: #a03a2a;
         }
-
-        @media (max-width: 480px) {
-            .nav-link {
-                padding: 0.45rem 0.9rem;
-                font-size: 0.78rem;
-                gap: 0.3rem;
-                min-height: 36px;
-            }
-            .nav-link i {
-                font-size: 0.8rem;
+        
+        @media (max-width:480px) {
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+                min-height: 34px;
             }
         }
-
-        @media (max-width: 380px) {
-            .nav-link {
-                padding: 0.4rem 0.7rem;
-                font-size: 0.7rem;
-                gap: 0.2rem;
-                min-height: 32px;
-            }
-            .nav-link i {
-                font-size: 0.7rem;
-            }
-        }
-
-        /* headline */
+        
         .headline {
             display: flex;
             justify-content: space-between;
@@ -173,7 +153,7 @@
             gap: 0.5rem 0.6rem;
             margin-bottom: 1.5rem;
         }
-
+        
         .headline h1 {
             font-weight: 600;
             font-size: 1.8rem;
@@ -187,7 +167,12 @@
             gap: 0.3rem;
             flex-wrap: wrap;
         }
-
+        
+        .headline h1 i {
+            -webkit-text-fill-color: #1e4a7a;
+            font-size: 1.6rem;
+        }
+        
         .headline h1 small {
             font-size: 0.75rem;
             font-weight: 400;
@@ -195,183 +180,271 @@
             padding: 0.1rem 0.7rem;
             border-radius: 40px;
             -webkit-text-fill-color: #2f557a;
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
-
-        @media (max-width: 480px) {
+        
+        @media (max-width:480px) {
             .headline h1 {
                 font-size: 1.4rem;
             }
-            .headline h1 small {
-                font-size: 0.6rem;
-                padding: 0.1rem 0.5rem;
+            .headline h1 i {
+                font-size: 1.3rem;
             }
         }
-
-        @media (max-width: 380px) {
-            .headline h1 {
-                font-size: 1.2rem;
+        
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2a8a4a;
+            background: rgba(111, 203, 147, 0.12);
+            border: 1px solid rgba(111, 203, 147, 0.25);
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            margin-left: 0.3rem;
+        }
+        
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2a8a4a;
+            animation: pulse 1.4s infinite;
+        }
+        
+        .live-dot.pulse-once {
+            background: #6fcb93;
+            animation: pulseOnce 1.2s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0.7);
             }
-            .headline h1 small {
-                font-size: 0.55rem;
-                padding: 0.05rem 0.4rem;
+            70% {
+                box-shadow: 0 0 0 8px rgba(111, 203, 147, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0);
             }
         }
-
+        
+        @keyframes pulseOnce {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0.9);
+            }
+            50% {
+                transform: scale(1.6);
+                box-shadow: 0 0 0 12px rgba(111, 203, 147, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0);
+            }
+        }
+        
         .total-badge {
-            background: #0b2b4a;
+            background: rgba(11, 43, 74, 0.9);
             color: white;
             padding: 0.35rem 1.2rem;
             border-radius: 60px;
             font-weight: 600;
             font-size: 1rem;
             box-shadow: 0 8px 16px -8px rgba(0, 20, 40, 0.2);
-            background: rgba(11, 43, 74, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.15);
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: transform 0.3s ease;
         }
-
-        .total-badge span {
-            font-weight: 300;
-            margin-right: 0.2rem;
-            opacity: 0.8;
+        
+        .total-badge.updated {
+            animation: badgePulse 0.8s ease;
         }
-
-        @media (max-width: 480px) {
+        
+        @keyframes badgePulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 0 0 6px rgba(79, 182, 168, 0.15);
+            }
+        }
+        
+        @media (max-width:480px) {
             .total-badge {
                 font-size: 0.8rem;
                 padding: 0.25rem 0.9rem;
             }
         }
-
-        @media (max-width: 380px) {
-            .total-badge {
-                font-size: 0.7rem;
-                padding: 0.2rem 0.7rem;
+        
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.8rem;
+            margin: 0.6rem 0 1.4rem;
+        }
+        
+        .summary-card {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 0.7rem 0.9rem;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .summary-card .summary-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #3b5e7e;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .summary-card .summary-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #0b2b4a;
+            font-family: 'Inter', monospace;
+        }
+        
+        .summary-card.virtual {
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.12) 0%, rgba(200, 154, 91, 0.04) 100%);
+            border-color: rgba(200, 154, 91, 0.2);
+        }
+        
+        .summary-card.virtual .summary-value {
+            color: #a67a3a;
+        }
+        
+        .summary-card.investment {
+            background: linear-gradient(135deg, rgba(79, 182, 168, 0.12) 0%, rgba(79, 182, 168, 0.04) 100%);
+            border-color: rgba(79, 182, 168, 0.2);
+        }
+        
+        .summary-card.investment .summary-value {
+            color: #2a8a7a;
+        }
+        
+        @media (max-width:480px) {
+            .summary-card .summary-value {
+                font-size: 1rem;
+            }
+            .summary-card .summary-label {
+                font-size: 0.55rem;
             }
         }
-
-        /* CHART GRID - FULLY RESPONSIVE */
+        
         .chart-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.2rem;
             margin: 1.5rem 0 1.2rem;
         }
-
-        @media (max-width: 700px) {
+        
+        @media (max-width:700px) {
             .chart-grid {
                 grid-template-columns: 1fr;
                 gap: 1.8rem;
             }
         }
-
+        
         .chart-card {
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
             border-radius: 24px;
             padding: 1rem 1rem 0.6rem;
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.06);
-            transition: 0.2s ease;
-            width: 100%;
         }
-
-        .chart-card:hover {
-            background: rgba(255, 255, 255, 0.7);
-        }
-
+        
         .chart-card h3 {
             font-weight: 500;
             font-size: 0.95rem;
-            letter-spacing: 0.02em;
             color: #1f405f;
             margin-bottom: 0.6rem;
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
-
+        
         .chart-card h3 i {
             color: #1e4a7a;
             opacity: 0.7;
         }
-
+        
         .chart-wrapper {
             position: relative;
             width: 100%;
-            height: 220px;
+            height: 240px;
         }
-
+        
         .chart-wrapper.pie-wrapper {
-            height: 210px;
+            height: 240px;
         }
-
-        @media (max-width: 600px) {
+        
+        @media (max-width:600px) {
             .chart-wrapper {
-                height: 200px;
+                height: 210px;
+            }
+            .chart-wrapper.pie-wrapper {
+                height: 210px;
+            }
+        }
+        
+        @media (max-width:480px) {
+            .chart-wrapper {
+                height: 190px;
             }
             .chart-wrapper.pie-wrapper {
                 height: 190px;
             }
         }
-
-        @media (max-width: 480px) {
-            .chart-wrapper {
-                height: 180px;
-            }
-            .chart-wrapper.pie-wrapper {
-                height: 170px;
-            }
-            .chart-card {
-                padding: 0.8rem 0.6rem 0.4rem;
-                border-radius: 20px;
-            }
-            .chart-card h3 {
-                font-size: 0.85rem;
-                margin-bottom: 0.4rem;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .chart-wrapper {
-                height: 160px;
-            }
-            .chart-wrapper.pie-wrapper {
-                height: 150px;
-            }
-            .chart-card {
-                padding: 0.6rem 0.4rem 0.3rem;
-                border-radius: 16px;
-            }
-            .chart-card h3 {
-                font-size: 0.75rem;
-            }
-        }
-
-        /* TABLE */
+        
         .table-section {
             margin-top: 1.5rem;
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
             border: 1px solid rgba(255, 255, 255, 0.5);
             overflow-x: auto;
             padding: 0.1rem;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
         }
-
+        
+        .table-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0.9rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .table-section-header h4 {
+            font-size: 0.85rem;
+            color: #1f405f;
+            font-weight: 600;
+        }
+        
         .investor-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
             background: rgba(255, 255, 255, 0.12);
-            min-width: 340px;
+            min-width: 400px;
         }
-
+        
         .investor-table th {
             text-align: left;
             padding: 0.7rem 0.8rem;
@@ -379,50 +452,89 @@
             color: #1a3a58;
             background: rgba(255, 255, 255, 0.2);
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-            letter-spacing: 0.02em;
             font-size: 0.7rem;
             text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
-
+        
         .investor-table td {
             padding: 0.6rem 0.8rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.03);
             color: #162d44;
-            font-weight: 450;
         }
-
+        
         .investor-table tr:last-child td {
             border-bottom: none;
         }
-
+        
         .investor-table .highlight-row {
-            background: rgba(30, 74, 122, 0.06);
-            font-weight: 500;
+            background: rgba(200, 154, 91, 0.12);
+            font-weight: 600;
+            border-left: 3px solid #c89a5b;
         }
-
+        
         .investor-table .highlight-row td {
-            border-bottom: 1px solid rgba(30, 74, 122, 0.08);
+            color: #0b2b4a;
         }
-
+        
         .investor-table .starlink-tag {
-            background: #1e4a7a18;
+            background: #c89a5b20;
             padding: 0.1rem 0.6rem;
             border-radius: 40px;
             font-size: 0.65rem;
             font-weight: 600;
-            color: #1e4a7a;
-            border: 1px solid #1e4a7a20;
+            color: #a67a3a;
+            border: 1px solid #c89a5b30;
             display: inline-block;
             margin-left: 0.2rem;
             white-space: nowrap;
         }
-
+        
         .investor-table .equity-ratio {
             font-weight: 600;
             color: #0b2b4a;
         }
-
-        @media (max-width: 480px) {
+        
+        .investor-table .total-row td {
+            border-top: 2px solid rgba(0, 0, 0, 0.08);
+            font-weight: 700;
+            color: #0b2b4a;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .row-actions {
+            display: flex;
+            gap: 0.3rem;
+            justify-content: flex-end;
+        }
+        
+        .row-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.4rem;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        
+        .row-actions .edit-btn {
+            color: #1a5a9c;
+        }
+        
+        .row-actions .edit-btn:hover {
+            background: rgba(26, 90, 156, 0.1);
+        }
+        
+        .row-actions .del-btn {
+            color: #c04a3a;
+        }
+        
+        .row-actions .del-btn:hover {
+            background: rgba(192, 74, 58, 0.1);
+        }
+        
+        @media (max-width:480px) {
             .investor-table {
                 font-size: 0.75rem;
                 min-width: 280px;
@@ -433,378 +545,1031 @@
             }
             .investor-table .starlink-tag {
                 font-size: 0.55rem;
-                padding: 0.05rem 0.4rem;
-            }
-            .investor-table th {
-                font-size: 0.6rem;
-                padding: 0.5rem 0.5rem;
             }
         }
-
-        @media (max-width: 380px) {
-            .investor-table {
-                font-size: 0.7rem;
-                min-width: 240px;
-            }
-            .investor-table th,
-            .investor-table td {
-                padding: 0.35rem 0.4rem;
-            }
-            .investor-table .starlink-tag {
-                font-size: 0.5rem;
-                padding: 0.05rem 0.3rem;
-            }
-        }
-
+        
         .footer-note {
             margin-top: 1.2rem;
             display: flex;
             justify-content: flex-end;
             font-size: 0.75rem;
             color: #3b5e7e;
-            opacity: 0.8;
+            opacity: 0.85;
             align-items: center;
             gap: 0.6rem;
             flex-wrap: wrap;
         }
-
+        
         .footer-note i {
             color: #1e4a7a;
         }
-
-        @media (max-width: 480px) {
+        
+        @media (max-width:480px) {
             .footer-note {
                 font-size: 0.65rem;
-                gap: 0.3rem;
                 justify-content: center;
             }
         }
-
-        @media (max-width: 380px) {
-            .footer-note {
-                font-size: 0.55rem;
-                gap: 0.2rem;
+        
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .loading-overlay .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(30, 74, 122, 0.15);
+            border-top-color: #1e4a7a;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
-
-        /* Force canvas to fill container */
-        .chart-wrapper canvas {
-            width: 100% !important;
-            height: 100% !important;
+        
+        .error-banner {
+            background: rgba(226, 104, 91, 0.12);
+            color: #c04a3a;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(226, 104, 91, 0.25);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .error-banner.show {
             display: block;
         }
-
-        /* Loading fallback */
-        .loading-fallback {
-            text-align: center;
-            padding: 2rem;
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 20, 35, 0.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 9998;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 1.3rem 1.3rem 1rem;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-card h3 {
+            font-size: 1.05rem;
+            color: #0b1e33;
+            margin-bottom: 0.9rem;
+        }
+        
+        .modal-card label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #3b5e7e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+            margin-top: 0.7rem;
+        }
+        
+        .modal-card input,
+        .modal-card select {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #cdd8e3;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #0b1e33;
+            outline: none;
+            transition: 0.15s;
+        }
+        
+        .modal-card input:focus,
+        .modal-card select:focus {
+            border-color: #1a5a9c;
+            box-shadow: 0 0 0 3px rgba(26, 90, 156, 0.15);
+        }
+        
+        .modal-card .modal-error {
+            color: #c04a3a;
+            font-size: 0.8rem;
+            margin-top: 0.6rem;
+            display: none;
+        }
+        
+        .modal-card .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.2rem;
+        }
+        
+        .modal-card .modal-actions button {
+            flex: 1;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .modal-card .modal-actions .save {
+            background: #1a5a9c;
+            color: #fff;
+        }
+        
+        .modal-card .modal-actions .save:hover {
+            background: #0f4a7e;
+        }
+        
+        .modal-card .modal-actions .cancel {
+            background: #eef2f7;
             color: #1a3a58;
         }
-        .loading-fallback i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #1e4a7a;
-        }
-
-        /* Chart container with min-height to prevent collapse */
-        .chart-container {
-            min-height: 200px;
-            width: 100%;
+        
+        .modal-card .modal-actions .cancel:hover {
+            background: #dde5ee;
         }
     </style>
 </head>
-<body>
-    <div class="dashboard">
 
-        <!-- navigation -->
-        <nav class="nav">
-            <div class="brand">
-                <i class="fas fa-satellite-dish"></i>
-                <span>STARLINK LLC</span>
+<body>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ADD / EDIT INVESTOR MODAL -->
+    <div class="modal-overlay" id="investorModal">
+        <div class="modal-card">
+            <h3 id="investorModalTitle">➕ Add Investor</h3>
+            <label>Name</label>
+            <input type="text" id="invName" placeholder="e.g. John Doe" maxlength="60">
+            <label>Equity Contribution (KSh)</label>
+            <input type="number" id="invEquity" placeholder="0" min="0" step="1">
+            <label>Color</label>
+            <input type="color" id="invColor" value="#1f4a7a" style="height:44px; padding:0.3rem;">
+            <div class="modal-error" id="invError"></div>
+            <div class="modal-actions">
+                <button class="cancel" id="invCancel">Cancel</button>
+                <button class="save" id="invSave">Save</button>
             </div>
-            <!-- DIRECT LINK - NO JAVASCRIPT INTERFERENCE -->
-            <a href="https://starlink-llc.netlify.app/" class="nav-link" target="_blank" rel="noopener noreferrer">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>Login · Expenditures</span>
-                <i class="fas fa-external-link-alt" style="font-size: 0.6rem; opacity: 0.7; margin-left: 0.05rem;"></i>
-            </a>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <nav class="nav">
+            <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
+            <div class="nav-actions">
+                <button class="btn btn-ghost" id="addInvestorBtn">➕ Add Investor</button>
+                <a href="https://starlink-llc.netlify.app/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-sign-in-alt"></i><span>Login · Expenditures</span>
+                </a>
+            </div>
         </nav>
 
-        <!-- headline + total equity -->
+        <div id="errorBanner" class="error-banner"></div>
+
         <div class="headline">
             <h1>
-                <i class="fas fa-chart-pie" style="font-size: 1.6rem; -webkit-text-fill-color: #1e4a7a;"></i>
-                equity overview
-                <small>investors</small>
+                <i class="fas fa-chart-pie"></i> equity overview <small>investors</small>
+                <span class="live-indicator">
+        <span class="live-dot" id="liveDot"></span>
+                <span id="liveStatus">Live</span>
+                </span>
             </h1>
-            <div class="total-badge">
-                <span>₿</span> KSh 1,960,207
+            <div class="total-badge" id="totalBadge">
+                <span>💰</span> KSh <span id="totalSharesValue">0</span>
             </div>
         </div>
 
-        <!-- charts grid -->
-        <div class="chart-grid">
-            <!-- Pie chart -->
-            <div class="chart-card">
-                <h3><i class="fas fa-circle"></i> distribution · pie</h3>
-                <div class="chart-wrapper pie-wrapper">
-                    <canvas id="pieChart"></canvas>
-                </div>
+        <div class="summary-row">
+            <div class="summary-card virtual">
+                <div class="summary-label"><i class="fas fa-landmark"></i> STARLINK VIRTUAL</div>
+                <div class="summary-value" id="virtualInvestmentValue">0.00</div>
             </div>
-            <!-- Bar chart -->
+            <div class="summary-card investment">
+                <div class="summary-label"><i class="fas fa-chart-line"></i> STARLINK INVESTMENT</div>
+                <div class="summary-value" id="starlinkInvestmentValue">0.00</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label"><i class="fas fa-coins"></i> COMMON EXPENDITURE</div>
+                <div class="summary-value" id="commonExpenditureValue">0.00</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label"><i class="fas fa-wifi"></i> ROUTERS − KAIRO</div>
+                <div class="summary-value" id="routersDeltaValue">0.00</div>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-circle"></i> investor distribution</h3>
+                <div class="chart-wrapper pie-wrapper"><canvas id="pieChart"></canvas></div>
+            </div>
             <div class="chart-card">
                 <h3><i class="fas fa-chart-bar"></i> equity · bar</h3>
-                <div class="chart-wrapper">
-                    <canvas id="barChart"></canvas>
-                </div>
+                <div class="chart-wrapper"><canvas id="barChart"></canvas></div>
             </div>
         </div>
 
-        <!-- investor table -->
         <div class="table-section">
+            <div class="table-section-header">
+                <h4>Equity breakdown by shareholder</h4>
+                <button class="btn btn-ghost" id="addInvestorBtn2" style="font-size:0.75rem; padding:0.35rem 0.8rem; min-height:30px;">➕ Add Investor</button>
+            </div>
             <table class="investor-table">
                 <thead>
                     <tr>
-                        <th>Shareholder</th>
-                        <th>Equity (KSh)</th>
-                        <th>Equity Ratio</th>
+                        <th scope="col">Shareholder</th>
+                        <th scope="col">Equity (KSh)</th>
+                        <th scope="col">Equity Ratio</th>
+                        <th scope="col" style="width:80px; text-align:right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>Toly Brian</td>
-                        <td>764,591</td>
-                        <td class="equity-ratio">39.01%</td>
-                    </tr>
-                    <tr>
-                        <td>Sam Musembi</td>
-                        <td>390,778</td>
-                        <td class="equity-ratio">19.94%</td>
-                    </tr>
-                    <tr>
-                        <td>Richard Isika</td>
-                        <td>290,202</td>
-                        <td class="equity-ratio">14.80%</td>
-                    </tr>
-                    <tr class="highlight-row">
-                        <td>
-                            STARLINK LLC VIRTUAL
-                            <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right: 2px;"></i>+102,066</span>
-                        </td>
-                        <td><strong>377,259</strong></td>
-                        <td class="equity-ratio">19.25%</td>
-                    </tr>
-                    <tr>
-                        <td>Shyla</td>
-                        <td>87,377</td>
-                        <td class="equity-ratio">4.46%</td>
-                    </tr>
-                    <tr>
-                        <td>Elvis Echwa</td>
-                        <td>50,000</td>
-                        <td class="equity-ratio">2.55%</td>
-                    </tr>
-                    <tr style="border-top: 2px solid rgba(0,0,0,0.06);">
-                        <td><strong>TOTAL</strong></td>
-                        <td><strong>1,960,207</strong></td>
-                        <td><strong>100.00%</strong></td>
-                    </tr>
-                </tbody>
+                <tbody id="investorTableBody"></tbody>
             </table>
         </div>
 
         <div class="footer-note">
-            <i class="fas fa-calculator"></i> STARLINK LLC VIRTUAL: 275,193 + 102,066 = <strong>377,259</strong> KSh
-            <span style="opacity: 0.3; margin: 0 0.2rem;">·</span>
-            <i class="fas fa-arrow-trend-up" style="opacity: 0.6;"></i>
+            <i class="fas fa-clock"></i> Last updated: <strong id="lastUpdatedValue">—</strong>
+            <span style="opacity:0.3; margin:0 0.2rem;">·</span>
+            <i class="fas fa-bolt" style="opacity:0.6;"></i>
         </div>
-
     </div>
 
     <script>
-        // Wait for DOM to load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Function to create charts
-            function createCharts() {
-                try {
-                    // Check if Chart is available
-                    if (typeof Chart === 'undefined') {
-                        console.error('Chart.js not loaded');
-                        showError('Chart library failed to load. Please refresh the page.');
-                        return;
-                    }
+        // ==================================================
+        // CONFIG
+        // ==================================================
+        const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
 
-                    // Your data
-                    const labels = ['Toly Brian', 'Sam Musembi', 'Richard Isika', 'STARLINK LLC VIRTUAL', 'Shyla',
-                        'Elvis Echwa'
-                    ];
-                    const equityValues = [764591, 390778, 290202, 377259, 87377, 50000];
+        const DEFAULT_INVESTORS = [{
+            id: 1,
+            name: 'Toly Brian',
+            equity: 764591,
+            color: '#1f4a7a'
+        }, {
+            id: 2,
+            name: 'Sam Musembi',
+            equity: 390778,
+            color: '#3d7a9e'
+        }, {
+            id: 3,
+            name: 'Richard Isika',
+            equity: 290202,
+            color: '#6d9eb0'
+        }, {
+            id: 4,
+            name: 'Shyla',
+            equity: 87377,
+            color: '#d3a87e'
+        }, {
+            id: 5,
+            name: 'Elvis Echwa',
+            equity: 50000,
+            color: '#b1a6a0'
+        }];
 
-                    const backgroundColors = [
-                        '#1f4a7a', '#3d7a9e', '#6d9eb0', '#aac7d9', '#d3a87e', '#b1a6a0'
-                    ];
+        const COLOR_PALETTE = ['#1f4a7a', '#3d7a9e', '#6d9eb0', '#d3a87e', '#b1a6a0', '#2a8a7a', '#a67a3a', '#8a4a7a', '#4a7a3a', '#7a4a4a'];
 
-                    // Get canvas elements
-                    const pieCanvas = document.getElementById('pieChart');
-                    const barCanvas = document.getElementById('barChart');
+        // ==================================================
+        // STATE
+        // ==================================================
+        let summary = {
+            commonExpenditureTotal: 0,
+            routersTotal: 0,
+            kairoRoutersTotal: 0,
+            starlinkInvestmentTotal: 0,
+            starlinkVirtualInvestment: 0,
+            totalTransactionFees: 0,
+            lastUpdated: null
+        };
 
-                    if (!pieCanvas || !barCanvas) {
-                        console.error('Canvas elements not found');
-                        showError('Chart containers not found. Please refresh the page.');
-                        return;
-                    }
+        let investors = [];
+        let supabaseClient = null;
+        let pieChartInstance = null;
+        let barChartInstance = null;
+        let pollInterval = null;
+        let editingInvestorId = null;
 
-                    // Pie Chart
-                    const pieCtx = pieCanvas.getContext('2d');
-                    new Chart(pieCtx, {
-                        type: 'pie',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: equityValues,
-                                backgroundColor: backgroundColors,
-                                borderColor: 'rgba(255,255,255,0.6)',
-                                borderWidth: 2.5,
-                                hoverOffset: 18,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        boxWidth: 12,
-                                        padding: 10,
-                                        font: { size: 10, weight: '500' },
-                                        color: '#1a334a',
-                                        usePointStyle: true,
-                                        pointStyle: 'circle',
-                                    }
+        // ==================================================
+        // HELPERS
+        // ==================================================
+        function safeNum(v) {
+            if (v === '' || v === null || v === undefined) return 0;
+            const n = typeof v === 'number' ? v : parseFloat(v);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function fmt(n) {
+            return Math.round(safeNum(n)).toLocaleString();
+        }
+
+        function fmtDec(n) {
+            return safeNum(n).toFixed(2);
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorBanner');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 6000);
+        }
+
+        function setLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('show', show);
+        }
+
+        function pulseLive() {
+            const dot = document.getElementById('liveDot');
+            const status = document.getElementById('liveStatus');
+            dot.classList.remove('pulse-once');
+            void dot.offsetWidth;
+            dot.classList.add('pulse-once');
+            const badge = document.getElementById('totalBadge');
+            badge.classList.remove('updated');
+            void badge.offsetWidth;
+            badge.classList.add('updated');
+            status.textContent = 'Updating…';
+            setTimeout(() => {
+                status.textContent = 'Live';
+            }, 1200);
+        }
+
+        function formatTimestamp(iso) {
+            if (!iso) return '—';
+            try {
+                return new Date(iso).toLocaleString();
+            } catch (e) {
+                return iso;
+            }
+        }
+
+        function nextInvestorId() {
+            return investors.reduce((m, i) => Math.max(m, i.id || 0), 0) + 1;
+        }
+
+        function pickColor() {
+            const used = new Set(investors.map(i => i.color));
+            for (const c of COLOR_PALETTE)
+                if (!used.has(c)) return c;
+            return COLOR_PALETTE[investors.length % COLOR_PALETTE.length];
+        }
+
+        // ==================================================
+        // BUILD INVESTOR LIST
+        // ==================================================
+        function buildInvestors() {
+            const list = investors.map(i => ({
+                id: i.id,
+                name: i.name,
+                color: i.color || '#6d9eb0',
+                equity: safeNum(i.equity),
+                isStarlink: false
+            }));
+            list.push({
+                name: 'STARLINK LLC VIRTUAL',
+                equity: Math.round(safeNum(summary.starlinkVirtualInvestment)),
+                color: '#c89a5b',
+                isStarlink: true,
+                rawEquity: safeNum(summary.starlinkVirtualInvestment)
+            });
+            return list;
+        }
+
+        // ==================================================
+        // RENDER TABLE
+        // ==================================================
+        function renderTable() {
+            const tbody = document.getElementById('investorTableBody');
+            const all = buildInvestors();
+            const totalEquity = all.reduce((s, i) => s + i.equity, 0);
+
+            let html = '';
+            all.forEach(inv => {
+                const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
+                const rowClass = inv.isStarlink ? 'highlight-row' : '';
+
+                if (inv.isStarlink) {
+                    html += `<tr class="${rowClass}">
+        <td>${inv.name} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
+        <td><strong>${fmt(inv.equity)}</strong></td>
+        <td class="equity-ratio">${ratio}%</td>
+        <td></td>
+      </tr>`;
+                } else {
+                    html += `<tr class="${rowClass}">
+        <td>${inv.name}</td>
+        <td>${fmt(inv.equity)}</td>
+        <td class="equity-ratio">${ratio}%</td>
+        <td>
+          <div class="row-actions">
+            <button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button>
+            <button class="del-btn"  data-id="${inv.id}" title="Delete">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+                }
+            });
+
+            html += `<tr class="total-row">
+    <td><strong>TOTAL</strong></td>
+    <td><strong>${fmt(totalEquity)}</strong></td>
+    <td><strong>100.00%</strong></td>
+    <td></td>
+  </tr>`;
+
+            tbody.innerHTML = html;
+
+            tbody.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => openInvestorModal(parseInt(btn.dataset.id)));
+            });
+            tbody.querySelectorAll('.del-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteInvestor(parseInt(btn.dataset.id)));
+            });
+
+            return totalEquity;
+        }
+
+        // ==================================================
+        // RENDER SUMMARY CARDS
+        // ==================================================
+        function renderSummaryCards() {
+            document.getElementById('virtualInvestmentValue').textContent = fmtDec(summary.starlinkVirtualInvestment);
+            document.getElementById('starlinkInvestmentValue').textContent = fmtDec(summary.starlinkInvestmentTotal);
+            document.getElementById('commonExpenditureValue').textContent = fmtDec(summary.commonExpenditureTotal);
+            const delta = safeNum(summary.routersTotal) - safeNum(summary.kairoRoutersTotal);
+            document.getElementById('routersDeltaValue').textContent = fmtDec(delta);
+            document.getElementById('lastUpdatedValue').textContent = formatTimestamp(summary.lastUpdated);
+        }
+
+        // ==================================================
+        // RENDER CHARTS
+        // ==================================================
+        function renderCharts() {
+            const all = buildInvestors();
+            const labels = all.map(i => i.name);
+            const values = all.map(i => i.equity);
+            const colors = all.map(i => i.color);
+
+            const hasLabels = typeof ChartDataLabels !== 'undefined';
+            if (hasLabels && !Chart.registry.plugins.get('datalabels')) Chart.register(ChartDataLabels);
+
+            const pieCanvas = document.getElementById('pieChart');
+            if (pieChartInstance) pieChartInstance.destroy();
+            pieChartInstance = new Chart(pieCanvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: 'rgba(255,255,255,0.7)',
+                        borderWidth: 2.5,
+                        hoverOffset: 18
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: {
+                                    size: 10,
+                                    weight: '500'
                                 },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            let label = context.label || '';
-                                            let value = context.parsed || 0;
-                                            let total = context.dataset.data.reduce((a, b) => a + b,
-                                            0);
-                                            let percentage = ((value / total) * 100).toFixed(2);
-                                            return `${label}: KSh ${value.toLocaleString()} (${percentage}%)`;
-                                        }
-                                    }
-                                }
-                            },
-                            cutout: '8%',
-                        }
-                    });
-
-                    // Bar Chart
-                    const barCtx = barCanvas.getContext('2d');
-                    new Chart(barCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Equity (KSh)',
-                                data: equityValues,
-                                backgroundColor: backgroundColors.map(c => c + 'cc'),
-                                borderColor: backgroundColors,
-                                borderWidth: 1.8,
-                                borderRadius: 6,
-                                barPercentage: 0.7,
-                                categoryPercentage: 0.8,
-                            }]
+                                color: '#1a334a',
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return `KSh ${context.parsed.y.toLocaleString()}`;
-                                        }
-                                    }
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(2) : '0.00';
+                                    return `${ctx.label}: KSh ${fmt(ctx.parsed)} (${pct}%)`;
                                 }
+                            }
+                        },
+                        datalabels: hasLabels ? {
+                            color: '#ffffff',
+                            font: {
+                                size: 10,
+                                weight: '700'
                             },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    grid: { color: 'rgba(0,0,0,0.04)' },
-                                    ticks: {
-                                        callback: function(value) { return 'KSh ' + value
-                                            .toLocaleString(); },
-                                        font: { size: 9 },
-                                        color: '#2a4b66'
-                                    }
+                            formatter: function(v, ctx) {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? (v / total) * 100 : 0;
+                                return pct >= 5 ? pct.toFixed(1) + '%' : '';
+                            },
+                            display: function(ctx) {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const v = ctx.dataset.data[ctx.dataIndex];
+                                return total > 0 && (v / total) * 100 >= 5;
+                            }
+                        } : {}
+                    },
+                    cutout: '8%'
+                }
+            });
+
+            const barCanvas = document.getElementById('barChart');
+            if (barChartInstance) barChartInstance.destroy();
+            barChartInstance = new Chart(barCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Equity (KSh)',
+                        data: values,
+                        backgroundColor: colors.map(c => c + 'cc'),
+                        borderColor: colors,
+                        borderWidth: 1.8,
+                        borderRadius: 6,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return `KSh ${fmt(ctx.parsed.y)}`;
+                                }
+                            }
+                        },
+                        datalabels: hasLabels ? {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#0b2e4a',
+                            font: {
+                                size: 9,
+                                weight: '700'
+                            },
+                            formatter: function(v) {
+                                return fmt(v);
+                            },
+                            offset: 2
+                        } : {}
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.04)'
+                            },
+                            ticks: {
+                                callback: function(v) {
+                                    return 'KSh ' + fmt(v);
                                 },
-                                x: {
-                                    grid: { display: false },
-                                    ticks: {
-                                        font: { size: 9, weight: '500' },
-                                        color: '#1f405f',
-                                        maxRotation: 20,
-                                        minRotation: 10
-                                    }
-                                }
+                                font: {
+                                    size: 9
+                                },
+                                color: '#2a4b66'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
                             },
-                            layout: {
-                                padding: { top: 6, bottom: 6 }
+                            ticks: {
+                                font: {
+                                    size: 9,
+                                    weight: '500'
+                                },
+                                color: '#1f405f',
+                                maxRotation: 30,
+                                minRotation: 15,
+                                autoSkip: false
                             }
                         }
+                    },
+                    layout: {
+                        padding: {
+                            top: 24,
+                            bottom: 6
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==================================================
+        // RENDER ALL
+        // ==================================================
+        function renderAll(pulse = true) {
+            const totalEquity = renderTable();
+            document.getElementById('totalSharesValue').textContent = fmt(totalEquity);
+            renderSummaryCards();
+            renderCharts();
+            if (pulse) pulseLive();
+        }
+
+        // ==================================================
+        // COMPUTE SUMMARY FROM RAW DATA (returns, does not mutate)
+        // ==================================================
+        function computeSummaryFromRaw(rawData) {
+            function sumAny(keys) {
+                let total = 0;
+                rawData.forEach(g => (g.rows || []).forEach(r => {
+                    for (const k of keys) {
+                        const v = safeNum(r[k + '_amount']);
+                        if (v !== 0) {
+                            total += v;
+                            break;
+                        }
+                    }
+                }));
+                return Math.round(total * 100) / 100;
+            }
+
+            const commonExpenditureTotal = sumAny(['commonExpenditure']);
+            const routersTotal = sumAny(['routers']);
+            const kairoRoutersTotal = sumAny([
+                'saved_6_kairo_routers', 'saved_5_kairo_routers', 'saved_4_kairo_routers',
+                'saved_3_kairo_routers', 'saved_2_kairo_routers', 'kairoRouters'
+            ]);
+            const starlinkInvestmentTotal = sumAny([
+                'saved_4_starlink_investment', 'saved_5_starlink_investment', 'saved_6_starlink_investment',
+                'saved_3_starlink_investment', 'saved_2_starlink_investment', 'starlinkInvestment'
+            ]);
+
+            return {
+                commonExpenditureTotal,
+                routersTotal,
+                kairoRoutersTotal,
+                starlinkInvestmentTotal,
+                starlinkVirtualInvestment: Math.round(((5 / 6) * commonExpenditureTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100,
+                totalTransactionFees: 0,
+                lastUpdated: new Date().toISOString()
+            };
+        }
+
+        // ==================================================
+        // FETCH FROM SUPABASE — with fallback recompute
+        // ==================================================
+        async function fetchSummary() {
+            if (!supabaseClient) return false;
+            try {
+                const {
+                    data: result,
+                    error
+                } = await supabaseClient
+                    .from('expenditure_data')
+                    .select('data, last_updated')
+                    .eq('id', 1)
+                    .single();
+
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        console.log('ℹ️ No row yet');
+                        return false;
+                    }
+                    throw error;
+                }
+
+                if (result && result.data) {
+                    const cloud = result.data;
+
+                    // Load cloud summary
+                    let cloudSummary = null;
+                    if (cloud.summary) {
+                        cloudSummary = {
+                            commonExpenditureTotal: safeNum(cloud.summary.commonExpenditureTotal),
+                            routersTotal: safeNum(cloud.summary.routersTotal),
+                            kairoRoutersTotal: safeNum(cloud.summary.kairoRoutersTotal),
+                            starlinkInvestmentTotal: safeNum(cloud.summary.starlinkInvestmentTotal),
+                            starlinkVirtualInvestment: safeNum(cloud.summary.starlinkVirtualInvestment),
+                            totalTransactionFees: safeNum(cloud.summary.totalTransactionFees),
+                            lastUpdated: cloud.summary.lastUpdated || result.last_updated
+                        };
+                    }
+
+                    // Compute from raw as fallback
+                    let rawSummary = null;
+                    if (Array.isArray(cloud.data) && cloud.data.length > 0) {
+                        rawSummary = computeSummaryFromRaw(cloud.data);
+                    }
+
+                    // Choose the source with actual values
+                    const cloudHasData = cloudSummary && (
+                        cloudSummary.commonExpenditureTotal > 0 ||
+                        cloudSummary.routersTotal > 0 ||
+                        cloudSummary.starlinkVirtualInvestment > 0
+                    );
+                    const rawHasData = rawSummary && (
+                        rawSummary.commonExpenditureTotal > 0 ||
+                        rawSummary.routersTotal > 0 ||
+                        rawSummary.starlinkVirtualInvestment > 0
+                    );
+
+                    if (cloudHasData) {
+                        summary = cloudSummary;
+                        console.log('📊 Using CLOUD summary:', summary);
+                    } else if (rawHasData) {
+                        summary = {...rawSummary,
+                            lastUpdated: result.last_updated || new Date().toISOString()
+                        };
+                        console.log('📊 Using RAW-derived summary (cloud was empty):', summary);
+                    } else {
+                        summary = cloudSummary || {
+                            commonExpenditureTotal: 0,
+                            routersTotal: 0,
+                            kairoRoutersTotal: 0,
+                            starlinkInvestmentTotal: 0,
+                            starlinkVirtualInvestment: 0,
+                            totalTransactionFees: 0,
+                            lastUpdated: result.last_updated
+                        };
+                        console.log('📊 No data available anywhere');
+                    }
+
+                    // --- Investors ---
+                    if (Array.isArray(cloud.investors) && cloud.investors.length > 0) {
+                        investors = cloud.investors.map(i => ({
+                            id: i.id || nextInvestorId(),
+                            name: i.name || 'Unnamed',
+                            equity: safeNum(i.equity),
+                            color: i.color || '#6d9eb0'
+                        }));
+                    } else {
+                        investors = DEFAULT_INVESTORS.map(i => ({...i
+                        }));
+                        saveInvestorsToCloud().catch(e => console.warn('Seed failed:', e));
+                    }
+
+                    return true;
+                }
+            } catch (e) {
+                console.error('❌ Fetch error:', e);
+                showError('Failed to load data: ' + e.message);
+            }
+            return false;
+        }
+
+        // ==================================================
+        // SAVE INVESTORS TO CLOUD
+        // ==================================================
+        async function saveInvestorsToCloud() {
+            if (!supabaseClient) return false;
+            try {
+                const {
+                    data: current,
+                    error: fetchErr
+                } = await supabaseClient
+                    .from('expenditure_data')
+                    .select('data')
+                    .eq('id', 1)
+                    .single();
+
+                if (fetchErr) throw fetchErr;
+
+                const newData = {...(current.data || {}),
+                    investors: investors
+                };
+
+                const {
+                    error: upsertErr
+                } = await supabaseClient
+                    .from('expenditure_data')
+                    .upsert({
+                        id: 1,
+                        data: newData,
+                        last_updated: new Date().toISOString()
+                    }, {
+                        onConflict: 'id'
                     });
 
-                    console.log('Charts created successfully');
-
-                } catch (error) {
-                    console.error('Chart creation error:', error);
-                    showError('Error creating charts: ' + error.message);
-                }
+                if (upsertErr) throw upsertErr;
+                console.log('✅ Investors saved to cloud');
+                return true;
+            } catch (e) {
+                console.error('❌ Save investors failed:', e);
+                showError('Could not save investor: ' + e.message);
+                return false;
             }
+        }
 
-            // Function to show error message
-            function showError(message) {
-                const chartGrid = document.querySelector('.chart-grid');
-                if (chartGrid) {
-                    chartGrid.innerHTML = `
-                                <div class="loading-fallback" style="grid-column: 1 / -1;">
-                                    <i class="fas fa-triangle-exclamation"></i>
-                                    <p>${message}</p>
-                                    <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1.5rem; background: #1a5a9c; color: white; border: none; border-radius: 8px; cursor: pointer;">Refresh Page</button>
-                                </div>
-                            `;
-                }
-            }
+        // ==================================================
+        // MODAL: ADD / EDIT
+        // ==================================================
+        function openInvestorModal(investorId = null) {
+            editingInvestorId = investorId;
+            const title = document.getElementById('investorModalTitle');
+            const nameEl = document.getElementById('invName');
+            const eqEl = document.getElementById('invEquity');
+            const colorEl = document.getElementById('invColor');
+            const errEl = document.getElementById('invError');
 
-            // Check if Chart.js is loaded, if not wait for it
-            if (typeof Chart !== 'undefined') {
-                createCharts();
+            errEl.style.display = 'none';
+
+            if (investorId) {
+                const inv = investors.find(i => i.id === investorId);
+                if (!inv) return;
+                title.textContent = '✏️ Edit Investor';
+                nameEl.value = inv.name;
+                eqEl.value = inv.equity;
+                colorEl.value = inv.color || '#1f4a7a';
             } else {
-                // Chart.js not loaded yet, try again after a short delay
-                console.log('Waiting for Chart.js to load...');
-                let attempts = 0;
-                const maxAttempts = 10;
-
-                const checkChart = setInterval(function() {
-                    attempts++;
-                    if (typeof Chart !== 'undefined') {
-                        clearInterval(checkChart);
-                        createCharts();
-                    } else if (attempts >= maxAttempts) {
-                        clearInterval(checkChart);
-                        showError('Chart.js failed to load. Please check your internet connection and refresh the page.');
-                    }
-                }, 500);
+                title.textContent = '➕ Add Investor';
+                nameEl.value = '';
+                eqEl.value = '';
+                colorEl.value = pickColor();
             }
 
-            // NO JAVASCRIPT EVENT LISTENER ON THE BUTTON
-            // The button uses a direct href link, so it will work without any JS interference
+            document.getElementById('investorModal').classList.add('show');
+            setTimeout(() => nameEl.focus(), 50);
+        }
 
-        });
+        function closeInvestorModal() {
+            document.getElementById('investorModal').classList.remove('show');
+            editingInvestorId = null;
+        }
+        async function saveInvestor() {
+            const nameEl = document.getElementById('invName');
+            const eqEl = document.getElementById('invEquity');
+            const colorEl = document.getElementById('invColor');
+            const errEl = document.getElementById('invError');
+
+            const name = nameEl.value.trim();
+            const equity = safeNum(eqEl.value);
+            const color = colorEl.value || '#1f4a7a';
+
+            errEl.style.display = 'none';
+
+            if (!name) {
+                errEl.textContent = '⚠️ Please enter a name.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (equity < 0) {
+                errEl.textContent = '⚠️ Equity cannot be negative.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            if (editingInvestorId) {
+                const idx = investors.findIndex(i => i.id === editingInvestorId);
+                if (idx !== -1) investors[idx] = {...investors[idx],
+                    name,
+                    equity,
+                    color
+                };
+            } else {
+                investors.push({
+                    id: nextInvestorId(),
+                    name,
+                    equity,
+                    color
+                });
+            }
+
+            closeInvestorModal();
+            renderAll(true);
+
+            await saveInvestorsToCloud();
+        }
+
+        async function deleteInvestor(investorId) {
+            const inv = investors.find(i => i.id === investorId);
+            if (!inv) return;
+            if (!confirm(`Delete investor "${inv.name}"?`)) return;
+
+            investors = investors.filter(i => i.id !== investorId);
+            renderAll(true);
+
+            await saveInvestorsToCloud();
+        }
+
+        // ==================================================
+        // REALTIME
+        // ==================================================
+        function subscribeRealtime() {
+            if (!supabaseClient) return;
+            supabaseClient
+                .channel('expenditure-data-realtime')
+                .on('postgres_changes', {
+                        event: '*',
+                        schema: 'public',
+                        table: 'expenditure_data',
+                        filter: 'id=eq.1'
+                    },
+                    async(payload) => {
+                        console.log('🔄 Realtime update:', payload);
+                        await fetchSummary();
+                        renderAll(true);
+                    })
+                .subscribe((status) => {
+                    console.log('📡 Realtime status:', status);
+                    const statusEl = document.getElementById('liveStatus');
+                    const dot = document.getElementById('liveDot');
+                    if (status === 'SUBSCRIBED') {
+                        statusEl.textContent = 'Live';
+                        dot.style.background = '';
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                        statusEl.textContent = 'Polling';
+                        dot.style.background = '#a67a3a';
+                    }
+                });
+        }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(async() => {
+                const ok = await fetchSummary();
+                if (ok) renderAll(true);
+            }, 30000);
+        }
+
+        // ==================================================
+        // INIT
+        // ==================================================
+        async function init() {
+            setLoading(true);
+
+            if (typeof supabase === 'undefined') {
+                showError('Supabase library not loaded. Please refresh.');
+                setLoading(false);
+                return;
+            }
+
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase initialized');
+
+            const ok = await fetchSummary();
+            if (!ok) {
+                investors = DEFAULT_INVESTORS.map(i => ({...i
+                }));
+                console.log('ℹ️ Using default investors');
+            }
+
+            renderAll(false);
+            subscribeRealtime();
+            startPolling();
+
+            document.getElementById('addInvestorBtn').addEventListener('click', () => openInvestorModal(null));
+            document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
+            document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
+            document.getElementById('invSave').addEventListener('click', saveInvestor);
+            document.getElementById('investorModal').addEventListener('click', function(e) {
+                if (e.target === this) closeInvestorModal();
+            });
+            document.getElementById('invName').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('invEquity').focus();
+            });
+            document.getElementById('invEquity').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') saveInvestor();
+            });
+
+            setLoading(false);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 
 </body>
+
 </html>
