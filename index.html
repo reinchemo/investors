@@ -711,6 +711,275 @@
         .modal-card .modal-actions .cancel:hover {
             background: #dde5ee;
         }
+        /* ==================================================
+           EMPLOYEE PAYMENTS
+           ================================================== */
+        
+        .payments-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.7rem;
+            margin-bottom: 0.9rem;
+        }
+        
+        .payments-modal-header h3 {
+            margin-bottom: 0;
+        }
+        
+        .add-employee-btn {
+            white-space: nowrap;
+            padding: 0.45rem 0.75rem;
+            min-height: 34px;
+            font-size: 0.75rem;
+        }
+        
+        .employee-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        
+        .employee-edit-btn,
+        .employee-delete-btn {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 7px;
+            font-size: 0.85rem;
+        }
+        
+        .employee-edit-btn {
+            color: #1a5a9c;
+        }
+        
+        .employee-delete-btn {
+            color: #c04a3a;
+        }
+        
+        .employee-edit-btn:hover {
+            background: rgba(26, 90, 156, 0.1);
+        }
+        
+        .employee-delete-btn:hover {
+            background: rgba(192, 74, 58, 0.1);
+        }
+        
+        .payments-modal-card {
+            max-width: 700px;
+        }
+        
+        .employee-table-wrap {
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            border: 1px solid #e1e7ee;
+            border-radius: 12px;
+        }
+        
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+        
+        .employee-table th {
+            background: #f1f5f9;
+            color: #1a3a58;
+            text-align: left;
+            padding: 0.7rem;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+        }
+        
+        .employee-table td {
+            padding: 0.75rem;
+            border-top: 1px solid #edf1f5;
+            color: #162d44;
+        }
+        
+        .employee-amount {
+            font-weight: 700;
+            color: #0b2b4a;
+        }
+        
+        .print-employee-btn {
+            border: none;
+            background: #1a5a9c;
+            color: white;
+            border-radius: 8px;
+            padding: 0.45rem 0.7rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .print-employee-btn:hover {
+            background: #0f4a7e;
+        }
+        
+        .payment-total {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+            font-weight: 700;
+            color: #0b2b4a;
+        }
+        
+        @media (max-width: 600px) {
+            .payments-modal-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .add-employee-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .payments-modal-card {
+                max-width: 100%;
+            }
+            .employee-table {
+                min-width: 450px;
+            }
+        }
+        /* ==================================================
+           EMPLOYEE PAYMENT PRINT REPORT
+           Uses the current page's print dialog; no popup window.
+           ================================================== */
+        
+        .employee-print-report {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #162d44;
+            background: #fff;
+        }
+        
+        .print-header {
+            text-align: center;
+            border-bottom: 2px solid #1a5a9c;
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+        }
+        
+        .print-header h1 {
+            margin: 0;
+            color: #0b2b4a;
+            font-size: 28px;
+        }
+        
+        .print-header h2 {
+            margin: 8px 0;
+            font-size: 20px;
+            color: #162d44;
+        }
+        
+        .print-header p {
+            margin: 0;
+            color: #5b6b7a;
+            font-size: 13px;
+        }
+        
+        .print-payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .print-payment-table td {
+            border: 1px solid #d8e0e8;
+            padding: 14px;
+            font-size: 15px;
+        }
+        
+        .print-payment-table td:first-child {
+            width: 38%;
+            font-weight: 700;
+            background: #f4f7fa;
+        }
+        
+        .print-summary {
+            margin: 25px 0 40px;
+            padding: 18px;
+            border-left: 4px solid #1a5a9c;
+            background: #f7f9fb;
+        }
+        
+        .print-summary h3 {
+            margin: 0 0 8px;
+            color: #0b2b4a;
+            font-size: 16px;
+        }
+        
+        .print-summary p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .print-signatures {
+            margin-top: 45px;
+            line-height: 2.4;
+            font-size: 14px;
+        }
+        
+        .print-footer {
+            margin-top: 55px;
+            padding-top: 12px;
+            border-top: 1px solid #d8e0e8;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            font-size: 12px;
+            color: #667788;
+        }
+        
+        @media screen {
+            #employeePrintArea {
+                display: none !important;
+            }
+        }
+        
+        @media print {
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+            html,
+            body {
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            #employeePrintArea,
+            #employeePrintArea * {
+                visibility: visible !important;
+            }
+            #employeePrintArea {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                min-height: 100vh !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #fff !important;
+            }
+            .employee-print-report {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: 10mm;
+                background: #fff !important;
+            }
+        }
     </style>
 </head>
 
@@ -718,6 +987,60 @@
 
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
+    </div>
+
+
+    <!-- EMPLOYEE PAYMENTS MODAL -->
+    <div class="modal-overlay" id="paymentsModal">
+        <div class="modal-card payments-modal-card">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-money-check-alt"></i> Employee Payments</h3>
+                <button class="btn btn-primary add-employee-btn" id="addEmployeeBtn">
+                    <i class="fas fa-user-plus"></i> Add Employee
+                </button>
+            </div>
+            <div class="employee-table-wrap">
+                <table class="employee-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Payment Amount</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeePaymentBody"></tbody>
+                </table>
+            </div>
+            <div class="payment-total">
+                <span>Total Payments:</span>
+                <span id="employeePaymentTotal">KSh 0</span>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel" id="paymentsClose">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="employeePrintArea" style="display:none;"></div>
+
+    <!-- ADD / EDIT EMPLOYEE MODAL -->
+    <div class="modal-overlay" id="employeeModal">
+        <div class="modal-card">
+            <h3 id="employeeModalTitle">➕ Add Employee</h3>
+
+            <label>Employee Name</label>
+            <input type="text" id="employeeName" placeholder="e.g. John Kamau" maxlength="80">
+
+            <label>Payment Amount (KSh)</label>
+            <input type="number" id="employeeAmount" placeholder="0" min="0" step="1">
+
+            <div class="modal-error" id="employeeError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="employeeCancel">Cancel</button>
+                <button class="save" id="employeeSave">Save Employee</button>
+            </div>
+        </div>
     </div>
 
     <!-- ADD / EDIT INVESTOR MODAL -->
@@ -742,6 +1065,7 @@
         <nav class="nav">
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
             <div class="nav-actions">
+                <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
                 <button class="btn btn-ghost" id="addInvestorBtn">➕ Add Investor</button>
                 <a href="https://starlink-llc.netlify.app/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-sign-in-alt"></i><span>Login · Expenditures</span>
@@ -878,6 +1202,20 @@
         let barChartInstance = null;
         let pollInterval = null;
         let editingInvestorId = null;
+
+        // Employee payments. New employees are saved in this browser.
+        const DEFAULT_EMPLOYEE_PAYMENTS = [{
+            id: 1,
+            name: 'John Kamau',
+            amount: 15000
+        }, {
+            id: 2,
+            name: 'Mary Wanjiku',
+            amount: 18000
+        }];
+
+        let EMPLOYEE_PAYMENTS = loadEmployeePayments();
+        let editingEmployeeId = null;
 
         // ==================================================
         // HELPERS
@@ -1460,6 +1798,244 @@
         }
 
         // ==================================================
+        // EMPLOYEE PAYMENTS
+        // ==================================================
+        function loadEmployeePayments() {
+            try {
+                const saved = localStorage.getItem('starlink_employee_payments');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) return parsed;
+                }
+            } catch (e) {
+                console.warn('Could not load saved employees:', e);
+            }
+            return DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({...e
+            }));
+        }
+
+        function saveEmployeePayments() {
+            try {
+                localStorage.setItem('starlink_employee_payments', JSON.stringify(EMPLOYEE_PAYMENTS));
+            } catch (e) {
+                console.warn('Could not save employees:', e);
+            }
+        }
+
+        function nextEmployeeId() {
+            return EMPLOYEE_PAYMENTS.reduce((max, emp) => Math.max(max, safeNum(emp.id)), 0) + 1;
+        }
+
+        function openEmployeeModal(employeeId = null) {
+            editingEmployeeId = employeeId;
+            const modal = document.getElementById('employeeModal');
+            const title = document.getElementById('employeeModalTitle');
+            const name = document.getElementById('employeeName');
+            const amount = document.getElementById('employeeAmount');
+            const error = document.getElementById('employeeError');
+
+            error.textContent = '';
+            error.style.display = 'none';
+
+            if (employeeId === null) {
+                title.innerHTML = '➕ Add Employee';
+                name.value = '';
+                amount.value = '';
+            } else {
+                const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
+                if (!employee) return;
+                title.innerHTML = '✏️ Edit Employee';
+                name.value = employee.name;
+                amount.value = employee.amount;
+            }
+
+            modal.classList.add('show');
+            setTimeout(() => name.focus(), 50);
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('show');
+            editingEmployeeId = null;
+        }
+
+        function saveEmployee() {
+            const name = document.getElementById('employeeName').value.trim();
+            const amount = safeNum(document.getElementById('employeeAmount').value);
+            const error = document.getElementById('employeeError');
+
+            if (!name) {
+                error.textContent = 'Please enter the employee name.';
+                error.style.display = 'block';
+                return;
+            }
+
+            if (amount <= 0) {
+                error.textContent = 'Please enter a payment amount greater than 0.';
+                error.style.display = 'block';
+                return;
+            }
+
+            if (editingEmployeeId === null) {
+                EMPLOYEE_PAYMENTS.push({
+                    id: nextEmployeeId(),
+                    name,
+                    amount
+                });
+            } else {
+                const employee = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId);
+                if (employee) {
+                    employee.name = name;
+                    employee.amount = amount;
+                }
+            }
+
+            saveEmployeePayments();
+            renderEmployeePayments();
+            closeEmployeeModal();
+        }
+
+        function deleteEmployee(employeeId) {
+            const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
+            if (!employee) return;
+
+            if (!confirm(`Delete employee "${employee.name}" from the payment list?`)) return;
+
+            EMPLOYEE_PAYMENTS = EMPLOYEE_PAYMENTS.filter(e => e.id !== employeeId);
+            saveEmployeePayments();
+            renderEmployeePayments();
+        }
+
+        function renderEmployeePayments() {
+            const body = document.getElementById('employeePaymentBody');
+            const totalEl = document.getElementById('employeePaymentTotal');
+
+            body.innerHTML = EMPLOYEE_PAYMENTS.map(emp => `
+                <tr>
+                    <td><strong>${emp.name}</strong></td>
+                    <td class="employee-amount">KSh ${fmt(emp.amount)}</td>
+                    <td>
+                        <div class="employee-actions">
+                            <button class="employee-edit-btn" onclick="openEmployeeModal(${emp.id})" title="Edit employee">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="employee-delete-btn" onclick="deleteEmployee(${emp.id})" title="Delete employee">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button class="print-employee-btn" onclick="printEmployeeReport(${emp.id})" title="Print payment report">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            const total = EMPLOYEE_PAYMENTS.reduce((sum, emp) => sum + safeNum(emp.amount), 0);
+            totalEl.textContent = 'KSh ' + fmt(total);
+        }
+
+        function openPaymentsModal() {
+            renderEmployeePayments();
+            document.getElementById('paymentsModal').classList.add('show');
+        }
+
+        function closePaymentsModal() {
+            document.getElementById('paymentsModal').classList.remove('show');
+        }
+
+        // Direct printing: no window.open(), so browser pop-up blocking cannot stop reports.
+        function printEmployeeReport(employeeId) {
+            const employee = EMPLOYEE_PAYMENTS.find(emp => emp.id === employeeId);
+            if (!employee) {
+                showError('Employee not found.');
+                return;
+            }
+
+            const printArea = document.getElementById('employeePrintArea');
+            if (!printArea) {
+                showError('Print area is unavailable. Please refresh the page and try again.');
+                return;
+            }
+
+            const reportDate = new Date().toLocaleDateString();
+
+            printArea.innerHTML = `
+                <div class="employee-print-report">
+                    <div class="print-header">
+                        <h1>STARLINK LLC</h1>
+                        <h2>Employee Payment Report</h2>
+                        <p>Report Date: ${escapeHTML(reportDate)}</p>
+                    </div>
+
+                    <table class="print-payment-table">
+                        <tr>
+                            <td>Employee Name</td>
+                            <td>${escapeHTML(employee.name)}</td>
+                        </tr>
+                        <tr>
+                            <td>Payment Amount</td>
+                            <td><strong>KSh ${fmt(employee.amount)}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Report Date</td>
+                            <td>${escapeHTML(reportDate)}</td>
+                        </tr>
+                    </table>
+
+                    <div class="print-summary">
+                        <h3>Payment Summary</h3>
+                        <p>
+                            ${escapeHTML(employee.name)} is recorded as having received
+                            <strong>KSh ${fmt(employee.amount)}</strong>.
+                        </p>
+                    </div>
+
+                    <div class="print-signatures">
+                        <p>Employee Signature: ____________________________________</p>
+                        <p>Authorized By: _________________________________________</p>
+                    </div>
+
+                    <div class="print-footer">
+                        <span>Prepared by STARLINK LLC</span>
+                        <span>${escapeHTML(reportDate)}</span>
+                    </div>
+                </div>
+            `;
+
+            // Show only the print area. The @media print CSS hides everything else.
+            printArea.style.display = 'block';
+
+            // Allow the browser to render the report before opening its native print dialog.
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    window.print();
+                });
+            });
+
+            // Restore the normal page after printing/cancelling.
+            const cleanup = () => {
+                printArea.style.display = 'none';
+                printArea.innerHTML = '';
+                window.removeEventListener('afterprint', cleanup);
+            };
+
+            window.addEventListener('afterprint', cleanup);
+
+            // Fallback for browsers that do not fire afterprint reliably.
+            setTimeout(() => {
+                if (printArea.style.display !== 'none') cleanup();
+            }, 60000);
+        }
+
+        function escapeHTML(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ==================================================
         // REALTIME
         // ==================================================
         function subscribeRealtime() {
@@ -1527,6 +2103,23 @@
 
             document.getElementById('addInvestorBtn').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
+            document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal(null));
+            document.getElementById('employeeCancel').addEventListener('click', closeEmployeeModal);
+            document.getElementById('employeeSave').addEventListener('click', saveEmployee);
+            document.getElementById('employeeModal').addEventListener('click', function(e) {
+                if (e.target === this) closeEmployeeModal();
+            });
+            document.getElementById('employeeName').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('employeeAmount').focus();
+            });
+            document.getElementById('employeeAmount').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') saveEmployee();
+            });
+            document.getElementById('paymentsBtn').addEventListener('click', openPaymentsModal);
+            document.getElementById('paymentsClose').addEventListener('click', closePaymentsModal);
+            document.getElementById('paymentsModal').addEventListener('click', function(e) {
+                if (e.target === this) closePaymentsModal();
+            });
             document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
             document.getElementById('invSave').addEventListener('click', saveInvestor);
             document.getElementById('investorModal').addEventListener('click', function(e) {
