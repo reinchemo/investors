@@ -128,15 +128,6 @@
             background: rgba(255, 255, 255, 0.9);
         }
         
-        .btn-danger {
-            background: #c04a3a;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #a03a2a;
-        }
-        
         @media (max-width:480px) {
             .btn {
                 padding: 0.4rem 0.8rem;
@@ -783,8 +774,8 @@
                 <div class="summary-value" id="starlinkInvestmentValue">0.00</div>
             </div>
             <div class="summary-card">
-                <div class="summary-label"><i class="fas fa-coins"></i> COMMON EXPENDITURE</div>
-                <div class="summary-value" id="commonExpenditureValue">0.00</div>
+                <div class="summary-label"><i class="fas fa-coins"></i> COMMON INVESTMENT</div>
+                <div class="summary-value" id="commonInvestmentValue">0.00</div>
             </div>
             <div class="summary-card">
                 <div class="summary-label"><i class="fas fa-wifi"></i> ROUTERS − KAIRO</div>
@@ -835,6 +826,10 @@
         const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
 
+        // Base amount already attributed to STARLINK VIRTUAL.
+        // Every recalculation ADDS to this base.
+        const STARLINK_VIRTUAL_BASE = 377259;
+
         const DEFAULT_INVESTORS = [{
             id: 1,
             name: 'Toly Brian',
@@ -868,11 +863,11 @@
         // STATE
         // ==================================================
         let summary = {
-            commonExpenditureTotal: 0,
+            commonInvestmentTotal: 0,
             routersTotal: 0,
             kairoRoutersTotal: 0,
             starlinkInvestmentTotal: 0,
-            starlinkVirtualInvestment: 0,
+            starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
             totalTransactionFees: 0,
             lastUpdated: null
         };
@@ -1029,7 +1024,7 @@
         function renderSummaryCards() {
             document.getElementById('virtualInvestmentValue').textContent = fmtDec(summary.starlinkVirtualInvestment);
             document.getElementById('starlinkInvestmentValue').textContent = fmtDec(summary.starlinkInvestmentTotal);
-            document.getElementById('commonExpenditureValue').textContent = fmtDec(summary.commonExpenditureTotal);
+            document.getElementById('commonInvestmentValue').textContent = fmtDec(summary.commonInvestmentTotal);
             const delta = safeNum(summary.routersTotal) - safeNum(summary.kairoRoutersTotal);
             document.getElementById('routersDeltaValue').textContent = fmtDec(delta);
             document.getElementById('lastUpdatedValue').textContent = formatTimestamp(summary.lastUpdated);
@@ -1045,7 +1040,11 @@
             const colors = all.map(i => i.color);
 
             const hasLabels = typeof ChartDataLabels !== 'undefined';
-            if (hasLabels && !Chart.registry.plugins.get('datalabels')) Chart.register(ChartDataLabels);
+            if (hasLabels) {
+                try {
+                    Chart.register(ChartDataLabels);
+                } catch (e) {}
+            }
 
             const pieCanvas = document.getElementById('pieChart');
             if (pieChartInstance) pieChartInstance.destroy();
@@ -1105,8 +1104,7 @@
                                 return total > 0 && (v / total) * 100 >= 5;
                             }
                         } : {}
-                    },
-                    cutout: '8%'
+                    }
                 }
             });
 
@@ -1209,7 +1207,8 @@
         }
 
         // ==================================================
-        // COMPUTE SUMMARY FROM RAW DATA (returns, does not mutate)
+        // COMPUTE SUMMARY FROM RAW DATA
+        // STARLINK VIRTUAL = BASE + (5/6 × Common Investment) + (Routers − Kairo)
         // ==================================================
         function computeSummaryFromRaw(rawData) {
             function sumAny(keys) {
@@ -1226,7 +1225,7 @@
                 return Math.round(total * 100) / 100;
             }
 
-            const commonExpenditureTotal = sumAny(['commonExpenditure']);
+            const commonInvestmentTotal = sumAny(['commonInvestment']);
             const routersTotal = sumAny(['routers']);
             const kairoRoutersTotal = sumAny([
                 'saved_6_kairo_routers', 'saved_5_kairo_routers', 'saved_4_kairo_routers',
@@ -1237,19 +1236,26 @@
                 'saved_3_starlink_investment', 'saved_2_starlink_investment', 'starlinkInvestment'
             ]);
 
+            const starlinkVirtualInvestment = Math.round((
+                STARLINK_VIRTUAL_BASE +
+                (5 / 6) * commonInvestmentTotal +
+                (routersTotal - kairoRoutersTotal)
+            ) * 100) / 100;
+
             return {
-                commonExpenditureTotal,
+                commonInvestmentTotal,
                 routersTotal,
                 kairoRoutersTotal,
                 starlinkInvestmentTotal,
-                starlinkVirtualInvestment: Math.round(((5 / 6) * commonExpenditureTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100,
+                starlinkVirtualInvestment,
                 totalTransactionFees: 0,
                 lastUpdated: new Date().toISOString()
             };
         }
 
         // ==================================================
-        // FETCH FROM SUPABASE — with fallback recompute
+        // FETCH FROM SUPABASE
+        // Always recompute from raw so the 377,259 base stays intact.
         // ==================================================
         async function fetchSummary() {
             if (!supabaseClient) return false;
@@ -1274,57 +1280,25 @@
                 if (result && result.data) {
                     const cloud = result.data;
 
-                    // Load cloud summary
-                    let cloudSummary = null;
-                    if (cloud.summary) {
-                        cloudSummary = {
-                            commonExpenditureTotal: safeNum(cloud.summary.commonExpenditureTotal),
-                            routersTotal: safeNum(cloud.summary.routersTotal),
-                            kairoRoutersTotal: safeNum(cloud.summary.kairoRoutersTotal),
-                            starlinkInvestmentTotal: safeNum(cloud.summary.starlinkInvestmentTotal),
-                            starlinkVirtualInvestment: safeNum(cloud.summary.starlinkVirtualInvestment),
-                            totalTransactionFees: safeNum(cloud.summary.totalTransactionFees),
-                            lastUpdated: cloud.summary.lastUpdated || result.last_updated
-                        };
-                    }
-
-                    // Compute from raw as fallback
-                    let rawSummary = null;
+                    // Always compute from raw — this preserves the base correctly.
                     if (Array.isArray(cloud.data) && cloud.data.length > 0) {
-                        rawSummary = computeSummaryFromRaw(cloud.data);
-                    }
-
-                    // Choose the source with actual values
-                    const cloudHasData = cloudSummary && (
-                        cloudSummary.commonExpenditureTotal > 0 ||
-                        cloudSummary.routersTotal > 0 ||
-                        cloudSummary.starlinkVirtualInvestment > 0
-                    );
-                    const rawHasData = rawSummary && (
-                        rawSummary.commonExpenditureTotal > 0 ||
-                        rawSummary.routersTotal > 0 ||
-                        rawSummary.starlinkVirtualInvestment > 0
-                    );
-
-                    if (cloudHasData) {
-                        summary = cloudSummary;
-                        console.log('📊 Using CLOUD summary:', summary);
-                    } else if (rawHasData) {
-                        summary = {...rawSummary,
-                            lastUpdated: result.last_updated || new Date().toISOString()
+                        const rawSummary = computeSummaryFromRaw(cloud.data);
+                        summary = {
+                            ...rawSummary,
+                            lastUpdated: result.last_updated || rawSummary.lastUpdated
                         };
-                        console.log('📊 Using RAW-derived summary (cloud was empty):', summary);
+                        console.log('📊 Summary from raw + base:', summary);
                     } else {
-                        summary = cloudSummary || {
-                            commonExpenditureTotal: 0,
+                        summary = {
+                            commonInvestmentTotal: 0,
                             routersTotal: 0,
                             kairoRoutersTotal: 0,
                             starlinkInvestmentTotal: 0,
-                            starlinkVirtualInvestment: 0,
+                            starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
                             totalTransactionFees: 0,
                             lastUpdated: result.last_updated
                         };
-                        console.log('📊 No data available anywhere');
+                        console.log('📊 No raw rows — base only:', STARLINK_VIRTUAL_BASE);
                     }
 
                     // --- Investors ---
@@ -1428,6 +1402,7 @@
             document.getElementById('investorModal').classList.remove('show');
             editingInvestorId = null;
         }
+
         async function saveInvestor() {
             const nameEl = document.getElementById('invName');
             const eqEl = document.getElementById('invEquity');
