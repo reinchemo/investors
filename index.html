@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>STARLINK LLC · equity visual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -14,163 +17,362 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth;
         }
         
         body {
-            background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: #0a0e1a;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 0.8rem 0.6rem;
+            padding: 1rem 0.8rem;
+            position: relative;
+            overflow-x: hidden;
+            color: #e8eef7;
+        }
+        /* ============================================
+           ANIMATED BACKGROUND
+           ============================================ */
+        
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: linear-gradient(-45deg, #0a0e1a, #0f1a2e, #14213a, #0d2438, #1a1030);
+            background-size: 400% 400%;
+            animation: gradientShift 18s ease infinite;
         }
         
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .bg-orbs {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            animation: floatOrb 22s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, #4fb6a8 0%, transparent 70%);
+            top: -120px;
+            left: -80px;
+            animation-delay: 0s;
+        }
+        
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #7a5af8 0%, transparent 70%);
+            bottom: -180px;
+            right: -120px;
+            animation-delay: -7s;
+        }
+        
+        .orb-3 {
+            width: 360px;
+            height: 360px;
+            background: radial-gradient(circle, #c89a5b 0%, transparent 70%);
+            top: 40%;
+            right: 30%;
+            animation-delay: -14s;
+            opacity: 0.22;
+        }
+        
+        @keyframes floatOrb {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(60px, -40px) scale(1.1);
+            }
+            66% {
+                transform: translate(-40px, 50px) scale(0.95);
+            }
+        }
+        /* ============================================
+           DASHBOARD SHELL
+           ============================================ */
+        
         .dashboard {
-            max-width: 1300px;
+            max-width: 1320px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 36px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.7);
-            padding: 1.5rem 1.2rem 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: linear-gradient(135deg, rgba(20, 32, 52, 0.75) 0%, rgba(15, 26, 46, 0.85) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 32px;
+            box-shadow: 0 32px 80px -20px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(120, 200, 220, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+            padding: 1.6rem 1.4rem 2rem;
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            position: relative;
+            animation: cardEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         
         @media (max-width:600px) {
             .dashboard {
-                padding: 1rem 0.7rem 1.5rem;
+                padding: 1.1rem 0.8rem 1.6rem;
                 border-radius: 24px;
             }
         }
         
         @media (max-width:400px) {
             .dashboard {
-                padding: 0.8rem 0.5rem 1.2rem;
+                padding: 0.9rem 0.6rem 1.3rem;
                 border-radius: 20px;
             }
         }
+        /* ============================================
+           NAV
+           ============================================ */
         
         .nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 0.6rem 0.8rem;
-            margin-bottom: 1.4rem;
-            padding-bottom: 0.7rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            gap: 0.7rem 0.9rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid rgba(120, 200, 220, 0.1);
         }
         
         .brand {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            font-size: 1.3rem;
-            color: #0b1e33;
+            gap: 0.6rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #f2f0eb;
+            letter-spacing: -0.01em;
         }
         
         .brand i {
-            color: #1e4a7a;
-            font-size: 1.6rem;
+            color: #4fb6a8;
+            font-size: 1.7rem;
+            filter: drop-shadow(0 0 12px rgba(79, 182, 168, 0.5));
+            animation: dishPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes dishPulse {
+            0%,
+            100% {
+                transform: rotate(0deg);
+                filter: drop-shadow(0 0 12px rgba(79, 182, 168, 0.5));
+            }
+            50% {
+                transform: rotate(6deg);
+                filter: drop-shadow(0 0 20px rgba(79, 182, 168, 0.85));
+            }
+        }
+        
+        .brand span {
+            background: linear-gradient(90deg, #e8eef7 0%, #5fc7bc 30%, #c89a5b 60%, #e8eef7 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerText 4s linear infinite;
+        }
+        
+        @keyframes shimmerText {
+            to {
+                background-position: 200% center;
+            }
         }
         
         @media (max-width:480px) {
             .brand {
-                font-size: 1.1rem;
+                font-size: 1.15rem;
             }
             .brand i {
-                font-size: 1.3rem;
+                font-size: 1.4rem;
             }
         }
         
         .nav-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.55rem;
             flex-wrap: wrap;
         }
+        /* ============================================
+           BUTTONS
+           ============================================ */
         
         .btn {
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 0.5rem 1rem;
+            border: 1px solid rgba(120, 200, 220, 0.18);
+            padding: 0.55rem 1.1rem;
             border-radius: 60px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 600;
             font-size: 0.85rem;
             cursor: pointer;
-            transition: 0.15s ease;
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, background 0.3s ease, color 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            min-height: 38px;
+            gap: 0.45rem;
+            min-height: 40px;
             text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.04);
+            color: #c7d5e6;
+            isolation: isolate;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(95, 199, 188, 0.35), transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            opacity: 1;
+        }
+        
+        .btn i {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(95, 199, 188, 0.4);
+            color: #e8eef7;
+            box-shadow: 0 10px 24px -10px rgba(79, 182, 168, 0.4);
+        }
+        
+        .btn:hover i {
+            transform: scale(1.15) rotate(-6deg);
+        }
+        
+        .btn:active {
+            transform: translateY(0) scale(0.97);
         }
         
         .btn-primary {
-            background: #1a5a9c;
+            background: linear-gradient(135deg, #1a5a9c 0%, #2a7ac4 100%);
             color: white;
-            box-shadow: 0 8px 16px -6px rgba(26, 90, 156, 0.25);
+            border-color: rgba(120, 180, 255, 0.3);
+            box-shadow: 0 8px 20px -8px rgba(42, 122, 196, 0.55);
         }
         
         .btn-primary:hover {
-            background: #0f4a7e;
-            transform: scale(1.02);
+            background: linear-gradient(135deg, #2068b0 0%, #3a8ad4 100%);
+            box-shadow: 0 14px 30px -10px rgba(42, 122, 196, 0.75);
         }
         
         .btn-ghost {
-            background: rgba(255, 255, 255, 0.6);
-            color: #1a3a58;
+            background: rgba(255, 255, 255, 0.05);
+            color: #c7d5e6;
         }
         
         .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(120, 200, 220, 0.1);
+            color: #e8eef7;
         }
         
         @media (max-width:480px) {
             .btn {
-                padding: 0.4rem 0.8rem;
+                padding: 0.45rem 0.85rem;
                 font-size: 0.75rem;
-                min-height: 34px;
+                min-height: 36px;
             }
         }
+        /* ============================================
+           HEADLINE
+           ============================================ */
         
         .headline {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 0.5rem 0.6rem;
-            margin-bottom: 1.5rem;
+            gap: 0.6rem 0.7rem;
+            margin-bottom: 1.6rem;
         }
         
         .headline h1 {
-            font-weight: 600;
-            font-size: 1.8rem;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #102b44, #1d4b74);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.9rem;
+            letter-spacing: -0.025em;
+            color: #f2f0eb;
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
         
         .headline h1 i {
-            -webkit-text-fill-color: #1e4a7a;
-            font-size: 1.6rem;
+            color: #5fc7bc;
+            font-size: 1.7rem;
+            filter: drop-shadow(0 0 14px rgba(95, 199, 188, 0.55));
+            animation: iconFloat 4s ease-in-out infinite;
+        }
+        
+        @keyframes iconFloat {
+            0%,
+            100% {
+                transform: translateY(0) rotate(-2deg);
+            }
+            50% {
+                transform: translateY(-4px) rotate(2deg);
+            }
         }
         
         .headline h1 small {
-            font-size: 0.75rem;
-            font-weight: 400;
-            background: rgba(30, 74, 122, 0.08);
-            padding: 0.1rem 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, rgba(79, 182, 168, 0.18), rgba(122, 90, 248, 0.15));
+            padding: 0.25rem 0.85rem;
             border-radius: 40px;
-            -webkit-text-fill-color: #2f557a;
+            color: #7fded1;
+            border: 1px solid rgba(79, 182, 168, 0.3);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
         
         @media (max-width:480px) {
@@ -178,280 +380,457 @@
                 font-size: 1.4rem;
             }
             .headline h1 i {
-                font-size: 1.3rem;
+                font-size: 1.35rem;
             }
         }
+        /* ============================================
+           LIVE INDICATOR
+           ============================================ */
         
         .live-indicator {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            font-size: 0.7rem;
+            gap: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
             font-weight: 600;
-            color: #2a8a4a;
+            color: #7ee0a2;
             background: rgba(111, 203, 147, 0.12);
-            border: 1px solid rgba(111, 203, 147, 0.25);
-            padding: 0.2rem 0.7rem;
+            border: 1px solid rgba(111, 203, 147, 0.3);
+            padding: 0.3rem 0.85rem;
             border-radius: 30px;
-            margin-left: 0.3rem;
+            margin-left: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
         
         .live-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #2a8a4a;
-            animation: pulse 1.4s infinite;
+            background: #6fcb93;
+            position: relative;
+        }
+        
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: #6fcb93;
+            opacity: 0.6;
+            animation: dotWave 1.6s ease-out infinite;
+        }
+        
+        @keyframes dotWave {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2.4);
+                opacity: 0;
+            }
         }
         
         .live-dot.pulse-once {
-            background: #6fcb93;
-            animation: pulseOnce 1.2s ease-out;
+            animation: dotPulse 0.9s ease-out;
         }
         
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 8px rgba(111, 203, 147, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0);
-            }
-        }
-        
-        @keyframes pulseOnce {
+        @keyframes dotPulse {
             0% {
                 transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0.9);
             }
             50% {
-                transform: scale(1.6);
-                box-shadow: 0 0 0 12px rgba(111, 203, 147, 0);
+                transform: scale(1.8);
             }
             100% {
                 transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(111, 203, 147, 0);
             }
         }
+        /* ============================================
+           TOTAL BADGE
+           ============================================ */
         
         .total-badge {
-            background: rgba(11, 43, 74, 0.9);
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.95), rgba(15, 26, 46, 0.98));
             color: white;
-            padding: 0.35rem 1.2rem;
+            padding: 0.55rem 1.5rem;
             border-radius: 60px;
-            font-weight: 600;
-            font-size: 1rem;
-            box-shadow: 0 8px 16px -8px rgba(0, 20, 40, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.05rem;
+            box-shadow: 0 12px 30px -10px rgba(79, 182, 168, 0.5), 0 0 0 1px rgba(95, 199, 188, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(95, 199, 188, 0.3);
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            transition: transform 0.3s ease;
+            gap: 0.45rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .total-badge::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(95, 199, 188, 0.2), transparent);
+            transform: translateX(-100%);
+            animation: badgeSweep 3.5s ease-in-out infinite;
+        }
+        
+        @keyframes badgeSweep {
+            0%,
+            100% {
+                transform: translateX(-100%);
+            }
+            50% {
+                transform: translateX(100%);
+            }
         }
         
         .total-badge.updated {
-            animation: badgePulse 0.8s ease;
+            animation: badgePop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        @keyframes badgePulse {
-            0%,
-            100% {
+        @keyframes badgePop {
+            0% {
                 transform: scale(1);
             }
             50% {
-                transform: scale(1.06);
-                box-shadow: 0 0 0 6px rgba(79, 182, 168, 0.15);
+                transform: scale(1.08);
+                box-shadow: 0 0 0 8px rgba(79, 182, 168, 0.15);
+            }
+            100% {
+                transform: scale(1);
             }
         }
         
         @media (max-width:480px) {
             .total-badge {
-                font-size: 0.8rem;
-                padding: 0.25rem 0.9rem;
+                font-size: 0.85rem;
+                padding: 0.4rem 1rem;
             }
         }
+        /* ============================================
+           SUMMARY CARDS
+           ============================================ */
         
         .summary-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 0.8rem;
-            margin: 0.6rem 0 1.4rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 0.8rem 0 1.6rem;
         }
         
         .summary-card {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 16px;
-            padding: 0.7rem 0.9rem;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(135deg, rgba(30, 45, 70, 0.55) 0%, rgba(20, 32, 52, 0.65) 100%);
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            border-radius: 20px;
+            padding: 1rem 1.15rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.4);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(95, 199, 188, 0.12), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+        
+        .summary-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #5fc7bc, transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(120, 200, 220, 0.3);
+            box-shadow: 0 20px 40px -16px rgba(79, 182, 168, 0.35);
+        }
+        
+        .summary-card:hover::before {
+            opacity: 1;
+        }
+        
+        .summary-card:hover::after {
+            transform: translateX(0);
         }
         
         .summary-card .summary-label {
-            font-size: 0.62rem;
+            font-size: 0.66rem;
             font-weight: 700;
-            letter-spacing: 0.6px;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #3b5e7e;
-            margin-bottom: 0.25rem;
+            color: #7f9bb8;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.4rem;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .summary-card .summary-label i {
+            color: #5fc7bc;
+            font-size: 0.85rem;
+            transition: transform 0.35s ease;
+        }
+        
+        .summary-card:hover .summary-label i {
+            transform: scale(1.15) rotate(-8deg);
         }
         
         .summary-card .summary-value {
-            font-size: 1.15rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.35rem;
             font-weight: 700;
-            color: #0b2b4a;
-            font-family: 'Inter', monospace;
+            color: #f2f0eb;
+            letter-spacing: -0.02em;
+            transition: color 0.3s ease;
         }
         
         .summary-card.virtual {
-            background: linear-gradient(135deg, rgba(200, 154, 91, 0.12) 0%, rgba(200, 154, 91, 0.04) 100%);
-            border-color: rgba(200, 154, 91, 0.2);
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.16) 0%, rgba(60, 40, 20, 0.55) 100%);
+            border-color: rgba(200, 154, 91, 0.28);
+        }
+        
+        .summary-card.virtual::after {
+            background: linear-gradient(90deg, transparent, #c89a5b, transparent);
+        }
+        
+        .summary-card.virtual .summary-label i {
+            color: #e8b879;
         }
         
         .summary-card.virtual .summary-value {
-            color: #a67a3a;
+            color: #f4c98d;
+            text-shadow: 0 0 20px rgba(200, 154, 91, 0.35);
+        }
+        
+        .summary-card.virtual:hover {
+            box-shadow: 0 20px 40px -16px rgba(200, 154, 91, 0.45);
+            border-color: rgba(200, 154, 91, 0.5);
         }
         
         .summary-card.investment {
-            background: linear-gradient(135deg, rgba(79, 182, 168, 0.12) 0%, rgba(79, 182, 168, 0.04) 100%);
-            border-color: rgba(79, 182, 168, 0.2);
+            background: linear-gradient(135deg, rgba(79, 182, 168, 0.16) 0%, rgba(20, 50, 48, 0.55) 100%);
+            border-color: rgba(79, 182, 168, 0.28);
+        }
+        
+        .summary-card.investment::after {
+            background: linear-gradient(90deg, transparent, #5fc7bc, transparent);
         }
         
         .summary-card.investment .summary-value {
-            color: #2a8a7a;
+            color: #7fded1;
+            text-shadow: 0 0 20px rgba(79, 182, 168, 0.35);
+        }
+        
+        .summary-card.investment:hover {
+            box-shadow: 0 20px 40px -16px rgba(79, 182, 168, 0.5);
+            border-color: rgba(79, 182, 168, 0.5);
         }
         
         @media (max-width:480px) {
             .summary-card .summary-value {
-                font-size: 1rem;
+                font-size: 1.15rem;
             }
             .summary-card .summary-label {
-                font-size: 0.55rem;
+                font-size: 0.6rem;
             }
         }
+        /* ============================================
+           CHART CARDS
+           ============================================ */
         
         .chart-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.2rem;
-            margin: 1.5rem 0 1.2rem;
+            gap: 1.3rem;
+            margin: 1.6rem 0 1.4rem;
         }
         
         @media (max-width:700px) {
             .chart-grid {
                 grid-template-columns: 1fr;
-                gap: 1.8rem;
+                gap: 1.4rem;
             }
         }
         
         .chart-card {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(4px);
+            background: linear-gradient(135deg, rgba(30, 45, 70, 0.5) 0%, rgba(20, 32, 52, 0.6) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 24px;
-            padding: 1rem 1rem 0.6rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.06);
+            padding: 1.2rem 1.2rem 0.7rem;
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            box-shadow: 0 14px 32px -16px rgba(0, 0, 0, 0.4);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(95, 199, 188, 0.08), transparent 30%);
+            animation: chartSpin 12s linear infinite;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        
+        .chart-card:hover::before {
+            opacity: 1;
+        }
+        
+        @keyframes chartSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(120, 200, 220, 0.25);
+            box-shadow: 0 24px 50px -18px rgba(79, 182, 168, 0.3);
         }
         
         .chart-card h3 {
-            font-weight: 500;
-            font-size: 0.95rem;
-            color: #1f405f;
-            margin-bottom: 0.6rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #c7d5e6;
+            margin-bottom: 0.7rem;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
         }
         
         .chart-card h3 i {
-            color: #1e4a7a;
-            opacity: 0.7;
+            color: #5fc7bc;
+            opacity: 0.9;
+            font-size: 0.9rem;
         }
         
         .chart-wrapper {
             position: relative;
             width: 100%;
-            height: 240px;
-        }
-        
-        .chart-wrapper.pie-wrapper {
-            height: 240px;
+            height: 260px;
         }
         
         @media (max-width:600px) {
             .chart-wrapper {
-                height: 210px;
-            }
-            .chart-wrapper.pie-wrapper {
-                height: 210px;
+                height: 230px;
             }
         }
         
         @media (max-width:480px) {
             .chart-wrapper {
-                height: 190px;
-            }
-            .chart-wrapper.pie-wrapper {
-                height: 190px;
+                height: 200px;
             }
         }
+        /* ============================================
+           TABLES
+           ============================================ */
         
         .table-section {
-            margin-top: 1.5rem;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            overflow-x: auto;
+            margin-top: 1.6rem;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(30, 45, 70, 0.45) 0%, rgba(20, 32, 52, 0.55) 100%);
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            overflow: hidden;
             padding: 0.1rem;
             -webkit-overflow-scrolling: touch;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 14px 32px -16px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.35s ease;
+        }
+        
+        .table-section:hover {
+            border-color: rgba(120, 200, 220, 0.22);
         }
         
         .table-section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.6rem 0.9rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid rgba(120, 200, 220, 0.1);
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.6rem;
         }
         
         .table-section-header h4 {
-            font-size: 0.85rem;
-            color: #1f405f;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.92rem;
+            color: #c7d5e6;
             font-weight: 600;
+            letter-spacing: 0.02em;
         }
         
         .investor-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
-            background: rgba(255, 255, 255, 0.12);
+            font-size: 0.88rem;
             min-width: 400px;
         }
         
         .investor-table th {
             text-align: left;
-            padding: 0.7rem 0.8rem;
+            padding: 0.85rem 1rem;
+            font-family: 'Space Grotesk', sans-serif;
             font-weight: 600;
-            color: #1a3a58;
-            background: rgba(255, 255, 255, 0.2);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-            font-size: 0.7rem;
+            color: #7f9bb8;
+            background: rgba(15, 26, 46, 0.35);
+            border-bottom: 1px solid rgba(120, 200, 220, 0.1);
+            font-size: 0.68rem;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.1em;
         }
         
         .investor-table td {
-            padding: 0.6rem 0.8rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-            color: #162d44;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(120, 200, 220, 0.06);
+            color: #c7d5e6;
+            transition: background 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+        
+        .investor-table tr {
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .investor-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(95, 199, 188, 0.08), transparent);
+        }
+        
+        .investor-table tbody tr:hover td {
+            color: #f2f0eb;
         }
         
         .investor-table tr:last-child td {
@@ -459,100 +838,156 @@
         }
         
         .investor-table .highlight-row {
-            background: rgba(200, 154, 91, 0.12);
+            background: linear-gradient(90deg, rgba(200, 154, 91, 0.15), rgba(200, 154, 91, 0.03));
             font-weight: 600;
             border-left: 3px solid #c89a5b;
+            position: relative;
+        }
+        
+        .investor-table .highlight-row::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #c89a5b;
+            box-shadow: 0 0 12px rgba(200, 154, 91, 0.7);
+            animation: glowLine 2s ease-in-out infinite;
+        }
+        
+        @keyframes glowLine {
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(200, 154, 91, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 18px rgba(200, 154, 91, 0.95);
+            }
         }
         
         .investor-table .highlight-row td {
-            color: #0b2b4a;
+            color: #f4c98d;
         }
         
         .investor-table .starlink-tag {
-            background: #c89a5b20;
-            padding: 0.1rem 0.6rem;
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.25), rgba(200, 154, 91, 0.1));
+            padding: 0.15rem 0.7rem;
             border-radius: 40px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #a67a3a;
-            border: 1px solid #c89a5b30;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #e8b879;
+            border: 1px solid rgba(200, 154, 91, 0.4);
             display: inline-block;
-            margin-left: 0.2rem;
+            margin-left: 0.3rem;
             white-space: nowrap;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            animation: tagPulse 2.4s ease-in-out infinite;
+        }
+        
+        @keyframes tagPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(200, 154, 91, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(200, 154, 91, 0);
+            }
         }
         
         .investor-table .equity-ratio {
-            font-weight: 600;
-            color: #0b2b4a;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #7fded1;
         }
         
         .investor-table .total-row td {
-            border-top: 2px solid rgba(0, 0, 0, 0.08);
+            border-top: 2px solid rgba(120, 200, 220, 0.2);
+            font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
-            color: #0b2b4a;
-            background: rgba(255, 255, 255, 0.15);
+            color: #f2f0eb;
+            background: linear-gradient(90deg, rgba(79, 182, 168, 0.12), rgba(79, 182, 168, 0.03));
+            font-size: 0.95rem;
         }
         
         .row-actions {
             display: flex;
-            gap: 0.3rem;
+            gap: 0.35rem;
             justify-content: flex-end;
         }
         
         .row-actions button {
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(120, 200, 220, 0.12);
             cursor: pointer;
             font-size: 0.85rem;
-            padding: 0.25rem 0.4rem;
-            border-radius: 6px;
-            transition: background 0.15s;
+            padding: 0.35rem 0.55rem;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         .row-actions .edit-btn {
-            color: #1a5a9c;
+            color: #5fc7bc;
         }
         
         .row-actions .edit-btn:hover {
-            background: rgba(26, 90, 156, 0.1);
+            background: rgba(95, 199, 188, 0.15);
+            border-color: rgba(95, 199, 188, 0.5);
+            transform: scale(1.15) rotate(-8deg);
+            box-shadow: 0 6px 16px -6px rgba(95, 199, 188, 0.6);
         }
         
         .row-actions .del-btn {
-            color: #c04a3a;
+            color: #e8837a;
         }
         
         .row-actions .del-btn:hover {
-            background: rgba(192, 74, 58, 0.1);
+            background: rgba(226, 104, 91, 0.15);
+            border-color: rgba(226, 104, 91, 0.5);
+            transform: scale(1.15) rotate(8deg);
+            box-shadow: 0 6px 16px -6px rgba(226, 104, 91, 0.6);
         }
         
         @media (max-width:480px) {
             .investor-table {
-                font-size: 0.75rem;
+                font-size: 0.78rem;
                 min-width: 280px;
             }
             .investor-table th,
             .investor-table td {
-                padding: 0.45rem 0.5rem;
+                padding: 0.55rem 0.6rem;
             }
             .investor-table .starlink-tag {
-                font-size: 0.55rem;
+                font-size: 0.5rem;
             }
         }
+        /* ============================================
+           FOOTER
+           ============================================ */
         
         .footer-note {
-            margin-top: 1.2rem;
+            margin-top: 1.4rem;
             display: flex;
             justify-content: flex-end;
             font-size: 0.75rem;
-            color: #3b5e7e;
-            opacity: 0.85;
+            color: #7f9bb8;
             align-items: center;
             gap: 0.6rem;
             flex-wrap: wrap;
+            font-family: 'JetBrains Mono', monospace;
         }
         
         .footer-note i {
-            color: #1e4a7a;
+            color: #5fc7bc;
+            animation: iconSpin 4s linear infinite;
+        }
+        
+        @keyframes iconSpin {
+            to {
+                transform: rotate(360deg);
+            }
         }
         
         @media (max-width:480px) {
@@ -561,18 +996,22 @@
                 justify-content: center;
             }
         }
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
         
         .loading-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.35s ease;
         }
         
         .loading-overlay.show {
@@ -581,12 +1020,34 @@
         }
         
         .loading-overlay .spinner {
-            width: 44px;
-            height: 44px;
-            border: 3px solid rgba(30, 74, 122, 0.15);
-            border-top-color: #1e4a7a;
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(95, 199, 188, 0.15);
+            border-top-color: #5fc7bc;
             border-radius: 50%;
             animation: spin 0.9s linear infinite;
+            position: relative;
+            box-shadow: 0 0 30px rgba(95, 199, 188, 0.3);
+        }
+        
+        .loading-overlay .spinner::before,
+        .loading-overlay .spinner::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid transparent;
+        }
+        
+        .loading-overlay .spinner::before {
+            inset: 6px;
+            border-top-color: #c89a5b;
+            animation: spin 1.4s linear reverse infinite;
+        }
+        
+        .loading-overlay .spinner::after {
+            inset: 14px;
+            border-top-color: #7a5af8;
+            animation: spin 0.7s linear infinite;
         }
         
         @keyframes spin {
@@ -594,28 +1055,47 @@
                 transform: rotate(360deg);
             }
         }
+        /* ============================================
+           ERROR BANNER
+           ============================================ */
         
         .error-banner {
             background: rgba(226, 104, 91, 0.12);
-            color: #c04a3a;
-            padding: 0.7rem 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(226, 104, 91, 0.25);
-            font-size: 0.8rem;
+            color: #f0a89f;
+            padding: 0.85rem 1.1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(226, 104, 91, 0.3);
+            font-size: 0.85rem;
             font-weight: 500;
             margin-bottom: 1rem;
             display: none;
+            animation: slideDown 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         .error-banner.show {
             display: block;
         }
         
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* ============================================
+           MODALS
+           ============================================ */
+        
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(10, 20, 35, 0.55);
-            backdrop-filter: blur(4px);
+            background: rgba(5, 10, 20, 0.72);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -625,102 +1105,159 @@
         
         .modal-overlay.show {
             display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
         
         .modal-card {
-            background: #fff;
-            border-radius: 18px;
-            padding: 1.3rem 1.3rem 1rem;
-            max-width: 420px;
+            background: linear-gradient(135deg, rgba(24, 38, 60, 0.98) 0%, rgba(15, 26, 46, 0.99) 100%);
+            border-radius: 24px;
+            padding: 1.6rem 1.5rem 1.3rem;
+            max-width: 440px;
             width: 100%;
-            box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(120, 200, 220, 0.18);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(120, 200, 220, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            max-height: 92vh;
+            overflow-y: auto;
+            animation: modalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
         
         .modal-card h3 {
-            font-size: 1.05rem;
-            color: #0b1e33;
-            margin-bottom: 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.15rem;
+            color: #f2f0eb;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .modal-card h3 i {
+            color: #5fc7bc;
         }
         
         .modal-card label {
             display: block;
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 0.7rem;
             font-weight: 700;
-            color: #3b5e7e;
+            color: #7f9bb8;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
-            margin-top: 0.7rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.35rem;
+            margin-top: 0.85rem;
         }
         
         .modal-card input,
         .modal-card select {
             width: 100%;
-            padding: 0.6rem 0.8rem;
-            border: 1px solid #cdd8e3;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            color: #0b1e33;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid rgba(120, 200, 220, 0.2);
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #f2f0eb;
+            background: rgba(255, 255, 255, 0.04);
             outline: none;
-            transition: 0.15s;
+            transition: all 0.3s ease;
         }
         
         .modal-card input:focus,
         .modal-card select:focus {
-            border-color: #1a5a9c;
-            box-shadow: 0 0 0 3px rgba(26, 90, 156, 0.15);
+            border-color: #5fc7bc;
+            background: rgba(95, 199, 188, 0.06);
+            box-shadow: 0 0 0 4px rgba(95, 199, 188, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .modal-card input::placeholder {
+            color: #5a6f88;
         }
         
         .modal-card .modal-error {
-            color: #c04a3a;
-            font-size: 0.8rem;
-            margin-top: 0.6rem;
+            color: #f0a89f;
+            font-size: 0.82rem;
+            margin-top: 0.7rem;
+            padding: 0.55rem 0.8rem;
+            background: rgba(226, 104, 91, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(226, 104, 91, 0.25);
             display: none;
         }
         
         .modal-card .modal-actions {
             display: flex;
-            gap: 0.5rem;
-            margin-top: 1.2rem;
+            gap: 0.6rem;
+            margin-top: 1.4rem;
         }
         
         .modal-card .modal-actions button {
             flex: 1;
-            padding: 0.7rem;
+            padding: 0.8rem;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 700;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.92rem;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
         }
         
         .modal-card .modal-actions .save {
-            background: #1a5a9c;
+            background: linear-gradient(135deg, #1a5a9c, #2a7ac4);
             color: #fff;
+            box-shadow: 0 8px 20px -8px rgba(42, 122, 196, 0.55);
         }
         
         .modal-card .modal-actions .save:hover {
-            background: #0f4a7e;
+            background: linear-gradient(135deg, #2068b0, #3a8ad4);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px -10px rgba(42, 122, 196, 0.75);
         }
         
         .modal-card .modal-actions .cancel {
-            background: #eef2f7;
-            color: #1a3a58;
+            background: rgba(255, 255, 255, 0.06);
+            color: #c7d5e6;
+            border: 1px solid rgba(120, 200, 220, 0.15);
         }
         
         .modal-card .modal-actions .cancel:hover {
-            background: #dde5ee;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
         }
-        /* ==================================================
-           EMPLOYEE PAYMENTS
-           ================================================== */
+        /* ============================================
+           EMPLOYEE PAYMENTS SPECIFIC
+           ============================================ */
         
         .payments-modal-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 0.7rem;
-            margin-bottom: 0.9rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
         
         .payments-modal-header h3 {
@@ -729,106 +1266,235 @@
         
         .add-employee-btn {
             white-space: nowrap;
-            padding: 0.45rem 0.75rem;
-            min-height: 34px;
-            font-size: 0.75rem;
+            padding: 0.5rem 0.9rem;
+            min-height: 38px;
+            font-size: 0.78rem;
         }
         
         .employee-actions {
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.3rem;
             flex-wrap: wrap;
         }
         
         .employee-edit-btn,
         .employee-delete-btn {
-            border: none;
-            background: transparent;
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            background: rgba(255, 255, 255, 0.04);
             cursor: pointer;
-            padding: 0.4rem;
-            border-radius: 7px;
+            padding: 0.4rem 0.6rem;
+            border-radius: 8px;
             font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         .employee-edit-btn {
-            color: #1a5a9c;
+            color: #5fc7bc;
         }
         
         .employee-delete-btn {
-            color: #c04a3a;
+            color: #e8837a;
         }
         
         .employee-edit-btn:hover {
-            background: rgba(26, 90, 156, 0.1);
+            background: rgba(95, 199, 188, 0.15);
+            border-color: rgba(95, 199, 188, 0.5);
+            transform: scale(1.12) rotate(-6deg);
         }
         
         .employee-delete-btn:hover {
-            background: rgba(192, 74, 58, 0.1);
+            background: rgba(226, 104, 91, 0.15);
+            border-color: rgba(226, 104, 91, 0.5);
+            transform: scale(1.12) rotate(6deg);
         }
         
         .payments-modal-card {
-            max-width: 700px;
+            max-width: 900px;
         }
         
         .employee-table-wrap {
             overflow-x: auto;
-            margin-top: 0.5rem;
-            border: 1px solid #e1e7ee;
-            border-radius: 12px;
+            margin-top: 0.6rem;
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            border-radius: 14px;
+            background: rgba(15, 26, 46, 0.35);
         }
         
         .employee-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 500px;
+            min-width: 700px;
         }
         
         .employee-table th {
-            background: #f1f5f9;
-            color: #1a3a58;
+            background: rgba(15, 26, 46, 0.55);
+            color: #7f9bb8;
             text-align: left;
-            padding: 0.7rem;
-            font-size: 0.72rem;
+            padding: 0.8rem 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.68rem;
             text-transform: uppercase;
-        }
-        
-        .employee-table td {
-            padding: 0.75rem;
-            border-top: 1px solid #edf1f5;
-            color: #162d44;
-        }
-        
-        .employee-amount {
-            font-weight: 700;
-            color: #0b2b4a;
-        }
-        
-        .print-employee-btn {
-            border: none;
-            background: #1a5a9c;
-            color: white;
-            border-radius: 8px;
-            padding: 0.45rem 0.7rem;
-            cursor: pointer;
+            letter-spacing: 0.1em;
             font-weight: 600;
         }
         
+        .employee-table td {
+            padding: 0.85rem 0.9rem;
+            border-top: 1px solid rgba(120, 200, 220, 0.06);
+            color: #c7d5e6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        
+        .employee-table tbody tr {
+            transition: background 0.3s ease;
+        }
+        
+        .employee-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(95, 199, 188, 0.06), transparent);
+        }
+        
+        .employee-table tbody tr:hover td {
+            color: #f2f0eb;
+        }
+        
+        .employee-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #f2f0eb;
+        }
+        
+        .status-pill {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: all 0.3s ease;
+        }
+        
+        .status-pill.paid {
+            background: rgba(111, 203, 147, 0.18);
+            color: #7ee0a2;
+            border: 1px solid rgba(111, 203, 147, 0.35);
+        }
+        
+        .status-pill.paid:hover {
+            background: rgba(111, 203, 147, 0.3);
+            box-shadow: 0 0 12px rgba(111, 203, 147, 0.5);
+        }
+        
+        .status-pill.pending {
+            background: rgba(200, 154, 91, 0.18);
+            color: #e8b879;
+            border: 1px solid rgba(200, 154, 91, 0.35);
+        }
+        
+        .status-pill.pending:hover {
+            background: rgba(200, 154, 91, 0.3);
+            box-shadow: 0 0 12px rgba(200, 154, 91, 0.5);
+        }
+        
+        .status-pill.cancelled {
+            background: rgba(226, 104, 91, 0.18);
+            color: #f0a89f;
+            border: 1px solid rgba(226, 104, 91, 0.35);
+        }
+        
+        .status-pill.cancelled:hover {
+            background: rgba(226, 104, 91, 0.3);
+            box-shadow: 0 0 12px rgba(226, 104, 91, 0.5);
+        }
+        
+        .print-employee-btn {
+            border: 1px solid rgba(42, 122, 196, 0.3);
+            background: linear-gradient(135deg, #1a5a9c, #2a7ac4);
+            color: white;
+            border-radius: 10px;
+            padding: 0.45rem 0.8rem;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.72rem;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
         .print-employee-btn:hover {
-            background: #0f4a7e;
+            background: linear-gradient(135deg, #2068b0, #3a8ad4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -6px rgba(42, 122, 196, 0.6);
         }
         
         .payment-total {
             display: flex;
             justify-content: flex-end;
-            gap: 0.5rem;
-            margin-top: 0.8rem;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
-            color: #0b2b4a;
+            color: #f2f0eb;
+            font-size: 1.05rem;
+            padding: 0.6rem 0.9rem;
+            background: linear-gradient(90deg, transparent, rgba(79, 182, 168, 0.12));
+            border-radius: 12px;
+            border-right: 3px solid #5fc7bc;
+        }
+        /* ============================================
+           FILTER BAR
+           ============================================ */
+        
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+            align-items: center;
+            padding: 0.8rem;
+            background: rgba(15, 26, 46, 0.5);
+            border-radius: 14px;
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            margin-bottom: 1rem;
+            transition: border-color 0.3s ease;
         }
         
-        @media (max-width: 600px) {
+        .filter-bar:hover {
+            border-color: rgba(120, 200, 220, 0.2);
+        }
+        
+        .filter-bar input,
+        .filter-bar select {
+            padding: 0.55rem 0.8rem;
+            border: 1px solid rgba(120, 200, 220, 0.18);
+            border-radius: 10px;
+            font-size: 0.82rem;
+            background: rgba(255, 255, 255, 0.04);
+            color: #f2f0eb;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 38px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .filter-bar input::placeholder {
+            color: #5a6f88;
+        }
+        
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+            border-color: #5fc7bc;
+            background: rgba(95, 199, 188, 0.06);
+            box-shadow: 0 0 0 4px rgba(95, 199, 188, 0.12);
+        }
+        
+        .filter-bar .grow {
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        @media (max-width:600px) {
             .payments-modal-header {
                 align-items: flex-start;
                 flex-direction: column;
@@ -841,13 +1507,81 @@
                 max-width: 100%;
             }
             .employee-table {
-                min-width: 450px;
+                min-width: 600px;
+            }
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-bar input,
+            .filter-bar select,
+            .filter-bar button {
+                width: 100%;
             }
         }
-        /* ==================================================
-           EMPLOYEE PAYMENT PRINT REPORT
-           Uses the current page's print dialog; no popup window.
-           ================================================== */
+        /* ============================================
+           AUDIT BANNER
+           ============================================ */
+        
+        .audit-banner {
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.15), rgba(200, 154, 91, 0.05));
+            border: 1px solid rgba(200, 154, 91, 0.35);
+            color: #e8b879;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+            line-height: 1.5;
+        }
+        
+        .audit-banner i {
+            margin-top: 2px;
+            font-size: 1rem;
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes warningPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.15);
+                opacity: 0.7;
+            }
+        }
+        
+        .empty-row {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #7f9bb8;
+            font-size: 0.88rem;
+        }
+        
+        .empty-row i {
+            display: block;
+            font-size: 2rem;
+            color: rgba(120, 200, 220, 0.3);
+            margin-bottom: 0.6rem;
+            animation: emptyFloat 2.4s ease-in-out infinite;
+        }
+        
+        @keyframes emptyFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+        /* ============================================
+           PRINT STYLES (unchanged)
+           ============================================ */
         
         .employee-print-report {
             max-width: 800px;
@@ -899,6 +1633,27 @@
             width: 38%;
             font-weight: 700;
             background: #f4f7fa;
+        }
+        
+        .print-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        .print-list th {
+            background: #1a5a9c;
+            color: #fff;
+            padding: 8px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .print-list td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #e5ecf4;
         }
         
         .print-summary {
@@ -985,26 +1740,56 @@
 
 <body>
 
+    <div class="bg-layer"></div>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
     </div>
-
 
     <!-- EMPLOYEE PAYMENTS MODAL -->
     <div class="modal-overlay" id="paymentsModal">
         <div class="modal-card payments-modal-card">
             <div class="payments-modal-header">
                 <h3><i class="fas fa-money-check-alt"></i> Employee Payments</h3>
-                <button class="btn btn-primary add-employee-btn" id="addEmployeeBtn">
-                    <i class="fas fa-user-plus"></i> Add Employee
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-ghost add-employee-btn" id="printAllEmployeesBtn">
+                        <i class="fas fa-print"></i> Print All
+                    </button>
+                    <button class="btn btn-primary add-employee-btn" id="addEmployeeBtn">
+                        <i class="fas fa-user-plus"></i> Add Employee
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <input type="date" id="empFilterFrom" title="From date">
+                <input type="date" id="empFilterTo" title="To date">
+                <select id="empFilterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <input type="text" class="grow" id="empFilterSearch" placeholder="Search name or reference...">
+                <button class="btn btn-ghost add-employee-btn" id="empFilterClear">
+                    <i class="fas fa-times"></i> Clear
                 </button>
             </div>
+
             <div class="employee-table-wrap">
                 <table class="employee-table">
                     <thead>
                         <tr>
                             <th>Employee</th>
-                            <th>Payment Amount</th>
+                            <th>Date</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th style="text-align:right;">Amount</th>
                             <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
@@ -1021,6 +1806,58 @@
         </div>
     </div>
 
+    <!-- AUDIT LOG MODAL -->
+    <div class="modal-overlay" id="auditModal">
+        <div class="modal-card" style="max-width: 900px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-history"></i> Audit Log</h3>
+                <button class="btn btn-ghost add-employee-btn" id="printAuditBtn">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+
+            <div class="audit-banner">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div><strong>Client-side audit log — not tamper-proof.</strong> Entries are stored in the shared cloud record and can be modified by anyone with database access. A proper backend table with append-only permissions is required for real immutability.</div>
+            </div>
+
+            <div class="filter-bar">
+                <input type="date" id="auditFilterFrom">
+                <input type="date" id="auditFilterTo">
+                <select id="auditFilterAction">
+                    <option value="">All Actions</option>
+                    <option value="CREATE">Create</option>
+                    <option value="UPDATE">Update</option>
+                    <option value="DELETE">Delete</option>
+                    <option value="LOGIN">Login</option>
+                </select>
+                <input type="text" class="grow" id="auditFilterSearch" placeholder="Search user or target...">
+                <button class="btn btn-ghost add-employee-btn" id="auditFilterClear">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div class="employee-table-wrap">
+                <table class="employee-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Target</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="auditClose">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div id="employeePrintArea" style="display:none;"></div>
 
     <!-- ADD / EDIT EMPLOYEE MODAL -->
@@ -1033,6 +1870,19 @@
 
             <label>Payment Amount (KSh)</label>
             <input type="number" id="employeeAmount" placeholder="0" min="0" step="1">
+
+            <label>Transaction Reference</label>
+            <input type="text" id="employeeRef" placeholder="M-Pesa code, bank ref, etc." maxlength="80">
+
+            <label>Status</label>
+            <select id="employeeStatus">
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+
+            <label>Date</label>
+            <input type="date" id="employeeDate">
 
             <div class="modal-error" id="employeeError"></div>
 
@@ -1052,7 +1902,7 @@
             <label>Equity Contribution (KSh)</label>
             <input type="number" id="invEquity" placeholder="0" min="0" step="1">
             <label>Color</label>
-            <input type="color" id="invColor" value="#1f4a7a" style="height:44px; padding:0.3rem;">
+            <input type="color" id="invColor" value="#1f4a7a" style="height:48px; padding:0.3rem;">
             <div class="modal-error" id="invError"></div>
             <div class="modal-actions">
                 <button class="cancel" id="invCancel">Cancel</button>
@@ -1066,7 +1916,8 @@
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
             <div class="nav-actions">
                 <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
-                <button class="btn btn-ghost" id="addInvestorBtn">➕ Add Investor</button>
+                <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
+                <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
                 <a href="https://starlink-llc.netlify.app/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-sign-in-alt"></i><span>Login · Expenditures</span>
                 </a>
@@ -1079,7 +1930,7 @@
             <h1>
                 <i class="fas fa-chart-pie"></i> equity overview <small>investors</small>
                 <span class="live-indicator">
-        <span class="live-dot" id="liveDot"></span>
+                    <span class="live-dot" id="liveDot"></span>
                 <span id="liveStatus">Live</span>
                 </span>
             </h1>
@@ -1120,8 +1971,10 @@
 
         <div class="table-section">
             <div class="table-section-header">
-                <h4>Equity breakdown by shareholder</h4>
-                <button class="btn btn-ghost" id="addInvestorBtn2" style="font-size:0.75rem; padding:0.35rem 0.8rem; min-height:30px;">➕ Add Investor</button>
+                <h4><i class="fas fa-users" style="color:#5fc7bc; margin-right:0.4rem;"></i> Equity breakdown by shareholder</h4>
+                <button class="btn btn-ghost" id="addInvestorBtn2" style="font-size:0.75rem; padding:0.4rem 0.9rem; min-height:34px;">
+                    <i class="fas fa-plus"></i> Add Investor
+                </button>
             </div>
             <table class="investor-table">
                 <thead>
@@ -1138,8 +1991,6 @@
 
         <div class="footer-note">
             <i class="fas fa-clock"></i> Last updated: <strong id="lastUpdatedValue">—</strong>
-            <span style="opacity:0.3; margin:0 0.2rem;">·</span>
-            <i class="fas fa-bolt" style="opacity:0.6;"></i>
         </div>
     </div>
 
@@ -1149,43 +2000,38 @@
         // ==================================================
         const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
-
-        // Base amount already attributed to STARLINK VIRTUAL.
-        // Every recalculation ADDS to this base.
         const STARLINK_VIRTUAL_BASE = 377259;
+        const CURRENT_USER = 'admin';
 
         const DEFAULT_INVESTORS = [{
             id: 1,
             name: 'Toly Brian',
             equity: 764591,
-            color: '#1f4a7a'
+            color: '#5fc7bc'
         }, {
             id: 2,
             name: 'Sam Musembi',
             equity: 390778,
-            color: '#3d7a9e'
+            color: '#7a5af8'
         }, {
             id: 3,
             name: 'Richard Isika',
             equity: 290202,
-            color: '#6d9eb0'
+            color: '#4fb6a8'
         }, {
             id: 4,
             name: 'Shyla',
             equity: 87377,
-            color: '#d3a87e'
+            color: '#e8b879'
         }, {
             id: 5,
             name: 'Elvis Echwa',
             equity: 50000,
-            color: '#b1a6a0'
+            color: '#e8837a'
         }];
 
-        const COLOR_PALETTE = ['#1f4a7a', '#3d7a9e', '#6d9eb0', '#d3a87e', '#b1a6a0', '#2a8a7a', '#a67a3a', '#8a4a7a', '#4a7a3a', '#7a4a4a'];
+        const COLOR_PALETTE = ['#5fc7bc', '#7a5af8', '#4fb6a8', '#e8b879', '#e8837a', '#2a7ac4', '#c89a5b', '#a86fc7', '#6fcb93', '#f0a89f'];
 
-        // ==================================================
-        // STATE
-        // ==================================================
         let summary = {
             commonInvestmentTotal: 0,
             routersTotal: 0,
@@ -1203,23 +2049,26 @@
         let pollInterval = null;
         let editingInvestorId = null;
 
-        // Employee payments. New employees are saved in this browser.
         const DEFAULT_EMPLOYEE_PAYMENTS = [{
             id: 1,
             name: 'John Kamau',
-            amount: 15000
+            amount: 15000,
+            reference: 'MPESA-QX7B21',
+            status: 'paid',
+            date: '2026-01-15'
         }, {
             id: 2,
             name: 'Mary Wanjiku',
-            amount: 18000
+            amount: 18000,
+            reference: 'MPESA-QZ8C44',
+            status: 'paid',
+            date: '2026-02-15'
         }];
 
         let EMPLOYEE_PAYMENTS = loadEmployeePayments();
         let editingEmployeeId = null;
+        let auditLogs = [];
 
-        // ==================================================
-        // HELPERS
-        // ==================================================
         function safeNum(v) {
             if (v === '' || v === null || v === undefined) return 0;
             const n = typeof v === 'number' ? v : parseFloat(v);
@@ -1270,8 +2119,16 @@
             }
         }
 
+        function todayISO() {
+            return new Date().toISOString().split('T')[0];
+        }
+
         function nextInvestorId() {
             return investors.reduce((m, i) => Math.max(m, i.id || 0), 0) + 1;
+        }
+
+        function nextEmployeeId() {
+            return EMPLOYEE_PAYMENTS.reduce((m, e) => Math.max(m, safeNum(e.id)), 0) + 1;
         }
 
         function pickColor() {
@@ -1281,16 +2138,68 @@
             return COLOR_PALETTE[investors.length % COLOR_PALETTE.length];
         }
 
+        function escapeHTML(v) {
+            return String(v == null ? '' : v)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
         // ==================================================
-        // BUILD INVESTOR LIST
+        // AUDIT LOG
+        // ==================================================
+        function logAudit(action, target, details, oldVal, newVal) {
+            auditLogs.push({
+                id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                timestamp: new Date().toISOString(),
+                user: CURRENT_USER,
+                action: action,
+                target: target,
+                details: details || '',
+                oldValue: oldVal !== undefined ? String(oldVal) : '',
+                newValue: newVal !== undefined ? String(newVal) : ''
+            });
+            saveAuditToCloud().catch(e => console.warn('Audit save failed:', e));
+        }
+
+        function renderAuditLog() {
+            const body = document.getElementById('auditTableBody');
+            if (!body) return;
+            const from = document.getElementById('auditFilterFrom').value || '';
+            const to = document.getElementById('auditFilterTo').value || '';
+            const act = document.getElementById('auditFilterAction').value || '';
+            const q = (document.getElementById('auditFilterSearch').value || '').toLowerCase();
+
+            let filtered = [...auditLogs].reverse();
+            if (from) filtered = filtered.filter(l => l.timestamp.slice(0, 10) >= from);
+            if (to) filtered = filtered.filter(l => l.timestamp.slice(0, 10) <= to);
+            if (act) filtered = filtered.filter(l => l.action === act);
+            if (q) filtered = filtered.filter(l => (l.user + ' ' + l.target + ' ' + l.details).toLowerCase().includes(q));
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-history"></i>No audit entries match your filters.</div></td></tr>`;
+                return;
+            }
+            body.innerHTML = filtered.map(l => {
+                        const color = l.action === 'DELETE' ? '#f0a89f' :
+                            l.action === 'CREATE' ? '#7ee0a2' :
+                            l.action === 'UPDATE' ? '#7fded1' : '#7f9bb8';
+                        return `<tr>
+                    <td style="white-space:nowrap; font-size:0.75rem;">${escapeHTML(new Date(l.timestamp).toLocaleString())}</td>
+                    <td><strong>${escapeHTML(l.user)}</strong></td>
+                    <td><span style="color:${color}; font-weight:700; font-size:0.72rem; font-family:'JetBrains Mono',monospace;">${escapeHTML(l.action)}</span></td>
+                    <td>${escapeHTML(l.target)}</td>
+                    <td style="font-size:0.78rem;">${escapeHTML(l.details)}${l.oldValue ? `<div style="color:#7f9bb8; font-size:0.7rem; font-family:'JetBrains Mono',monospace;">Old: ${escapeHTML(l.oldValue)} → New: ${escapeHTML(l.newValue)}</div>` : ''}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ==================================================
+        // BUILD INVESTORS
         // ==================================================
         function buildInvestors() {
             const list = investors.map(i => ({
-                id: i.id,
-                name: i.name,
-                color: i.color || '#6d9eb0',
-                equity: safeNum(i.equity),
-                isStarlink: false
+                id: i.id, name: i.name, color: i.color || '#4fb6a8',
+                equity: safeNum(i.equity), isStarlink: false
             }));
             list.push({
                 name: 'STARLINK LLC VIRTUAL',
@@ -1314,62 +2223,53 @@
             all.forEach(inv => {
                 const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
                 const rowClass = inv.isStarlink ? 'highlight-row' : '';
-
                 if (inv.isStarlink) {
                     html += `<tr class="${rowClass}">
-        <td>${inv.name} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
-        <td><strong>${fmt(inv.equity)}</strong></td>
-        <td class="equity-ratio">${ratio}%</td>
-        <td></td>
-      </tr>`;
+                        <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
+                        <td><strong>${fmt(inv.equity)}</strong></td>
+                        <td class="equity-ratio">${ratio}%</td>
+                        <td></td>
+                    </tr>`;
                 } else {
                     html += `<tr class="${rowClass}">
-        <td>${inv.name}</td>
-        <td>${fmt(inv.equity)}</td>
-        <td class="equity-ratio">${ratio}%</td>
-        <td>
-          <div class="row-actions">
-            <button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button>
-            <button class="del-btn"  data-id="${inv.id}" title="Delete">🗑️</button>
-          </div>
-        </td>
-      </tr>`;
+                        <td>${escapeHTML(inv.name)}</td>
+                        <td>${fmt(inv.equity)}</td>
+                        <td class="equity-ratio">${ratio}%</td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button>
+                                <button class="del-btn" data-id="${inv.id}" title="Delete">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>`;
                 }
             });
-
             html += `<tr class="total-row">
-    <td><strong>TOTAL</strong></td>
-    <td><strong>${fmt(totalEquity)}</strong></td>
-    <td><strong>100.00%</strong></td>
-    <td></td>
-  </tr>`;
-
+                <td><strong>TOTAL</strong></td>
+                <td><strong>${fmt(totalEquity)}</strong></td>
+                <td><strong>100.00%</strong></td>
+                <td></td>
+            </tr>`;
             tbody.innerHTML = html;
-
             tbody.querySelectorAll('.edit-btn').forEach(btn => {
                 btn.addEventListener('click', () => openInvestorModal(parseInt(btn.dataset.id)));
             });
             tbody.querySelectorAll('.del-btn').forEach(btn => {
                 btn.addEventListener('click', () => deleteInvestor(parseInt(btn.dataset.id)));
             });
-
             return totalEquity;
         }
 
-        // ==================================================
-        // RENDER SUMMARY CARDS
-        // ==================================================
         function renderSummaryCards() {
             document.getElementById('virtualInvestmentValue').textContent = fmtDec(summary.starlinkVirtualInvestment);
             document.getElementById('starlinkInvestmentValue').textContent = fmtDec(summary.starlinkInvestmentTotal);
             document.getElementById('commonInvestmentValue').textContent = fmtDec(summary.commonInvestmentTotal);
-            const delta = safeNum(summary.routersTotal) - safeNum(summary.kairoRoutersTotal);
-            document.getElementById('routersDeltaValue').textContent = fmtDec(delta);
+            document.getElementById('routersDeltaValue').textContent = fmtDec(safeNum(summary.routersTotal) - safeNum(summary.kairoRoutersTotal));
             document.getElementById('lastUpdatedValue').textContent = formatTimestamp(summary.lastUpdated);
         }
 
         // ==================================================
-        // RENDER CHARTS
+        // CHARTS
         // ==================================================
         function renderCharts() {
             const all = buildInvestors();
@@ -1378,11 +2278,7 @@
             const colors = all.map(i => i.color);
 
             const hasLabels = typeof ChartDataLabels !== 'undefined';
-            if (hasLabels) {
-                try {
-                    Chart.register(ChartDataLabels);
-                } catch (e) {}
-            }
+            if (hasLabels) { try { Chart.register(ChartDataLabels); } catch (e) {} }
 
             const pieCanvas = document.getElementById('pieChart');
             if (pieChartInstance) pieChartInstance.destroy();
@@ -1393,30 +2289,35 @@
                     datasets: [{
                         data: values,
                         backgroundColor: colors,
-                        borderColor: 'rgba(255,255,255,0.7)',
-                        borderWidth: 2.5,
-                        hoverOffset: 18
+                        borderColor: 'rgba(20, 32, 52, 0.6)',
+                        borderWidth: 3,
+                        hoverOffset: 22,
+                        hoverBorderColor: 'rgba(95, 199, 188, 0.9)',
+                        hoverBorderWidth: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 900, easing: 'easeOutQuart' },
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                boxWidth: 12,
-                                padding: 10,
-                                font: {
-                                    size: 10,
-                                    weight: '500'
-                                },
-                                color: '#1a334a',
-                                usePointStyle: true,
-                                pointStyle: 'circle'
+                                boxWidth: 12, padding: 12,
+                                font: { size: 11, weight: '600', family: 'Plus Jakarta Sans' },
+                                color: '#c7d5e6',
+                                usePointStyle: true, pointStyle: 'circle'
                             }
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
+                            titleColor: '#f2f0eb',
+                            bodyColor: '#c7d5e6',
+                            borderColor: 'rgba(95, 199, 188, 0.5)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 10,
                             callbacks: {
                                 label: function(ctx) {
                                     const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -1427,10 +2328,7 @@
                         },
                         datalabels: hasLabels ? {
                             color: '#ffffff',
-                            font: {
-                                size: 10,
-                                weight: '700'
-                            },
+                            font: { size: 11, weight: '700', family: 'Space Grotesk' },
                             formatter: function(v, ctx) {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                                 const pct = total > 0 ? (v / total) * 100 : 0;
@@ -1455,87 +2353,65 @@
                     datasets: [{
                         label: 'Equity (KSh)',
                         data: values,
-                        backgroundColor: colors.map(c => c + 'cc'),
+                        backgroundColor: colors.map(c => c + 'dd'),
                         borderColor: colors,
-                        borderWidth: 1.8,
-                        borderRadius: 6,
+                        borderWidth: 2,
+                        borderRadius: 8,
                         barPercentage: 0.7,
-                        categoryPercentage: 0.8
+                        categoryPercentage: 0.8,
+                        hoverBackgroundColor: colors.map(c => c),
+                        hoverBorderColor: '#ffffff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: { duration: 900, easing: 'easeOutQuart' },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
-                            callbacks: {
-                                label: function(ctx) {
-                                    return `KSh ${fmt(ctx.parsed.y)}`;
-                                }
-                            }
+                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
+                            titleColor: '#f2f0eb',
+                            bodyColor: '#c7d5e6',
+                            borderColor: 'rgba(95, 199, 188, 0.5)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 10,
+                            callbacks: { label: function(ctx) { return `KSh ${fmt(ctx.parsed.y)}`; } }
                         },
                         datalabels: hasLabels ? {
                             anchor: 'end',
                             align: 'top',
-                            color: '#0b2e4a',
-                            font: {
-                                size: 9,
-                                weight: '700'
-                            },
-                            formatter: function(v) {
-                                return fmt(v);
-                            },
-                            offset: 2
+                            color: '#c7d5e6',
+                            font: { size: 10, weight: '700', family: 'JetBrains Mono' },
+                            formatter: function(v) { return fmt(v); },
+                            offset: 4
                         } : {}
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0,0,0,0.04)'
-                            },
+                            grid: { color: 'rgba(120, 200, 220, 0.06)' },
                             ticks: {
-                                callback: function(v) {
-                                    return 'KSh ' + fmt(v);
-                                },
-                                font: {
-                                    size: 9
-                                },
-                                color: '#2a4b66'
+                                callback: function(v) { return 'KSh ' + fmt(v); },
+                                font: { size: 10, family: 'JetBrains Mono' },
+                                color: '#7f9bb8'
                             }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            },
+                            grid: { display: false },
                             ticks: {
-                                font: {
-                                    size: 9,
-                                    weight: '500'
-                                },
-                                color: '#1f405f',
-                                maxRotation: 30,
-                                minRotation: 15,
-                                autoSkip: false
+                                font: { size: 10, weight: '600', family: 'Plus Jakarta Sans' },
+                                color: '#c7d5e6',
+                                maxRotation: 30, minRotation: 15, autoSkip: false
                             }
                         }
                     },
-                    layout: {
-                        padding: {
-                            top: 24,
-                            bottom: 6
-                        }
-                    }
+                    layout: { padding: { top: 24, bottom: 6 } }
                 }
             });
         }
 
-        // ==================================================
-        // RENDER ALL
-        // ==================================================
         function renderAll(pulse = true) {
             const totalEquity = renderTable();
             document.getElementById('totalSharesValue').textContent = fmt(totalEquity);
@@ -1545,8 +2421,7 @@
         }
 
         // ==================================================
-        // COMPUTE SUMMARY FROM RAW DATA
-        // STARLINK VIRTUAL = BASE + (5/6 × Common Investment) + (Routers − Kairo)
+        // SUMMARY FROM RAW
         // ==================================================
         function computeSummaryFromRaw(rawData) {
             function sumAny(keys) {
@@ -1554,105 +2429,66 @@
                 rawData.forEach(g => (g.rows || []).forEach(r => {
                     for (const k of keys) {
                         const v = safeNum(r[k + '_amount']);
-                        if (v !== 0) {
-                            total += v;
-                            break;
-                        }
+                        if (v !== 0) { total += v; break; }
                     }
                 }));
                 return Math.round(total * 100) / 100;
             }
-
             const commonInvestmentTotal = sumAny(['commonInvestment']);
             const routersTotal = sumAny(['routers']);
-            const kairoRoutersTotal = sumAny([
-                'saved_6_kairo_routers', 'saved_5_kairo_routers', 'saved_4_kairo_routers',
-                'saved_3_kairo_routers', 'saved_2_kairo_routers', 'kairoRouters'
-            ]);
-            const starlinkInvestmentTotal = sumAny([
-                'saved_4_starlink_investment', 'saved_5_starlink_investment', 'saved_6_starlink_investment',
-                'saved_3_starlink_investment', 'saved_2_starlink_investment', 'starlinkInvestment'
-            ]);
-
-            const starlinkVirtualInvestment = Math.round((
-                STARLINK_VIRTUAL_BASE +
-                (5 / 6) * commonInvestmentTotal +
-                (routersTotal - kairoRoutersTotal)
-            ) * 100) / 100;
-
+            const kairoRoutersTotal = sumAny(['saved_6_kairo_routers','saved_5_kairo_routers','saved_4_kairo_routers','saved_3_kairo_routers','saved_2_kairo_routers','kairoRouters']);
+            const starlinkInvestmentTotal = sumAny(['saved_4_starlink_investment','saved_5_starlink_investment','saved_6_starlink_investment','saved_3_starlink_investment','saved_2_starlink_investment','starlinkInvestment']);
+            const starlinkVirtualInvestment = Math.round((STARLINK_VIRTUAL_BASE + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
             return {
-                commonInvestmentTotal,
-                routersTotal,
-                kairoRoutersTotal,
-                starlinkInvestmentTotal,
-                starlinkVirtualInvestment,
-                totalTransactionFees: 0,
-                lastUpdated: new Date().toISOString()
+                commonInvestmentTotal, routersTotal, kairoRoutersTotal,
+                starlinkInvestmentTotal, starlinkVirtualInvestment,
+                totalTransactionFees: 0, lastUpdated: new Date().toISOString()
             };
         }
 
         // ==================================================
-        // FETCH FROM SUPABASE
-        // Always recompute from raw so the 377,259 base stays intact.
+        // CLOUD
         // ==================================================
         async function fetchSummary() {
             if (!supabaseClient) return false;
             try {
-                const {
-                    data: result,
-                    error
-                } = await supabaseClient
+                const { data: result, error } = await supabaseClient
                     .from('expenditure_data')
                     .select('data, last_updated')
                     .eq('id', 1)
                     .single();
-
                 if (error) {
-                    if (error.code === 'PGRST116') {
-                        console.log('ℹ️ No row yet');
-                        return false;
-                    }
+                    if (error.code === 'PGRST116') { console.log('ℹ️ No row yet'); return false; }
                     throw error;
                 }
-
                 if (result && result.data) {
                     const cloud = result.data;
-
-                    // Always compute from raw — this preserves the base correctly.
                     if (Array.isArray(cloud.data) && cloud.data.length > 0) {
-                        const rawSummary = computeSummaryFromRaw(cloud.data);
-                        summary = {
-                            ...rawSummary,
-                            lastUpdated: result.last_updated || rawSummary.lastUpdated
-                        };
-                        console.log('📊 Summary from raw + base:', summary);
+                        summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: result.last_updated };
                     } else {
                         summary = {
-                            commonInvestmentTotal: 0,
-                            routersTotal: 0,
-                            kairoRoutersTotal: 0,
-                            starlinkInvestmentTotal: 0,
-                            starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
-                            totalTransactionFees: 0,
-                            lastUpdated: result.last_updated
+                            commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0,
+                            starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
+                            totalTransactionFees: 0, lastUpdated: result.last_updated
                         };
-                        console.log('📊 No raw rows — base only:', STARLINK_VIRTUAL_BASE);
                     }
-
-                    // --- Investors ---
-                    if (Array.isArray(cloud.investors) && cloud.investors.length > 0) {
+                    if (Array.isArray(cloud.investors) && cloud.investors.length) {
                         investors = cloud.investors.map(i => ({
-                            id: i.id || nextInvestorId(),
-                            name: i.name || 'Unnamed',
-                            equity: safeNum(i.equity),
-                            color: i.color || '#6d9eb0'
+                            id: i.id || nextInvestorId(), name: i.name || 'Unnamed',
+                            equity: safeNum(i.equity), color: i.color || '#4fb6a8'
                         }));
                     } else {
-                        investors = DEFAULT_INVESTORS.map(i => ({...i
-                        }));
-                        saveInvestorsToCloud().catch(e => console.warn('Seed failed:', e));
+                        investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
+                        saveInvestorsToCloud().catch(() => {});
                     }
-
+                    if (Array.isArray(cloud.employees) && cloud.employees.length) {
+                        EMPLOYEE_PAYMENTS = cloud.employees.map(e => ({
+                            id: e.id, name: e.name || 'Unnamed', amount: safeNum(e.amount),
+                            reference: e.reference || '', status: e.status || 'paid', date: e.date || ''
+                        }));
+                        saveEmployeePayments();
+                    }
+                    if (Array.isArray(cloud.audit_logs)) auditLogs = cloud.audit_logs;
                     return true;
                 }
             } catch (e) {
@@ -1662,51 +2498,35 @@
             return false;
         }
 
-        // ==================================================
-        // SAVE INVESTORS TO CLOUD
-        // ==================================================
         async function saveInvestorsToCloud() {
             if (!supabaseClient) return false;
             try {
-                const {
-                    data: current,
-                    error: fetchErr
-                } = await supabaseClient
-                    .from('expenditure_data')
-                    .select('data')
-                    .eq('id', 1)
-                    .single();
-
-                if (fetchErr) throw fetchErr;
-
-                const newData = {...(current.data || {}),
-                    investors: investors
-                };
-
-                const {
-                    error: upsertErr
-                } = await supabaseClient
-                    .from('expenditure_data')
-                    .upsert({
-                        id: 1,
-                        data: newData,
-                        last_updated: new Date().toISOString()
-                    }, {
-                        onConflict: 'id'
-                    });
-
-                if (upsertErr) throw upsertErr;
-                console.log('✅ Investors saved to cloud');
+                const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single();
+                await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), investors }, last_updated: new Date().toISOString() }, { onConflict: 'id' });
                 return true;
-            } catch (e) {
-                console.error('❌ Save investors failed:', e);
-                showError('Could not save investor: ' + e.message);
-                return false;
-            }
+            } catch (e) { showError('Save investors failed: ' + e.message); return false; }
+        }
+
+        async function saveEmployeesToCloud() {
+            if (!supabaseClient) return false;
+            try {
+                const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single();
+                await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), employees: EMPLOYEE_PAYMENTS }, last_updated: new Date().toISOString() }, { onConflict: 'id' });
+                return true;
+            } catch (e) { showError('Save employees failed: ' + e.message); return false; }
+        }
+
+        async function saveAuditToCloud() {
+            if (!supabaseClient) return false;
+            try {
+                const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single();
+                await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), audit_logs: auditLogs }, last_updated: new Date().toISOString() }, { onConflict: 'id' });
+                return true;
+            } catch (e) { console.warn('Audit save failed:', e); return false; }
         }
 
         // ==================================================
-        // MODAL: ADD / EDIT
+        // INVESTOR MODAL
         // ==================================================
         function openInvestorModal(investorId = null) {
             editingInvestorId = investorId;
@@ -1715,23 +2535,20 @@
             const eqEl = document.getElementById('invEquity');
             const colorEl = document.getElementById('invColor');
             const errEl = document.getElementById('invError');
-
             errEl.style.display = 'none';
-
             if (investorId) {
                 const inv = investors.find(i => i.id === investorId);
                 if (!inv) return;
                 title.textContent = '✏️ Edit Investor';
                 nameEl.value = inv.name;
                 eqEl.value = inv.equity;
-                colorEl.value = inv.color || '#1f4a7a';
+                colorEl.value = inv.color || '#4fb6a8';
             } else {
                 title.textContent = '➕ Add Investor';
                 nameEl.value = '';
                 eqEl.value = '';
                 colorEl.value = pickColor();
             }
-
             document.getElementById('investorModal').classList.add('show');
             setTimeout(() => nameEl.focus(), 50);
         }
@@ -1742,47 +2559,28 @@
         }
 
         async function saveInvestor() {
-            const nameEl = document.getElementById('invName');
-            const eqEl = document.getElementById('invEquity');
-            const colorEl = document.getElementById('invColor');
+            const name = document.getElementById('invName').value.trim();
+            const equity = safeNum(document.getElementById('invEquity').value);
+            const color = document.getElementById('invColor').value || '#4fb6a8';
             const errEl = document.getElementById('invError');
-
-            const name = nameEl.value.trim();
-            const equity = safeNum(eqEl.value);
-            const color = colorEl.value || '#1f4a7a';
-
             errEl.style.display = 'none';
-
-            if (!name) {
-                errEl.textContent = '⚠️ Please enter a name.';
-                errEl.style.display = 'block';
-                return;
-            }
-            if (equity < 0) {
-                errEl.textContent = '⚠️ Equity cannot be negative.';
-                errEl.style.display = 'block';
-                return;
-            }
+            if (!name) { errEl.textContent = '⚠️ Please enter a name.'; errEl.style.display = 'block'; return; }
+            if (equity < 0) { errEl.textContent = '⚠️ Equity cannot be negative.'; errEl.style.display = 'block'; return; }
 
             if (editingInvestorId) {
                 const idx = investors.findIndex(i => i.id === editingInvestorId);
-                if (idx !== -1) investors[idx] = {...investors[idx],
-                    name,
-                    equity,
-                    color
-                };
+                if (idx !== -1) {
+                    const old = investors[idx].equity;
+                    investors[idx] = { ...investors[idx], name, equity, color };
+                    logAudit('UPDATE', `Investor #${editingInvestorId}`, `Updated investor: ${name}`, old, equity);
+                }
             } else {
-                investors.push({
-                    id: nextInvestorId(),
-                    name,
-                    equity,
-                    color
-                });
+                const newId = nextInvestorId();
+                investors.push({ id: newId, name, equity, color });
+                logAudit('CREATE', `Investor #${newId}`, `Added investor: ${name}`, '', equity);
             }
-
             closeInvestorModal();
             renderAll(true);
-
             await saveInvestorsToCloud();
         }
 
@@ -1790,15 +2588,14 @@
             const inv = investors.find(i => i.id === investorId);
             if (!inv) return;
             if (!confirm(`Delete investor "${inv.name}"?`)) return;
-
+            logAudit('DELETE', `Investor #${investorId}`, `Deleted investor: ${inv.name}`, inv.equity, '');
             investors = investors.filter(i => i.id !== investorId);
             renderAll(true);
-
             await saveInvestorsToCloud();
         }
 
         // ==================================================
-        // EMPLOYEE PAYMENTS
+        // EMPLOYEES
         // ==================================================
         function loadEmployeePayments() {
             try {
@@ -1807,23 +2604,12 @@
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) return parsed;
                 }
-            } catch (e) {
-                console.warn('Could not load saved employees:', e);
-            }
-            return DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({...e
-            }));
+            } catch (e) {}
+            return DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({ ...e }));
         }
 
         function saveEmployeePayments() {
-            try {
-                localStorage.setItem('starlink_employee_payments', JSON.stringify(EMPLOYEE_PAYMENTS));
-            } catch (e) {
-                console.warn('Could not save employees:', e);
-            }
-        }
-
-        function nextEmployeeId() {
-            return EMPLOYEE_PAYMENTS.reduce((max, emp) => Math.max(max, safeNum(emp.id)), 0) + 1;
+            try { localStorage.setItem('starlink_employee_payments', JSON.stringify(EMPLOYEE_PAYMENTS)); } catch (e) {}
         }
 
         function openEmployeeModal(employeeId = null) {
@@ -1832,23 +2618,26 @@
             const title = document.getElementById('employeeModalTitle');
             const name = document.getElementById('employeeName');
             const amount = document.getElementById('employeeAmount');
+            const ref = document.getElementById('employeeRef');
+            const status = document.getElementById('employeeStatus');
+            const date = document.getElementById('employeeDate');
             const error = document.getElementById('employeeError');
-
             error.textContent = '';
             error.style.display = 'none';
-
             if (employeeId === null) {
                 title.innerHTML = '➕ Add Employee';
-                name.value = '';
-                amount.value = '';
+                name.value = ''; amount.value = ''; ref.value = '';
+                status.value = 'paid'; date.value = todayISO();
             } else {
-                const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
-                if (!employee) return;
+                const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
+                if (!emp) return;
                 title.innerHTML = '✏️ Edit Employee';
-                name.value = employee.name;
-                amount.value = employee.amount;
+                name.value = emp.name;
+                amount.value = emp.amount;
+                ref.value = emp.reference || '';
+                status.value = emp.status || 'paid';
+                date.value = emp.date || todayISO();
             }
-
             modal.classList.add('show');
             setTimeout(() => name.focus(), 50);
         }
@@ -1858,181 +2647,188 @@
             editingEmployeeId = null;
         }
 
-        function saveEmployee() {
+        async function saveEmployee() {
             const name = document.getElementById('employeeName').value.trim();
             const amount = safeNum(document.getElementById('employeeAmount').value);
+            const reference = document.getElementById('employeeRef').value.trim();
+            const status = document.getElementById('employeeStatus').value;
+            const date = document.getElementById('employeeDate').value || todayISO();
             const error = document.getElementById('employeeError');
-
-            if (!name) {
-                error.textContent = 'Please enter the employee name.';
-                error.style.display = 'block';
-                return;
+            error.textContent = '';
+            error.style.display = 'none';
+            if (!name) { error.textContent = 'Please enter the employee name.'; error.style.display = 'block'; return; }
+            if (amount <= 0) { error.textContent = 'Please enter a payment amount greater than 0.'; error.style.display = 'block'; return; }
+            if (reference) {
+                const dup = EMPLOYEE_PAYMENTS.find(e => e.id !== editingEmployeeId && (e.reference || '').toLowerCase() === reference.toLowerCase());
+                if (dup) { error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`; error.style.display = 'block'; return; }
             }
-
-            if (amount <= 0) {
-                error.textContent = 'Please enter a payment amount greater than 0.';
-                error.style.display = 'block';
-                return;
-            }
-
             if (editingEmployeeId === null) {
-                EMPLOYEE_PAYMENTS.push({
-                    id: nextEmployeeId(),
-                    name,
-                    amount
-                });
+                const newId = nextEmployeeId();
+                EMPLOYEE_PAYMENTS.push({ id: newId, name, amount, reference, status, date });
+                logAudit('CREATE', `Employee #${newId}`, `Added payment for ${name} (${reference || 'no ref'})`, '', amount);
             } else {
-                const employee = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId);
-                if (employee) {
-                    employee.name = name;
-                    employee.amount = amount;
+                const emp = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId);
+                if (emp) {
+                    const oldAmount = emp.amount;
+                    const oldStatus = emp.status;
+                    emp.name = name; emp.amount = amount; emp.reference = reference;
+                    emp.status = status; emp.date = date;
+                    logAudit('UPDATE', `Employee #${editingEmployeeId}`, `Updated payment for ${name}`, `${oldAmount}/${oldStatus}`, `${amount}/${status}`);
                 }
             }
-
             saveEmployeePayments();
             renderEmployeePayments();
             closeEmployeeModal();
+            await saveEmployeesToCloud();
         }
 
-        function deleteEmployee(employeeId) {
+        async function deleteEmployee(employeeId) {
             const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
             if (!employee) return;
-
             if (!confirm(`Delete employee "${employee.name}" from the payment list?`)) return;
-
+            logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
             EMPLOYEE_PAYMENTS = EMPLOYEE_PAYMENTS.filter(e => e.id !== employeeId);
             saveEmployeePayments();
             renderEmployeePayments();
+            await saveEmployeesToCloud();
         }
 
         function renderEmployeePayments() {
             const body = document.getElementById('employeePaymentBody');
             const totalEl = document.getElementById('employeePaymentTotal');
+            if (!body) return;
 
-            body.innerHTML = EMPLOYEE_PAYMENTS.map(emp => `
+            const from = document.getElementById('empFilterFrom').value || '';
+            const to = document.getElementById('empFilterTo').value || '';
+            const status = document.getElementById('empFilterStatus').value || '';
+            const q = (document.getElementById('empFilterSearch').value || '').toLowerCase();
+
+            let list = [...EMPLOYEE_PAYMENTS];
+            if (from) list = list.filter(e => (e.date || '') >= from);
+            if (to) list = list.filter(e => (e.date || '') <= to);
+            if (status) list = list.filter(e => e.status === status);
+            if (q) list = list.filter(e => (e.name + ' ' + (e.reference || '')).toLowerCase().includes(q));
+            list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            if (!list.length) {
+                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-receipt"></i>No employee payments match your filters.</div></td></tr>`;
+                totalEl.textContent = 'KSh 0';
+                return;
+            }
+            body.innerHTML = list.map(emp => `
                 <tr>
-                    <td><strong>${emp.name}</strong></td>
-                    <td class="employee-amount">KSh ${fmt(emp.amount)}</td>
+                    <td><strong>${escapeHTML(emp.name)}</strong></td>
+                    <td>${escapeHTML(emp.date || '-')}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(emp.reference || '-')}</td>
+                    <td><span class="status-pill ${escapeHTML(emp.status || 'paid')}">${escapeHTML(emp.status || 'paid')}</span></td>
+                    <td class="employee-amount" style="text-align:right;">KSh ${fmt(emp.amount)}</td>
                     <td>
                         <div class="employee-actions">
-                            <button class="employee-edit-btn" onclick="openEmployeeModal(${emp.id})" title="Edit employee">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="employee-delete-btn" onclick="deleteEmployee(${emp.id})" title="Delete employee">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button class="print-employee-btn" onclick="printEmployeeReport(${emp.id})" title="Print payment report">
-                                <i class="fas fa-print"></i> Print
-                            </button>
+                            <button class="employee-edit-btn" onclick="openEmployeeModal(${emp.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="employee-delete-btn" onclick="deleteEmployee(${emp.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                            <button class="print-employee-btn" onclick="printEmployeeReport(${emp.id})" title="Print"><i class="fas fa-print"></i> Print</button>
                         </div>
                     </td>
                 </tr>
             `).join('');
-
-            const total = EMPLOYEE_PAYMENTS.reduce((sum, emp) => sum + safeNum(emp.amount), 0);
+            const total = list.reduce((sum, emp) => sum + safeNum(emp.amount), 0);
             totalEl.textContent = 'KSh ' + fmt(total);
         }
 
-        function openPaymentsModal() {
-            renderEmployeePayments();
-            document.getElementById('paymentsModal').classList.add('show');
-        }
+        function openPaymentsModal() { renderEmployeePayments(); document.getElementById('paymentsModal').classList.add('show'); }
+        function closePaymentsModal() { document.getElementById('paymentsModal').classList.remove('show'); }
+        function openAuditModal() { renderAuditLog(); document.getElementById('auditModal').classList.add('show'); }
+        function closeAuditModal() { document.getElementById('auditModal').classList.remove('show'); }
 
-        function closePaymentsModal() {
-            document.getElementById('paymentsModal').classList.remove('show');
-        }
-
-        // Direct printing: no window.open(), so browser pop-up blocking cannot stop reports.
-        function printEmployeeReport(employeeId) {
-            const employee = EMPLOYEE_PAYMENTS.find(emp => emp.id === employeeId);
-            if (!employee) {
-                showError('Employee not found.');
-                return;
-            }
-
+        // ==================================================
+        // PRINT
+        // ==================================================
+        function doPrint(html) {
             const printArea = document.getElementById('employeePrintArea');
-            if (!printArea) {
-                showError('Print area is unavailable. Please refresh the page and try again.');
-                return;
-            }
-
-            const reportDate = new Date().toLocaleDateString();
-
-            printArea.innerHTML = `
-                <div class="employee-print-report">
-                    <div class="print-header">
-                        <h1>STARLINK LLC</h1>
-                        <h2>Employee Payment Report</h2>
-                        <p>Report Date: ${escapeHTML(reportDate)}</p>
-                    </div>
-
-                    <table class="print-payment-table">
-                        <tr>
-                            <td>Employee Name</td>
-                            <td>${escapeHTML(employee.name)}</td>
-                        </tr>
-                        <tr>
-                            <td>Payment Amount</td>
-                            <td><strong>KSh ${fmt(employee.amount)}</strong></td>
-                        </tr>
-                        <tr>
-                            <td>Report Date</td>
-                            <td>${escapeHTML(reportDate)}</td>
-                        </tr>
-                    </table>
-
-                    <div class="print-summary">
-                        <h3>Payment Summary</h3>
-                        <p>
-                            ${escapeHTML(employee.name)} is recorded as having received
-                            <strong>KSh ${fmt(employee.amount)}</strong>.
-                        </p>
-                    </div>
-
-                    <div class="print-signatures">
-                        <p>Employee Signature: ____________________________________</p>
-                        <p>Authorized By: _________________________________________</p>
-                    </div>
-
-                    <div class="print-footer">
-                        <span>Prepared by STARLINK LLC</span>
-                        <span>${escapeHTML(reportDate)}</span>
-                    </div>
-                </div>
-            `;
-
-            // Show only the print area. The @media print CSS hides everything else.
+            if (!printArea) return;
+            printArea.innerHTML = html;
             printArea.style.display = 'block';
-
-            // Allow the browser to render the report before opening its native print dialog.
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    window.print();
-                });
-            });
-
-            // Restore the normal page after printing/cancelling.
+            requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
             const cleanup = () => {
                 printArea.style.display = 'none';
                 printArea.innerHTML = '';
                 window.removeEventListener('afterprint', cleanup);
             };
-
             window.addEventListener('afterprint', cleanup);
-
-            // Fallback for browsers that do not fire afterprint reliably.
-            setTimeout(() => {
-                if (printArea.style.display !== 'none') cleanup();
-            }, 60000);
+            setTimeout(() => { if (printArea.style.display !== 'none') cleanup(); }, 60000);
         }
 
-        function escapeHTML(value) {
-            return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+        function printHeader(title) {
+            return `<div class="print-header"><h1>STARLINK LLC</h1><h2>${escapeHTML(title)}</h2><p>Generated: ${escapeHTML(new Date().toLocaleString())}</p></div>`;
+        }
+
+        function printEmployeeReport(employeeId) {
+            const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
+            if (!emp) { showError('Employee not found.'); return; }
+            const date = new Date().toLocaleDateString();
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Employee Payment Report')}
+                    <table class="print-payment-table">
+                        <tr><td>Employee Name</td><td>${escapeHTML(emp.name)}</td></tr>
+                        <tr><td>Payment Amount</td><td><strong>KSh ${fmt(emp.amount)}</strong></td></tr>
+                        <tr><td>Transaction Reference</td><td>${escapeHTML(emp.reference || '—')}</td></tr>
+                        <tr><td>Status</td><td>${escapeHTML(emp.status || 'paid')}</td></tr>
+                        <tr><td>Payment Date</td><td>${escapeHTML(emp.date || '—')}</td></tr>
+                        <tr><td>Report Date</td><td>${escapeHTML(date)}</td></tr>
+                    </table>
+                    <div class="print-summary">
+                        <h3>Payment Summary</h3>
+                        <p>${escapeHTML(emp.name)} is recorded as having received <strong>KSh ${fmt(emp.amount)}</strong>.</p>
+                    </div>
+                    <div class="print-signatures">
+                        <p>Employee Signature: ____________________________________</p>
+                        <p>Authorized By: _________________________________________</p>
+                    </div>
+                    <div class="print-footer">
+                        <span>Prepared by STARLINK LLC</span>
+                        <span>${escapeHTML(date)}</span>
+                    </div>
+                </div>
+            `);
+        }
+
+        function printAllEmployees() {
+            const total = EMPLOYEE_PAYMENTS.reduce((s, e) => s + safeNum(e.amount), 0);
+            const rows = EMPLOYEE_PAYMENTS.map(e => `<tr>
+                <td>${escapeHTML(e.name)}</td><td>${escapeHTML(e.date || '-')}</td>
+                <td>${escapeHTML(e.reference || '-')}</td><td>${escapeHTML(e.status || 'paid')}</td>
+                <td style="text-align:right;">KSh ${fmt(e.amount)}</td>
+            </tr>`).join('');
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('All Employee Payments')}
+                    <table class="print-list">
+                        <thead><tr><th>Employee</th><th>Date</th><th>Reference</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr></thead>
+                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="4">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td></tr></tbody>
+                    </table>
+                    <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p></div>
+                    <div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
+        function printAuditLog() {
+            const rows = [...auditLogs].reverse().slice(0, 500).map(l => `<tr>
+                <td>${escapeHTML(new Date(l.timestamp).toLocaleString())}</td>
+                <td>${escapeHTML(l.user)}</td><td>${escapeHTML(l.action)}</td>
+                <td>${escapeHTML(l.target)}</td><td>${escapeHTML(l.details)}</td>
+            </tr>`).join('');
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Audit Log Report')}
+                    <table class="print-list">
+                        <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="print-footer"><span>Client-side audit log — not tamper-proof</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
         }
 
         // ==================================================
@@ -2040,39 +2836,64 @@
         // ==================================================
         function subscribeRealtime() {
             if (!supabaseClient) return;
-            supabaseClient
-                .channel('expenditure-data-realtime')
-                .on('postgres_changes', {
-                        event: '*',
-                        schema: 'public',
-                        table: 'expenditure_data',
-                        filter: 'id=eq.1'
-                    },
-                    async(payload) => {
-                        console.log('🔄 Realtime update:', payload);
-                        await fetchSummary();
-                        renderAll(true);
-                    })
+            supabaseClient.channel('expenditure-data-realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditure_data', filter: 'id=eq.1' },
+                    async () => { await fetchSummary(); renderAll(true); })
                 .subscribe((status) => {
-                    console.log('📡 Realtime status:', status);
-                    const statusEl = document.getElementById('liveStatus');
+                    const st = document.getElementById('liveStatus');
                     const dot = document.getElementById('liveDot');
-                    if (status === 'SUBSCRIBED') {
-                        statusEl.textContent = 'Live';
-                        dot.style.background = '';
-                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                        statusEl.textContent = 'Polling';
-                        dot.style.background = '#a67a3a';
-                    }
+                    if (status === 'SUBSCRIBED') { st.textContent = 'Live'; dot.style.background = ''; }
+                    else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { st.textContent = 'Polling'; dot.style.background = '#e8b879'; }
                 });
         }
 
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(async() => {
+            pollInterval = setInterval(async () => {
                 const ok = await fetchSummary();
                 if (ok) renderAll(true);
             }, 30000);
+        }
+
+        // ==================================================
+        // BUTTON RIPPLE EFFECT
+        // ==================================================
+        function attachRipple() {
+            document.addEventListener('mousemove', (e) => {
+                const btn = e.target.closest('.btn');
+                if (btn) {
+                    const rect = btn.getBoundingClientRect();
+                    btn.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
+                    btn.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.btn, .print-employee-btn, .employee-edit-btn, .employee-delete-btn');
+                if (!btn) return;
+                const rect = btn.getBoundingClientRect();
+                const ripple = document.createElement('span');
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.35);
+                    transform: scale(0);
+                    animation: rippleAnim 0.6s ease-out;
+                    pointer-events: none;
+                    width: ${size}px; height: ${size}px;
+                    left: ${e.clientX - rect.left - size/2}px;
+                    top: ${e.clientY - rect.top - size/2}px;
+                `;
+                btn.style.position = 'relative';
+                btn.style.overflow = 'hidden';
+                btn.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+
+            const style = document.createElement('style');
+            style.textContent = '@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }';
+            document.head.appendChild(style);
         }
 
         // ==================================================
@@ -2080,58 +2901,70 @@
         // ==================================================
         async function init() {
             setLoading(true);
-
             if (typeof supabase === 'undefined') {
                 showError('Supabase library not loaded. Please refresh.');
                 setLoading(false);
                 return;
             }
-
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             console.log('✅ Supabase initialized');
 
             const ok = await fetchSummary();
             if (!ok) {
-                investors = DEFAULT_INVESTORS.map(i => ({...i
-                }));
-                console.log('ℹ️ Using default investors');
+                investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
+                EMPLOYEE_PAYMENTS = loadEmployeePayments();
             }
 
             renderAll(false);
             subscribeRealtime();
             startPolling();
+            attachRipple();
 
             document.getElementById('addInvestorBtn').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
+            document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
+            document.getElementById('invSave').addEventListener('click', saveInvestor);
+            document.getElementById('investorModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorModal(); });
+            document.getElementById('invName').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('invEquity').focus(); });
+            document.getElementById('invEquity').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveInvestor(); });
+
             document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal(null));
             document.getElementById('employeeCancel').addEventListener('click', closeEmployeeModal);
             document.getElementById('employeeSave').addEventListener('click', saveEmployee);
-            document.getElementById('employeeModal').addEventListener('click', function(e) {
-                if (e.target === this) closeEmployeeModal();
-            });
-            document.getElementById('employeeName').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('employeeAmount').focus();
-            });
-            document.getElementById('employeeAmount').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') saveEmployee();
-            });
+            document.getElementById('employeeModal').addEventListener('click', function(e) { if (e.target === this) closeEmployeeModal(); });
+            document.getElementById('employeeName').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('employeeAmount').focus(); });
+            document.getElementById('employeeAmount').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('employeeRef').focus(); });
+            document.getElementById('employeeRef').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('employeeSave').click(); });
+
             document.getElementById('paymentsBtn').addEventListener('click', openPaymentsModal);
             document.getElementById('paymentsClose').addEventListener('click', closePaymentsModal);
-            document.getElementById('paymentsModal').addEventListener('click', function(e) {
-                if (e.target === this) closePaymentsModal();
+            document.getElementById('paymentsModal').addEventListener('click', function(e) { if (e.target === this) closePaymentsModal(); });
+            document.getElementById('printAllEmployeesBtn').addEventListener('click', printAllEmployees);
+
+            ['empFilterFrom', 'empFilterTo', 'empFilterStatus'].forEach(id => {
+                document.getElementById(id).addEventListener('change', renderEmployeePayments);
             });
-            document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
-            document.getElementById('invSave').addEventListener('click', saveInvestor);
-            document.getElementById('investorModal').addEventListener('click', function(e) {
-                if (e.target === this) closeInvestorModal();
-            });
-            document.getElementById('invName').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('invEquity').focus();
-            });
-            document.getElementById('invEquity').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') saveInvestor();
+            document.getElementById('empFilterSearch').addEventListener('input', renderEmployeePayments);
+            document.getElementById('empFilterClear').addEventListener('click', () => {
+                ['empFilterFrom', 'empFilterTo', 'empFilterStatus', 'empFilterSearch'].forEach(id => document.getElementById(id).value = '');
+                renderEmployeePayments();
             });
 
+            document.getElementById('auditBtn').addEventListener('click', openAuditModal);
+            document.getElementById('auditClose').addEventListener('click', closeAuditModal);
+            document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
+            document.getElementById('printAuditBtn').addEventListener('click', printAuditLog);
+
+            ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction'].forEach(id => {
+                document.getElementById(id).addEventListener('change', renderAuditLog);
+            });
+            document.getElementById('auditFilterSearch').addEventListener('input', renderAuditLog);
+            document.getElementById('auditFilterClear').addEventListener('click', () => {
+                ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction', 'auditFilterSearch'].forEach(id => document.getElementById(id).value = '');
+                renderAuditLog();
+            });
+
+            logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
         }
 
