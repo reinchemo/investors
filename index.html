@@ -36,9 +36,6 @@
             overflow-x: hidden;
             color: #e8eef7;
         }
-        /* ============================================
-           ANIMATED BACKGROUND
-           ============================================ */
         
         .bg-layer {
             position: fixed;
@@ -83,7 +80,6 @@
             background: radial-gradient(circle, #4fb6a8 0%, transparent 70%);
             top: -120px;
             left: -80px;
-            animation-delay: 0s;
         }
         
         .orb-2 {
@@ -117,9 +113,6 @@
                 transform: translate(-40px, 50px) scale(0.95);
             }
         }
-        /* ============================================
-           DASHBOARD SHELL
-           ============================================ */
         
         .dashboard {
             max-width: 1320px;
@@ -159,9 +152,6 @@
                 border-radius: 20px;
             }
         }
-        /* ============================================
-           NAV
-           ============================================ */
         
         .nav {
             display: flex;
@@ -233,9 +223,6 @@
             gap: 0.55rem;
             flex-wrap: wrap;
         }
-        /* ============================================
-           BUTTONS
-           ============================================ */
         
         .btn {
             border: 1px solid rgba(120, 200, 220, 0.18);
@@ -320,9 +307,6 @@
                 min-height: 36px;
             }
         }
-        /* ============================================
-           HEADLINE
-           ============================================ */
         
         .headline {
             display: flex;
@@ -383,9 +367,6 @@
                 font-size: 1.35rem;
             }
         }
-        /* ============================================
-           LIVE INDICATOR
-           ============================================ */
         
         .live-indicator {
             display: inline-flex;
@@ -448,9 +429,6 @@
                 transform: scale(1);
             }
         }
-        /* ============================================
-           TOTAL BADGE
-           ============================================ */
         
         .total-badge {
             background: linear-gradient(135deg, rgba(26, 42, 74, 0.95), rgba(15, 26, 46, 0.98));
@@ -513,9 +491,6 @@
                 padding: 0.4rem 1rem;
             }
         }
-        /* ============================================
-           SUMMARY CARDS
-           ============================================ */
         
         .summary-row {
             display: grid;
@@ -535,7 +510,6 @@
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
             position: relative;
             overflow: hidden;
-            cursor: default;
         }
         
         .summary-card::before {
@@ -603,7 +577,6 @@
             font-weight: 700;
             color: #f2f0eb;
             letter-spacing: -0.02em;
-            transition: color 0.3s ease;
         }
         
         .summary-card.virtual {
@@ -656,9 +629,6 @@
                 font-size: 0.6rem;
             }
         }
-        /* ============================================
-           CHART CARDS
-           ============================================ */
         
         .chart-grid {
             display: grid;
@@ -753,9 +723,6 @@
                 height: 200px;
             }
         }
-        /* ============================================
-           TABLES
-           ============================================ */
         
         .table-section {
             margin-top: 1.6rem;
@@ -818,11 +785,6 @@
             border-bottom: 1px solid rgba(120, 200, 220, 0.06);
             color: #c7d5e6;
             transition: background 0.3s ease, color 0.3s ease;
-            position: relative;
-        }
-        
-        .investor-table tr {
-            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         .investor-table tbody tr:hover {
@@ -842,28 +804,6 @@
             font-weight: 600;
             border-left: 3px solid #c89a5b;
             position: relative;
-        }
-        
-        .investor-table .highlight-row::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: #c89a5b;
-            box-shadow: 0 0 12px rgba(200, 154, 91, 0.7);
-            animation: glowLine 2s ease-in-out infinite;
-        }
-        
-        @keyframes glowLine {
-            0%,
-            100% {
-                box-shadow: 0 0 8px rgba(200, 154, 91, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 18px rgba(200, 154, 91, 0.95);
-            }
         }
         
         .investor-table .highlight-row td {
@@ -963,9 +903,6 @@
                 font-size: 0.5rem;
             }
         }
-        /* ============================================
-           FOOTER
-           ============================================ */
         
         .footer-note {
             margin-top: 1.4rem;
@@ -996,9 +933,6 @@
                 justify-content: center;
             }
         }
-        /* ============================================
-           LOADING OVERLAY
-           ============================================ */
         
         .loading-overlay {
             position: fixed;
@@ -1055,9 +989,6 @@
                 transform: rotate(360deg);
             }
         }
-        /* ============================================
-           ERROR BANNER
-           ============================================ */
         
         .error-banner {
             background: rgba(226, 104, 91, 0.12);
@@ -1086,9 +1017,6 @@
                 transform: translateY(0);
             }
         }
-        /* ============================================
-           MODALS
-           ============================================ */
         
         .modal-overlay {
             position: fixed;
@@ -1169,7 +1097,8 @@
         }
         
         .modal-card input,
-        .modal-card select {
+        .modal-card select,
+        .modal-card textarea {
             width: 100%;
             padding: 0.7rem 0.9rem;
             border: 1px solid rgba(120, 200, 220, 0.2);
@@ -1182,15 +1111,22 @@
             transition: all 0.3s ease;
         }
         
+        .modal-card textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        
         .modal-card input:focus,
-        .modal-card select:focus {
+        .modal-card select:focus,
+        .modal-card textarea:focus {
             border-color: #5fc7bc;
             background: rgba(95, 199, 188, 0.06);
             box-shadow: 0 0 0 4px rgba(95, 199, 188, 0.15);
             transform: translateY(-1px);
         }
         
-        .modal-card input::placeholder {
+        .modal-card input::placeholder,
+        .modal-card textarea::placeholder {
             color: #5a6f88;
         }
         
@@ -1247,9 +1183,6 @@
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
-        /* ============================================
-           EMPLOYEE PAYMENTS SPECIFIC
-           ============================================ */
         
         .payments-modal-header {
             display: flex;
@@ -1410,6 +1343,39 @@
             box-shadow: 0 0 12px rgba(226, 104, 91, 0.5);
         }
         
+        .status-pill.draft {
+            background: rgba(120, 140, 180, 0.18);
+            color: #a8b8d4;
+            border: 1px solid rgba(120, 140, 180, 0.35);
+        }
+        
+        .status-pill.draft:hover {
+            background: rgba(120, 140, 180, 0.3);
+            box-shadow: 0 0 12px rgba(120, 140, 180, 0.5);
+        }
+        
+        .status-pill.approved {
+            background: rgba(122, 90, 248, 0.18);
+            color: #b8a0ff;
+            border: 1px solid rgba(122, 90, 248, 0.35);
+        }
+        
+        .status-pill.approved:hover {
+            background: rgba(122, 90, 248, 0.3);
+            box-shadow: 0 0 12px rgba(122, 90, 248, 0.5);
+        }
+        
+        .status-pill.processing {
+            background: rgba(95, 199, 188, 0.18);
+            color: #7fded1;
+            border: 1px solid rgba(95, 199, 188, 0.35);
+        }
+        
+        .status-pill.processing:hover {
+            background: rgba(95, 199, 188, 0.3);
+            box-shadow: 0 0 12px rgba(95, 199, 188, 0.5);
+        }
+        
         .print-employee-btn {
             border: 1px solid rgba(42, 122, 196, 0.3);
             background: linear-gradient(135deg, #1a5a9c, #2a7ac4);
@@ -1443,9 +1409,6 @@
             border-radius: 12px;
             border-right: 3px solid #5fc7bc;
         }
-        /* ============================================
-           FILTER BAR
-           ============================================ */
         
         .filter-bar {
             display: flex;
@@ -1519,9 +1482,6 @@
                 width: 100%;
             }
         }
-        /* ============================================
-           AUDIT BANNER
-           ============================================ */
         
         .audit-banner {
             background: linear-gradient(135deg, rgba(200, 154, 91, 0.15), rgba(200, 154, 91, 0.05));
@@ -1580,10 +1540,250 @@
             }
         }
         /* ============================================
-           PRINT STYLES (unchanged)
+           PHASE 3 — DIVIDEND ENGINE
            ============================================ */
         
-        .employee-print-report {
+        .dividend-card {
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.12) 0%, rgba(60, 40, 20, 0.5) 100%);
+            border: 1px solid rgba(200, 154, 91, 0.28);
+            border-radius: 20px;
+            padding: 1.15rem 1.3rem;
+            backdrop-filter: blur(12px);
+            margin-bottom: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dividend-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #c89a5b, transparent);
+            transform: translateX(-100%);
+            animation: badgeSweep 4s ease-in-out infinite;
+        }
+        
+        .dividend-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            color: #f4c98d;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .dividend-card p {
+            color: #b8a578;
+            font-size: 0.82rem;
+            line-height: 1.55;
+        }
+        
+        .dividend-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #f4c98d;
+            margin: 0.5rem 0 0.2rem;
+            text-shadow: 0 0 24px rgba(200, 154, 91, 0.4);
+        }
+        
+        .alloc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 600px;
+        }
+        
+        .alloc-table th {
+            text-align: left;
+            padding: 0.75rem 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: #7f9bb8;
+            background: rgba(15, 26, 46, 0.55);
+            border-bottom: 1px solid rgba(120, 200, 220, 0.1);
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        
+        .alloc-table td {
+            padding: 0.8rem 0.9rem;
+            border-top: 1px solid rgba(120, 200, 220, 0.06);
+            color: #c7d5e6;
+        }
+        
+        .alloc-table .total-row td {
+            border-top: 2px solid rgba(200, 154, 91, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #f4c98d;
+            background: linear-gradient(90deg, rgba(200, 154, 91, 0.1), transparent);
+            font-size: 0.92rem;
+        }
+        
+        .alloc-table .alloc-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #7fded1;
+            text-align: right;
+        }
+        
+        .alloc-table .alloc-pct {
+            font-family: 'JetBrains Mono', monospace;
+            color: #b8a578;
+        }
+        
+        .reconcile-note {
+            margin-top: 0.7rem;
+            padding: 0.55rem 0.8rem;
+            background: rgba(95, 199, 188, 0.08);
+            border: 1px solid rgba(95, 199, 188, 0.25);
+            border-radius: 10px;
+            font-size: 0.75rem;
+            color: #7fded1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .reconcile-note.warning {
+            background: rgba(200, 154, 91, 0.1);
+            border-color: rgba(200, 154, 91, 0.35);
+            color: #e8b879;
+        }
+        
+        .dividend-status-flow {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin: 0.6rem 0 1rem;
+        }
+        
+        .status-step {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.3rem 0.7rem;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            background: rgba(120, 140, 180, 0.1);
+            color: #7f9bb8;
+            border: 1px solid rgba(120, 140, 180, 0.2);
+            opacity: 0.5;
+        }
+        
+        .status-step.active {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(122, 90, 248, 0.25), rgba(122, 90, 248, 0.1));
+            color: #b8a0ff;
+            border-color: rgba(122, 90, 248, 0.5);
+            box-shadow: 0 0 16px rgba(122, 90, 248, 0.3);
+        }
+        
+        .status-step.done {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(111, 203, 147, 0.2), rgba(111, 203, 147, 0.05));
+            color: #7ee0a2;
+            border-color: rgba(111, 203, 147, 0.4);
+        }
+        
+        .div-ref {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #b8a578;
+            letter-spacing: 0.03em;
+        }
+        
+        .div-actions-row {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-top: 0.6rem;
+        }
+        
+        .div-action-btn {
+            border: 1px solid rgba(120, 200, 220, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #c7d5e6;
+            border-radius: 10px;
+            padding: 0.5rem 0.85rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        .div-action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .div-action-btn.approve {
+            background: linear-gradient(135deg, rgba(122, 90, 248, 0.25), rgba(122, 90, 248, 0.1));
+            color: #b8a0ff;
+            border-color: rgba(122, 90, 248, 0.5);
+        }
+        
+        .div-action-btn.approve:hover {
+            box-shadow: 0 8px 20px -8px rgba(122, 90, 248, 0.6);
+        }
+        
+        .div-action-btn.paid {
+            background: linear-gradient(135deg, rgba(111, 203, 147, 0.25), rgba(111, 203, 147, 0.1));
+            color: #7ee0a2;
+            border-color: rgba(111, 203, 147, 0.5);
+        }
+        
+        .div-action-btn.paid:hover {
+            box-shadow: 0 8px 20px -8px rgba(111, 203, 147, 0.6);
+        }
+        
+        .div-action-btn.cancel {
+            background: rgba(226, 104, 91, 0.12);
+            color: #f0a89f;
+            border-color: rgba(226, 104, 91, 0.35);
+        }
+        
+        .div-action-btn.cancel:hover {
+            background: rgba(226, 104, 91, 0.22);
+            box-shadow: 0 8px 20px -8px rgba(226, 104, 91, 0.55);
+        }
+        
+        .div-action-btn.expand {
+            background: rgba(95, 199, 188, 0.1);
+            color: #7fded1;
+            border-color: rgba(95, 199, 188, 0.3);
+        }
+        
+        .div-action-btn.expand:hover {
+            background: rgba(95, 199, 188, 0.2);
+        }
+        
+        .preview-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #f4c98d;
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.15), rgba(200, 154, 91, 0.03));
+            border-radius: 14px;
+            border: 1px solid rgba(200, 154, 91, 0.3);
+            margin: 0.6rem 0 1rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 30px rgba(200, 154, 91, 0.45);
+        }
+        
+        .print-employee-report {
             max-width: 800px;
             margin: 0 auto;
             padding: 30px;
@@ -1765,7 +1965,6 @@
                     </button>
                 </div>
             </div>
-
             <div class="filter-bar">
                 <input type="date" id="empFilterFrom" title="From date">
                 <input type="date" id="empFilterTo" title="To date">
@@ -1776,11 +1975,8 @@
                     <option value="cancelled">Cancelled</option>
                 </select>
                 <input type="text" class="grow" id="empFilterSearch" placeholder="Search name or reference...">
-                <button class="btn btn-ghost add-employee-btn" id="empFilterClear">
-                    <i class="fas fa-times"></i> Clear
-                </button>
+                <button class="btn btn-ghost add-employee-btn" id="empFilterClear"><i class="fas fa-times"></i> Clear</button>
             </div>
-
             <div class="employee-table-wrap">
                 <table class="employee-table">
                     <thead>
@@ -1800,9 +1996,7 @@
                 <span>Total Payments:</span>
                 <span id="employeePaymentTotal">KSh 0</span>
             </div>
-            <div class="modal-actions">
-                <button class="cancel" id="paymentsClose">Close</button>
-            </div>
+            <div class="modal-actions"><button class="cancel" id="paymentsClose">Close</button></div>
         </div>
     </div>
 
@@ -1811,16 +2005,12 @@
         <div class="modal-card" style="max-width: 900px;">
             <div class="payments-modal-header">
                 <h3><i class="fas fa-history"></i> Audit Log</h3>
-                <button class="btn btn-ghost add-employee-btn" id="printAuditBtn">
-                    <i class="fas fa-print"></i> Print
-                </button>
+                <button class="btn btn-ghost add-employee-btn" id="printAuditBtn"><i class="fas fa-print"></i> Print</button>
             </div>
-
             <div class="audit-banner">
                 <i class="fas fa-exclamation-triangle"></i>
                 <div><strong>Client-side audit log — not tamper-proof.</strong> Entries are stored in the shared cloud record and can be modified by anyone with database access. A proper backend table with append-only permissions is required for real immutability.</div>
             </div>
-
             <div class="filter-bar">
                 <input type="date" id="auditFilterFrom">
                 <input type="date" id="auditFilterTo">
@@ -1830,13 +2020,13 @@
                     <option value="UPDATE">Update</option>
                     <option value="DELETE">Delete</option>
                     <option value="LOGIN">Login</option>
+                    <option value="APPROVE">Approve</option>
+                    <option value="PAID">Mark Paid</option>
+                    <option value="CANCEL">Cancel</option>
                 </select>
                 <input type="text" class="grow" id="auditFilterSearch" placeholder="Search user or target...">
-                <button class="btn btn-ghost add-employee-btn" id="auditFilterClear">
-                    <i class="fas fa-times"></i> Clear
-                </button>
+                <button class="btn btn-ghost add-employee-btn" id="auditFilterClear"><i class="fas fa-times"></i> Clear</button>
             </div>
-
             <div class="employee-table-wrap">
                 <table class="employee-table">
                     <thead>
@@ -1851,10 +2041,87 @@
                     <tbody id="auditTableBody"></tbody>
                 </table>
             </div>
+            <div class="modal-actions"><button class="cancel" id="auditClose">Close</button></div>
+        </div>
+    </div>
 
+    <!-- DIVIDEND CALCULATOR MODAL -->
+    <div class="modal-overlay" id="dividendModal">
+        <div class="modal-card" style="max-width: 560px;">
+            <h3><i class="fas fa-calculator"></i> New Dividend Distribution</h3>
+            <label>Total Distributable Amount (KSh)</label>
+            <input type="number" id="divTotal" placeholder="e.g. 500000" min="1" step="1">
+            <label>Period Label</label>
+            <input type="text" id="divPeriod" placeholder="e.g. September 2026" maxlength="40">
+            <label>Notes (optional)</label>
+            <textarea id="divNotes" placeholder="e.g. Q3 distribution after reserve"></textarea>
+            <div class="modal-error" id="divError"></div>
             <div class="modal-actions">
-                <button class="cancel" id="auditClose">Close</button>
+                <button class="cancel" id="divCancel">Cancel</button>
+                <button class="save" id="divPreviewBtn">Preview Allocation</button>
             </div>
+        </div>
+    </div>
+
+    <!-- DIVIDEND PREVIEW MODAL -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-card" style="max-width: 780px;">
+            <h3><i class="fas fa-eye"></i> Distribution Preview</h3>
+            <div class="preview-amount" id="previewTotal">KSh 0</div>
+            <p style="text-align:center; color:#b8a578; font-size:0.82rem; margin-bottom:0.8rem;" id="previewPeriod">—</p>
+            <div class="employee-table-wrap">
+                <table class="alloc-table">
+                    <thead>
+                        <tr>
+                            <th>Shareholder</th>
+                            <th>Equity %</th>
+                            <th style="text-align:right;">Raw</th>
+                            <th style="text-align:right;">Rounding</th>
+                            <th style="text-align:right;">Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewBody"></tbody>
+                </table>
+            </div>
+            <div class="reconcile-note" id="previewReconcile">
+                <i class="fas fa-check-circle"></i>
+                <span id="previewReconcileText">Allocations reconcile to distributable amount.</span>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel" id="previewBack">Back</button>
+                <button class="save" id="previewConfirm">Confirm & Save Draft</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIVIDEND DETAIL / STATUS MODAL -->
+    <div class="modal-overlay" id="dividendDetailModal">
+        <div class="modal-card" style="max-width: 780px;">
+            <h3><i class="fas fa-coins"></i> <span id="detailTitle">Dividend Detail</span></h3>
+            <div class="dividend-status-flow" id="detailFlow"></div>
+            <div class="preview-amount" id="detailTotal">KSh 0</div>
+            <p style="text-align:center; color:#b8a578; font-size:0.82rem; margin-bottom:0.6rem;" id="detailMeta">—</p>
+            <div class="employee-table-wrap">
+                <table class="alloc-table">
+                    <thead>
+                        <tr>
+                            <th>Shareholder</th>
+                            <th>Equity %</th>
+                            <th style="text-align:right;">Amount</th>
+                            <th style="text-align:right;">Rounding</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailBody"></tbody>
+                </table>
+            </div>
+            <div style="margin-top:1rem; padding:0.7rem; background:rgba(120,200,220,0.05); border-radius:10px; border:1px solid rgba(120,200,220,0.12); font-size:0.75rem; color:#b8a578;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;"><span>Created:</span><strong id="detailCreated">—</strong></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;"><span>Approved:</span><strong id="detailApproved">—</strong></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;"><span>Paid:</span><strong id="detailPaid">—</strong></div>
+                <div style="display:flex; justify-content:space-between;"><span>Notes:</span><strong id="detailNotes">—</strong></div>
+            </div>
+            <div class="div-actions-row" id="detailActions"></div>
+            <div class="modal-actions"><button class="cancel" id="detailClose">Close</button></div>
         </div>
     </div>
 
@@ -1864,28 +2131,21 @@
     <div class="modal-overlay" id="employeeModal">
         <div class="modal-card">
             <h3 id="employeeModalTitle">➕ Add Employee</h3>
-
             <label>Employee Name</label>
             <input type="text" id="employeeName" placeholder="e.g. John Kamau" maxlength="80">
-
             <label>Payment Amount (KSh)</label>
             <input type="number" id="employeeAmount" placeholder="0" min="0" step="1">
-
             <label>Transaction Reference</label>
             <input type="text" id="employeeRef" placeholder="M-Pesa code, bank ref, etc." maxlength="80">
-
             <label>Status</label>
             <select id="employeeStatus">
                 <option value="paid">Paid</option>
                 <option value="pending">Pending</option>
                 <option value="cancelled">Cancelled</option>
             </select>
-
             <label>Date</label>
             <input type="date" id="employeeDate">
-
             <div class="modal-error" id="employeeError"></div>
-
             <div class="modal-actions">
                 <button class="cancel" id="employeeCancel">Cancel</button>
                 <button class="save" id="employeeSave">Save Employee</button>
@@ -1916,6 +2176,7 @@
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
             <div class="nav-actions">
                 <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
+                <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
                 <a href="https://starlink-llc.netlify.app/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
@@ -1929,10 +2190,7 @@
         <div class="headline">
             <h1>
                 <i class="fas fa-chart-pie"></i> equity overview <small>investors</small>
-                <span class="live-indicator">
-                    <span class="live-dot" id="liveDot"></span>
-                <span id="liveStatus">Live</span>
-                </span>
+                <span class="live-indicator"><span class="live-dot" id="liveDot"></span><span id="liveStatus">Live</span></span>
             </h1>
             <div class="total-badge" id="totalBadge">
                 <span>💰</span> KSh <span id="totalSharesValue">0</span>
@@ -1966,6 +2224,21 @@
             <div class="chart-card">
                 <h3><i class="fas fa-chart-bar"></i> equity · bar</h3>
                 <div class="chart-wrapper"><canvas id="barChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- DIVIDEND OVERVIEW CARD (added to main page) -->
+        <div class="dividend-card" id="dividendOverviewCard">
+            <h3><i class="fas fa-hand-holding-usd"></i> Dividend Overview</h3>
+            <div class="dividend-amount" id="dividendTotalPaid">KSh 0</div>
+            <p>Total paid out across <strong id="dividendCount">0</strong> distributions · Latest: <strong id="dividendLatest">—</strong></p>
+            <div class="div-actions-row" style="margin-top:0.8rem;">
+                <button class="div-action-btn approve" id="newDividendBtn">
+                    <i class="fas fa-plus"></i> New Distribution
+                </button>
+                <button class="div-action-btn expand" id="viewDividendsBtn">
+                    <i class="fas fa-list"></i> View All Distributions
+                </button>
             </div>
         </div>
 
@@ -2032,23 +2305,6 @@
 
         const COLOR_PALETTE = ['#5fc7bc', '#7a5af8', '#4fb6a8', '#e8b879', '#e8837a', '#2a7ac4', '#c89a5b', '#a86fc7', '#6fcb93', '#f0a89f'];
 
-        let summary = {
-            commonInvestmentTotal: 0,
-            routersTotal: 0,
-            kairoRoutersTotal: 0,
-            starlinkInvestmentTotal: 0,
-            starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
-            totalTransactionFees: 0,
-            lastUpdated: null
-        };
-
-        let investors = [];
-        let supabaseClient = null;
-        let pieChartInstance = null;
-        let barChartInstance = null;
-        let pollInterval = null;
-        let editingInvestorId = null;
-
         const DEFAULT_EMPLOYEE_PAYMENTS = [{
             id: 1,
             name: 'John Kamau',
@@ -2065,10 +2321,35 @@
             date: '2026-02-15'
         }];
 
+        let summary = {
+            commonInvestmentTotal: 0,
+            routersTotal: 0,
+            kairoRoutersTotal: 0,
+            starlinkInvestmentTotal: 0,
+            starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
+            totalTransactionFees: 0,
+            lastUpdated: null
+        };
+
+        let investors = [];
+        let dividends = [];
+        let supabaseClient = null;
+        let pieChartInstance = null,
+            barChartInstance = null,
+            pollInterval = null;
+        let editingInvestorId = null;
         let EMPLOYEE_PAYMENTS = loadEmployeePayments();
         let editingEmployeeId = null;
         let auditLogs = [];
 
+        // Pending dividend state (built during preview)
+        let pendingDividend = null;
+        let currentDetailId = null;
+        let expandedDividendId = null;
+
+        // ==================================================
+        // HELPERS
+        // ==================================================
         function safeNum(v) {
             if (v === '' || v === null || v === undefined) return 0;
             const n = typeof v === 'number' ? v : parseFloat(v);
@@ -2081,6 +2362,10 @@
 
         function fmtDec(n) {
             return safeNum(n).toFixed(2);
+        }
+
+        function escapeHTML(v) {
+            return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
         function showError(msg) {
@@ -2138,12 +2423,6 @@
             return COLOR_PALETTE[investors.length % COLOR_PALETTE.length];
         }
 
-        function escapeHTML(v) {
-            return String(v == null ? '' : v)
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-        }
-
         // ==================================================
         // AUDIT LOG
         // ==================================================
@@ -2152,8 +2431,8 @@
                 id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
                 timestamp: new Date().toISOString(),
                 user: CURRENT_USER,
-                action: action,
-                target: target,
+                action,
+                target,
                 details: details || '',
                 oldValue: oldVal !== undefined ? String(oldVal) : '',
                 newValue: newVal !== undefined ? String(newVal) : ''
@@ -2168,20 +2447,20 @@
             const to = document.getElementById('auditFilterTo').value || '';
             const act = document.getElementById('auditFilterAction').value || '';
             const q = (document.getElementById('auditFilterSearch').value || '').toLowerCase();
-
             let filtered = [...auditLogs].reverse();
             if (from) filtered = filtered.filter(l => l.timestamp.slice(0, 10) >= from);
             if (to) filtered = filtered.filter(l => l.timestamp.slice(0, 10) <= to);
             if (act) filtered = filtered.filter(l => l.action === act);
             if (q) filtered = filtered.filter(l => (l.user + ' ' + l.target + ' ' + l.details).toLowerCase().includes(q));
-
             if (!filtered.length) {
                 body.innerHTML = `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-history"></i>No audit entries match your filters.</div></td></tr>`;
                 return;
             }
             body.innerHTML = filtered.map(l => {
-                        const color = l.action === 'DELETE' ? '#f0a89f' :
+                        const color = l.action === 'DELETE' || l.action === 'CANCEL' ? '#f0a89f' :
                             l.action === 'CREATE' ? '#7ee0a2' :
+                            l.action === 'APPROVE' ? '#b8a0ff' :
+                            l.action === 'PAID' ? '#7ee0a2' :
                             l.action === 'UPDATE' ? '#7fded1' : '#7f9bb8';
                         return `<tr>
                     <td style="white-space:nowrap; font-size:0.75rem;">${escapeHTML(new Date(l.timestamp).toLocaleString())}</td>
@@ -2197,66 +2476,29 @@
         // BUILD INVESTORS
         // ==================================================
         function buildInvestors() {
-            const list = investors.map(i => ({
-                id: i.id, name: i.name, color: i.color || '#4fb6a8',
-                equity: safeNum(i.equity), isStarlink: false
-            }));
-            list.push({
-                name: 'STARLINK LLC VIRTUAL',
-                equity: Math.round(safeNum(summary.starlinkVirtualInvestment)),
-                color: '#c89a5b',
-                isStarlink: true,
-                rawEquity: safeNum(summary.starlinkVirtualInvestment)
-            });
+            const list = investors.map(i => ({ id: i.id, name: i.name, color: i.color || '#4fb6a8', equity: safeNum(i.equity), isStarlink: false }));
+            list.push({ name: 'STARLINK LLC VIRTUAL', equity: Math.round(safeNum(summary.starlinkVirtualInvestment)), color: '#c89a5b', isStarlink: true, rawEquity: safeNum(summary.starlinkVirtualInvestment) });
             return list;
         }
 
-        // ==================================================
-        // RENDER TABLE
-        // ==================================================
         function renderTable() {
             const tbody = document.getElementById('investorTableBody');
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
-
             let html = '';
             all.forEach(inv => {
                 const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
                 const rowClass = inv.isStarlink ? 'highlight-row' : '';
                 if (inv.isStarlink) {
-                    html += `<tr class="${rowClass}">
-                        <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
-                        <td><strong>${fmt(inv.equity)}</strong></td>
-                        <td class="equity-ratio">${ratio}%</td>
-                        <td></td>
-                    </tr>`;
+                    html += `<tr class="${rowClass}"><td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td><td><strong>${fmt(inv.equity)}</strong></td><td class="equity-ratio">${ratio}%</td><td></td></tr>`;
                 } else {
-                    html += `<tr class="${rowClass}">
-                        <td>${escapeHTML(inv.name)}</td>
-                        <td>${fmt(inv.equity)}</td>
-                        <td class="equity-ratio">${ratio}%</td>
-                        <td>
-                            <div class="row-actions">
-                                <button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button>
-                                <button class="del-btn" data-id="${inv.id}" title="Delete">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>`;
+                    html += `<tr class="${rowClass}"><td>${escapeHTML(inv.name)}</td><td>${fmt(inv.equity)}</td><td class="equity-ratio">${ratio}%</td><td><div class="row-actions"><button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button><button class="del-btn" data-id="${inv.id}" title="Delete">🗑️</button></div></td></tr>`;
                 }
             });
-            html += `<tr class="total-row">
-                <td><strong>TOTAL</strong></td>
-                <td><strong>${fmt(totalEquity)}</strong></td>
-                <td><strong>100.00%</strong></td>
-                <td></td>
-            </tr>`;
+            html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${fmt(totalEquity)}</strong></td><td><strong>100.00%</strong></td><td></td></tr>`;
             tbody.innerHTML = html;
-            tbody.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => openInvestorModal(parseInt(btn.dataset.id)));
-            });
-            tbody.querySelectorAll('.del-btn').forEach(btn => {
-                btn.addEventListener('click', () => deleteInvestor(parseInt(btn.dataset.id)));
-            });
+            tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openInvestorModal(parseInt(btn.dataset.id))));
+            tbody.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', () => deleteInvestor(parseInt(btn.dataset.id))));
             return totalEquity;
         }
 
@@ -2269,6 +2511,17 @@
         }
 
         // ==================================================
+        // DIVIDEND OVERVIEW
+        // ==================================================
+        function renderDividendOverview() {
+            const totalPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+            const latest = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+            document.getElementById('dividendTotalPaid').textContent = 'KSh ' + fmt(totalPaid);
+            document.getElementById('dividendCount').textContent = dividends.length;
+            document.getElementById('dividendLatest').textContent = latest ? (latest.periodLabel || latest.period || '—') : '—';
+        }
+
+        // ==================================================
         // CHARTS
         // ==================================================
         function renderCharts() {
@@ -2276,7 +2529,6 @@
             const labels = all.map(i => i.name);
             const values = all.map(i => i.equity);
             const colors = all.map(i => i.color);
-
             const hasLabels = typeof ChartDataLabels !== 'undefined';
             if (hasLabels) { try { Chart.register(ChartDataLabels); } catch (e) {} }
 
@@ -2284,62 +2536,14 @@
             if (pieChartInstance) pieChartInstance.destroy();
             pieChartInstance = new Chart(pieCanvas.getContext('2d'), {
                 type: 'pie',
-                data: {
-                    labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: colors,
-                        borderColor: 'rgba(20, 32, 52, 0.6)',
-                        borderWidth: 3,
-                        hoverOffset: 22,
-                        hoverBorderColor: 'rgba(95, 199, 188, 0.9)',
-                        hoverBorderWidth: 4
-                    }]
-                },
+                data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: 'rgba(20, 32, 52, 0.6)', borderWidth: 3, hoverOffset: 22, hoverBorderColor: 'rgba(95, 199, 188, 0.9)', hoverBorderWidth: 4 }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     animation: { duration: 900, easing: 'easeOutQuart' },
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12, padding: 12,
-                                font: { size: 11, weight: '600', family: 'Plus Jakarta Sans' },
-                                color: '#c7d5e6',
-                                usePointStyle: true, pointStyle: 'circle'
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
-                            titleColor: '#f2f0eb',
-                            bodyColor: '#c7d5e6',
-                            borderColor: 'rgba(95, 199, 188, 0.5)',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 10,
-                            callbacks: {
-                                label: function(ctx) {
-                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                    const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(2) : '0.00';
-                                    return `${ctx.label}: KSh ${fmt(ctx.parsed)} (${pct}%)`;
-                                }
-                            }
-                        },
-                        datalabels: hasLabels ? {
-                            color: '#ffffff',
-                            font: { size: 11, weight: '700', family: 'Space Grotesk' },
-                            formatter: function(v, ctx) {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = total > 0 ? (v / total) * 100 : 0;
-                                return pct >= 5 ? pct.toFixed(1) + '%' : '';
-                            },
-                            display: function(ctx) {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const v = ctx.dataset.data[ctx.dataIndex];
-                                return total > 0 && (v / total) * 100 >= 5;
-                            }
-                        } : {}
+                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11, weight: '600', family: 'Plus Jakarta Sans' }, color: '#c7d5e6', usePointStyle: true, pointStyle: 'circle' } },
+                        tooltip: { backgroundColor: 'rgba(10, 20, 35, 0.95)', titleColor: '#f2f0eb', bodyColor: '#c7d5e6', borderColor: 'rgba(95, 199, 188, 0.5)', borderWidth: 1, padding: 12, cornerRadius: 10, callbacks: { label: function(ctx) { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(2) : '0.00'; return `${ctx.label}: KSh ${fmt(ctx.parsed)} (${pct}%)`; } } },
+                        datalabels: hasLabels ? { color: '#ffffff', font: { size: 11, weight: '700', family: 'Space Grotesk' }, formatter: function(v, ctx) { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); const pct = total > 0 ? (v / total) * 100 : 0; return pct >= 5 ? pct.toFixed(1) + '%' : ''; }, display: function(ctx) { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); const v = ctx.dataset.data[ctx.dataIndex]; return total > 0 && (v / total) * 100 >= 5; } } : {}
                     }
                 }
             });
@@ -2348,64 +2552,18 @@
             if (barChartInstance) barChartInstance.destroy();
             barChartInstance = new Chart(barCanvas.getContext('2d'), {
                 type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Equity (KSh)',
-                        data: values,
-                        backgroundColor: colors.map(c => c + 'dd'),
-                        borderColor: colors,
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        barPercentage: 0.7,
-                        categoryPercentage: 0.8,
-                        hoverBackgroundColor: colors.map(c => c),
-                        hoverBorderColor: '#ffffff'
-                    }]
-                },
+                data: { labels, datasets: [{ label: 'Equity (KSh)', data: values, backgroundColor: colors.map(c => c + 'dd'), borderColor: colors, borderWidth: 2, borderRadius: 8, barPercentage: 0.7, categoryPercentage: 0.8, hoverBackgroundColor: colors.map(c => c), hoverBorderColor: '#ffffff' }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     animation: { duration: 900, easing: 'easeOutQuart' },
                     plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
-                            titleColor: '#f2f0eb',
-                            bodyColor: '#c7d5e6',
-                            borderColor: 'rgba(95, 199, 188, 0.5)',
-                            borderWidth: 1,
-                            padding: 12,
-                            cornerRadius: 10,
-                            callbacks: { label: function(ctx) { return `KSh ${fmt(ctx.parsed.y)}`; } }
-                        },
-                        datalabels: hasLabels ? {
-                            anchor: 'end',
-                            align: 'top',
-                            color: '#c7d5e6',
-                            font: { size: 10, weight: '700', family: 'JetBrains Mono' },
-                            formatter: function(v) { return fmt(v); },
-                            offset: 4
-                        } : {}
+                        tooltip: { backgroundColor: 'rgba(10, 20, 35, 0.95)', titleColor: '#f2f0eb', bodyColor: '#c7d5e6', borderColor: 'rgba(95, 199, 188, 0.5)', borderWidth: 1, padding: 12, cornerRadius: 10, callbacks: { label: function(ctx) { return `KSh ${fmt(ctx.parsed.y)}`; } } },
+                        datalabels: hasLabels ? { anchor: 'end', align: 'top', color: '#c7d5e6', font: { size: 10, weight: '700', family: 'JetBrains Mono' }, formatter: function(v) { return fmt(v); }, offset: 4 } : {}
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(120, 200, 220, 0.06)' },
-                            ticks: {
-                                callback: function(v) { return 'KSh ' + fmt(v); },
-                                font: { size: 10, family: 'JetBrains Mono' },
-                                color: '#7f9bb8'
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 10, weight: '600', family: 'Plus Jakarta Sans' },
-                                color: '#c7d5e6',
-                                maxRotation: 30, minRotation: 15, autoSkip: false
-                            }
-                        }
+                        y: { beginAtZero: true, grid: { color: 'rgba(120, 200, 220, 0.06)' }, ticks: { callback: function(v) { return 'KSh ' + fmt(v); }, font: { size: 10, family: 'JetBrains Mono' }, color: '#7f9bb8' } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600', family: 'Plus Jakarta Sans' }, color: '#c7d5e6', maxRotation: 30, minRotation: 15, autoSkip: false } }
                     },
                     layout: { padding: { top: 24, bottom: 6 } }
                 }
@@ -2417,6 +2575,7 @@
             document.getElementById('totalSharesValue').textContent = fmt(totalEquity);
             renderSummaryCards();
             renderCharts();
+            renderDividendOverview();
             if (pulse) pulseLive();
         }
 
@@ -2427,10 +2586,7 @@
             function sumAny(keys) {
                 let total = 0;
                 rawData.forEach(g => (g.rows || []).forEach(r => {
-                    for (const k of keys) {
-                        const v = safeNum(r[k + '_amount']);
-                        if (v !== 0) { total += v; break; }
-                    }
+                    for (const k of keys) { const v = safeNum(r[k + '_amount']); if (v !== 0) { total += v; break; } }
                 }));
                 return Math.round(total * 100) / 100;
             }
@@ -2439,11 +2595,7 @@
             const kairoRoutersTotal = sumAny(['saved_6_kairo_routers','saved_5_kairo_routers','saved_4_kairo_routers','saved_3_kairo_routers','saved_2_kairo_routers','kairoRouters']);
             const starlinkInvestmentTotal = sumAny(['saved_4_starlink_investment','saved_5_starlink_investment','saved_6_starlink_investment','saved_3_starlink_investment','saved_2_starlink_investment','starlinkInvestment']);
             const starlinkVirtualInvestment = Math.round((STARLINK_VIRTUAL_BASE + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
-            return {
-                commonInvestmentTotal, routersTotal, kairoRoutersTotal,
-                starlinkInvestmentTotal, starlinkVirtualInvestment,
-                totalTransactionFees: 0, lastUpdated: new Date().toISOString()
-            };
+            return { commonInvestmentTotal, routersTotal, kairoRoutersTotal, starlinkInvestmentTotal, starlinkVirtualInvestment, totalTransactionFees: 0, lastUpdated: new Date().toISOString() };
         }
 
         // ==================================================
@@ -2452,78 +2604,34 @@
         async function fetchSummary() {
             if (!supabaseClient) return false;
             try {
-                const { data: result, error } = await supabaseClient
-                    .from('expenditure_data')
-                    .select('data, last_updated')
-                    .eq('id', 1)
-                    .single();
-                if (error) {
-                    if (error.code === 'PGRST116') { console.log('ℹ️ No row yet'); return false; }
-                    throw error;
-                }
+                const { data: result, error } = await supabaseClient.from('expenditure_data').select('data, last_updated').eq('id', 1).single();
+                if (error) { if (error.code === 'PGRST116') return false; throw error; }
                 if (result && result.data) {
                     const cloud = result.data;
                     if (Array.isArray(cloud.data) && cloud.data.length > 0) {
                         summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: result.last_updated };
                     } else {
-                        summary = {
-                            commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0,
-                            starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
-                            totalTransactionFees: 0, lastUpdated: result.last_updated
-                        };
+                        summary = { commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0, starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE, totalTransactionFees: 0, lastUpdated: result.last_updated };
                     }
                     if (Array.isArray(cloud.investors) && cloud.investors.length) {
-                        investors = cloud.investors.map(i => ({
-                            id: i.id || nextInvestorId(), name: i.name || 'Unnamed',
-                            equity: safeNum(i.equity), color: i.color || '#4fb6a8'
-                        }));
-                    } else {
-                        investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
-                        saveInvestorsToCloud().catch(() => {});
-                    }
+                        investors = cloud.investors.map(i => ({ id: i.id || nextInvestorId(), name: i.name || 'Unnamed', equity: safeNum(i.equity), color: i.color || '#4fb6a8' }));
+                    } else { investors = DEFAULT_INVESTORS.map(i => ({ ...i })); saveInvestorsToCloud().catch(() => {}); }
                     if (Array.isArray(cloud.employees) && cloud.employees.length) {
-                        EMPLOYEE_PAYMENTS = cloud.employees.map(e => ({
-                            id: e.id, name: e.name || 'Unnamed', amount: safeNum(e.amount),
-                            reference: e.reference || '', status: e.status || 'paid', date: e.date || ''
-                        }));
+                        EMPLOYEE_PAYMENTS = cloud.employees.map(e => ({ id: e.id, name: e.name || 'Unnamed', amount: safeNum(e.amount), reference: e.reference || '', status: e.status || 'paid', date: e.date || '' }));
                         saveEmployeePayments();
                     }
                     if (Array.isArray(cloud.audit_logs)) auditLogs = cloud.audit_logs;
+                    if (Array.isArray(cloud.dividends)) dividends = cloud.dividends;
                     return true;
                 }
-            } catch (e) {
-                console.error('❌ Fetch error:', e);
-                showError('Failed to load data: ' + e.message);
-            }
+            } catch (e) { console.error('❌ Fetch error:', e); showError('Failed to load data: ' + e.message); }
             return false;
         }
 
-        async function saveInvestorsToCloud() {
-            if (!supabaseClient) return false;
-            try {
-                const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single();
-                await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), investors }, last_updated: new Date().toISOString() }, { onConflict: 'id' });
-                return true;
-            } catch (e) { showError('Save investors failed: ' + e.message); return false; }
-        }
-
-        async function saveEmployeesToCloud() {
-            if (!supabaseClient) return false;
-            try {
-                const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single();
-                await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), employees: EMPLOYEE_PAYMENTS }, last_updated: new Date().toISOString() }, { onConflict: 'id' });
-                return true;
-            } catch (e) { showError('Save employees failed: ' + e.message); return false; }
-        }
-
-        async function saveAuditToCloud() {
-            if (!supabaseClient) return false;
-            try {
-                const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single();
-                await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), audit_logs: auditLogs }, last_updated: new Date().toISOString() }, { onConflict: 'id' });
-                return true;
-            } catch (e) { console.warn('Audit save failed:', e); return false; }
-        }
+        async function saveInvestorsToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), investors }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { showError('Save investors failed: ' + e.message); return false; } }
+        async function saveEmployeesToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), employees: EMPLOYEE_PAYMENTS }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { showError('Save employees failed: ' + e.message); return false; } }
+        async function saveAuditToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), audit_logs: auditLogs }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { console.warn('Audit save failed:', e); return false; } }
+        async function saveDividendsToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), dividends }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { showError('Save dividends failed: ' + e.message); return false; } }
 
         // ==================================================
         // INVESTOR MODAL
@@ -2540,24 +2648,15 @@
                 const inv = investors.find(i => i.id === investorId);
                 if (!inv) return;
                 title.textContent = '✏️ Edit Investor';
-                nameEl.value = inv.name;
-                eqEl.value = inv.equity;
-                colorEl.value = inv.color || '#4fb6a8';
+                nameEl.value = inv.name; eqEl.value = inv.equity; colorEl.value = inv.color || '#4fb6a8';
             } else {
                 title.textContent = '➕ Add Investor';
-                nameEl.value = '';
-                eqEl.value = '';
-                colorEl.value = pickColor();
+                nameEl.value = ''; eqEl.value = ''; colorEl.value = pickColor();
             }
             document.getElementById('investorModal').classList.add('show');
             setTimeout(() => nameEl.focus(), 50);
         }
-
-        function closeInvestorModal() {
-            document.getElementById('investorModal').classList.remove('show');
-            editingInvestorId = null;
-        }
-
+        function closeInvestorModal() { document.getElementById('investorModal').classList.remove('show'); editingInvestorId = null; }
         async function saveInvestor() {
             const name = document.getElementById('invName').value.trim();
             const equity = safeNum(document.getElementById('invEquity').value);
@@ -2566,7 +2665,6 @@
             errEl.style.display = 'none';
             if (!name) { errEl.textContent = '⚠️ Please enter a name.'; errEl.style.display = 'block'; return; }
             if (equity < 0) { errEl.textContent = '⚠️ Equity cannot be negative.'; errEl.style.display = 'block'; return; }
-
             if (editingInvestorId) {
                 const idx = investors.findIndex(i => i.id === editingInvestorId);
                 if (idx !== -1) {
@@ -2583,7 +2681,6 @@
             renderAll(true);
             await saveInvestorsToCloud();
         }
-
         async function deleteInvestor(investorId) {
             const inv = investors.find(i => i.id === investorId);
             if (!inv) return;
@@ -2598,23 +2695,13 @@
         // EMPLOYEES
         // ==================================================
         function loadEmployeePayments() {
-            try {
-                const saved = localStorage.getItem('starlink_employee_payments');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed)) return parsed;
-                }
-            } catch (e) {}
+            try { const saved = localStorage.getItem('starlink_employee_payments'); if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) return parsed; } } catch (e) {}
             return DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({ ...e }));
         }
-
-        function saveEmployeePayments() {
-            try { localStorage.setItem('starlink_employee_payments', JSON.stringify(EMPLOYEE_PAYMENTS)); } catch (e) {}
-        }
+        function saveEmployeePayments() { try { localStorage.setItem('starlink_employee_payments', JSON.stringify(EMPLOYEE_PAYMENTS)); } catch (e) {} }
 
         function openEmployeeModal(employeeId = null) {
             editingEmployeeId = employeeId;
-            const modal = document.getElementById('employeeModal');
             const title = document.getElementById('employeeModalTitle');
             const name = document.getElementById('employeeName');
             const amount = document.getElementById('employeeAmount');
@@ -2622,30 +2709,21 @@
             const status = document.getElementById('employeeStatus');
             const date = document.getElementById('employeeDate');
             const error = document.getElementById('employeeError');
-            error.textContent = '';
-            error.style.display = 'none';
+            error.textContent = ''; error.style.display = 'none';
             if (employeeId === null) {
                 title.innerHTML = '➕ Add Employee';
-                name.value = ''; amount.value = ''; ref.value = '';
-                status.value = 'paid'; date.value = todayISO();
+                name.value = ''; amount.value = ''; ref.value = ''; status.value = 'paid'; date.value = todayISO();
             } else {
                 const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
                 if (!emp) return;
                 title.innerHTML = '✏️ Edit Employee';
-                name.value = emp.name;
-                amount.value = emp.amount;
-                ref.value = emp.reference || '';
-                status.value = emp.status || 'paid';
-                date.value = emp.date || todayISO();
+                name.value = emp.name; amount.value = emp.amount; ref.value = emp.reference || '';
+                status.value = emp.status || 'paid'; date.value = emp.date || todayISO();
             }
-            modal.classList.add('show');
+            document.getElementById('employeeModal').classList.add('show');
             setTimeout(() => name.focus(), 50);
         }
-
-        function closeEmployeeModal() {
-            document.getElementById('employeeModal').classList.remove('show');
-            editingEmployeeId = null;
-        }
+        function closeEmployeeModal() { document.getElementById('employeeModal').classList.remove('show'); editingEmployeeId = null; }
 
         async function saveEmployee() {
             const name = document.getElementById('employeeName').value.trim();
@@ -2654,8 +2732,7 @@
             const status = document.getElementById('employeeStatus').value;
             const date = document.getElementById('employeeDate').value || todayISO();
             const error = document.getElementById('employeeError');
-            error.textContent = '';
-            error.style.display = 'none';
+            error.textContent = ''; error.style.display = 'none';
             if (!name) { error.textContent = 'Please enter the employee name.'; error.style.display = 'block'; return; }
             if (amount <= 0) { error.textContent = 'Please enter a payment amount greater than 0.'; error.style.display = 'block'; return; }
             if (reference) {
@@ -2671,14 +2748,11 @@
                 if (emp) {
                     const oldAmount = emp.amount;
                     const oldStatus = emp.status;
-                    emp.name = name; emp.amount = amount; emp.reference = reference;
-                    emp.status = status; emp.date = date;
+                    emp.name = name; emp.amount = amount; emp.reference = reference; emp.status = status; emp.date = date;
                     logAudit('UPDATE', `Employee #${editingEmployeeId}`, `Updated payment for ${name}`, `${oldAmount}/${oldStatus}`, `${amount}/${status}`);
                 }
             }
-            saveEmployeePayments();
-            renderEmployeePayments();
-            closeEmployeeModal();
+            saveEmployeePayments(); renderEmployeePayments(); closeEmployeeModal();
             await saveEmployeesToCloud();
         }
 
@@ -2688,8 +2762,7 @@
             if (!confirm(`Delete employee "${employee.name}" from the payment list?`)) return;
             logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
             EMPLOYEE_PAYMENTS = EMPLOYEE_PAYMENTS.filter(e => e.id !== employeeId);
-            saveEmployeePayments();
-            renderEmployeePayments();
+            saveEmployeePayments(); renderEmployeePayments();
             await saveEmployeesToCloud();
         }
 
@@ -2697,24 +2770,17 @@
             const body = document.getElementById('employeePaymentBody');
             const totalEl = document.getElementById('employeePaymentTotal');
             if (!body) return;
-
             const from = document.getElementById('empFilterFrom').value || '';
             const to = document.getElementById('empFilterTo').value || '';
             const status = document.getElementById('empFilterStatus').value || '';
             const q = (document.getElementById('empFilterSearch').value || '').toLowerCase();
-
             let list = [...EMPLOYEE_PAYMENTS];
             if (from) list = list.filter(e => (e.date || '') >= from);
             if (to) list = list.filter(e => (e.date || '') <= to);
             if (status) list = list.filter(e => e.status === status);
             if (q) list = list.filter(e => (e.name + ' ' + (e.reference || '')).toLowerCase().includes(q));
             list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-
-            if (!list.length) {
-                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-receipt"></i>No employee payments match your filters.</div></td></tr>`;
-                totalEl.textContent = 'KSh 0';
-                return;
-            }
+            if (!list.length) { body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-receipt"></i>No employee payments match your filters.</div></td></tr>`; totalEl.textContent = 'KSh 0'; return; }
             body.innerHTML = list.map(emp => `
                 <tr>
                     <td><strong>${escapeHTML(emp.name)}</strong></td>
@@ -2722,13 +2788,11 @@
                     <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(emp.reference || '-')}</td>
                     <td><span class="status-pill ${escapeHTML(emp.status || 'paid')}">${escapeHTML(emp.status || 'paid')}</span></td>
                     <td class="employee-amount" style="text-align:right;">KSh ${fmt(emp.amount)}</td>
-                    <td>
-                        <div class="employee-actions">
-                            <button class="employee-edit-btn" onclick="openEmployeeModal(${emp.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="employee-delete-btn" onclick="deleteEmployee(${emp.id})" title="Delete"><i class="fas fa-trash"></i></button>
-                            <button class="print-employee-btn" onclick="printEmployeeReport(${emp.id})" title="Print"><i class="fas fa-print"></i> Print</button>
-                        </div>
-                    </td>
+                    <td><div class="employee-actions">
+                        <button class="employee-edit-btn" onclick="openEmployeeModal(${emp.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="employee-delete-btn" onclick="deleteEmployee(${emp.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        <button class="print-employee-btn" onclick="printEmployeeReport(${emp.id})" title="Print"><i class="fas fa-print"></i> Print</button>
+                    </div></td>
                 </tr>
             `).join('');
             const total = list.reduce((sum, emp) => sum + safeNum(emp.amount), 0);
@@ -2741,7 +2805,280 @@
         function closeAuditModal() { document.getElementById('auditModal').classList.remove('show'); }
 
         // ==================================================
-        // PRINT
+        // DIVIDEND ENGINE
+        // ==================================================
+        function calcAllocations(total) {
+            // Investors + virtual shareholder
+            const all = buildInvestors();
+            const totalEquity = all.reduce((s, i) => s + i.equity, 0);
+            if (totalEquity === 0) return [];
+
+            // raw amounts
+            const raw = all.map((inv, idx) => {
+                const pct = (inv.equity / totalEquity) * 100;
+                const rawAmt = total * (pct / 100);
+                return { investorId: inv.id || ('virtual_' + idx), name: inv.name, equity: inv.equity, percentage: pct, rawAmount: rawAmt, floorAmount: Math.floor(rawAmt), roundingAdj: 0 };
+            });
+
+            // Sum of floors
+            const floorSum = raw.reduce((s, r) => s + r.floorAmount, 0);
+            let remainder = Math.round(total) - floorSum;
+
+            // Give remainder to largest raw fraction, then next largest, etc.
+            const sorted = [...raw].sort((a, b) => (b.rawAmount - b.floorAmount) - (a.rawAmount - a.floorAmount));
+            let i = 0;
+            while (remainder > 0 && i < sorted.length * 10) {
+                sorted[i % sorted.length].floorAmount += 1;
+                remainder -= 1;
+                i++;
+            }
+
+            // Compute rounding adj for display
+            raw.forEach(r => {
+                const match = sorted.find(s => s.investorId === r.investorId);
+                if (match) r.floorAmount = match.floorAmount;
+                r.roundingAdj = +(r.floorAmount - r.rawAmount).toFixed(4);
+            });
+
+            return raw.map(r => ({
+                investorId: r.investorId,
+                name: r.name,
+                equity: r.equity,
+                percentage: +r.percentage.toFixed(4),
+                amount: r.floorAmount,
+                roundingAdj: r.roundingAdj
+            }));
+        }
+
+        function generateDividendId() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+            return `DIV-${y}-${m}-${rnd}`;
+        }
+
+        function openDividendModal() {
+            document.getElementById('divTotal').value = '';
+            document.getElementById('divPeriod').value = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+            document.getElementById('divNotes').value = '';
+            document.getElementById('divError').style.display = 'none';
+            document.getElementById('dividendModal').classList.add('show');
+            setTimeout(() => document.getElementById('divTotal').focus(), 100);
+        }
+        function closeDividendModal() { document.getElementById('dividendModal').classList.remove('show'); }
+
+        function previewDividend() {
+            const total = safeNum(document.getElementById('divTotal').value);
+            const period = document.getElementById('divPeriod').value.trim();
+            const notes = document.getElementById('divNotes').value.trim();
+            const errEl = document.getElementById('divError');
+            errEl.style.display = 'none';
+
+            if (total <= 0) { errEl.textContent = '⚠️ Enter a distributable amount greater than 0.'; errEl.style.display = 'block'; return; }
+            if (!period) { errEl.textContent = '⚠️ Enter a period label (e.g. September 2026).'; errEl.style.display = 'block'; return; }
+
+            // Duplicate check
+            const dup = dividends.find(d => d.periodLabel.toLowerCase() === period.toLowerCase() && d.status !== 'cancelled');
+            if (dup) { errEl.textContent = `⚠️ A distribution for "${period}" already exists (${dup.status}). Cancel it first if you need to redo.`; errEl.style.display = 'block'; return; }
+
+            const allocations = calcAllocations(total);
+            const allocSum = allocations.reduce((s, a) => s + a.amount, 0);
+            const reconciled = allocSum === Math.round(total);
+
+            pendingDividend = {
+                id: generateDividendId(),
+                periodLabel: period,
+                totalDistributable: total,
+                notes,
+                allocations,
+                status: 'draft',
+                createdAt: new Date().toISOString(),
+                createdBy: CURRENT_USER,
+                approvedAt: null, approvedBy: null,
+                paidAt: null,
+                cancelledAt: null, cancelReason: null
+            };
+
+            // Build preview
+            document.getElementById('previewTotal').textContent = 'KSh ' + fmt(total);
+            document.getElementById('previewPeriod').textContent = period;
+            const body = document.getElementById('previewBody');
+            body.innerHTML = allocations.map(a => `
+                <tr>
+                    <td>${escapeHTML(a.name)}</td>
+                    <td class="alloc-pct">${a.percentage.toFixed(2)}%</td>
+                    <td class="alloc-amount" style="color:#7f9bb8;">${fmtDec(a.amount - a.roundingAdj)}</td>
+                    <td class="alloc-amount" style="color:${a.roundingAdj >= 0 ? '#7ee0a2' : '#f0a89f'};">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td>
+                    <td class="alloc-amount">${fmt(a.amount)}</td>
+                </tr>
+            `).join('') + `
+                <tr class="total-row">
+                    <td colspan="2"><strong>TOTAL</strong></td>
+                    <td colspan="2" style="text-align:right;"><strong>Reconciled to:</strong></td>
+                    <td><strong>${fmt(allocSum)}</strong></td>
+                </tr>
+            `;
+
+            const reconcileEl = document.getElementById('previewReconcile');
+            const reconcileTxt = document.getElementById('previewReconcileText');
+            if (reconciled) {
+                reconcileEl.classList.remove('warning');
+                reconcileTxt.textContent = `Allocations reconcile exactly to KSh ${fmt(total)}. Ready to save.`;
+            } else {
+                reconcileEl.classList.add('warning');
+                reconcileTxt.textContent = `Allocations total KSh ${fmt(allocSum)} but distributable is KSh ${fmt(total)}. Difference: KSh ${fmt(total - allocSum)}.`;
+            }
+
+            closeDividendModal();
+            document.getElementById('previewModal').classList.add('show');
+        }
+
+        function closePreviewModal() { document.getElementById('previewModal').classList.remove('show'); }
+
+        async function confirmDividend() {
+            if (!pendingDividend) return;
+            dividends.push(pendingDividend);
+            logAudit('CREATE', `Dividend ${pendingDividend.id}`, `Created draft for ${pendingDividend.periodLabel} — KSh ${fmt(pendingDividend.totalDistributable)} across ${pendingDividend.allocations.length} shareholders`, '', pendingDividend.totalDistributable);
+            pendingDividend = null;
+            closePreviewModal();
+            renderDividendOverview();
+            await saveDividendsToCloud();
+            // open detail
+            openDividendDetail(dividends[dividends.length - 1].id);
+        }
+
+        function openDividendDetail(id) {
+            const d = dividends.find(x => x.id === id);
+            if (!d) return;
+            currentDetailId = id;
+
+            document.getElementById('detailTitle').textContent = d.periodLabel;
+            document.getElementById('detailTotal').textContent = 'KSh ' + fmt(d.totalDistributable);
+            document.getElementById('detailMeta').innerHTML = `<span class="div-ref">${escapeHTML(d.id)}</span> · Created ${escapeHTML(new Date(d.createdAt).toLocaleString())}`;
+
+            // Status flow
+            const steps = ['draft', 'approved', 'processing', 'paid'];
+            const flow = document.getElementById('detailFlow');
+            const order = { draft: 0, approved: 1, processing: 2, paid: 3, cancelled: -1 };
+            const current = order[d.status] !== undefined ? order[d.status] : 0;
+            flow.innerHTML = steps.map(s => {
+                let cls = 'status-step';
+                if (d.status === 'cancelled') {
+                    if (s === 'draft') cls += ' done';
+                } else {
+                    if (order[s] < current) cls += ' done';
+                    else if (order[s] === current) cls += ' active';
+                }
+                return `<span class="${cls}">${s}</span>`;
+            }).join('') + (d.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
+
+            const body = document.getElementById('detailBody');
+            body.innerHTML = d.allocations.map(a => `
+                <tr>
+                    <td>${escapeHTML(a.name)}</td>
+                    <td class="alloc-pct">${a.percentage.toFixed(2)}%</td>
+                    <td class="alloc-amount">${fmt(a.amount)}</td>
+                    <td class="alloc-amount" style="color:${a.roundingAdj >= 0 ? '#7ee0a2' : '#f0a89f'};">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td>
+                </tr>
+            `).join('') + `
+                <tr class="total-row">
+                    <td colspan="2"><strong>TOTAL</strong></td>
+                    <td colspan="2" style="text-align:right;"><strong>${fmt(d.allocations.reduce((s, a) => s + a.amount, 0))}</strong></td>
+                </tr>
+            `;
+
+            document.getElementById('detailCreated').textContent = `${d.createdBy} · ${new Date(d.createdAt).toLocaleString()}`;
+            document.getElementById('detailApproved').textContent = d.approvedAt ? `${d.approvedBy} · ${new Date(d.approvedAt).toLocaleString()}` : '—';
+            document.getElementById('detailPaid').textContent = d.paidAt ? new Date(d.paidAt).toLocaleString() : '—';
+            document.getElementById('detailNotes').textContent = d.notes || '—';
+
+            // Action buttons based on status
+            const actions = document.getElementById('detailActions');
+            let html = '';
+            if (d.status === 'draft') {
+                html += `<button class="div-action-btn approve" onclick="approveDividend('${d.id}')"><i class="fas fa-check"></i> Approve</button>`;
+                html += `<button class="div-action-btn cancel" onclick="cancelDividend('${d.id}')"><i class="fas fa-ban"></i> Cancel</button>`;
+            } else if (d.status === 'approved') {
+                html += `<button class="div-action-btn paid" onclick="markPaid('${d.id}')"><i class="fas fa-check-double"></i> Mark as Paid</button>`;
+                html += `<button class="div-action-btn cancel" onclick="cancelDividend('${d.id}')"><i class="fas fa-ban"></i> Cancel</button>`;
+            } else if (d.status === 'processing') {
+                html += `<button class="div-action-btn paid" onclick="markPaid('${d.id}')"><i class="fas fa-check-double"></i> Mark as Paid</button>`;
+            }
+            html += `<button class="div-action-btn expand" onclick="printDividendReport('${d.id}')"><i class="fas fa-print"></i> Print Report</button>`;
+            actions.innerHTML = html;
+
+            document.getElementById('dividendDetailModal').classList.add('show');
+        }
+        function closeDividendDetail() { document.getElementById('dividendDetailModal').classList.remove('show'); currentDetailId = null; }
+
+        async function approveDividend(id) {
+            const d = dividends.find(x => x.id === id);
+            if (!d) return;
+            if (!confirm(`Approve distribution ${d.id} for ${d.periodLabel}?`)) return;
+            d.status = 'approved';
+            d.approvedAt = new Date().toISOString();
+            d.approvedBy = CURRENT_USER;
+            logAudit('APPROVE', `Dividend ${id}`, `Approved ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, 'draft', 'approved');
+            renderDividendOverview();
+            await saveDividendsToCloud();
+            openDividendDetail(id);
+        }
+
+        async function markPaid(id) {
+            const d = dividends.find(x => x.id === id);
+            if (!d) return;
+            if (!confirm(`Mark distribution ${d.id} as PAID? This should only be done after actual payments have been made.`)) return;
+            d.status = 'paid';
+            d.paidAt = new Date().toISOString();
+            logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}`, d.status, 'paid');
+            renderDividendOverview();
+            await saveDividendsToCloud();
+            openDividendDetail(id);
+        }
+
+        async function cancelDividend(id) {
+            const d = dividends.find(x => x.id === id);
+            if (!d) return;
+            const reason = prompt('Reason for cancelling this distribution:', '');
+            if (reason === null) return;
+            const oldStatus = d.status;
+            d.status = 'cancelled';
+            d.cancelledAt = new Date().toISOString();
+            d.cancelReason = reason || 'No reason provided';
+            logAudit('CANCEL', `Dividend ${id}`, `Cancelled ${d.periodLabel} — Reason: ${d.cancelReason}`, oldStatus, 'cancelled');
+            renderDividendOverview();
+            await saveDividendsToCloud();
+            openDividendDetail(id);
+        }
+
+        // ==================================================
+        // DIVIDEND HISTORY MODAL
+        // ==================================================
+        function openDividendsHistoryModal() {
+            const body = document.getElementById('dividendHistoryBody');
+            if (!body) return;
+            if (!dividends.length) {
+                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-coins"></i>No dividend distributions yet. Create one to get started.</div></td></tr>`;
+            } else {
+                const sorted = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+                body.innerHTML = sorted.map(d => `
+                    <tr onclick="openDividendDetail('${d.id}')" style="cursor:pointer;">
+                        <td><span class="div-ref">${escapeHTML(d.id)}</span></td>
+                        <td><strong>${escapeHTML(d.periodLabel)}</strong></td>
+                        <td><span class="status-pill ${escapeHTML(d.status)}">${escapeHTML(d.status)}</span></td>
+                        <td style="font-family:'JetBrains Mono',monospace; color:#f4c98d;">KSh ${fmt(d.totalDistributable)}</td>
+                        <td>${d.allocations ? d.allocations.length : 0}</td>
+                        <td style="font-size:0.72rem; color:#7f9bb8;">${escapeHTML(new Date(d.createdAt).toLocaleDateString())}</td>
+                    </tr>
+                `).join('');
+            }
+            document.getElementById('dividendsHistoryModal').classList.add('show');
+        }
+        function closeDividendsHistoryModal() { document.getElementById('dividendsHistoryModal').classList.remove('show'); }
+
+        // ==================================================
+        // PRINT — DIVIDEND
         // ==================================================
         function doPrint(html) {
             const printArea = document.getElementById('employeePrintArea');
@@ -2749,11 +3086,7 @@
             printArea.innerHTML = html;
             printArea.style.display = 'block';
             requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
-            const cleanup = () => {
-                printArea.style.display = 'none';
-                printArea.innerHTML = '';
-                window.removeEventListener('afterprint', cleanup);
-            };
+            const cleanup = () => { printArea.style.display = 'none'; printArea.innerHTML = ''; window.removeEventListener('afterprint', cleanup); };
             window.addEventListener('afterprint', cleanup);
             setTimeout(() => { if (printArea.style.display !== 'none') cleanup(); }, 60000);
         }
@@ -2762,6 +3095,84 @@
             return `<div class="print-header"><h1>STARLINK LLC</h1><h2>${escapeHTML(title)}</h2><p>Generated: ${escapeHTML(new Date().toLocaleString())}</p></div>`;
         }
 
+        function printDividendReport(id) {
+            const d = dividends.find(x => x.id === id);
+            if (!d) return;
+            const rows = d.allocations.map(a => `
+                <tr>
+                    <td>${escapeHTML(a.name)}</td>
+                    <td style="text-align:right;">${a.percentage.toFixed(2)}%</td>
+                    <td style="text-align:right; font-weight:700;">KSh ${fmt(a.amount)}</td>
+                    <td style="text-align:right; color:#5b6b7a;">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td>
+                </tr>
+            `).join('');
+            const total = d.allocations.reduce((s, a) => s + a.amount, 0);
+
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Dividend Distribution Report')}
+                    <table class="print-payment-table" style="margin-bottom:20px;">
+                        <tr><td>Reference</td><td>${escapeHTML(d.id)}</td></tr>
+                        <tr><td>Period</td><td><strong>${escapeHTML(d.periodLabel)}</strong></td></tr>
+                        <tr><td>Status</td><td>${escapeHTML(d.status.toUpperCase())}</td></tr>
+                        <tr><td>Total Distributable</td><td><strong>KSh ${fmt(d.totalDistributable)}</strong></td></tr>
+                        <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy)}</td></tr>
+                        ${d.approvedAt ? `<tr><td>Approved</td><td>${escapeHTML(new Date(d.approvedAt).toLocaleString())} by ${escapeHTML(d.approvedBy)}</td></tr>` : ''}
+                        ${d.paidAt ? `<tr><td>Paid</td><td>${escapeHTML(new Date(d.paidAt).toLocaleString())}</td></tr>` : ''}
+                        ${d.cancelReason ? `<tr><td>Cancellation Reason</td><td>${escapeHTML(d.cancelReason)}</td></tr>` : ''}
+                        ${d.notes ? `<tr><td>Notes</td><td>${escapeHTML(d.notes)}</td></tr>` : ''}
+                    </table>
+                    <table class="print-list">
+                        <thead>
+                            <tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                            <tr style="font-weight:800; background:#f0f5fb;">
+                                <td colspan="2">TOTAL</td>
+                                <td style="text-align:right;">KSh ${fmt(total)}</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="print-signatures">
+                        <p>Prepared By: ______________________________</p>
+                        <p>Approved By: ______________________________</p>
+                    </div>
+                    <div class="print-footer">
+                        <span>Starlink LLC · Dividend Distribution</span>
+                        <span>${escapeHTML(new Date().toLocaleString())}</span>
+                    </div>
+                </div>
+            `);
+        }
+
+        function printAllDividends() {
+            if (!dividends.length) { showError('No dividends to print.'); return; }
+            const rows = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).map(d => `
+                <tr>
+                    <td>${escapeHTML(d.id)}</td>
+                    <td>${escapeHTML(d.periodLabel)}</td>
+                    <td>${escapeHTML(d.status)}</td>
+                    <td style="text-align:right; font-weight:700;">KSh ${fmt(d.totalDistributable)}</td>
+                </tr>
+            `).join('');
+            const total = dividends.reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('All Dividend Distributions')}
+                    <table class="print-list">
+                        <thead><tr><th>Reference</th><th>Period</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr></thead>
+                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="3">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td></tr></tbody>
+                    </table>
+                    <div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
+        // ==================================================
+        // PRINT — EMPLOYEE & AUDIT
+        // ==================================================
         function printEmployeeReport(employeeId) {
             const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
             if (!emp) { showError('Employee not found.'); return; }
@@ -2777,36 +3188,20 @@
                         <tr><td>Payment Date</td><td>${escapeHTML(emp.date || '—')}</td></tr>
                         <tr><td>Report Date</td><td>${escapeHTML(date)}</td></tr>
                     </table>
-                    <div class="print-summary">
-                        <h3>Payment Summary</h3>
-                        <p>${escapeHTML(emp.name)} is recorded as having received <strong>KSh ${fmt(emp.amount)}</strong>.</p>
-                    </div>
-                    <div class="print-signatures">
-                        <p>Employee Signature: ____________________________________</p>
-                        <p>Authorized By: _________________________________________</p>
-                    </div>
-                    <div class="print-footer">
-                        <span>Prepared by STARLINK LLC</span>
-                        <span>${escapeHTML(date)}</span>
-                    </div>
+                    <div class="print-summary"><h3>Payment Summary</h3><p>${escapeHTML(emp.name)} is recorded as having received <strong>KSh ${fmt(emp.amount)}</strong>.</p></div>
+                    <div class="print-signatures"><p>Employee Signature: ____________________________________</p><p>Authorized By: _________________________________________</p></div>
+                    <div class="print-footer"><span>Prepared by STARLINK LLC</span><span>${escapeHTML(date)}</span></div>
                 </div>
             `);
         }
 
         function printAllEmployees() {
             const total = EMPLOYEE_PAYMENTS.reduce((s, e) => s + safeNum(e.amount), 0);
-            const rows = EMPLOYEE_PAYMENTS.map(e => `<tr>
-                <td>${escapeHTML(e.name)}</td><td>${escapeHTML(e.date || '-')}</td>
-                <td>${escapeHTML(e.reference || '-')}</td><td>${escapeHTML(e.status || 'paid')}</td>
-                <td style="text-align:right;">KSh ${fmt(e.amount)}</td>
-            </tr>`).join('');
+            const rows = EMPLOYEE_PAYMENTS.map(e => `<tr><td>${escapeHTML(e.name)}</td><td>${escapeHTML(e.date || '-')}</td><td>${escapeHTML(e.reference || '-')}</td><td>${escapeHTML(e.status || 'paid')}</td><td style="text-align:right;">KSh ${fmt(e.amount)}</td></tr>`).join('');
             doPrint(`
                 <div class="employee-print-report">
                     ${printHeader('All Employee Payments')}
-                    <table class="print-list">
-                        <thead><tr><th>Employee</th><th>Date</th><th>Reference</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr></thead>
-                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="4">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td></tr></tbody>
-                    </table>
+                    <table class="print-list"><thead><tr><th>Employee</th><th>Date</th><th>Reference</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr></thead><tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="4">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td></tr></tbody></table>
                     <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p></div>
                     <div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
                 </div>
@@ -2814,18 +3209,11 @@
         }
 
         function printAuditLog() {
-            const rows = [...auditLogs].reverse().slice(0, 500).map(l => `<tr>
-                <td>${escapeHTML(new Date(l.timestamp).toLocaleString())}</td>
-                <td>${escapeHTML(l.user)}</td><td>${escapeHTML(l.action)}</td>
-                <td>${escapeHTML(l.target)}</td><td>${escapeHTML(l.details)}</td>
-            </tr>`).join('');
+            const rows = [...auditLogs].reverse().slice(0, 500).map(l => `<tr><td>${escapeHTML(new Date(l.timestamp).toLocaleString())}</td><td>${escapeHTML(l.user)}</td><td>${escapeHTML(l.action)}</td><td>${escapeHTML(l.target)}</td><td>${escapeHTML(l.details)}</td></tr>`).join('');
             doPrint(`
                 <div class="employee-print-report">
                     ${printHeader('Audit Log Report')}
-                    <table class="print-list">
-                        <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>
+                    <table class="print-list"><thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table>
                     <div class="print-footer"><span>Client-side audit log — not tamper-proof</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
                 </div>
             `);
@@ -2846,17 +3234,10 @@
                     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { st.textContent = 'Polling'; dot.style.background = '#e8b879'; }
                 });
         }
-
-        function startPolling() {
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(async () => {
-                const ok = await fetchSummary();
-                if (ok) renderAll(true);
-            }, 30000);
-        }
+        function startPolling() { if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(async () => { const ok = await fetchSummary(); if (ok) renderAll(true); }, 30000); }
 
         // ==================================================
-        // BUTTON RIPPLE EFFECT
+        // RIPPLE EFFECT
         // ==================================================
         function attachRipple() {
             document.addEventListener('mousemove', (e) => {
@@ -2867,30 +3248,18 @@
                     btn.style.setProperty('--my', (e.clientY - rect.top) + 'px');
                 }
             });
-
             document.addEventListener('click', (e) => {
-                const btn = e.target.closest('.btn, .print-employee-btn, .employee-edit-btn, .employee-delete-btn');
+                const btn = e.target.closest('.btn, .print-employee-btn, .employee-edit-btn, .employee-delete-btn, .div-action-btn');
                 if (!btn) return;
                 const rect = btn.getBoundingClientRect();
                 const ripple = document.createElement('span');
                 const size = Math.max(rect.width, rect.height);
-                ripple.style.cssText = `
-                    position: absolute;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.35);
-                    transform: scale(0);
-                    animation: rippleAnim 0.6s ease-out;
-                    pointer-events: none;
-                    width: ${size}px; height: ${size}px;
-                    left: ${e.clientX - rect.left - size/2}px;
-                    top: ${e.clientY - rect.top - size/2}px;
-                `;
+                ripple.style.cssText = `position:absolute; border-radius:50%; background:rgba(255,255,255,0.35); transform:scale(0); animation:rippleAnim 0.6s ease-out; pointer-events:none; width:${size}px; height:${size}px; left:${e.clientX-rect.left-size/2}px; top:${e.clientY-rect.top-size/2}px;`;
                 btn.style.position = 'relative';
                 btn.style.overflow = 'hidden';
                 btn.appendChild(ripple);
                 setTimeout(() => ripple.remove(), 600);
             });
-
             const style = document.createElement('style');
             style.textContent = '@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }';
             document.head.appendChild(style);
@@ -2901,11 +3270,7 @@
         // ==================================================
         async function init() {
             setLoading(true);
-            if (typeof supabase === 'undefined') {
-                showError('Supabase library not loaded. Please refresh.');
-                setLoading(false);
-                return;
-            }
+            if (typeof supabase === 'undefined') { showError('Supabase library not loaded. Please refresh.'); setLoading(false); return; }
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             console.log('✅ Supabase initialized');
 
@@ -2920,49 +3285,83 @@
             startPolling();
             attachRipple();
 
+            // Investor buttons
             document.getElementById('addInvestorBtn').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
             document.getElementById('invSave').addEventListener('click', saveInvestor);
             document.getElementById('investorModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorModal(); });
-            document.getElementById('invName').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('invEquity').focus(); });
-            document.getElementById('invEquity').addEventListener('keydown', (e) => { if (e.key === 'Enter') saveInvestor(); });
 
+            // Employee buttons
             document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal(null));
             document.getElementById('employeeCancel').addEventListener('click', closeEmployeeModal);
             document.getElementById('employeeSave').addEventListener('click', saveEmployee);
             document.getElementById('employeeModal').addEventListener('click', function(e) { if (e.target === this) closeEmployeeModal(); });
-            document.getElementById('employeeName').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('employeeAmount').focus(); });
-            document.getElementById('employeeAmount').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('employeeRef').focus(); });
-            document.getElementById('employeeRef').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('employeeSave').click(); });
 
+            // Payments modal
             document.getElementById('paymentsBtn').addEventListener('click', openPaymentsModal);
             document.getElementById('paymentsClose').addEventListener('click', closePaymentsModal);
             document.getElementById('paymentsModal').addEventListener('click', function(e) { if (e.target === this) closePaymentsModal(); });
             document.getElementById('printAllEmployeesBtn').addEventListener('click', printAllEmployees);
 
-            ['empFilterFrom', 'empFilterTo', 'empFilterStatus'].forEach(id => {
-                document.getElementById(id).addEventListener('change', renderEmployeePayments);
-            });
+            // Employee filters
+            ['empFilterFrom', 'empFilterTo', 'empFilterStatus'].forEach(id => document.getElementById(id).addEventListener('change', renderEmployeePayments));
             document.getElementById('empFilterSearch').addEventListener('input', renderEmployeePayments);
-            document.getElementById('empFilterClear').addEventListener('click', () => {
-                ['empFilterFrom', 'empFilterTo', 'empFilterStatus', 'empFilterSearch'].forEach(id => document.getElementById(id).value = '');
-                renderEmployeePayments();
-            });
+            document.getElementById('empFilterClear').addEventListener('click', () => { ['empFilterFrom', 'empFilterTo', 'empFilterStatus', 'empFilterSearch'].forEach(id => document.getElementById(id).value = ''); renderEmployeePayments(); });
 
+            // Audit modal
             document.getElementById('auditBtn').addEventListener('click', openAuditModal);
             document.getElementById('auditClose').addEventListener('click', closeAuditModal);
             document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
             document.getElementById('printAuditBtn').addEventListener('click', printAuditLog);
 
-            ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction'].forEach(id => {
-                document.getElementById(id).addEventListener('change', renderAuditLog);
-            });
+            // Audit filters
+            ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction'].forEach(id => document.getElementById(id).addEventListener('change', renderAuditLog));
             document.getElementById('auditFilterSearch').addEventListener('input', renderAuditLog);
-            document.getElementById('auditFilterClear').addEventListener('click', () => {
-                ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction', 'auditFilterSearch'].forEach(id => document.getElementById(id).value = '');
-                renderAuditLog();
-            });
+            document.getElementById('auditFilterClear').addEventListener('click', () => { ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction', 'auditFilterSearch'].forEach(id => document.getElementById(id).value = ''); renderAuditLog(); });
+
+            // Dividend buttons
+            document.getElementById('newDividendBtn').addEventListener('click', openDividendModal);
+            document.getElementById('viewDividendsBtn').addEventListener('click', openDividendsHistoryModal);
+            document.getElementById('dividendsBtn').addEventListener('click', openDividendsHistoryModal);
+            document.getElementById('divCancel').addEventListener('click', closeDividendModal);
+            document.getElementById('divPreviewBtn').addEventListener('click', previewDividend);
+            document.getElementById('dividendModal').addEventListener('click', function(e) { if (e.target === this) closeDividendModal(); });
+            document.getElementById('previewBack').addEventListener('click', () => { closePreviewModal(); openDividendModal(); });
+            document.getElementById('previewConfirm').addEventListener('click', confirmDividend);
+            document.getElementById('previewModal').addEventListener('click', function(e) { if (e.target === this) closePreviewModal(); });
+            document.getElementById('detailClose').addEventListener('click', closeDividendDetail);
+            document.getElementById('dividendDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDividendDetail(); });
+
+            // Create dividends history modal dynamically
+            const historyModal = document.createElement('div');
+            historyModal.className = 'modal-overlay';
+            historyModal.id = 'dividendsHistoryModal';
+            historyModal.innerHTML = `
+                <div class="modal-card" style="max-width:900px;">
+                    <div class="payments-modal-header">
+                        <h3><i class="fas fa-coins"></i> Dividend Distributions</h3>
+                        <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                            <button class="btn btn-ghost add-employee-btn" id="printAllDividendsBtn"><i class="fas fa-print"></i> Print All</button>
+                            <button class="btn btn-primary add-employee-btn" id="newDividendFromHistoryBtn"><i class="fas fa-plus"></i> New Distribution</button>
+                        </div>
+                    </div>
+                    <div class="employee-table-wrap">
+                        <table class="employee-table">
+                            <thead>
+                                <tr><th>Ref</th><th>Period</th><th>Status</th><th>Amount</th><th>Shareholders</th><th>Date</th></tr>
+                            </thead>
+                            <tbody id="dividendHistoryBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-actions"><button class="cancel" id="dividendsHistoryClose">Close</button></div>
+                </div>
+            `;
+            document.body.appendChild(historyModal);
+            historyModal.addEventListener('click', function(e) { if (e.target === this) closeDividendsHistoryModal(); });
+            document.getElementById('dividendsHistoryClose').addEventListener('click', closeDividendsHistoryModal);
+            document.getElementById('printAllDividendsBtn').addEventListener('click', printAllDividends);
+            document.getElementById('newDividendFromHistoryBtn').addEventListener('click', () => { closeDividendsHistoryModal(); openDividendModal(); });
 
             logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
