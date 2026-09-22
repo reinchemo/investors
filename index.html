@@ -3068,7 +3068,7 @@
             document.querySelectorAll('.recon-section').forEach(s => s.classList.toggle('active', s.dataset.reconSection === tabName));
         }
         function closeReconAndEdit(employeeId) { closeReconModal(); openEmployeeModal(employeeId); }
-
+        
         // ==================================================
         // CHARTS
         // ==================================================
@@ -3118,7 +3118,84 @@
         }
 
         // ==================================================
-        // CLOUD
+        // CLOUD — SERIALIZED WRITES (fixes disappearing data)
+        // ==================================================
+        let cloudWriteChain = Promise.resolve();
+
+        function enqueueCloudWrite(fn) {
+            cloudWriteChain = cloudWriteChain.then(fn, fn);
+            return cloudWriteChain;
+        }
+
+        // Single writer. Always merges ALL local state into the blob so no
+        // parallel save can clobber another field.
+        async function saveStateToCloud() {
+            if (!supabaseClient) return false;
+            return enqueueCloudWrite(async () => {
+                try {
+                    const { data: c } = await supabaseClient
+                        .from('expenditure_data')
+                        .select('data')
+                        .eq('id', 1)
+                        .single();
+
+                    const existing = c?.data || {};
+                    const merged = {
+                        ...existing,
+                        investors: investors,
+                        employees: EMPLOYEE_PAYMENTS,
+                        audit_logs: auditLogs,
+                        dividends: dividends
+                    };
+
+                    await supabaseClient.from('expenditure_data').upsert({
+                        id: 1,
+                        data: merged,
+                        last_updated: new Date().toISOString()
+                    }, { onConflict: 'id' });
+
+                    return true;
+                } catch (e) {
+                    showError('Save failed: ' + e.message);
+                    return false;
+                }
+            });
+        }
+
+        // Thin wrappers so existing callers keep working
+        async function saveInvestorsToCloud() { return saveStateToCloud(); }
+        async function saveEmployeesToCloud() { return saveStateToCloud(); }
+        async function saveAuditToCloud()    { return saveStateToCloud(); }
+        async function saveDividendsToCloud(){ return saveStateToCloud(); }
+
+        // DevTools recovery helpers
+        window.recoverDividends = async function () {
+            if (!dividends.length) {
+                console.warn('No local dividends in memory to recover.');
+                return;
+            }
+            console.log(`Pushing ${dividends.length} local dividends to cloud...`);
+            const ok = await saveStateToCloud();
+            console.log(ok ? 'Recovery save complete.' : 'Recovery save FAILED.');
+        };
+
+        window.inspectCloud = async function () {
+            if (!supabaseClient) { console.warn('Supabase not ready.'); return; }
+            const { data } = await supabaseClient
+                .from('expenditure_data').select('data').eq('id', 1).single();
+            const blob = data?.data || {};
+            console.table({
+                investors:  (blob.investors  || []).length,
+                employees:  (blob.employees  || []).length,
+                audit_logs: (blob.audit_logs || []).length,
+                dividends:  (blob.dividends  || []).length,
+                raw_rows:   (blob.data       || []).length
+            });
+            return blob;
+        };
+
+        // ==================================================
+        // FETCH — hardended against partial blobs
         // ==================================================
         async function fetchSummary() {
             if (!supabaseClient) return false;
@@ -3127,24 +3204,67 @@
                 if (error) { if (error.code === 'PGRST116') return false; throw error; }
                 if (result && result.data) {
                     const cloud = result.data;
-                    if (Array.isArray(cloud.data) && cloud.data.length > 0) summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: result.last_updated };
-                    else summary = { commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0, starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE, totalTransactionFees: 0, lastUpdated: result.last_updated };
-                    if (Array.isArray(cloud.investors) && cloud.investors.length) investors = cloud.investors.map(i => ({ id: i.id || nextInvestorId(), name: i.name || 'Unnamed', equity: safeNum(i.equity), color: i.color || '#4fb6a8' }));
-                    else { investors = DEFAULT_INVESTORS.map(i => ({ ...i })); saveInvestorsToCloud().catch(() => {}); }
-                    if (Array.isArray(cloud.employees) && cloud.employees.length) { EMPLOYEE_PAYMENTS = cloud.employees.map(e => ({ id: e.id, name: e.name || 'Unnamed', amount: safeNum(e.amount), reference: e.reference || '', status: e.status || 'paid', date: e.date || '' })); saveEmployeePayments(); }
-                    if (Array.isArray(cloud.audit_logs)) auditLogs = cloud.audit_logs;
-                    if (Array.isArray(cloud.dividends)) dividends = cloud.dividends;
+
+                    if (Array.isArray(cloud.data) && cloud.data.length > 0) {
+                        summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: result.last_updated };
+                    } else {
+                        summary = { commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0, starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE, totalTransactionFees: 0, lastUpdated: result.last_updated };
+                    }
+
+                    // --- INVESTORS ---
+                    if (Array.isArray(cloud.investors) && cloud.investors.length > 0) {
+                        investors = cloud.investors.map(i => ({
+                            id: i.id || nextInvestorId(),
+                            name: i.name || 'Unnamed',
+                            equity: safeNum(i.equity),
+                            color: i.color || '#4fb6a8'
+                        }));
+                    } else if (investors.length === 0) {
+                        investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
+                        saveStateToCloud().catch(() => {});
+                    }
+
+                    // --- EMPLOYEES ---
+                    if (Array.isArray(cloud.employees) && cloud.employees.length > 0) {
+                        EMPLOYEE_PAYMENTS = cloud.employees.map(e => ({
+                            id: e.id,
+                            name: e.name || 'Unnamed',
+                            amount: safeNum(e.amount),
+                            reference: e.reference || '',
+                            status: e.status || 'paid',
+                            date: e.date || ''
+                        }));
+                        saveEmployeePayments();
+                    }
+
+                    // --- AUDIT LOGS (union merge by id) ---
+                    if (Array.isArray(cloud.audit_logs) && cloud.audit_logs.length > 0) {
+                        const known = new Set(auditLogs.map(l => l.id));
+                        const merged = [...auditLogs];
+                        cloud.audit_logs.forEach(l => {
+                            if (l && l.id && !known.has(l.id)) merged.push(l);
+                        });
+                        auditLogs = merged;
+                    }
+
+                    // --- DIVIDENDS (CRITICAL: never let empty cloud array wipe local state) ---
+                    if (Array.isArray(cloud.dividends) && cloud.dividends.length > 0) {
+                        const byId = new Map(dividends.map(d => [d.id, d]));
+                        cloud.dividends.forEach(d => { if (d && d.id) byId.set(d.id, d); });
+                        dividends = [...byId.values()];
+                    } else if (Array.isArray(cloud.dividends) && cloud.dividends.length === 0 && dividends.length > 0) {
+                        // Cloud was clobbered empty, but we still have local entries — push them back up.
+                        console.warn('[Recovery] Cloud dividends empty, local has entries. Re-saving.');
+                        saveStateToCloud().catch(() => {});
+                    }
+                    // else: cloud has no dividends key at all — keep local state untouched.
+
                     return true;
                 }
             } catch (e) { console.error('❌ Fetch error:', e); showError('Failed to load data: ' + e.message); }
             return false;
         }
-
-        async function saveInvestorsToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), investors }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { showError('Save investors failed: ' + e.message); return false; } }
-        async function saveEmployeesToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), employees: EMPLOYEE_PAYMENTS }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { showError('Save employees failed: ' + e.message); return false; } }
-        async function saveAuditToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), audit_logs: auditLogs }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { console.warn('Audit save failed:', e); return false; } }
-        async function saveDividendsToCloud() { if (!supabaseClient) return false; try { const { data: c } = await supabaseClient.from('expenditure_data').select('data').eq('id', 1).single(); await supabaseClient.from('expenditure_data').upsert({ id: 1, data: { ...(c?.data || {}), dividends }, last_updated: new Date().toISOString() }, { onConflict: 'id' }); return true; } catch (e) { showError('Save dividends failed: ' + e.message); return false; } }
-
+        
         // ==================================================
         // INVESTOR MODAL
         // ==================================================
@@ -3620,7 +3740,6 @@
             document.getElementById('dividendsHistoryModal').classList.add('show');
         }
         function closeDividendsHistoryModal() { document.getElementById('dividendsHistoryModal').classList.remove('show'); }
-
         // ==================================================
         // PRINT
         // ==================================================
@@ -3779,12 +3898,18 @@
         }
 
         // ==================================================
-        // REALTIME
+        // REALTIME + POLLING
         // ==================================================
+        let lastFetchAt = 0;
+
         function subscribeRealtime() {
             if (!supabaseClient) return;
             supabaseClient.channel('expenditure-data-realtime')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditure_data', filter: 'id=eq.1' }, async () => { await fetchSummary(); renderAll(true); })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditure_data', filter: 'id=eq.1' }, async () => {
+                    await fetchSummary();
+                    lastFetchAt = Date.now();
+                    renderAll(true);
+                })
                 .subscribe((status) => {
                     const st = document.getElementById('liveStatus');
                     const dot = document.getElementById('liveDot');
@@ -3792,7 +3917,17 @@
                     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { st.textContent = 'Polling'; dot.style.background = '#e8b879'; }
                 });
         }
-        function startPolling() { if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(async () => { const ok = await fetchSummary(); if (ok) renderAll(true); }, 30000); }
+
+        function startPolling() {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(async () => {
+                // Skip if realtime just updated us <10s ago
+                if (Date.now() - lastFetchAt < 10000) return;
+                const ok = await fetchSummary();
+                lastFetchAt = Date.now();
+                if (ok) renderAll(true);
+            }, 30000);
+        }
 
         function attachRipple() {
             document.addEventListener('mousemove', (e) => {
@@ -3814,7 +3949,10 @@
             style.textContent = '@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }';
             document.head.appendChild(style);
         }
-
+        
+        // ==================================================
+        // INIT
+        // ==================================================
         async function init() {
             setLoading(true);
             if (typeof supabase === 'undefined') { showError('Supabase library not loaded. Please refresh.'); setLoading(false); return; }
@@ -3827,12 +3965,14 @@
             startPolling();
             attachRipple();
 
+            // ---- Investors ----
             document.getElementById('addInvestorBtn').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
             document.getElementById('invSave').addEventListener('click', saveInvestor);
             document.getElementById('investorModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorModal(); });
 
+            // ---- Employees ----
             document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal(null));
             document.getElementById('employeeCancel').addEventListener('click', closeEmployeeModal);
             document.getElementById('employeeSave').addEventListener('click', saveEmployee);
@@ -3845,38 +3985,56 @@
 
             ['empFilterFrom', 'empFilterTo', 'empFilterStatus'].forEach(id => document.getElementById(id).addEventListener('change', renderEmployeePayments));
             document.getElementById('empFilterSearch').addEventListener('input', renderEmployeePayments);
-            document.getElementById('empFilterClear').addEventListener('click', () => { ['empFilterFrom', 'empFilterTo', 'empFilterStatus', 'empFilterSearch'].forEach(id => document.getElementById(id).value = ''); renderEmployeePayments(); });
+            document.getElementById('empFilterClear').addEventListener('click', () => {
+                ['empFilterFrom', 'empFilterTo', 'empFilterStatus', 'empFilterSearch'].forEach(id => document.getElementById(id).value = '');
+                renderEmployeePayments();
+            });
 
+            // ---- Audit ----
             document.getElementById('auditBtn').addEventListener('click', openAuditModal);
             document.getElementById('auditClose').addEventListener('click', closeAuditModal);
             document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
             document.getElementById('printAuditBtn').addEventListener('click', printAuditLog);
             ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction'].forEach(id => document.getElementById(id).addEventListener('change', renderAuditLog));
             document.getElementById('auditFilterSearch').addEventListener('input', renderAuditLog);
-            document.getElementById('auditFilterClear').addEventListener('click', () => { ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction', 'auditFilterSearch'].forEach(id => document.getElementById(id).value = ''); renderAuditLog(); });
+            document.getElementById('auditFilterClear').addEventListener('click', () => {
+                ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction', 'auditFilterSearch'].forEach(id => document.getElementById(id).value = '');
+                renderAuditLog();
+            });
 
+            // ---- Reconciliation ----
             document.getElementById('reconBtn').addEventListener('click', openReconModal);
             document.getElementById('reconClose').addEventListener('click', closeReconModal);
             document.getElementById('reconModal').addEventListener('click', function(e) { if (e.target === this) closeReconModal(); });
             document.getElementById('printReconBtn').addEventListener('click', printReconciliationReport);
-            document.querySelectorAll('.recon-tab').forEach(tab => { tab.addEventListener('click', () => switchReconTab(tab.dataset.recon)); });
+            document.querySelectorAll('.recon-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchReconTab(tab.dataset.recon));
+            });
 
+            // ---- Dividends ----
             document.getElementById('newDividendBtn').addEventListener('click', () => openDividendModal(null));
             document.getElementById('viewDividendsBtn').addEventListener('click', openDividendsHistoryModal);
             document.getElementById('dividendsBtn').addEventListener('click', openDividendsHistoryModal);
             document.getElementById('divCancel').addEventListener('click', closeDividendModal);
             document.getElementById('divPreviewBtn').addEventListener('click', previewDividend);
             document.getElementById('dividendModal').addEventListener('click', function(e) { if (e.target === this) closeDividendModal(); });
-            document.getElementById('previewBack').addEventListener('click', () => { const keepReason = window._editReason; const keepEdit = editingDividendId; closePreviewModal(); openDividendModal(keepEdit, keepReason); });
+            document.getElementById('previewBack').addEventListener('click', () => {
+                const keepReason = window._editReason;
+                const keepEdit = editingDividendId;
+                closePreviewModal();
+                openDividendModal(keepEdit, keepReason);
+            });
             document.getElementById('previewConfirm').addEventListener('click', confirmDividend);
             document.getElementById('previewModal').addEventListener('click', function(e) { if (e.target === this) closePreviewModal(); });
             document.getElementById('detailClose').addEventListener('click', closeDividendDetail);
             document.getElementById('dividendDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDividendDetail(); });
 
+            // ---- Edit warning gate ----
             document.getElementById('editWarningCancel').addEventListener('click', closeEditWarningModal);
             document.getElementById('editWarningConfirm').addEventListener('click', confirmEditWarning);
             document.getElementById('editWarningModal').addEventListener('click', function(e) { if (e.target === this) closeEditWarningModal(); });
 
+            // ---- Dynamically create Dividend History modal ----
             const historyModal = document.createElement('div');
             historyModal.className = 'modal-overlay';
             historyModal.id = 'dividendsHistoryModal';
@@ -3906,8 +4064,12 @@
             historyModal.addEventListener('click', function(e) { if (e.target === this) closeDividendsHistoryModal(); });
             document.getElementById('dividendsHistoryClose').addEventListener('click', closeDividendsHistoryModal);
             document.getElementById('printAllDividendsBtn').addEventListener('click', printAllDividends);
-            document.getElementById('newDividendFromHistoryBtn').addEventListener('click', () => { closeDividendsHistoryModal(); openDividendModal(null); });
+            document.getElementById('newDividendFromHistoryBtn').addEventListener('click', () => {
+                closeDividendsHistoryModal();
+                openDividendModal(null);
+            });
 
+            // ---- Initial login audit ----
             logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
         }
