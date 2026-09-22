@@ -803,7 +803,6 @@
             background: linear-gradient(90deg, rgba(200, 154, 91, 0.15), rgba(200, 154, 91, 0.03));
             font-weight: 600;
             border-left: 3px solid #c89a5b;
-            position: relative;
         }
         
         .investor-table .highlight-row td {
@@ -1316,20 +1315,10 @@
             border: 1px solid rgba(111, 203, 147, 0.35);
         }
         
-        .status-pill.paid:hover {
-            background: rgba(111, 203, 147, 0.3);
-            box-shadow: 0 0 12px rgba(111, 203, 147, 0.5);
-        }
-        
         .status-pill.pending {
             background: rgba(200, 154, 91, 0.18);
             color: #e8b879;
             border: 1px solid rgba(200, 154, 91, 0.35);
-        }
-        
-        .status-pill.pending:hover {
-            background: rgba(200, 154, 91, 0.3);
-            box-shadow: 0 0 12px rgba(200, 154, 91, 0.5);
         }
         
         .status-pill.cancelled {
@@ -1338,20 +1327,10 @@
             border: 1px solid rgba(226, 104, 91, 0.35);
         }
         
-        .status-pill.cancelled:hover {
-            background: rgba(226, 104, 91, 0.3);
-            box-shadow: 0 0 12px rgba(226, 104, 91, 0.5);
-        }
-        
         .status-pill.draft {
             background: rgba(120, 140, 180, 0.18);
             color: #a8b8d4;
             border: 1px solid rgba(120, 140, 180, 0.35);
-        }
-        
-        .status-pill.draft:hover {
-            background: rgba(120, 140, 180, 0.3);
-            box-shadow: 0 0 12px rgba(120, 140, 180, 0.5);
         }
         
         .status-pill.approved {
@@ -1360,20 +1339,10 @@
             border: 1px solid rgba(122, 90, 248, 0.35);
         }
         
-        .status-pill.approved:hover {
-            background: rgba(122, 90, 248, 0.3);
-            box-shadow: 0 0 12px rgba(122, 90, 248, 0.5);
-        }
-        
         .status-pill.processing {
             background: rgba(95, 199, 188, 0.18);
             color: #7fded1;
             border: 1px solid rgba(95, 199, 188, 0.35);
-        }
-        
-        .status-pill.processing:hover {
-            background: rgba(95, 199, 188, 0.3);
-            box-shadow: 0 0 12px rgba(95, 199, 188, 0.5);
         }
         
         .print-employee-btn {
@@ -1539,9 +1508,7 @@
                 transform: translateY(-6px);
             }
         }
-        /* ============================================
-           PHASE 3 — DIVIDEND ENGINE
-           ============================================ */
+        /* PHASE 3 — DIVIDENDS */
         
         .dividend-card {
             background: linear-gradient(135deg, rgba(200, 154, 91, 0.12) 0%, rgba(60, 40, 20, 0.5) 100%);
@@ -1782,158 +1749,267 @@
             letter-spacing: -0.02em;
             text-shadow: 0 0 30px rgba(200, 154, 91, 0.45);
         }
+        /* PHASE 5 — RECONCILIATION */
         
-        .print-employee-report {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #162d44;
-            background: #fff;
+        .recon-banner {
+            background: linear-gradient(135deg, rgba(226, 104, 91, 0.15) 0%, rgba(226, 104, 91, 0.05) 100%);
+            border: 1px solid rgba(226, 104, 91, 0.35);
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.2rem;
+            display: none;
+            animation: slideDown 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
-        .print-header {
-            text-align: center;
-            border-bottom: 2px solid #1a5a9c;
-            padding-bottom: 18px;
-            margin-bottom: 28px;
+        .recon-banner.show {
+            display: block;
         }
         
-        .print-header h1 {
-            margin: 0;
-            color: #0b2b4a;
-            font-size: 28px;
+        .recon-banner.ok {
+            background: linear-gradient(135deg, rgba(111, 203, 147, 0.12), rgba(111, 203, 147, 0.03));
+            border-color: rgba(111, 203, 147, 0.3);
         }
         
-        .print-header h2 {
-            margin: 8px 0;
-            font-size: 20px;
-            color: #162d44;
+        .recon-banner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-bottom: 0.5rem;
         }
         
-        .print-header p {
-            margin: 0;
-            color: #5b6b7a;
-            font-size: 13px;
-        }
-        
-        .print-payment-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        
-        .print-payment-table td {
-            border: 1px solid #d8e0e8;
-            padding: 14px;
-            font-size: 15px;
-        }
-        
-        .print-payment-table td:first-child {
-            width: 38%;
+        .recon-banner-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
             font-weight: 700;
-            background: #f4f7fa;
+            color: #f0a89f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
-        .print-list {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 12px;
+        .recon-banner.ok .recon-banner-title {
+            color: #7ee0a2;
         }
         
-        .print-list th {
-            background: #1a5a9c;
-            color: #fff;
-            padding: 8px;
-            text-align: left;
-            font-size: 11px;
-            text-transform: uppercase;
+        .recon-banner-title i {
+            animation: warningPulse 2s ease-in-out infinite;
         }
         
-        .print-list td {
-            padding: 7px 8px;
-            border-bottom: 1px solid #e5ecf4;
+        .recon-banner.ok .recon-banner-title i {
+            animation: iconSpin 4s linear infinite;
         }
         
-        .print-summary {
-            margin: 25px 0 40px;
-            padding: 18px;
-            border-left: 4px solid #1a5a9c;
-            background: #f7f9fb;
+        .recon-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(226, 104, 91, 0.2);
+            color: #f0a89f;
+            padding: 0.25rem 0.7rem;
+            border-radius: 30px;
+            border: 1px solid rgba(226, 104, 91, 0.4);
         }
         
-        .print-summary h3 {
-            margin: 0 0 8px;
-            color: #0b2b4a;
-            font-size: 16px;
+        .recon-banner.ok .recon-count {
+            background: rgba(111, 203, 147, 0.2);
+            color: #7ee0a2;
+            border-color: rgba(111, 203, 147, 0.4);
         }
         
-        .print-summary p {
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.6;
+        .recon-summary-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            font-size: 0.82rem;
+            color: #c7d5e6;
+            line-height: 1.5;
         }
         
-        .print-signatures {
-            margin-top: 45px;
-            line-height: 2.4;
-            font-size: 14px;
-        }
-        
-        .print-footer {
-            margin-top: 55px;
-            padding-top: 12px;
-            border-top: 1px solid #d8e0e8;
+        .recon-summary-list .recon-line {
             display: flex;
             justify-content: space-between;
-            gap: 20px;
-            font-size: 12px;
-            color: #667788;
+            padding: 0.35rem 0;
+            border-bottom: 1px solid rgba(120, 200, 220, 0.06);
         }
         
-        @media screen {
-            #employeePrintArea {
-                display: none !important;
-            }
+        .recon-summary-list .recon-line:last-child {
+            border-bottom: none;
         }
         
-        @media print {
-            @page {
-                size: A4;
-                margin: 12mm;
-            }
-            html,
-            body {
-                background: #fff !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            body * {
-                visibility: hidden !important;
-            }
-            #employeePrintArea,
-            #employeePrintArea * {
-                visibility: visible !important;
-            }
-            #employeePrintArea {
-                display: block !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-                min-height: 100vh !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                background: #fff !important;
-            }
-            .employee-print-report {
-                width: 100%;
-                max-width: none;
-                margin: 0;
-                padding: 10mm;
-                background: #fff !important;
-            }
+        .recon-summary-list .recon-line span:first-child {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .recon-summary-list .recon-line i {
+            color: #f0a89f;
+            font-size: 0.7rem;
+        }
+        
+        .recon-banner.ok .recon-summary-list .recon-line i {
+            color: #7ee0a2;
+        }
+        
+        .recon-summary-list .recon-line strong {
+            font-family: 'JetBrains Mono', monospace;
+            color: #f0a89f;
+            font-size: 0.8rem;
+        }
+        
+        .recon-banner.ok .recon-summary-list .recon-line strong {
+            color: #7ee0a2;
+        }
+        
+        .recon-tabs {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            padding: 0.3rem;
+            background: rgba(15, 26, 46, 0.5);
+            border-radius: 14px;
+            border: 1px solid rgba(120, 200, 220, 0.12);
+        }
+        
+        .recon-tab {
+            border: none;
+            background: transparent;
+            padding: 0.5rem 0.9rem;
+            border-radius: 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #7f9bb8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            position: relative;
+        }
+        
+        .recon-tab:hover {
+            color: #c7d5e6;
+            background: rgba(120, 200, 220, 0.08);
+        }
+        
+        .recon-tab.active {
+            background: linear-gradient(135deg, rgba(226, 104, 91, 0.2), rgba(226, 104, 91, 0.08));
+            color: #f0a89f;
+            box-shadow: 0 4px 12px -6px rgba(226, 104, 91, 0.5);
+            border: 1px solid rgba(226, 104, 91, 0.3);
+        }
+        
+        .recon-tab .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            background: rgba(226, 104, 91, 0.25);
+            color: #f0a89f;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+        
+        .recon-tab.active .badge {
+            background: rgba(226, 104, 91, 0.4);
+            color: #fff;
+        }
+        
+        .recon-tab.empty .badge {
+            background: rgba(111, 203, 147, 0.2);
+            color: #7ee0a2;
+        }
+        
+        .recon-section {
+            display: none;
+        }
+        
+        .recon-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .recon-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.7rem;
+            margin-bottom: 1rem;
+        }
+        
+        .recon-stat {
+            background: rgba(15, 26, 46, 0.5);
+            border: 1px solid rgba(120, 200, 220, 0.12);
+            border-radius: 14px;
+            padding: 0.75rem 0.9rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .recon-stat:hover {
+            transform: translateY(-2px);
+            border-color: rgba(120, 200, 220, 0.25);
+        }
+        
+        .recon-stat .recon-stat-label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #7f9bb8;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        .recon-stat .recon-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f2f0eb;
+        }
+        
+        .recon-stat.warn {
+            border-color: rgba(200, 154, 91, 0.3);
+        }
+        
+        .recon-stat.warn .recon-stat-value {
+            color: #e8b879;
+        }
+        
+        .recon-stat.bad {
+            border-color: rgba(226, 104, 91, 0.35);
+            background: linear-gradient(135deg, rgba(226, 104, 91, 0.08), rgba(226, 104, 91, 0.02));
+        }
+        
+        .recon-stat.bad .recon-stat-value {
+            color: #f0a89f;
+        }
+        
+        .recon-stat.good {
+            border-color: rgba(111, 203, 147, 0.3);
+            background: linear-gradient(135deg, rgba(111, 203, 147, 0.08), rgba(111, 203, 147, 0.02));
+        }
+        
+        .recon-stat.good .recon-stat-value {
+            color: #7ee0a2;
+        }
+        
+        .recon-row-warning {
+            background: linear-gradient(90deg, rgba(226, 104, 91, 0.08), transparent) !important;
+            border-left: 3px solid #f0a89f !important;
+        }
+        
+        .recon-row-caution {
+            background: linear-gradient(90deg, rgba(200, 154, 91, 0.08), transparent) !important;
+            border-left: 3px solid #e8b879 !important;
         }
     </style>
 </head>
@@ -2045,6 +2121,132 @@
         </div>
     </div>
 
+    <!-- RECONCILIATION MODAL (PHASE 5) -->
+    <div class="modal-overlay" id="reconModal">
+        <div class="modal-card" style="max-width: 1000px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-balance-scale"></i> Reconciliation & Financial Controls</h3>
+                <button class="btn btn-ghost add-employee-btn" id="printReconBtn"><i class="fas fa-print"></i> Print Report</button>
+            </div>
+
+            <div class="recon-tabs">
+                <button class="recon-tab active" data-recon="summary">
+                    <i class="fas fa-chart-pie"></i> Summary <span class="badge" id="reconBadgeSummary">0</span>
+                </button>
+                <button class="recon-tab" data-recon="missing-ref">
+                    <i class="fas fa-exclamation-circle"></i> Missing Refs <span class="badge" id="reconBadgeMissing">0</span>
+                </button>
+                <button class="recon-tab" data-recon="dup-ref">
+                    <i class="fas fa-copy"></i> Duplicates <span class="badge" id="reconBadgeDup">0</span>
+                </button>
+                <button class="recon-tab" data-recon="pending">
+                    <i class="fas fa-clock"></i> Pending <span class="badge" id="reconBadgePending">0</span>
+                </button>
+                <button class="recon-tab" data-recon="dividends">
+                    <i class="fas fa-coins"></i> Dividends <span class="badge" id="reconBadgeDiv">0</span>
+                </button>
+            </div>
+
+            <!-- Summary tab -->
+            <div class="recon-section active" data-recon-section="summary">
+                <div class="recon-stats" id="reconStats"></div>
+                <div class="reconcile-note" id="reconSummaryNote">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Reconciliation checks completed. Review each tab for details.</span>
+                </div>
+            </div>
+
+            <!-- Missing refs tab -->
+            <div class="recon-section" data-recon-section="missing-ref">
+                <div class="reconcile-note warning" style="margin-bottom:0.8rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Payments marked <strong>paid</strong> but with no transaction reference recorded. These need follow-up.</span>
+                </div>
+                <div class="employee-table-wrap">
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th style="text-align:right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reconMissingRefBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Dup refs tab -->
+            <div class="recon-section" data-recon-section="dup-ref">
+                <div class="reconcile-note warning" style="margin-bottom:0.8rem;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Same transaction reference used on multiple payments. Possible duplicate entry.</span>
+                </div>
+                <div class="employee-table-wrap">
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Employees</th>
+                                <th>Total Amount</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reconDupRefBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pending tab -->
+            <div class="recon-section" data-recon-section="pending">
+                <div class="reconcile-note warning" style="margin-bottom:0.8rem;">
+                    <i class="fas fa-clock"></i>
+                    <span>Payments still marked <strong>pending</strong>. Consider following up or cancelling.</span>
+                </div>
+                <div class="employee-table-wrap">
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Amount</th>
+                                <th>Reference</th>
+                                <th>Date</th>
+                                <th>Days Pending</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reconPendingBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Dividends tab -->
+            <div class="recon-section" data-recon-section="dividends">
+                <div class="reconcile-note warning" style="margin-bottom:0.8rem;">
+                    <i class="fas fa-coins"></i>
+                    <span>Dividend distributions not yet fully paid. Drafts and approved distributions need action.</span>
+                </div>
+                <div class="employee-table-wrap">
+                    <table class="employee-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Period</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                                <th>Age (days)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reconDividendBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-actions"><button class="cancel" id="reconClose">Close</button></div>
+        </div>
+    </div>
+
     <!-- DIVIDEND CALCULATOR MODAL -->
     <div class="modal-overlay" id="dividendModal">
         <div class="modal-card" style="max-width: 560px;">
@@ -2094,7 +2296,7 @@
         </div>
     </div>
 
-    <!-- DIVIDEND DETAIL / STATUS MODAL -->
+    <!-- DIVIDEND DETAIL MODAL -->
     <div class="modal-overlay" id="dividendDetailModal">
         <div class="modal-card" style="max-width: 780px;">
             <h3><i class="fas fa-coins"></i> <span id="detailTitle">Dividend Detail</span></h3>
@@ -2177,6 +2379,7 @@
             <div class="nav-actions">
                 <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
                 <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
+                <button class="btn btn-ghost" id="reconBtn"><i class="fas fa-balance-scale"></i> Reconcile <span id="reconCountNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(226,104,91,0.3); color:#f0a89f; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
                 <a href="https://starlink-llc.netlify.app/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
@@ -2186,6 +2389,18 @@
         </nav>
 
         <div id="errorBanner" class="error-banner"></div>
+
+        <!-- RECONCILIATION BANNER ON MAIN PAGE -->
+        <div class="recon-banner" id="reconBanner">
+            <div class="recon-banner-header">
+                <div class="recon-banner-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="reconBannerTitle">Reconciliation Warnings</span>
+                </div>
+                <span class="recon-count" id="reconBannerCount">0 issues</span>
+            </div>
+            <div class="recon-summary-list" id="reconSummaryList"></div>
+        </div>
 
         <div class="headline">
             <h1>
@@ -2227,18 +2442,13 @@
             </div>
         </div>
 
-        <!-- DIVIDEND OVERVIEW CARD (added to main page) -->
         <div class="dividend-card" id="dividendOverviewCard">
             <h3><i class="fas fa-hand-holding-usd"></i> Dividend Overview</h3>
             <div class="dividend-amount" id="dividendTotalPaid">KSh 0</div>
             <p>Total paid out across <strong id="dividendCount">0</strong> distributions · Latest: <strong id="dividendLatest">—</strong></p>
             <div class="div-actions-row" style="margin-top:0.8rem;">
-                <button class="div-action-btn approve" id="newDividendBtn">
-                    <i class="fas fa-plus"></i> New Distribution
-                </button>
-                <button class="div-action-btn expand" id="viewDividendsBtn">
-                    <i class="fas fa-list"></i> View All Distributions
-                </button>
+                <button class="div-action-btn approve" id="newDividendBtn"><i class="fas fa-plus"></i> New Distribution</button>
+                <button class="div-action-btn expand" id="viewDividendsBtn"><i class="fas fa-list"></i> View All Distributions</button>
             </div>
         </div>
 
@@ -2342,10 +2552,8 @@
         let editingEmployeeId = null;
         let auditLogs = [];
 
-        // Pending dividend state (built during preview)
         let pendingDividend = null;
         let currentDetailId = null;
-        let expandedDividendId = null;
 
         // ==================================================
         // HELPERS
@@ -2421,6 +2629,13 @@
             for (const c of COLOR_PALETTE)
                 if (!used.has(c)) return c;
             return COLOR_PALETTE[investors.length % COLOR_PALETTE.length];
+        }
+
+        function daysBetween(dateStr1, dateStr2) {
+            if (!dateStr1) return 0;
+            const d1 = new Date(dateStr1);
+            const d2 = dateStr2 ? new Date(dateStr2) : new Date();
+            return Math.max(0, Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)));
         }
 
         // ==================================================
@@ -2510,15 +2725,276 @@
             document.getElementById('lastUpdatedValue').textContent = formatTimestamp(summary.lastUpdated);
         }
 
-        // ==================================================
-        // DIVIDEND OVERVIEW
-        // ==================================================
         function renderDividendOverview() {
             const totalPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
             const latest = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
             document.getElementById('dividendTotalPaid').textContent = 'KSh ' + fmt(totalPaid);
             document.getElementById('dividendCount').textContent = dividends.length;
             document.getElementById('dividendLatest').textContent = latest ? (latest.periodLabel || latest.period || '—') : '—';
+        }
+
+        // ==================================================
+        // PHASE 5 — RECONCILIATION ENGINE
+        // ==================================================
+        function computeReconciliation() {
+            const issues = {
+                missingRef: [],
+                dupRef: [],
+                pending: [],
+                dividends: []
+            };
+
+            // Missing references — employees marked paid but no ref
+            EMPLOYEE_PAYMENTS.forEach(e => {
+                if (e.status === 'paid' && (!e.reference || e.reference.trim() === '')) {
+                    issues.missingRef.push(e);
+                }
+            });
+
+            // Duplicate references — same ref used more than once
+            const refMap = {};
+            EMPLOYEE_PAYMENTS.forEach(e => {
+                const ref = (e.reference || '').trim().toLowerCase();
+                if (!ref) return;
+                if (!refMap[ref]) refMap[ref] = [];
+                refMap[ref].push(e);
+            });
+            Object.keys(refMap).forEach(ref => {
+                if (refMap[ref].length > 1) {
+                    issues.dupRef.push({
+                        reference: refMap[ref][0].reference,
+                        employees: refMap[ref],
+                        total: refMap[ref].reduce((s, e) => s + safeNum(e.amount), 0)
+                    });
+                }
+            });
+
+            // Pending payments — still in pending status
+            EMPLOYEE_PAYMENTS.forEach(e => {
+                if (e.status === 'pending') {
+                    issues.pending.push({
+                        ...e,
+                        daysPending: daysBetween(e.date)
+                    });
+                }
+            });
+
+            // Dividend distributions not fully paid
+            dividends.forEach(d => {
+                if (d.status === 'draft' || d.status === 'approved' || d.status === 'processing') {
+                    issues.dividends.push({
+                        ...d,
+                        ageDays: daysBetween(d.createdAt)
+                    });
+                }
+            });
+
+            return issues;
+        }
+
+        function renderReconciliationBanner() {
+            const issues = computeReconciliation();
+            const totalIssues = issues.missingRef.length + issues.dupRef.length + issues.pending.length + issues.dividends.length;
+
+            // Update nav badge
+            const navBadge = document.getElementById('reconCountNav');
+            if (navBadge) {
+                navBadge.textContent = totalIssues;
+                navBadge.style.display = totalIssues > 0 ? 'inline-flex' : 'none';
+            }
+
+            // Update banners
+            const banner = document.getElementById('reconBanner');
+            const countEl = document.getElementById('reconBannerCount');
+            const titleEl = document.getElementById('reconBannerTitle');
+            const listEl = document.getElementById('reconSummaryList');
+
+            if (totalIssues === 0) {
+                banner.classList.add('show', 'ok');
+                titleEl.textContent = 'All Clear';
+                countEl.textContent = '✓ no issues';
+                listEl.innerHTML = `<div class="recon-line"><span><i class="fas fa-check-circle" style="color:#7ee0a2;"></i> All records reconcile cleanly. No action needed.</span></div>`;
+            } else {
+                banner.classList.add('show');
+                banner.classList.remove('ok');
+                titleEl.textContent = 'Reconciliation Warnings';
+                countEl.textContent = totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '');
+                let lines = [];
+                if (issues.missingRef.length) lines.push(`<div class="recon-line"><span><i class="fas fa-exclamation-circle"></i> Payments marked paid with no reference</span><strong>${issues.missingRef.length}</strong></div>`);
+                if (issues.dupRef.length) lines.push(`<div class="recon-line"><span><i class="fas fa-copy"></i> Duplicate transaction references</span><strong>${issues.dupRef.length}</strong></div>`);
+                if (issues.pending.length) lines.push(`<div class="recon-line"><span><i class="fas fa-clock"></i> Payments still pending</span><strong>${issues.pending.length}</strong></div>`);
+                if (issues.dividends.length) lines.push(`<div class="recon-line"><span><i class="fas fa-coins"></i> Dividend distributions not fully paid</span><strong>${issues.dividends.length}</strong></div>`);
+                listEl.innerHTML = lines.join('');
+            }
+        }
+
+        function renderReconciliationModal() {
+            const issues = computeReconciliation();
+
+            // Update tab badges
+            const totalIssues = issues.missingRef.length + issues.dupRef.length + issues.pending.length + issues.dividends.length;
+            const bSummary = document.getElementById('reconBadgeSummary');
+            const bMissing = document.getElementById('reconBadgeMissing');
+            const bDup = document.getElementById('reconBadgeDup');
+            const bPending = document.getElementById('reconBadgePending');
+            const bDiv = document.getElementById('reconBadgeDiv');
+
+            bSummary.textContent = totalIssues;
+            bMissing.textContent = issues.missingRef.length;
+            bDup.textContent = issues.dupRef.length;
+            bPending.textContent = issues.pending.length;
+            bDiv.textContent = issues.dividends.length;
+
+            [bSummary, bMissing, bDup, bPending, bDiv].forEach(b => {
+                const tab = b.closest('.recon-tab');
+                if (b.textContent === '0') {
+                    tab.classList.add('empty');
+                } else {
+                    tab.classList.remove('empty');
+                }
+            });
+
+            // Summary tab
+            const statsEl = document.getElementById('reconStats');
+            const totalPaidEmployees = EMPLOYEE_PAYMENTS.filter(e => e.status === 'paid').reduce((s, e) => s + safeNum(e.amount), 0);
+            const totalPending = EMPLOYEE_PAYMENTS.filter(e => e.status === 'pending').reduce((s, e) => s + safeNum(e.amount), 0);
+            const totalDivPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+            const totalDivUnpaid = dividends.filter(d => ['draft','approved','processing'].includes(d.status)).reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+
+            statsEl.innerHTML = `
+                <div class="recon-stat good"><div class="recon-stat-label"><i class="fas fa-check-circle"></i> Paid Payments</div><div class="recon-stat-value">KSh ${fmt(totalPaidEmployees)}</div></div>
+                <div class="recon-stat warn"><div class="recon-stat-label"><i class="fas fa-clock"></i> Pending Payments</div><div class="recon-stat-value">KSh ${fmt(totalPending)}</div></div>
+                <div class="recon-stat good"><div class="recon-stat-label"><i class="fas fa-coins"></i> Dividends Paid</div><div class="recon-stat-value">KSh ${fmt(totalDivPaid)}</div></div>
+                <div class="recon-stat ${totalDivUnpaid > 0 ? 'warn' : 'good'}"><div class="recon-stat-label"><i class="fas fa-hourglass-half"></i> Dividends Unpaid</div><div class="recon-stat-value">KSh ${fmt(totalDivUnpaid)}</div></div>
+                <div class="recon-stat ${issues.missingRef.length ? 'bad' : 'good'}"><div class="recon-stat-label"><i class="fas fa-exclamation-circle"></i> Missing Refs</div><div class="recon-stat-value">${issues.missingRef.length}</div></div>
+                <div class="recon-stat ${issues.dupRef.length ? 'bad' : 'good'}"><div class="recon-stat-label"><i class="fas fa-copy"></i> Duplicate Refs</div><div class="recon-stat-value">${issues.dupRef.length}</div></div>
+            `;
+
+            const noteEl = document.getElementById('reconSummaryNote');
+            if (totalIssues === 0) {
+                noteEl.classList.remove('warning');
+                noteEl.innerHTML = `<i class="fas fa-check-circle"></i><span>All records reconcile cleanly. No outstanding issues.</span>`;
+            } else {
+                noteEl.classList.add('warning');
+                noteEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${totalIssues} reconciliation issue${totalIssues !== 1 ? 's' : ''} found. Review the other tabs for details.</span>`;
+            }
+
+            // Missing refs
+            const mrBody = document.getElementById('reconMissingRefBody');
+            if (!issues.missingRef.length) {
+                mrBody.innerHTML = `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>All paid payments have references.</div></td></tr>`;
+            } else {
+                mrBody.innerHTML = issues.missingRef.map(e => `
+                    <tr class="recon-row-warning">
+                        <td><strong>${escapeHTML(e.name)}</strong></td>
+                        <td class="employee-amount">KSh ${fmt(e.amount)}</td>
+                        <td><span class="status-pill paid">paid</span></td>
+                        <td>${escapeHTML(e.date || '—')}</td>
+                        <td style="text-align:right;"><button class="div-action-btn expand" onclick="closeReconAndEdit(${e.id})"><i class="fas fa-edit"></i> Add Ref</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Dup refs
+            const drBody = document.getElementById('reconDupRefBody');
+            if (!issues.dupRef.length) {
+                drBody.innerHTML = `<tr><td colspan="4"><div class="empty-row"><i class="fas fa-check-circle"></i>No duplicate references found.</div></td></tr>`;
+            } else {
+                drBody.innerHTML = issues.dupRef.map(d => `
+                    <tr class="recon-row-warning">
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(d.reference)}</td>
+                        <td>${d.employees.map(e => escapeHTML(e.name)).join(', ')}</td>
+                        <td class="employee-amount">KSh ${fmt(d.total)}</td>
+                        <td>${d.employees.length}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Pending
+            const pendBody = document.getElementById('reconPendingBody');
+            if (!issues.pending.length) {
+                pendBody.innerHTML = `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>No pending payments.</div></td></tr>`;
+            } else {
+                pendBody.innerHTML = issues.pending.map(e => `
+                    <tr class="${e.daysPending > 30 ? 'recon-row-warning' : 'recon-row-caution'}">
+                        <td><strong>${escapeHTML(e.name)}</strong></td>
+                        <td class="employee-amount">KSh ${fmt(e.amount)}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(e.reference || '—')}</td>
+                        <td>${escapeHTML(e.date || '—')}</td>
+                        <td><strong style="color:${e.daysPending > 30 ? '#f0a89f' : '#e8b879'};">${e.daysPending} days</strong></td>
+                    </tr>
+                `).join('');
+            }
+
+            // Dividends
+            const divBody = document.getElementById('reconDividendBody');
+            if (!issues.dividends.length) {
+                divBody.innerHTML = `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>All dividends fully paid.</div></td></tr>`;
+            } else {
+                divBody.innerHTML = issues.dividends.map(d => `
+                    <tr class="${d.ageDays > 30 ? 'recon-row-warning' : 'recon-row-caution'}">
+                        <td><span class="div-ref">${escapeHTML(d.id)}</span></td>
+                        <td><strong>${escapeHTML(d.periodLabel)}</strong></td>
+                        <td><span class="status-pill ${escapeHTML(d.status)}">${escapeHTML(d.status)}</span></td>
+                        <td class="employee-amount">KSh ${fmt(d.totalDistributable)}</td>
+                        <td><strong style="color:${d.ageDays > 30 ? '#f0a89f' : '#e8b879'};">${d.ageDays} days</strong></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function openReconModal() {
+            renderReconciliationModal();
+            document.getElementById('reconModal').classList.add('show');
+            switchReconTab('summary');
+        }
+        function closeReconModal() { document.getElementById('reconModal').classList.remove('show'); }
+
+        function switchReconTab(tabName) {
+            document.querySelectorAll('.recon-tab').forEach(t => t.classList.toggle('active', t.dataset.recon === tabName));
+            document.querySelectorAll('.recon-section').forEach(s => s.classList.toggle('active', s.dataset.reconSection === tabName));
+        }
+
+        function closeReconAndEdit(employeeId) {
+            closeReconModal();
+            openEmployeeModal(employeeId);
+        }
+
+        function printReconciliationReport() {
+            const issues = computeReconciliation();
+            const totalIssues = issues.missingRef.length + issues.dupRef.length + issues.pending.length + issues.dividends.length;
+
+            let sections = [];
+            sections.push(`<h3 style="margin-top:20px; color:#0b2b4a;">Summary</h3><p style="font-size:14px;">Total issues: <strong>${totalIssues}</strong></p>`);
+
+            if (issues.missingRef.length) {
+                sections.push(`<h3 style="margin-top:20px; color:#0b2b4a;">Missing References (${issues.missingRef.length})</h3>
+                    <table class="print-list"><thead><tr><th>Employee</th><th>Amount</th><th>Date</th></tr></thead><tbody>${issues.missingRef.map(e => `<tr><td>${escapeHTML(e.name)}</td><td>KSh ${fmt(e.amount)}</td><td>${escapeHTML(e.date || '—')}</td></tr>`).join('')}</tbody></table>`);
+            }
+            if (issues.dupRef.length) {
+                sections.push(`<h3 style="margin-top:20px; color:#0b2b4a;">Duplicate References (${issues.dupRef.length})</h3>
+                    <table class="print-list"><thead><tr><th>Reference</th><th>Employees</th><th>Total</th></tr></thead><tbody>${issues.dupRef.map(d => `<tr><td>${escapeHTML(d.reference)}</td><td>${d.employees.map(e => escapeHTML(e.name)).join(', ')}</td><td>KSh ${fmt(d.total)}</td></tr>`).join('')}</tbody></table>`);
+            }
+            if (issues.pending.length) {
+                sections.push(`<h3 style="margin-top:20px; color:#0b2b4a;">Pending Payments (${issues.pending.length})</h3>
+                    <table class="print-list"><thead><tr><th>Employee</th><th>Amount</th><th>Date</th><th>Days Pending</th></tr></thead><tbody>${issues.pending.map(e => `<tr><td>${escapeHTML(e.name)}</td><td>KSh ${fmt(e.amount)}</td><td>${escapeHTML(e.date || '—')}</td><td>${e.daysPending}</td></tr>`).join('')}</tbody></table>`);
+            }
+            if (issues.dividends.length) {
+                sections.push(`<h3 style="margin-top:20px; color:#0b2b4a;">Unpaid Dividends (${issues.dividends.length})</h3>
+                    <table class="print-list"><thead><tr><th>Ref</th><th>Period</th><th>Status</th><th>Amount</th><th>Age</th></tr></thead><tbody>${issues.dividends.map(d => `<tr><td>${escapeHTML(d.id)}</td><td>${escapeHTML(d.periodLabel)}</td><td>${escapeHTML(d.status)}</td><td>KSh ${fmt(d.totalDistributable)}</td><td>${d.ageDays}d</td></tr>`).join('')}</tbody></table>`);
+            }
+
+            if (totalIssues === 0) {
+                sections.push(`<p style="margin-top:30px; font-size:16px; color:#0b2b4a; text-align:center;">✓ All records reconcile cleanly.</p>`);
+            }
+
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Reconciliation Report')}
+                    ${sections.join('')}
+                    <div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
         }
 
         // ==================================================
@@ -2576,6 +3052,7 @@
             renderSummaryCards();
             renderCharts();
             renderDividendOverview();
+            renderReconciliationBanner();
             if (pulse) pulseLive();
         }
 
@@ -2753,6 +3230,7 @@
                 }
             }
             saveEmployeePayments(); renderEmployeePayments(); closeEmployeeModal();
+            renderReconciliationBanner();
             await saveEmployeesToCloud();
         }
 
@@ -2763,6 +3241,7 @@
             logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
             EMPLOYEE_PAYMENTS = EMPLOYEE_PAYMENTS.filter(e => e.id !== employeeId);
             saveEmployeePayments(); renderEmployeePayments();
+            renderReconciliationBanner();
             await saveEmployeesToCloud();
         }
 
@@ -2808,23 +3287,16 @@
         // DIVIDEND ENGINE
         // ==================================================
         function calcAllocations(total) {
-            // Investors + virtual shareholder
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
             if (totalEquity === 0) return [];
-
-            // raw amounts
             const raw = all.map((inv, idx) => {
                 const pct = (inv.equity / totalEquity) * 100;
                 const rawAmt = total * (pct / 100);
                 return { investorId: inv.id || ('virtual_' + idx), name: inv.name, equity: inv.equity, percentage: pct, rawAmount: rawAmt, floorAmount: Math.floor(rawAmt), roundingAdj: 0 };
             });
-
-            // Sum of floors
             const floorSum = raw.reduce((s, r) => s + r.floorAmount, 0);
             let remainder = Math.round(total) - floorSum;
-
-            // Give remainder to largest raw fraction, then next largest, etc.
             const sorted = [...raw].sort((a, b) => (b.rawAmount - b.floorAmount) - (a.rawAmount - a.floorAmount));
             let i = 0;
             while (remainder > 0 && i < sorted.length * 10) {
@@ -2832,22 +3304,12 @@
                 remainder -= 1;
                 i++;
             }
-
-            // Compute rounding adj for display
             raw.forEach(r => {
                 const match = sorted.find(s => s.investorId === r.investorId);
                 if (match) r.floorAmount = match.floorAmount;
                 r.roundingAdj = +(r.floorAmount - r.rawAmount).toFixed(4);
             });
-
-            return raw.map(r => ({
-                investorId: r.investorId,
-                name: r.name,
-                equity: r.equity,
-                percentage: +r.percentage.toFixed(4),
-                amount: r.floorAmount,
-                roundingAdj: r.roundingAdj
-            }));
+            return raw.map(r => ({ investorId: r.investorId, name: r.name, equity: r.equity, percentage: +r.percentage.toFixed(4), amount: r.floorAmount, roundingAdj: r.roundingAdj }));
         }
 
         function generateDividendId() {
@@ -2874,11 +3336,8 @@
             const notes = document.getElementById('divNotes').value.trim();
             const errEl = document.getElementById('divError');
             errEl.style.display = 'none';
-
             if (total <= 0) { errEl.textContent = '⚠️ Enter a distributable amount greater than 0.'; errEl.style.display = 'block'; return; }
             if (!period) { errEl.textContent = '⚠️ Enter a period label (e.g. September 2026).'; errEl.style.display = 'block'; return; }
-
-            // Duplicate check
             const dup = dividends.find(d => d.periodLabel.toLowerCase() === period.toLowerCase() && d.status !== 'cancelled');
             if (dup) { errEl.textContent = `⚠️ A distribution for "${period}" already exists (${dup.status}). Cancel it first if you need to redo.`; errEl.style.display = 'block'; return; }
 
@@ -2887,20 +3346,11 @@
             const reconciled = allocSum === Math.round(total);
 
             pendingDividend = {
-                id: generateDividendId(),
-                periodLabel: period,
-                totalDistributable: total,
-                notes,
-                allocations,
-                status: 'draft',
-                createdAt: new Date().toISOString(),
-                createdBy: CURRENT_USER,
-                approvedAt: null, approvedBy: null,
-                paidAt: null,
-                cancelledAt: null, cancelReason: null
+                id: generateDividendId(), periodLabel: period, totalDistributable: total, notes, allocations,
+                status: 'draft', createdAt: new Date().toISOString(), createdBy: CURRENT_USER,
+                approvedAt: null, approvedBy: null, paidAt: null, cancelledAt: null, cancelReason: null
             };
 
-            // Build preview
             document.getElementById('previewTotal').textContent = 'KSh ' + fmt(total);
             document.getElementById('previewPeriod').textContent = period;
             const body = document.getElementById('previewBody');
@@ -2927,7 +3377,7 @@
                 reconcileTxt.textContent = `Allocations reconcile exactly to KSh ${fmt(total)}. Ready to save.`;
             } else {
                 reconcileEl.classList.add('warning');
-                reconcileTxt.textContent = `Allocations total KSh ${fmt(allocSum)} but distributable is KSh ${fmt(total)}. Difference: KSh ${fmt(total - allocSum)}.`;
+                reconcileTxt.textContent = `Allocations total KSh ${fmt(allocSum)} but distributable is KSh ${fmt(total)}.`;
             }
 
             closeDividendModal();
@@ -2943,8 +3393,8 @@
             pendingDividend = null;
             closePreviewModal();
             renderDividendOverview();
+            renderReconciliationBanner();
             await saveDividendsToCloud();
-            // open detail
             openDividendDetail(dividends[dividends.length - 1].id);
         }
 
@@ -2952,24 +3402,18 @@
             const d = dividends.find(x => x.id === id);
             if (!d) return;
             currentDetailId = id;
-
             document.getElementById('detailTitle').textContent = d.periodLabel;
             document.getElementById('detailTotal').textContent = 'KSh ' + fmt(d.totalDistributable);
             document.getElementById('detailMeta').innerHTML = `<span class="div-ref">${escapeHTML(d.id)}</span> · Created ${escapeHTML(new Date(d.createdAt).toLocaleString())}`;
 
-            // Status flow
             const steps = ['draft', 'approved', 'processing', 'paid'];
             const flow = document.getElementById('detailFlow');
             const order = { draft: 0, approved: 1, processing: 2, paid: 3, cancelled: -1 };
             const current = order[d.status] !== undefined ? order[d.status] : 0;
             flow.innerHTML = steps.map(s => {
                 let cls = 'status-step';
-                if (d.status === 'cancelled') {
-                    if (s === 'draft') cls += ' done';
-                } else {
-                    if (order[s] < current) cls += ' done';
-                    else if (order[s] === current) cls += ' active';
-                }
+                if (d.status === 'cancelled') { if (s === 'draft') cls += ' done'; }
+                else { if (order[s] < current) cls += ' done'; else if (order[s] === current) cls += ' active'; }
                 return `<span class="${cls}">${s}</span>`;
             }).join('') + (d.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
 
@@ -2993,7 +3437,6 @@
             document.getElementById('detailPaid').textContent = d.paidAt ? new Date(d.paidAt).toLocaleString() : '—';
             document.getElementById('detailNotes').textContent = d.notes || '—';
 
-            // Action buttons based on status
             const actions = document.getElementById('detailActions');
             let html = '';
             if (d.status === 'draft') {
@@ -3021,6 +3464,7 @@
             d.approvedBy = CURRENT_USER;
             logAudit('APPROVE', `Dividend ${id}`, `Approved ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, 'draft', 'approved');
             renderDividendOverview();
+            renderReconciliationBanner();
             await saveDividendsToCloud();
             openDividendDetail(id);
         }
@@ -3029,10 +3473,12 @@
             const d = dividends.find(x => x.id === id);
             if (!d) return;
             if (!confirm(`Mark distribution ${d.id} as PAID? This should only be done after actual payments have been made.`)) return;
+            const oldStatus = d.status;
             d.status = 'paid';
             d.paidAt = new Date().toISOString();
-            logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}`, d.status, 'paid');
+            logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}`, oldStatus, 'paid');
             renderDividendOverview();
+            renderReconciliationBanner();
             await saveDividendsToCloud();
             openDividendDetail(id);
         }
@@ -3048,13 +3494,11 @@
             d.cancelReason = reason || 'No reason provided';
             logAudit('CANCEL', `Dividend ${id}`, `Cancelled ${d.periodLabel} — Reason: ${d.cancelReason}`, oldStatus, 'cancelled');
             renderDividendOverview();
+            renderReconciliationBanner();
             await saveDividendsToCloud();
             openDividendDetail(id);
         }
 
-        // ==================================================
-        // DIVIDEND HISTORY MODAL
-        // ==================================================
         function openDividendsHistoryModal() {
             const body = document.getElementById('dividendHistoryBody');
             if (!body) return;
@@ -3078,7 +3522,7 @@
         function closeDividendsHistoryModal() { document.getElementById('dividendsHistoryModal').classList.remove('show'); }
 
         // ==================================================
-        // PRINT — DIVIDEND
+        // PRINT HELPERS
         // ==================================================
         function doPrint(html) {
             const printArea = document.getElementById('employeePrintArea');
@@ -3107,7 +3551,6 @@
                 </tr>
             `).join('');
             const total = d.allocations.reduce((s, a) => s + a.amount, 0);
-
             doPrint(`
                 <div class="employee-print-report">
                     ${printHeader('Dividend Distribution Report')}
@@ -3123,26 +3566,11 @@
                         ${d.notes ? `<tr><td>Notes</td><td>${escapeHTML(d.notes)}</td></tr>` : ''}
                     </table>
                     <table class="print-list">
-                        <thead>
-                            <tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                            <tr style="font-weight:800; background:#f0f5fb;">
-                                <td colspan="2">TOTAL</td>
-                                <td style="text-align:right;">KSh ${fmt(total)}</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
+                        <thead><tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr></thead>
+                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="2">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td><td></td></tr></tbody>
                     </table>
-                    <div class="print-signatures">
-                        <p>Prepared By: ______________________________</p>
-                        <p>Approved By: ______________________________</p>
-                    </div>
-                    <div class="print-footer">
-                        <span>Starlink LLC · Dividend Distribution</span>
-                        <span>${escapeHTML(new Date().toLocaleString())}</span>
-                    </div>
+                    <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p></div>
+                    <div class="print-footer"><span>Starlink LLC · Dividend Distribution</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
                 </div>
             `);
         }
@@ -3150,29 +3578,18 @@
         function printAllDividends() {
             if (!dividends.length) { showError('No dividends to print.'); return; }
             const rows = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).map(d => `
-                <tr>
-                    <td>${escapeHTML(d.id)}</td>
-                    <td>${escapeHTML(d.periodLabel)}</td>
-                    <td>${escapeHTML(d.status)}</td>
-                    <td style="text-align:right; font-weight:700;">KSh ${fmt(d.totalDistributable)}</td>
-                </tr>
+                <tr><td>${escapeHTML(d.id)}</td><td>${escapeHTML(d.periodLabel)}</td><td>${escapeHTML(d.status)}</td><td style="text-align:right; font-weight:700;">KSh ${fmt(d.totalDistributable)}</td></tr>
             `).join('');
             const total = dividends.reduce((s, d) => s + safeNum(d.totalDistributable), 0);
             doPrint(`
                 <div class="employee-print-report">
                     ${printHeader('All Dividend Distributions')}
-                    <table class="print-list">
-                        <thead><tr><th>Reference</th><th>Period</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr></thead>
-                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="3">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td></tr></tbody>
-                    </table>
+                    <table class="print-list"><thead><tr><th>Reference</th><th>Period</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr></thead><tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="3">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td></tr></tbody></table>
                     <div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
                 </div>
             `);
         }
 
-        // ==================================================
-        // PRINT — EMPLOYEE & AUDIT
-        // ==================================================
         function printEmployeeReport(employeeId) {
             const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
             if (!emp) { showError('Employee not found.'); return; }
@@ -3237,7 +3654,7 @@
         function startPolling() { if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(async () => { const ok = await fetchSummary(); if (ok) renderAll(true); }, 30000); }
 
         // ==================================================
-        // RIPPLE EFFECT
+        // RIPPLE
         // ==================================================
         function attachRipple() {
             document.addEventListener('mousemove', (e) => {
@@ -3249,7 +3666,7 @@
                 }
             });
             document.addEventListener('click', (e) => {
-                const btn = e.target.closest('.btn, .print-employee-btn, .employee-edit-btn, .employee-delete-btn, .div-action-btn');
+                const btn = e.target.closest('.btn, .print-employee-btn, .employee-edit-btn, .employee-delete-btn, .div-action-btn, .recon-tab');
                 if (!btn) return;
                 const rect = btn.getBoundingClientRect();
                 const ripple = document.createElement('span');
@@ -3314,11 +3731,18 @@
             document.getElementById('auditClose').addEventListener('click', closeAuditModal);
             document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
             document.getElementById('printAuditBtn').addEventListener('click', printAuditLog);
-
-            // Audit filters
             ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction'].forEach(id => document.getElementById(id).addEventListener('change', renderAuditLog));
             document.getElementById('auditFilterSearch').addEventListener('input', renderAuditLog);
             document.getElementById('auditFilterClear').addEventListener('click', () => { ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction', 'auditFilterSearch'].forEach(id => document.getElementById(id).value = ''); renderAuditLog(); });
+
+            // Reconciliation modal
+            document.getElementById('reconBtn').addEventListener('click', openReconModal);
+            document.getElementById('reconClose').addEventListener('click', closeReconModal);
+            document.getElementById('reconModal').addEventListener('click', function(e) { if (e.target === this) closeReconModal(); });
+            document.getElementById('printReconBtn').addEventListener('click', printReconciliationReport);
+            document.querySelectorAll('.recon-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchReconTab(tab.dataset.recon));
+            });
 
             // Dividend buttons
             document.getElementById('newDividendBtn').addEventListener('click', openDividendModal);
@@ -3333,7 +3757,7 @@
             document.getElementById('detailClose').addEventListener('click', closeDividendDetail);
             document.getElementById('dividendDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDividendDetail(); });
 
-            // Create dividends history modal dynamically
+            // History modal (dynamic)
             const historyModal = document.createElement('div');
             historyModal.className = 'modal-overlay';
             historyModal.id = 'dividendsHistoryModal';
@@ -3348,9 +3772,7 @@
                     </div>
                     <div class="employee-table-wrap">
                         <table class="employee-table">
-                            <thead>
-                                <tr><th>Ref</th><th>Period</th><th>Status</th><th>Amount</th><th>Shareholders</th><th>Date</th></tr>
-                            </thead>
+                            <thead><tr><th>Ref</th><th>Period</th><th>Status</th><th>Amount</th><th>Shareholders</th><th>Date</th></tr></thead>
                             <tbody id="dividendHistoryBody"></tbody>
                         </table>
                     </div>
