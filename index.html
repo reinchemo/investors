@@ -4469,6 +4469,204 @@
                 </div>
             `);
         }
+        // ==================================================
+        // INVESTOR STATEMENT PRINT (Phase 2e)
+        // ==================================================
+        async function printInvestorStatement(investorId) {
+            const inv = investors.find(i => i.id === investorId);
+            if (!inv) { showError('Investor not found.'); return; }
+
+            let investmentList = [];
+            let shareTxnList = [];
+
+            try {
+                const { data: invData } = await supabaseClient
+                    .from('investments')
+                    .select('*')
+                    .eq('investor_id', investorId)
+                    .order('date', { ascending: true });
+                investmentList = invData || [];
+            } catch (e) { console.warn('Investments fetch failed:', e.message); }
+
+            try {
+                const { data: shareData } = await supabaseClient
+                    .from('share_transactions')
+                    .select('*')
+                    .eq('investor_id', investorId)
+                    .order('date', { ascending: true })
+                    .order('id', { ascending: true });
+                shareTxnList = shareData || [];
+            } catch (e) { console.warn('Share txns fetch failed:', e.message); }
+
+            const dividendRows = [];
+            dividends.forEach(d => {
+                if (Array.isArray(d.allocations)) {
+                    const alloc = d.allocations.find(a => a.investorId === investorId || (a.name && a.name === inv.name));
+                    if (alloc) {
+                        dividendRows.push({
+                            id: d.id,
+                            period: d.periodLabel,
+                            status: d.status,
+                            date: d.paidAt || d.approvedAt || d.createdAt,
+                            amount: safeNum(alloc.amount)
+                        });
+                    }
+                }
+            });
+
+            const totalInvested = investmentList.filter(x => x.type !== 'withdrawal').reduce((s, x) => s + safeNum(x.amount), 0);
+            const totalWithdrawn = investmentList.filter(x => x.type === 'withdrawal').reduce((s, x) => s + safeNum(x.amount), 0);
+            const dividendsReceived = dividendRows.filter(d => d.status === 'paid').reduce((s, d) => s + d.amount, 0);
+            const dividendsPending = dividendRows.filter(d => d.status !== 'paid' && d.status !== 'cancelled').reduce((s, d) => s + d.amount, 0);
+
+            const allHolders = buildInvestors();
+            const totalEquity = allHolders.reduce((s, h) => s + h.equity, 0);
+            const sharePct = totalEquity > 0 ? (safeNum(inv.equity) / totalEquity) * 100 : 0;
+
+            const statementDate = new Date().toLocaleString();
+
+            let invRowsHtml = '';
+            if (investmentList.length === 0) {
+                invRowsHtml = `<tr><td colspan="4" style="text-align:center; padding:14px; color:#6b6860;">No investment contributions recorded.</td></tr>`;
+            } else {
+                investmentList.forEach(x => {
+                    const sign = x.type === 'withdrawal' ? '−' : '+';
+                    const amtColor = x.type === 'withdrawal' ? '#c04a3a' : '#2a8a4a';
+                    invRowsHtml += `<tr>
+                        <td>${escapeHTML(x.date || '—')}</td>
+                        <td style="text-transform:capitalize;">${escapeHTML(x.type || '')}</td>
+                        <td style="font-family:monospace; font-size:11px;">${escapeHTML(x.reference || '—')}</td>
+                        <td style="text-align:right; color:${amtColor}; font-weight:700;">${sign} KSh ${fmt(x.amount)}</td>
+                    </tr>`;
+                });
+                invRowsHtml += `<tr style="font-weight:800; background:#f0f5fb;">
+                    <td colspan="3">NET INVESTED</td>
+                    <td style="text-align:right;">KSh ${fmt(totalInvested - totalWithdrawn)}</td>
+                </tr>`;
+            }
+
+            let divRowsHtml = '';
+            if (dividendRows.length === 0) {
+                divRowsHtml = `<tr><td colspan="4" style="text-align:center; padding:14px; color:#6b6860;">No dividend allocations recorded.</td></tr>`;
+            } else {
+                dividendRows.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+                dividendRows.forEach(d => {
+                    const statusColor = d.status === 'paid' ? '#2a8a4a' : d.status === 'cancelled' ? '#c04a3a' : '#a67a3a';
+                    divRowsHtml += `<tr>
+                        <td>${escapeHTML(d.period || '—')}</td>
+                        <td>${escapeHTML(d.id || '—')}</td>
+                        <td><span style="color:${statusColor}; font-weight:700; text-transform:uppercase; font-size:10px;">${escapeHTML(d.status || '')}</span></td>
+                        <td style="text-align:right; font-weight:700;">KSh ${fmt(d.amount)}</td>
+                    </tr>`;
+                });
+                divRowsHtml += `<tr style="font-weight:800; background:#f0f5fb;">
+                    <td colspan="3">TOTAL PAID DIVIDENDS</td>
+                    <td style="text-align:right;">KSh ${fmt(dividendsReceived)}</td>
+                </tr>`;
+            }
+
+            let shareRowsHtml = '';
+            if (shareTxnList.length === 0) {
+                shareRowsHtml = `<tr><td colspan="5" style="text-align:center; padding:14px; color:#6b6860;">No share ledger entries recorded.</td></tr>`;
+            } else {
+                shareTxnList.forEach(t => {
+                    const deltaSign = safeNum(t.delta) >= 0 ? '+' : '−';
+                    const deltaColor = safeNum(t.delta) >= 0 ? '#2a8a4a' : '#c04a3a';
+                    shareRowsHtml += `<tr>
+                        <td>${escapeHTML(t.date || '—')}</td>
+                        <td style="text-transform:capitalize;">${escapeHTML(t.action || '')}</td>
+                        <td style="text-align:right;">KSh ${fmt(t.equity_before)}</td>
+                        <td style="text-align:right;">KSh ${fmt(t.equity_after)}</td>
+                        <td style="text-align:right; color:${deltaColor}; font-weight:700;">${deltaSign} KSh ${fmt(Math.abs(safeNum(t.delta)))}</td>
+                    </tr>`;
+                });
+            }
+
+            const statusUpper = (inv.status || 'active').toUpperCase();
+
+            const html = `
+                <div class="employee-print-report">
+                    <div class="print-header">
+                        <h1>STARLINK LLC</h1>
+                        <h2>Investor Statement</h2>
+                        <p>Generated: ${escapeHTML(statementDate)}</p>
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <h3 style="color:#0b2b4a; font-size:16px; margin-bottom:8px;">Investor Profile</h3>
+                        <table class="print-payment-table" style="margin-bottom:0;">
+                            <tr><td>Name</td><td><strong>${escapeHTML(inv.name)}</strong></td></tr>
+                            <tr><td>Investor #</td><td>${escapeHTML(inv.investorNumber || '—')}</td></tr>
+                            <tr><td>Status</td><td><strong>${escapeHTML(statusUpper)}</strong></td></tr>
+                            <tr><td>Phone</td><td>${escapeHTML(inv.phone || '—')}</td></tr>
+                            <tr><td>Email</td><td>${escapeHTML(inv.email || '—')}</td></tr>
+                            <tr><td>ID / Reference</td><td>${escapeHTML(inv.idNumber || '—')}</td></tr>
+                            <tr><td>Address</td><td>${escapeHTML(inv.address || '—')}</td></tr>
+                            <tr><td>Joined</td><td>${escapeHTML(inv.joinedDate || '—')}</td></tr>
+                        </table>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:160px; padding:12px 16px; background:#f0f5fb; border:1px solid #d5e2f0; border-radius:10px;">
+                            <div style="font-size:10px; font-weight:700; letter-spacing:0.6px; color:#3b5e7e; text-transform:uppercase;">Total Invested</div>
+                            <div style="font-size:16px; font-weight:800; color:#0b1e33; margin-top:4px;">KSh ${fmt(totalInvested - totalWithdrawn)}</div>
+                        </div>
+                        <div style="flex:1; min-width:160px; padding:12px 16px; background:#f0f5fb; border:1px solid #d5e2f0; border-radius:10px;">
+                            <div style="font-size:10px; font-weight:700; letter-spacing:0.6px; color:#3b5e7e; text-transform:uppercase;">Current Equity</div>
+                            <div style="font-size:16px; font-weight:800; color:#0b1e33; margin-top:4px;">KSh ${fmt(inv.equity)}</div>
+                        </div>
+                        <div style="flex:1; min-width:160px; padding:12px 16px; background:#f0f5fb; border:1px solid #d5e2f0; border-radius:10px;">
+                            <div style="font-size:10px; font-weight:700; letter-spacing:0.6px; color:#3b5e7e; text-transform:uppercase;">Share %</div>
+                            <div style="font-size:16px; font-weight:800; color:#0b1e33; margin-top:4px;">${sharePct.toFixed(2)}%</div>
+                        </div>
+                        <div style="flex:1; min-width:160px; padding:12px 16px; background:#f0f5fb; border:1px solid #d5e2f0; border-radius:10px;">
+                            <div style="font-size:10px; font-weight:700; letter-spacing:0.6px; color:#3b5e7e; text-transform:uppercase;">Dividends Received</div>
+                            <div style="font-size:16px; font-weight:800; color:#2a8a4a; margin-top:4px;">KSh ${fmt(dividendsReceived)}</div>
+                            ${dividendsPending > 0 ? `<div style="font-size:10px; color:#a67a3a; margin-top:2px;">Pending: KSh ${fmt(dividendsPending)}</div>` : ''}
+                        </div>
+                    </div>
+
+                    <h3 style="color:#0b2b4a; font-size:14px; margin-bottom:8px;">Investment History</h3>
+                    <table class="print-list" style="margin-bottom:24px;">
+                        <thead>
+                            <tr><th>Date</th><th>Type</th><th>Reference</th><th style="text-align:right;">Amount (KSh)</th></tr>
+                        </thead>
+                        <tbody>${invRowsHtml}</tbody>
+                    </table>
+
+                    <h3 style="color:#0b2b4a; font-size:14px; margin-bottom:8px;">Dividend History</h3>
+                    <table class="print-list" style="margin-bottom:24px;">
+                        <thead>
+                            <tr><th>Period</th><th>Reference</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th></tr>
+                        </thead>
+                        <tbody>${divRowsHtml}</tbody>
+                    </table>
+
+                    <h3 style="color:#0b2b4a; font-size:14px; margin-bottom:8px;">Share Ledger</h3>
+                    <table class="print-list" style="margin-bottom:24px;">
+                        <thead>
+                            <tr><th>Date</th><th>Action</th><th style="text-align:right;">Equity Before</th><th style="text-align:right;">Equity After</th><th style="text-align:right;">Change</th></tr>
+                        </thead>
+                        <tbody>${shareRowsHtml}</tbody>
+                    </table>
+
+                    ${inv.notes ? `<div style="margin-bottom:24px; padding:12px; background:#f7f9fb; border-left:4px solid #1a5a9c;"><strong style="color:#0b2b4a;">Notes:</strong> <span style="font-size:13px;">${escapeHTML(inv.notes)}</span></div>` : ''}
+
+                    <div class="print-signatures">
+                        <p>Prepared By: ______________________________</p>
+                        <p>Investor Signature: ______________________________</p>
+                        <p>Date: ______________________________</p>
+                    </div>
+
+                    <div class="print-footer">
+                        <span>Starlink LLC · Investor Statement</span>
+                        <span>${escapeHTML(statementDate)}</span>
+                    </div>
+                </div>
+            `;
+
+            doPrint(html);
+        }
 
 
                 // ==================================================
@@ -4752,12 +4950,18 @@
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; gap:0.5rem; flex-wrap:wrap;">
                     <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.9rem; color:#c7d5e6;">Investment History</h4>
-                    <button class="btn btn-primary" id="addInvestmentBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px;">
-                        <i class="fas fa-plus"></i> Add Investment
-                    </button>
+                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                        <button class="btn btn-ghost" id="printStatementBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px;">
+                            <i class="fas fa-file-invoice"></i> Print Statement
+                        </button>
+                        <button class="btn btn-primary" id="addInvestmentBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px;">
+                            <i class="fas fa-plus"></i> Add Investment
+                        </button>
+                    </div>
                 </div>
+
                 <div class="employee-table-wrap">
                     <table class="employee-table" style="min-width:auto;">
                         <thead>
@@ -4796,6 +5000,7 @@
 
             // Wire add investment button
             document.getElementById('addInvestmentBtn').addEventListener('click', () => openInvestmentModal(investorId));
+            document.getElementById('printStatementBtn').addEventListener('click', () => printInvestorStatement(investorId));
         }
 
         function closeInvestorDetail() {
