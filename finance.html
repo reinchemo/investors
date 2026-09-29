@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -151,7 +150,6 @@
                 border-radius: 20px;
             }
         }
-        /* NAV */
         
         .nav {
             display: flex;
@@ -308,7 +306,6 @@
                 min-height: 36px;
             }
         }
-        /* TABS */
         
         .tabs {
             display: flex;
@@ -375,7 +372,6 @@
                 font-size: 0.72rem;
             }
         }
-        /* VIEWS */
         
         .view {
             display: none;
@@ -396,7 +392,6 @@
                 transform: translateY(0);
             }
         }
-        /* HEADLINE */
         
         .headline {
             display: flex;
@@ -443,7 +438,6 @@
                 font-size: 1.3rem;
             }
         }
-        /* INFO BANNER */
         
         .info-banner {
             background: linear-gradient(135deg, rgba(200, 154, 91, 0.15), rgba(200, 154, 91, 0.05));
@@ -467,7 +461,6 @@
         .info-banner strong {
             color: #f4c98d;
         }
-        /* SUMMARY CARDS */
         
         .summary-row {
             display: grid;
@@ -582,7 +575,6 @@
                 font-size: 1.15rem;
             }
         }
-        /* FILTER BAR */
         
         .filter-bar {
             display: flex;
@@ -609,9 +601,6 @@
             transition: all 0.3s ease;
             outline: none;
         }
-        /* ============================================
-   GLOBAL FIX — make all dropdown options readable
-   ============================================ */
         
         select option,
         select optgroup {
@@ -646,7 +635,6 @@
                 width: 100%;
             }
         }
-        /* TABLE */
         
         .table-section {
             border-radius: 22px;
@@ -742,7 +730,6 @@
             font-weight: 700;
             color: #b8a0ff;
         }
-        /* STATUS PILLS */
         
         .status-pill {
             display: inline-block;
@@ -869,7 +856,6 @@
             color: rgba(120, 200, 220, 0.3);
             margin-bottom: 0.6rem;
         }
-        /* MODAL */
         
         .modal-overlay {
             position: fixed;
@@ -952,7 +938,6 @@
             outline: none;
             transition: all 0.3s ease;
         }
-        /* Fix invisible dropdown options on light system menus */
         
         .modal-card select option {
             color: #0a0e1a;
@@ -1043,7 +1028,6 @@
         .modal-card .modal-actions .cancel:hover {
             background: rgba(255, 255, 255, 0.1);
         }
-        /* ACTIVITY FEED */
         
         .activity-feed {
             display: flex;
@@ -1085,7 +1069,6 @@
             font-size: 0.7rem;
             color: #7f9bb8;
         }
-        /* TOAST */
         
         .toast {
             position: fixed;
@@ -1125,7 +1108,6 @@
             color: #7fded1;
             border: 1px solid rgba(95, 199, 188, 0.4);
         }
-        /* LOADING */
         
         .loading-overlay {
             position: fixed;
@@ -1199,20 +1181,16 @@
     <div class="modal-overlay" id="txnModal">
         <div class="modal-card">
             <h3 id="txnModalTitle"><i class="fas fa-plus-circle"></i> New Transaction</h3>
-
             <label>Type</label>
             <select id="txnType">
                 <option value="income">Income</option>
                 <option value="expense">Expenditure</option>
                 <option value="capital">Capital Injection</option>
             </select>
-
             <label>Category</label>
             <select id="txnCategory"></select>
-
             <label>Description</label>
             <input type="text" id="txnDesc" placeholder="e.g. Customer payment for Kimbo site" maxlength="200">
-
             <div class="modal-row">
                 <div>
                     <label>Amount (KSh)</label>
@@ -1223,7 +1201,6 @@
                     <input type="date" id="txnDate">
                 </div>
             </div>
-
             <label>Payment Method</label>
             <select id="txnMethod">
                 <option value="cash">Cash</option>
@@ -1232,10 +1209,8 @@
                 <option value="cheque">Cheque</option>
                 <option value="other">Other</option>
             </select>
-
             <label>Reference (M-Pesa code, bank ref, cheque no.)</label>
             <input type="text" id="txnRef" placeholder="e.g. QAB123456" maxlength="80">
-
             <div class="modal-row">
                 <div>
                     <label>Location</label>
@@ -1251,12 +1226,9 @@
                     </select>
                 </div>
             </div>
-
             <label>Notes (optional)</label>
             <textarea id="txnNotes" placeholder="Additional details..."></textarea>
-
             <div class="modal-error" id="txnError"></div>
-
             <div class="modal-actions">
                 <button class="cancel" id="txnCancel">Cancel</button>
                 <button class="save" id="txnSave">Save Transaction</button>
@@ -1296,14 +1268,13 @@
     <div class="dashboard">
         <nav class="nav">
             <div class="brand"><i class="fas fa-coins"></i><span>STARLINK · FINANCE</span></div>
-
             <div class="nav-actions">
                 <a href="index.html" class="btn btn-home">
                     <i class="fas fa-arrow-left"></i><span>Back</span>
                 </a>
                 <button class="btn btn-primary" id="newTxnBtn">
-        <i class="fas fa-plus"></i><span>New Transaction</span>
-    </button>
+                    <i class="fas fa-plus"></i><span>New Transaction</span>
+                </button>
             </div>
         </nav>
 
@@ -1330,7 +1301,6 @@
             <div class="headline">
                 <h1><i class="fas fa-chart-pie"></i> Overview <small id="todayLabel">—</small></h1>
             </div>
-
             <div class="summary-row">
                 <div class="summary-card income">
                     <div class="summary-label"><i class="fas fa-arrow-down"></i> TOTAL INCOME</div>
@@ -1353,7 +1323,6 @@
                     <div class="summary-sub">Income − Expenditure</div>
                 </div>
             </div>
-
             <div class="table-section">
                 <div class="table-section-header">
                     <h4><i class="fas fa-clock" style="color:#5fc7bc; margin-right:0.4rem;"></i> Recent Activity</h4>
@@ -1371,7 +1340,6 @@
                     <button class="btn btn-primary" id="newTxnBtn2"><i class="fas fa-plus"></i> New Transaction</button>
                 </div>
             </div>
-
             <div class="filter-bar">
                 <input type="date" id="ldgFilterFrom" title="From date">
                 <input type="date" id="ldgFilterTo" title="To date">
@@ -1393,7 +1361,6 @@
                     <i class="fas fa-times"></i> Clear
                 </button>
             </div>
-
             <div class="table-section">
                 <div class="table-wrap">
                     <table class="data-table">
@@ -1426,7 +1393,6 @@
                     <button class="btn btn-primary" id="newIncomeBtn"><i class="fas fa-plus"></i> Record Income</button>
                 </div>
             </div>
-
             <div class="summary-row">
                 <div class="summary-card income">
                     <div class="summary-label"><i class="fas fa-arrow-down"></i> TOTAL INCOME</div>
@@ -1434,7 +1400,6 @@
                     <div class="summary-sub" id="incCount">0 transactions</div>
                 </div>
             </div>
-
             <div class="filter-bar">
                 <input type="date" id="incFilterFrom">
                 <input type="date" id="incFilterTo">
@@ -1450,7 +1415,6 @@
                     <i class="fas fa-times"></i> Clear
                 </button>
             </div>
-
             <div class="table-section">
                 <div class="table-wrap">
                     <table class="data-table">
@@ -1482,7 +1446,6 @@
                     <button class="btn btn-primary" id="newExpenseBtn"><i class="fas fa-plus"></i> Record Expenditure</button>
                 </div>
             </div>
-
             <div class="summary-row">
                 <div class="summary-card expense">
                     <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE</div>
@@ -1490,7 +1453,6 @@
                     <div class="summary-sub" id="expCount">0 transactions</div>
                 </div>
             </div>
-
             <div class="filter-bar">
                 <input type="date" id="expFilterFrom">
                 <input type="date" id="expFilterTo">
@@ -1506,7 +1468,6 @@
                     <i class="fas fa-times"></i> Clear
                 </button>
             </div>
-
             <div class="table-section">
                 <div class="table-wrap">
                     <table class="data-table">
@@ -1534,7 +1495,6 @@
             <div class="headline">
                 <h1><i class="fas fa-mobile-alt" style="color:#5fc7bc;"></i> M-PESA Reconciliation</h1>
             </div>
-
             <div class="summary-row">
                 <div class="summary-card income">
                     <div class="summary-label"><i class="fas fa-check-circle"></i> RECONCILED</div>
@@ -1557,7 +1517,6 @@
                     <div class="summary-sub">Same code twice</div>
                 </div>
             </div>
-
             <div class="table-section">
                 <div class="table-section-header">
                     <h4><i class="fas fa-list" style="color:#5fc7bc; margin-right:0.4rem;"></i> M-Pesa Transactions</h4>
@@ -1587,14 +1546,12 @@
             <div class="headline">
                 <h1><i class="fas fa-check-double" style="color:#b8a0ff;"></i> Pending Approvals</h1>
             </div>
-
             <div class="info-banner">
                 <i class="fas fa-exclamation-triangle"></i>
                 <div>
                     <strong>UI-level approval.</strong> Approve/Reject buttons are cosmetic until Phase 1.5 adds real server-side enforcement. Any user with the URL can currently approve transactions.
                 </div>
             </div>
-
             <div class="table-section">
                 <div class="table-wrap">
                     <table class="data-table">
@@ -1620,7 +1577,6 @@
             <div class="headline">
                 <h1><i class="fas fa-database"></i> Backup & Restore</h1>
             </div>
-
             <div class="summary-row">
                 <div class="summary-card">
                     <div class="summary-label"><i class="fas fa-file-alt"></i> TOTAL TRANSACTIONS</div>
@@ -1633,7 +1589,6 @@
                     <div class="summary-sub">From cloud</div>
                 </div>
             </div>
-
             <div class="table-section">
                 <div class="table-section-header">
                     <h4><i class="fas fa-download" style="color:#5fc7bc; margin-right:0.4rem;"></i> Export / Import</h4>
@@ -1746,89 +1701,64 @@
         }
 
         // ==================================================
-        // CLOUD SYNC
+        // CLOUD SYNC — reads/writes individual rows from `transactions` table
         // ==================================================
-        let cloudWriteChain = Promise.resolve();
-
-        function enqueueCloudWrite(fn) {
-            cloudWriteChain = cloudWriteChain.then(fn, fn);
-            return cloudWriteChain;
-        }
-
-        async function saveToCloud() {
-            if (!supabaseClient) return false;
-            return enqueueCloudWrite(async() => {
-                try {
-                    const {
-                        data: c
-                    } = await supabaseClient
-                        .from('expenditure_data')
-                        .select('data')
-                        .eq('id', 1)
-                        .single();
-
-                    const existing = (c && c.data) || {};
-                    const merged = {
-                        ...existing,
-                        finance_ledger: {
-                            transactions: transactions,
-                            sequence: sequence,
-                            lastUpdated: new Date().toISOString(),
-                            lastUpdatedBy: CURRENT_USER
-                        }
-                    };
-
-                    await supabaseClient
-                        .from('expenditure_data')
-                        .upsert({
-                            id: 1,
-                            data: merged,
-                            last_updated: new Date().toISOString()
-                        }, {
-                            onConflict: 'id'
-                        });
-
-                    lastSyncAt = new Date().toISOString();
-                    updateSyncStatus();
-                    return true;
-                } catch (e) {
-                    console.error('Save error:', e);
-                    showToast('Save failed: ' + e.message, 'error');
-                    return false;
-                }
-            });
-        }
-
         async function fetchFromCloud() {
             if (!supabaseClient) return false;
             try {
                 const {
-                    data: result,
+                    data,
                     error
                 } = await supabaseClient
-                    .from('expenditure_data')
-                    .select('data, last_updated')
-                    .eq('id', 1)
-                    .single();
+                    .from('transactions')
+                    .select('*')
+                    .order('created_at', {
+                        ascending: false
+                    });
 
-                if (error) {
-                    if (error.code === 'PGRST116') return false;
-                    throw error;
-                }
+                if (error) throw error;
 
-                if (result && result.data) {
-                    const ledger = result.data.finance_ledger;
-                    if (ledger && Array.isArray(ledger.transactions)) {
-                        transactions = ledger.transactions;
-                        sequence = safeNum(ledger.sequence) || 1;
-                    }
-                    lastSyncAt = result.last_updated || new Date().toISOString();
-                    return true;
-                }
+                transactions = (data || []).map(row => ({
+                    id: row.id,
+                    date: row.date,
+                    type: row.type,
+                    category: row.category,
+                    description: row.description,
+                    amount: safeNum(row.amount),
+                    method: row.method,
+                    reference: row.reference || '',
+                    location: row.location || '',
+                    status: row.status,
+                    reconStatus: row.recon_status || 'na',
+                    notes: row.notes || '',
+                    createdAt: row.created_at,
+                    createdBy: row.created_by,
+                    updatedAt: row.updated_at,
+                    updatedBy: row.updated_by,
+                    approvedAt: row.approved_at,
+                    approvedBy: row.approved_by,
+                    rejectedAt: row.rejected_at,
+                    rejectedBy: row.rejected_by
+                }));
+
+                // Derive next sequence from highest ID present
+                const maxSeq = transactions.reduce((m, t) => {
+                    const match = String(t.id || '').match(/(\d{6})$/);
+                    return match ? Math.max(m, parseInt(match[1], 10)) : m;
+                }, 0);
+                sequence = maxSeq + 1;
+
+                lastSyncAt = new Date().toISOString();
+                return true;
             } catch (e) {
                 console.warn('Fetch failed — using local state:', e.message);
             }
             return false;
+        }
+
+        // saveToCloud is now a no-op — individual actions write directly to the table
+        async function saveToCloud() {
+            return true;
         }
 
         function updateSyncStatus() {
@@ -1884,7 +1814,6 @@
                 year: 'numeric'
             });
 
-            // Activity feed (last 10)
             const recent = [...transactions]
                 .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
                 .slice(0, 10);
@@ -2010,7 +1939,6 @@
             const body = document.getElementById('mpesaBody');
             const mpesaTxns = transactions.filter(t => t.method === 'mpesa' || (t.reference && /^[A-Z0-9]{8,12}$/i.test(t.reference || '')));
 
-            // Detect duplicates
             const refCounts = {};
             transactions.forEach(t => {
                 const r = (t.reference || '').trim().toUpperCase();
@@ -2018,7 +1946,6 @@
             });
             const duplicates = Object.keys(refCounts).filter(r => refCounts[r] > 1).length;
 
-            // Recon status
             const reconciled = mpesaTxns.filter(t => t.reconStatus === 'reconciled').length;
             const matched = mpesaTxns.filter(t => t.reconStatus === 'matched').length;
             const unmatched = mpesaTxns.filter(t => !t.reconStatus || t.reconStatus === 'unmatched').length;
@@ -2194,50 +2121,61 @@
                 }
             }
 
-            if (editingTxnId) {
-                const idx = transactions.findIndex(t => t.id === editingTxnId);
-                if (idx !== -1) {
-                    transactions[idx] = {
-                        ...transactions[idx],
-                        type,
-                        category,
-                        description,
-                        amount,
-                        date,
-                        method,
-                        reference,
-                        location,
-                        status,
-                        notes,
-                        updatedAt: new Date().toISOString(),
-                        updatedBy: CURRENT_USER
-                    };
+            const row = {
+                date: date,
+                type: type,
+                category: category,
+                description: description,
+                amount: amount,
+                method: method,
+                reference: reference || null,
+                location: location || null,
+                status: status,
+                recon_status: method === 'mpesa' ? 'unmatched' : 'na',
+                notes: notes || null
+            };
+
+            const wasEditing = !!editingTxnId;
+
+            if (wasEditing) {
+                row.updated_at = new Date().toISOString();
+                row.updated_by = CURRENT_USER;
+
+                const {
+                    error
+                } = await supabaseClient
+                    .from('transactions')
+                    .update(row)
+                    .eq('id', editingTxnId);
+
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
                 }
             } else {
-                const id = nextTxnId();
+                row.id = nextTxnId();
+                row.created_by = CURRENT_USER;
+                row.created_at = new Date().toISOString();
+
+                const {
+                    error
+                } = await supabaseClient
+                    .from('transactions')
+                    .insert(row);
+
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
+                }
                 sequence++;
-                transactions.push({
-                    id,
-                    type,
-                    category,
-                    description,
-                    amount,
-                    date,
-                    method,
-                    reference,
-                    location,
-                    status,
-                    notes,
-                    reconStatus: method === 'mpesa' ? 'unmatched' : 'na',
-                    createdAt: new Date().toISOString(),
-                    createdBy: CURRENT_USER
-                });
             }
 
+            await fetchFromCloud();
             closeTxnModal();
             renderAll();
-            const ok = await saveToCloud();
-            if (ok) showToast(editingTxnId ? '✅ Transaction updated' : '✅ Transaction saved', 'success');
+            showToast(wasEditing ? '✅ Transaction updated' : '✅ Transaction saved', 'success');
         }
 
         // ==================================================
@@ -2255,10 +2193,19 @@
                 '🗑️ Delete Transaction?',
                 `Delete ${t.id} — ${t.description} (KSh ${fmt(t.amount)})? This cannot be undone.`,
                 async() => {
-                    transactions = transactions.filter(x => x.id !== id);
+                    const {
+                        error
+                    } = await supabaseClient
+                        .from('transactions')
+                        .delete()
+                        .eq('id', id);
+                    if (error) {
+                        showToast('Delete failed: ' + error.message, 'error');
+                        return;
+                    }
+                    await fetchFromCloud();
                     renderAll();
-                    const ok = await saveToCloud();
-                    if (ok) showToast('✅ Transaction deleted', 'success');
+                    showToast('✅ Transaction deleted', 'success');
                 }
             );
         };
@@ -2266,12 +2213,23 @@
         window.approveTxn = async function(id) {
             const t = transactions.find(x => x.id === id);
             if (!t) return;
-            t.status = 'posted';
-            t.approvedAt = new Date().toISOString();
-            t.approvedBy = CURRENT_USER;
+            const {
+                error
+            } = await supabaseClient
+                .from('transactions')
+                .update({
+                    status: 'posted',
+                    approved_at: new Date().toISOString(),
+                    approved_by: CURRENT_USER
+                })
+                .eq('id', id);
+            if (error) {
+                showToast('Approve failed: ' + error.message, 'error');
+                return;
+            }
+            await fetchFromCloud();
             renderAll();
-            const ok = await saveToCloud();
-            if (ok) showToast('✅ Transaction approved & posted', 'success');
+            showToast('✅ Transaction approved & posted', 'success');
         };
 
         window.rejectTxn = function(id) {
@@ -2281,12 +2239,23 @@
                 '❌ Reject Transaction?',
                 `Reject ${t.id} — ${t.description}? It will be marked as rejected.`,
                 async() => {
-                    t.status = 'rejected';
-                    t.rejectedAt = new Date().toISOString();
-                    t.rejectedBy = CURRENT_USER;
+                    const {
+                        error
+                    } = await supabaseClient
+                        .from('transactions')
+                        .update({
+                            status: 'rejected',
+                            rejected_at: new Date().toISOString(),
+                            rejected_by: CURRENT_USER
+                        })
+                        .eq('id', id);
+                    if (error) {
+                        showToast('Reject failed: ' + error.message, 'error');
+                        return;
+                    }
+                    await fetchFromCloud();
                     renderAll();
-                    const ok = await saveToCloud();
-                    if (ok) showToast('Transaction rejected', 'info');
+                    showToast('Transaction rejected', 'info');
                 }
             );
         };
@@ -2297,10 +2266,21 @@
             const order = ['unmatched', 'matched', 'verified', 'reconciled'];
             const cur = t.reconStatus || 'unmatched';
             const next = order[(order.indexOf(cur) + 1) % order.length];
-            t.reconStatus = next;
+            const {
+                error
+            } = await supabaseClient
+                .from('transactions')
+                .update({
+                    recon_status: next
+                })
+                .eq('id', id);
+            if (error) {
+                showToast('Update failed: ' + error.message, 'error');
+                return;
+            }
+            await fetchFromCloud();
             renderAll();
-            const ok = await saveToCloud();
-            if (ok) showToast(`M-Pesa status: ${next}`, 'info');
+            showToast(`M-Pesa status: ${next}`, 'info');
         };
 
         // ==================================================
@@ -2376,13 +2356,42 @@
                     err.style.display = 'block';
                     return;
                 }
-                transactions = data.transactions;
-                sequence = safeNum(data.sequence) || (transactions.length + 1);
+
+                // Insert each transaction into the table (skip duplicates by ID)
+                let inserted = 0;
+                for (const t of data.transactions) {
+                    const row = {
+                        id: t.id,
+                        date: t.date,
+                        type: t.type,
+                        category: t.category,
+                        description: t.description,
+                        amount: safeNum(t.amount),
+                        method: t.method,
+                        reference: t.reference || null,
+                        location: t.location || null,
+                        status: t.status || 'draft',
+                        recon_status: t.reconStatus || 'na',
+                        notes: t.notes || null,
+                        created_at: t.createdAt || new Date().toISOString(),
+                        created_by: t.createdBy || CURRENT_USER
+                    };
+                    const {
+                        error
+                    } = await supabaseClient
+                        .from('transactions')
+                        .upsert(row, {
+                            onConflict: 'id',
+                            ignoreDuplicates: false
+                        });
+                    if (!error) inserted++;
+                }
+
                 document.getElementById('importModal').classList.remove('show');
                 document.getElementById('importJson').value = '';
+                await fetchFromCloud();
                 renderAll();
-                const ok = await saveToCloud();
-                if (ok) showToast(`✅ Imported ${transactions.length} transactions`, 'success');
+                showToast(`✅ Imported ${inserted} transactions`, 'success');
             } catch (e) {
                 err.textContent = '⚠️ Invalid JSON: ' + e.message;
                 err.style.display = 'block';
@@ -2406,7 +2415,6 @@
         // FILTER LISTENERS
         // ==================================================
         function setupFilters() {
-            // Ledger
             ['ldgFilterFrom', 'ldgFilterTo', 'ldgFilterType', 'ldgFilterStatus'].forEach(id =>
                 document.getElementById(id).addEventListener('change', renderLedger)
             );
@@ -2416,7 +2424,6 @@
                 renderLedger();
             });
 
-            // Income
             ['incFilterFrom', 'incFilterTo', 'incFilterStatus'].forEach(id =>
                 document.getElementById(id).addEventListener('change', renderIncome)
             );
@@ -2426,7 +2433,6 @@
                 renderIncome();
             });
 
-            // Expense
             ['expFilterFrom', 'expFilterTo', 'expFilterStatus'].forEach(id =>
                 document.getElementById(id).addEventListener('change', renderExpense)
             );
@@ -2466,11 +2472,9 @@
             await fetchFromCloud();
             renderAll();
 
-            // Setup tabs
             setupTabs();
             setupFilters();
 
-            // New transaction buttons
             document.getElementById('newTxnBtn').addEventListener('click', () => openTxnModal(null));
             document.getElementById('newTxnBtn2').addEventListener('click', () => openTxnModal(null));
             document.getElementById('newIncomeBtn').addEventListener('click', () => {
@@ -2488,7 +2492,6 @@
                 }, 50);
             });
 
-            // Modal handlers
             document.getElementById('txnCancel').addEventListener('click', closeTxnModal);
             document.getElementById('txnSave').addEventListener('click', saveTxn);
             document.getElementById('txnModal').addEventListener('click', function(e) {
@@ -2496,7 +2499,6 @@
             });
             document.getElementById('txnType').addEventListener('change', (e) => populateCategoryDropdown(e.target.value));
 
-            // Confirm modal
             document.getElementById('confirmNo').addEventListener('click', closeConfirm);
             document.getElementById('confirmYes').addEventListener('click', () => {
                 const cb = confirmCallback;
@@ -2507,7 +2509,6 @@
                 if (e.target === this) closeConfirm();
             });
 
-            // Export buttons
             document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
             document.getElementById('importJsonBtn').addEventListener('click', () => {
                 document.getElementById('importError').style.display = 'none';
@@ -2528,7 +2529,6 @@
             document.getElementById('exportCsvIncome').addEventListener('click', () => exportCsv(transactions.filter(t => t.type === 'income'), 'income'));
             document.getElementById('exportCsvExpense').addEventListener('click', () => exportCsv(transactions.filter(t => t.type === 'expense'), 'expense'));
 
-            // Start polling
             startPolling();
 
             setLoading(false);
