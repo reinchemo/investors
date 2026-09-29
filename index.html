@@ -245,20 +245,6 @@
             isolation: isolate;
         }
         
-        .btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(95, 199, 188, 0.35), transparent 50%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: -1;
-        }
-        
-        .btn:hover::before {
-            opacity: 1;
-        }
-        
         .btn i {
             transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -529,21 +515,10 @@
             border-radius: 20px;
             padding: 1rem 1.15rem;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.4);
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
             position: relative;
             overflow: hidden;
-        }
-        
-        .summary-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(95, 199, 188, 0.12), transparent 60%);
-            opacity: 0;
-            transition: opacity 0.35s ease;
-            pointer-events: none;
         }
         
         .summary-card::after {
@@ -562,10 +537,6 @@
             transform: translateY(-4px);
             border-color: rgba(120, 200, 220, 0.3);
             box-shadow: 0 20px 40px -16px rgba(79, 182, 168, 0.35);
-        }
-        
-        .summary-card:hover::before {
-            opacity: 1;
         }
         
         .summary-card:hover::after {
@@ -588,11 +559,6 @@
         .summary-card .summary-label i {
             color: #5fc7bc;
             font-size: 0.85rem;
-            transition: transform 0.35s ease;
-        }
-        
-        .summary-card:hover .summary-label i {
-            transform: scale(1.15) rotate(-8deg);
         }
         
         .summary-card .summary-value {
@@ -671,38 +637,11 @@
         .chart-card {
             background: linear-gradient(135deg, rgba(30, 45, 70, 0.5) 0%, rgba(20, 32, 52, 0.6) 100%);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 24px;
             padding: 1.2rem 1.2rem 0.7rem;
             border: 1px solid rgba(120, 200, 220, 0.12);
             box-shadow: 0 14px 32px -16px rgba(0, 0, 0, 0.4);
             transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .chart-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(from 0deg, transparent, rgba(95, 199, 188, 0.08), transparent 30%);
-            animation: chartSpin 12s linear infinite;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-        }
-        
-        .chart-card:hover::before {
-            opacity: 1;
-        }
-        
-        @keyframes chartSpin {
-            to {
-                transform: rotate(360deg);
-            }
         }
         
         .chart-card:hover {
@@ -720,8 +659,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            position: relative;
-            z-index: 1;
         }
         
         .chart-card h3 i {
@@ -757,13 +694,7 @@
             padding: 0.1rem;
             -webkit-overflow-scrolling: touch;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 14px 32px -16px rgba(0, 0, 0, 0.4);
-            transition: border-color 0.35s ease;
-        }
-        
-        .table-section:hover {
-            border-color: rgba(120, 200, 220, 0.22);
         }
         
         .table-section-header {
@@ -847,17 +778,6 @@
             white-space: nowrap;
             letter-spacing: 0.05em;
             text-transform: uppercase;
-            animation: tagPulse 2.4s ease-in-out infinite;
-        }
-        
-        @keyframes tagPulse {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(200, 154, 91, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 0 6px rgba(200, 154, 91, 0);
-            }
         }
         
         .investor-table .equity-ratio {
@@ -895,22 +815,20 @@
             color: #5fc7bc;
         }
         
+        .row-actions .del-btn {
+            color: #e8837a;
+        }
+        
         .row-actions .edit-btn:hover {
             background: rgba(95, 199, 188, 0.15);
             border-color: rgba(95, 199, 188, 0.5);
             transform: scale(1.15) rotate(-8deg);
-            box-shadow: 0 6px 16px -6px rgba(95, 199, 188, 0.6);
-        }
-        
-        .row-actions .del-btn {
-            color: #e8837a;
         }
         
         .row-actions .del-btn:hover {
             background: rgba(226, 104, 91, 0.15);
             border-color: rgba(226, 104, 91, 0.5);
             transform: scale(1.15) rotate(8deg);
-            box-shadow: 0 6px 16px -6px rgba(226, 104, 91, 0.6);
         }
         
         @media (max-width:480px) {
@@ -1046,7 +964,6 @@
             inset: 0;
             background: rgba(5, 10, 20, 0.72);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -1075,11 +992,10 @@
             max-width: 440px;
             width: 100%;
             border: 1px solid rgba(120, 200, 220, 0.18);
-            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(120, 200, 220, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7);
             max-height: 92vh;
             overflow-y: auto;
             animation: modalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
         }
         
         @keyframes modalEnter {
@@ -1185,8 +1101,6 @@
             cursor: pointer;
             font-size: 0.92rem;
             transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-            position: relative;
-            overflow: hidden;
         }
         
         .modal-card .modal-actions .save {
@@ -1308,10 +1222,6 @@
             transition: background 0.3s ease, color 0.3s ease;
         }
         
-        .employee-table tbody tr {
-            transition: background 0.3s ease;
-        }
-        
         .employee-table tbody tr:hover {
             background: linear-gradient(90deg, rgba(95, 199, 188, 0.06), transparent);
         }
@@ -1418,11 +1328,6 @@
             border-radius: 14px;
             border: 1px solid rgba(120, 200, 220, 0.12);
             margin-bottom: 1rem;
-            transition: border-color 0.3s ease;
-        }
-        
-        .filter-bar:hover {
-            border-color: rgba(120, 200, 220, 0.2);
         }
         
         .filter-bar input,
@@ -1498,19 +1403,6 @@
         .audit-banner i {
             margin-top: 2px;
             font-size: 1rem;
-            animation: warningPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes warningPulse {
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.15);
-                opacity: 0.7;
-            }
         }
         
         .empty-row {
@@ -1525,17 +1417,6 @@
             font-size: 2rem;
             color: rgba(120, 200, 220, 0.3);
             margin-bottom: 0.6rem;
-            animation: emptyFloat 2.4s ease-in-out infinite;
-        }
-        
-        @keyframes emptyFloat {
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-6px);
-            }
         }
         
         .dividend-card {
@@ -1785,7 +1666,6 @@
             padding: 1rem 1.2rem;
             margin-bottom: 1.2rem;
             display: none;
-            animation: slideDown 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         .recon-banner.show {
@@ -1817,14 +1697,6 @@
         
         .recon-banner.ok .recon-banner-title {
             color: #7ee0a2;
-        }
-        
-        .recon-banner-title i {
-            animation: warningPulse 2s ease-in-out infinite;
-        }
-        
-        .recon-banner.ok .recon-banner-title i {
-            animation: iconSpin 4s linear infinite;
         }
         
         .recon-count {
@@ -1924,7 +1796,6 @@
         .recon-tab.active {
             background: linear-gradient(135deg, rgba(226, 104, 91, 0.2), rgba(226, 104, 91, 0.08));
             color: #f0a89f;
-            box-shadow: 0 4px 12px -6px rgba(226, 104, 91, 0.5);
             border: 1px solid rgba(226, 104, 91, 0.3);
         }
         
@@ -1943,11 +1814,6 @@
             font-weight: 700;
         }
         
-        .recon-tab.active .badge {
-            background: rgba(226, 104, 91, 0.4);
-            color: #fff;
-        }
-        
         .recon-tab.empty .badge {
             background: rgba(111, 203, 147, 0.2);
             color: #7ee0a2;
@@ -1959,7 +1825,6 @@
         
         .recon-section.active {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
         
         .recon-stats {
@@ -1974,12 +1839,6 @@
             border: 1px solid rgba(120, 200, 220, 0.12);
             border-radius: 14px;
             padding: 0.75rem 0.9rem;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-        
-        .recon-stat:hover {
-            transform: translateY(-2px);
-            border-color: rgba(120, 200, 220, 0.25);
         }
         
         .recon-stat .recon-stat-label {
@@ -2083,16 +1942,6 @@
             color: #f0a89f;
         }
         
-        .div-edit-btn.warn:hover {
-            background: rgba(200, 154, 91, 0.15);
-            border-color: rgba(200, 154, 91, 0.5);
-        }
-        
-        .div-delete-btn.warn:hover {
-            background: rgba(226, 104, 91, 0.25);
-            border-color: rgba(226, 104, 91, 0.6);
-        }
-        
         .audit-row-warning {
             background: linear-gradient(90deg, rgba(226, 104, 91, 0.1), transparent) !important;
             border-left: 3px solid #f0a89f !important;
@@ -2111,7 +1960,6 @@
             margin-left: 0.4rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            animation: warningPulse 2s ease-in-out infinite;
         }
         
         .employee-print-report {
@@ -2395,6 +2243,315 @@
         </div>
     </div>
 
+    <!-- DILUTION SIMULATOR MODAL -->
+    <div class="modal-overlay" id="dilutionModal">
+        <div class="modal-card" style="max-width:1000px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-flask" style="color:#5fc7bc;"></i> Dilution Simulator</h3>
+                <button class="btn btn-ghost add-employee-btn" id="printDilutionBtn"><i class="fas fa-print"></i> Print</button>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span><strong>Sandbox only — nothing is saved.</strong> Model a hypothetical investment and see how it would affect ownership. Close this window to discard. To make it real, use <strong>Proposals</strong> instead.</span>
+            </div>
+
+            <div class="filter-bar" style="margin-bottom:1rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; width:100%;">
+                    <label style="font-size:0.7rem; font-weight:700; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Mode</label>
+                    <select id="dilMode" style="min-width:220px;">
+                        <option value="add">Add as new capital (proportional dilution)</option>
+                        <option value="target">Target equity % for new investor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-bar" style="margin-bottom:1rem;">
+                <input type="text" id="dilName" placeholder="New investor name" style="min-width:180px; flex:1;" maxlength="80">
+                <input type="number" id="dilAmount" placeholder="Investment amount (KSh)" style="min-width:180px; flex:1;" min="0" step="1">
+                <input type="number" id="dilTargetPct" placeholder="Target % (e.g. 10)" style="min-width:140px;" min="0" max="99.9999" step="0.0001">
+                <button class="btn btn-primary" id="dilRunBtn" style="padding:0.55rem 1.2rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-play"></i> Simulate
+                </button>
+                <button class="btn btn-ghost" id="dilResetBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+
+            <div id="dilResults" style="display:none;">
+                <div id="dilSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+                <div class="employee-table-wrap" style="margin-bottom:1rem;">
+                    <table class="employee-table" style="min-width:800px;">
+                        <thead>
+                            <tr>
+                                <th>Holder</th>
+                                <th style="text-align:right;">Current Equity</th>
+                                <th style="text-align:right;">Current %</th>
+                                <th style="text-align:right;">After Equity</th>
+                                <th style="text-align:right;">After %</th>
+                                <th style="text-align:right;">Change</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dilTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="chart-wrapper" style="height:300px; margin-bottom:1rem;">
+                    <canvas id="dilChart"></canvas>
+                </div>
+
+                <div class="reconcile-note" id="dilReconcile" style="margin-top:1rem;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="dilReconcileText">Simulation ready.</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="dilutionClose">Close (Discard)</button>
+            </div>
+        </div>
+    </div>
+    <!-- DILUTION SIMULATOR MODAL -->
+    <div class="modal-overlay" id="dilutionModal">
+        <div class="modal-card" style="max-width:1000px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-flask" style="color:#5fc7bc;"></i> Dilution Simulator</h3>
+                <button class="btn btn-ghost add-employee-btn" id="printDilutionBtn"><i class="fas fa-print"></i> Print</button>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span><strong>Sandbox only — nothing is saved.</strong> Model a hypothetical investment and see how it would affect ownership. Close this window to discard. To make it real, use <strong>Proposals</strong> instead.</span>
+            </div>
+
+            <div class="filter-bar" style="margin-bottom:1rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; width:100%;">
+                    <label style="font-size:0.7rem; font-weight:700; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Mode</label>
+                    <select id="dilMode" style="min-width:220px;">
+                        <option value="add">Add as new capital (proportional dilution)</option>
+                        <option value="target">Target equity % for new investor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-bar" style="margin-bottom:1rem;">
+                <input type="text" id="dilName" placeholder="New investor name" style="min-width:180px; flex:1;" maxlength="80">
+                <input type="number" id="dilAmount" placeholder="Investment amount (KSh)" style="min-width:180px; flex:1;" min="0" step="1">
+                <input type="number" id="dilTargetPct" placeholder="Target % (e.g. 10)" style="min-width:140px;" min="0" max="99.9999" step="0.0001">
+                <button class="btn btn-primary" id="dilRunBtn" style="padding:0.55rem 1.2rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-play"></i> Simulate
+                </button>
+                <button class="btn btn-ghost" id="dilResetBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+
+            <div id="dilResults" style="display:none;">
+                <div id="dilSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+                <div class="employee-table-wrap" style="margin-bottom:1rem;">
+                    <table class="employee-table" style="min-width:800px;">
+                        <thead>
+                            <tr>
+                                <th>Holder</th>
+                                <th style="text-align:right;">Current Equity</th>
+                                <th style="text-align:right;">Current %</th>
+                                <th style="text-align:right;">After Equity</th>
+                                <th style="text-align:right;">After %</th>
+                                <th style="text-align:right;">Change</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dilTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="chart-wrapper" style="height:300px; margin-bottom:1rem;">
+                    <canvas id="dilChart"></canvas>
+                </div>
+
+                <div class="reconcile-note" id="dilReconcile" style="margin-top:1rem;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="dilReconcileText">Simulation ready.</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="dilutionClose">Close (Discard)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROPOSALS LIST MODAL -->
+    <div class="modal-overlay" id="proposalsModal">
+        <div class="modal-card" style="max-width:1100px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-file-signature" style="color:#b8a0ff;"></i> Investment Proposals</h3>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-ghost add-employee-btn" id="printProposalsBtn"><i class="fas fa-print"></i> Print</button>
+                    <button class="btn btn-primary add-employee-btn" id="newProposalBtn"><i class="fas fa-plus"></i> New Proposal</button>
+                </div>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>Track investor proposals through the negotiation workflow: <strong>Draft → Sent → Negotiating → Accepted → Approved → Funded</strong>. When a proposal is <strong>Funded</strong>, the system automatically creates the investment, updates the investor's equity, and logs the change to the share ledger.</span>
+            </div>
+
+            <div class="filter-bar">
+                <select id="propFilterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="negotiating">Negotiating</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="approved">Approved</option>
+                    <option value="funded">Funded</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="propFilterInvestor"><option value="">All Investors</option></select>
+                <input type="text" class="grow" id="propFilterSearch" placeholder="Search purpose, notes, or prospect name...">
+                <button class="btn btn-ghost" id="propFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div id="proposalSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+            <div class="employee-table-wrap">
+                <table class="employee-table" style="min-width:1000px;">
+                    <thead>
+                        <tr>
+                            <th>Ref</th>
+                            <th>Investor / Prospect</th>
+                            <th style="text-align:right;">Proposed Amount</th>
+                            <th style="text-align:right;">Proposed %</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proposalsBody"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions"><button class="cancel" id="proposalsClose">Close</button></div>
+        </div>
+    </div>
+
+    <!-- NEW / EDIT PROPOSAL MODAL -->
+    <div class="modal-overlay" id="proposalFormModal">
+        <div class="modal-card" style="max-width:560px;">
+            <h3 id="proposalFormTitle"><i class="fas fa-plus-circle"></i> New Proposal</h3>
+
+            <label>Proposal For</label>
+            <select id="propFormInvestorType">
+                <option value="existing">Existing Investor</option>
+                <option value="prospect">New Prospect</option>
+            </select>
+
+            <div id="propFormExistingWrap">
+                <label>Select Investor</label>
+                <select id="propFormInvestor"></select>
+            </div>
+
+            <div id="propFormProspectWrap" style="display:none;">
+                <label>Prospect Name</label>
+                <input type="text" id="propFormProspectName" placeholder="e.g. Jane Wambui" maxlength="80">
+                <label>Prospect Contact (phone / email)</label>
+                <input type="text" id="propFormProspectContact" placeholder="+254..." maxlength="120">
+            </div>
+
+            <label>Proposed Amount (KSh) <span style="color:#e8837a;">*</span></label>
+            <input type="number" id="propFormAmount" placeholder="0" min="1" step="1">
+
+            <label>Proposed Equity % (optional)</label>
+            <input type="number" id="propFormEquityPct" placeholder="e.g. 12.5" min="0" max="100" step="0.0001">
+
+            <label>Purpose</label>
+            <input type="text" id="propFormPurpose" placeholder="e.g. Network expansion — Ruiru" maxlength="150">
+
+            <label>Terms (optional)</label>
+            <textarea id="propFormTerms" placeholder="Payment schedule, conditions, etc." maxlength="500"></textarea>
+
+            <label>Expiry Date (optional)</label>
+            <input type="date" id="propFormExpiry">
+
+            <label>Notes</label>
+            <textarea id="propFormNotes" placeholder="Additional context..." maxlength="500"></textarea>
+
+            <div class="modal-error" id="proposalFormError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="proposalFormCancel">Cancel</button>
+                <button class="save" id="proposalFormSave">Save as Draft</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROPOSAL DETAIL MODAL -->
+    <div class="modal-overlay" id="proposalDetailModal">
+        <div class="modal-card" style="max-width:760px;">
+            <h3><i class="fas fa-file-signature" style="color:#b8a0ff;"></i> <span id="propDetailTitle">Proposal Detail</span></h3>
+            <div id="propDetailBody"></div>
+            <div class="div-actions-row" id="propDetailActions"></div>
+            <div class="modal-actions"><button class="cancel" id="propDetailClose">Close</button></div>
+        </div>
+    </div>
+    <!-- CAP TABLE MODAL -->
+    <div class="modal-overlay" id="capTableModal">
+        <div class="modal-card" style="max-width:1000px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-layer-group" style="color:#5fc7bc;"></i> Capitalization Table</h3>
+                <button class="btn btn-ghost add-employee-btn" id="printCapTableBtn"><i class="fas fa-print"></i> Print</button>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>The cap table shows current ownership. Every change to an investor's equity is appended to the <strong>share ledger</strong> as a historical record. Use the date picker below to view ownership as it stood on any past date.</span>
+            </div>
+
+            <div class="filter-bar" style="margin-bottom:1rem;">
+                <label style="font-size:0.7rem; font-weight:700; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em; align-self:center;">📅 As of</label>
+                <input type="date" id="capTableDate" title="Show ownership as of this date">
+                <button class="btn btn-ghost" id="capTableTodayBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-calendar-day"></i> Today
+                </button>
+                <button class="btn btn-ghost" id="capTableAllBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-history"></i> All-time
+                </button>
+            </div>
+
+            <div id="capTableSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+            <div class="employee-table-wrap">
+                <table class="employee-table" style="min-width:800px;">
+                    <thead>
+                        <tr>
+                            <th>Investor</th>
+                            <th>Investor #</th>
+                            <th style="text-align:right;">Equity (KSh)</th>
+                            <th style="text-align:right;">Ownership %</th>
+                            <th>Last Change</th>
+                            <th>Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody id="capTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="reconcile-note" id="capTableReconcile" style="margin-top:1rem;">
+                <i class="fas fa-check-circle"></i>
+                <span id="capTableReconcileText">Cap table totals 100%.</span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="capTableClose">Close</button>
+            </div>
+        </div>
+    </div>
     <!-- RECONCILIATION MODAL -->
     <div class="modal-overlay" id="reconModal">
         <div class="modal-card" style="max-width: 1000px;">
@@ -2591,19 +2748,90 @@
     </div>
 
     <!-- ADD / EDIT INVESTOR MODAL -->
+    <!-- ADD / EDIT INVESTOR MODAL -->
     <div class="modal-overlay" id="investorModal">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width:560px;">
             <h3 id="investorModalTitle">➕ Add Investor</h3>
-            <label>Name</label>
+            <label>Name <span style="color:#e8837a;">*</span></label>
             <input type="text" id="invName" placeholder="e.g. John Doe" maxlength="60">
-            <label>Equity Contribution (KSh)</label>
+            <label>Investor Number</label>
+            <input type="text" id="invNumber" placeholder="Auto-generated (e.g. INV-006)" maxlength="20">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.7rem;">
+                <div>
+                    <label>Phone</label>
+                    <input type="text" id="invPhone" placeholder="+254..." maxlength="20">
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" id="invEmail" placeholder="name@example.com" maxlength="80">
+                </div>
+            </div>
+            <label>ID / Reference Number</label>
+            <input type="text" id="invIdNumber" placeholder="National ID or Passport #" maxlength="40">
+            <label>Address</label>
+            <input type="text" id="invAddress" placeholder="Physical address" maxlength="200">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.7rem;">
+                <div>
+                    <label>Joined Date</label>
+                    <input type="date" id="invJoinedDate">
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select id="invStatus">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="prospect">Prospect</option>
+                    </select>
+                </div>
+            </div>
+            <label>Equity (KSh) <span style="color:#e8837a;">*</span></label>
             <input type="number" id="invEquity" placeholder="0" min="0" step="1">
             <label>Color</label>
             <input type="color" id="invColor" value="#1f4a7a" style="height:48px; padding:0.3rem;">
+            <label>Notes</label>
+            <textarea id="invNotes" placeholder="Any additional information..." maxlength="500"></textarea>
             <div class="modal-error" id="invError"></div>
             <div class="modal-actions">
                 <button class="cancel" id="invCancel">Cancel</button>
                 <button class="save" id="invSave">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVESTOR DETAIL MODAL -->
+    <div class="modal-overlay" id="investorDetailModal">
+        <div class="modal-card" style="max-width:800px;">
+            <h3><i class="fas fa-user-circle" style="color:#5fc7bc;"></i> <span id="invDetailName">Investor</span></h3>
+            <div id="invDetailBody"></div>
+            <div class="modal-actions">
+                <button class="cancel" id="invDetailClose">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD INVESTMENT MODAL -->
+    <div class="modal-overlay" id="investmentModal">
+        <div class="modal-card" style="max-width:480px;">
+            <h3 id="investmentModalTitle"><i class="fas fa-plus-circle"></i> Add Investment</h3>
+            <p style="color:#7f9bb8; font-size:0.82rem; margin-bottom:0.5rem;" id="investmentInvestorLabel">—</p>
+            <label>Type</label>
+            <select id="invType">
+                <option value="initial">Initial Investment</option>
+                <option value="additional">Additional Investment</option>
+                <option value="withdrawal">Withdrawal</option>
+            </select>
+            <label>Amount (KSh)</label>
+            <input type="number" id="invAmount" placeholder="0" min="1" step="1">
+            <label>Date</label>
+            <input type="date" id="invDate">
+            <label>Reference (M-Pesa / bank / cheque)</label>
+            <input type="text" id="invRef" placeholder="e.g. QAB123456" maxlength="80">
+            <label>Notes (optional)</label>
+            <textarea id="invInvNotes" placeholder="Any details about this contribution..." maxlength="300"></textarea>
+            <div class="modal-error" id="invInvError"></div>
+            <div class="modal-actions">
+                <button class="cancel" id="invInvestmentCancel">Cancel</button>
+                <button class="save" id="invInvestmentSave">Save Investment</button>
             </div>
         </div>
     </div>
@@ -2633,18 +2861,17 @@
                 <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-arrow-left"></i><span>Back Home</span>
                 </a>
+                <a href="finance.html" class="btn btn-primary">
+                    <i class="fas fa-coins"></i><span>Finance</span>
+                </a>
+                <button class="btn btn-ghost" id="capTableBtn"><i class="fas fa-layer-group"></i> Cap Table</button>
+                <button class="btn btn-ghost" id="proposalsBtn"><i class="fas fa-file-signature"></i> Proposals <span id="proposalsCountNav" style="display:none; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(122,90,248,0.35); color:#b8a0ff; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
+                <button class="btn btn-ghost" id="dilutionBtn"><i class="fas fa-flask"></i> Simulator</button>
                 <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
                 <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
                 <button class="btn btn-ghost" id="reconBtn"><i class="fas fa-balance-scale"></i> Reconcile <span id="reconCountNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(226,104,91,0.3); color:#f0a89f; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
-                <a href="finance.html" class="btn btn-primary">
-                    <i class="fas fa-coins"></i> Finance
-                </a>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
-
-                <a href="https://starlink-one-iota.vercel.app/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-                    <i class="fas fa-sign-in-alt"></i><span>Login · Expenditures</span>
-                </a>
             </div>
         </nav>
 
@@ -2715,9 +2942,11 @@
                 <thead>
                     <tr>
                         <th scope="col">Shareholder</th>
+                        <th scope="col">Investor #</th>
+                        <th scope="col">Status</th>
                         <th scope="col">Equity (KSh)</th>
                         <th scope="col">Equity Ratio</th>
-                        <th scope="col" style="width:80px; text-align:right;">Actions</th>
+                        <th scope="col" style="width:110px; text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="investorTableBody"></tbody>
@@ -2795,12 +3024,15 @@
             barChartInstance = null,
             pollInterval = null;
         let editingInvestorId = null;
-        let EMPLOYEE_PAYMENTS = loadEmployeePayments();
+        let EMPLOYEE_PAYMENTS = [];
         let editingEmployeeId = null;
         let auditLogs = [];
+        let proposals = [];
+        let currentDetailProposalId = null;
+        let editingProposalId = null;
         let pendingDividend = null;
         let editingDividendId = null;
-        let pendingEditAction = null; // { type: 'dividend-edit' | 'dividend-delete', id }
+        let pendingEditAction = null;
 
         // ==================================================
         // HELPERS
@@ -2886,21 +3118,40 @@
         }
 
         // ==================================================
-        // AUDIT
+        // AUDIT — now writes to `audit_logs` table
         // ==================================================
-        function logAudit(action, target, details, oldVal, newVal, isWarning) {
-            auditLogs.push({
+        async function logAudit(action, target, details, oldVal, newVal, isWarning) {
+            const row = {
                 id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
                 timestamp: new Date().toISOString(),
-                user: CURRENT_USER,
-                action,
-                target,
+                user_name: CURRENT_USER,
+                action: action,
+                target: target || '',
                 details: details || '',
-                oldValue: oldVal !== undefined ? String(oldVal) : '',
-                newValue: newVal !== undefined ? String(newVal) : '',
-                warning: isWarning || false
+                old_value: oldVal !== undefined ? String(oldVal) : '',
+                new_value: newVal !== undefined ? String(newVal) : '',
+                warning: !!isWarning
+            };
+
+            // Optimistically add to local state
+            auditLogs.push({
+                id: row.id,
+                timestamp: row.timestamp,
+                user: row.user_name,
+                action: row.action,
+                target: row.target,
+                details: row.details,
+                oldValue: row.old_value,
+                newValue: row.new_value,
+                warning: row.warning
             });
-            saveAuditToCloud().catch(e => console.warn('Audit save failed:', e));
+
+            if (!supabaseClient) return;
+            try {
+                await supabaseClient.from('audit_logs').insert(row);
+            } catch (e) {
+                console.warn('Audit save failed:', e.message);
+            }
         }
 
         function renderAuditLog() {
@@ -2938,6 +3189,177 @@
         }
 
         // ==================================================
+        // CLOUD SYNC — reads from JSON blob (expenditure summary only)
+        // Investors, employees, dividends, audit_logs come from tables
+        // ==================================================
+        async function fetchSummary() {
+            if (!supabaseClient) return false;
+            try {
+                // 1. Read shared blob for summary calculation + custom columns
+                const { data: blobResult, error: blobErr } = await supabaseClient
+                    .from('expenditure_data')
+                    .select('data, last_updated')
+                    .eq('id', 1)
+                    .single();
+
+                if (blobErr && blobErr.code !== 'PGRST116') throw blobErr;
+
+                if (blobResult && blobResult.data) {
+                    const cloud = blobResult.data;
+                    if (Array.isArray(cloud.data) && cloud.data.length > 0) {
+                        summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: blobResult.last_updated };
+                    } else {
+                        summary = { commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0, starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE, totalTransactionFees: 0, lastUpdated: blobResult.last_updated };
+                    }
+                }
+
+                // 2. Read investors from table
+                const { data: invRows, error: invErr } = await supabaseClient
+                    .from('investors')
+                    .select('*')
+                    .order('id', { ascending: true });
+                if (invErr) throw invErr;
+                    investors = (invRows || []).map(r => ({
+                    id: r.id,
+                    name: r.name,
+                    equity: safeNum(r.equity),
+                    color: r.color || '#4fb6a8',
+                    phone: r.phone || '',
+                    email: r.email || '',
+                    idNumber: r.id_number || '',
+                    address: r.address || '',
+                    investorNumber: r.investor_number || '',
+                    status: r.status || 'active',
+                    joinedDate: r.joined_date || '',
+                    notes: r.notes || ''
+                }));
+
+                // 3. Read employees from table
+                const { data: empRows, error: empErr } = await supabaseClient
+                    .from('employees')
+                    .select('*')
+                    .order('date', { ascending: false });
+                if (empErr) throw empErr;
+                EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
+                    id: r.id,
+                    name: r.name,
+                    amount: safeNum(r.amount),
+                    reference: r.reference || '',
+                    status: r.status || 'paid',
+                    date: r.date || ''
+                }));
+
+                // 4. Read dividends from table
+                const { data: divRows, error: divErr } = await supabaseClient
+                    .from('dividends')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (divErr) throw divErr;
+                dividends = (divRows || []).map(r => ({
+                    id: r.id,
+                    periodLabel: r.period_label,
+                    totalDistributable: safeNum(r.total_distributable),
+                    notes: r.notes || '',
+                    status: r.status,
+                    allocations: Array.isArray(r.allocations) ? r.allocations : [],
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    approvedAt: r.approved_at,
+                    approvedBy: r.approved_by,
+                    paidAt: r.paid_at,
+                    cancelledAt: r.cancelled_at,
+                    cancelReason: r.cancel_reason,
+                    lastEditedAt: r.last_edited_at,
+                    lastEditedBy: r.last_edited_by,
+                    lastEditReason: r.last_edit_reason
+                }));
+
+                // 5. Read audit logs from table
+                           // 5. Read audit logs from table
+                const { data: auditRows, error: auditErr } = await supabaseClient
+                    .from('audit_logs')
+                    .select('*')
+                    .order('timestamp', { ascending: false })
+                    .limit(500);
+                if (auditErr) throw auditErr;
+                auditLogs = (auditRows || []).map(r => ({
+                    id: r.id,
+                    timestamp: r.timestamp,
+                    user: r.user_name || 'admin',
+                    action: r.action,
+                    target: r.target || '',
+                    details: r.details || '',
+                    oldValue: r.old_value || '',
+                    newValue: r.new_value || '',
+                    warning: !!r.warning
+                }));
+
+                // 6. Read proposals
+                const { data: propRows, error: propErr } = await supabaseClient
+                    .from('proposals')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (propErr) throw propErr;
+                proposals = (propRows || []).map(r => ({
+                    id: r.id,
+                    investorId: r.investor_id,
+                    prospectName: r.prospect_name || '',
+                    prospectContact: r.prospect_contact || '',
+                    proposedAmount: safeNum(r.proposed_amount),
+                    proposedEquityPct: r.proposed_equity_pct !== null ? safeNum(r.proposed_equity_pct) : null,
+                    purpose: r.purpose || '',
+                    terms: r.terms || '',
+                    expiryDate: r.expiry_date || '',
+                    status: r.status,
+                    notes: r.notes || '',
+                    sentAt: r.sent_at,
+                    negotiatingAt: r.negotiating_at,
+                    acceptedAt: r.accepted_at,
+                    approvedAt: r.approved_at,
+                    fundedAt: r.funded_at,
+                    rejectedAt: r.rejected_at,
+                    cancelledAt: r.cancelled_at,
+                    rejectionReason: r.rejection_reason || '',
+                    cancellationReason: r.cancellation_reason || '',
+                    linkedInvestmentId: r.linked_investment_id,
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by
+                }));
+
+                // Update nav badge for pending proposals
+                updateProposalsBadge();
+
+                return true;
+            } catch (e) {
+                console.warn('Fetch failed — using local state:', e.message);
+            }
+            return false;
+        }
+
+        function computeSummaryFromRaw(rawData) {
+            function sumAny(keys) {
+                let total = 0;
+                rawData.forEach(g => (g.rows || []).forEach(r => {
+                    for (const k of keys) {
+                        const v = safeNum(r[k + '_amount']);
+                        if (v !== 0) { total += v; break; }
+                    }
+                }));
+                return Math.round(total * 100) / 100;
+            }
+            const commonInvestmentTotal = sumAny(['commonInvestment']);
+            const routersTotal = sumAny(['routers']);
+            const kairoRoutersTotal = sumAny(['saved_6_kairo_routers', 'saved_5_kairo_routers', 'saved_4_kairo_routers', 'saved_3_kairo_routers', 'saved_2_kairo_routers', 'kairoRouters']);
+            const starlinkInvestmentTotal = sumAny(['saved_4_starlink_investment', 'saved_5_starlink_investment', 'saved_6_starlink_investment', 'saved_3_starlink_investment', 'saved_2_starlink_investment', 'starlinkInvestment']);
+            const starlinkVirtualInvestment = Math.round((STARLINK_VIRTUAL_BASE + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
+            return { commonInvestmentTotal, routersTotal, kairoRoutersTotal, starlinkInvestmentTotal, starlinkVirtualInvestment, totalTransactionFees: 0, lastUpdated: new Date().toISOString() };
+        }
+
+        // ==================================================
         // BUILD INVESTORS
         // ==================================================
         function buildInvestors() {
@@ -2946,7 +3368,7 @@
             return list;
         }
 
-        function renderTable() {
+            function renderTable() {
             const tbody = document.getElementById('investorTableBody');
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
@@ -2955,18 +3377,44 @@
                 const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
                 const rowClass = inv.isStarlink ? 'highlight-row' : '';
                 if (inv.isStarlink) {
-                    html += `<tr class="${rowClass}"><td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td><td><strong>${fmt(inv.equity)}</strong></td><td class="equity-ratio">${ratio}%</td><td></td></tr>`;
+                    html += `<tr class="${rowClass}">
+                        <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td><strong>${fmt(inv.equity)}</strong></td>
+                        <td class="equity-ratio">${ratio}%</td>
+                        <td></td>
+                    </tr>`;
                 } else {
-                    html += `<tr class="${rowClass}"><td>${escapeHTML(inv.name)}</td><td>${fmt(inv.equity)}</td><td class="equity-ratio">${ratio}%</td><td><div class="row-actions"><button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button><button class="del-btn" data-id="${inv.id}" title="Delete">🗑️</button></div></td></tr>`;
+                    const statusClass = inv.status === 'inactive' ? 'cancelled' :
+                                        inv.status === 'prospect' ? 'pending' : 'paid';
+                    html += `<tr class="${rowClass}">
+                        <td><a href="#" class="investor-name-link" data-id="${inv.id}" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(inv.name)}</a></td>
+                        <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#7f9bb8;">${escapeHTML(inv.investorNumber || '—')}</span></td>
+                        <td><span class="status-pill ${statusClass}">${escapeHTML(inv.status || 'active')}</span></td>
+                        <td>${fmt(inv.equity)}</td>
+                        <td class="equity-ratio">${ratio}%</td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button>
+                                <button class="del-btn" data-id="${inv.id}" title="Delete">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>`;
                 }
             });
-            html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${fmt(totalEquity)}</strong></td><td><strong>100.00%</strong></td><td></td></tr>`;
+            html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td></td><td></td><td><strong>${fmt(totalEquity)}</strong></td><td><strong>100.00%</strong></td><td></td></tr>`;
             tbody.innerHTML = html;
+
             tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openInvestorModal(parseInt(btn.dataset.id))));
             tbody.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', () => deleteInvestor(parseInt(btn.dataset.id))));
+            tbody.querySelectorAll('.investor-name-link').forEach(link => link.addEventListener('click', (e) => {
+                e.preventDefault();
+                openInvestorDetail(parseInt(link.dataset.id));
+            }));
+
             return totalEquity;
         }
-
         function renderSummaryCards() {
             document.getElementById('virtualInvestmentValue').textContent = fmtDec(summary.starlinkVirtualInvestment);
             document.getElementById('starlinkInvestmentValue').textContent = fmtDec(summary.starlinkInvestmentTotal);
@@ -2980,7 +3428,7 @@
             const latest = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
             document.getElementById('dividendTotalPaid').textContent = 'KSh ' + fmt(totalPaid);
             document.getElementById('dividendCount').textContent = dividends.length;
-            document.getElementById('dividendLatest').textContent = latest ? (latest.periodLabel || latest.period || '—') : '—';
+            document.getElementById('dividendLatest').textContent = latest ? (latest.periodLabel || '—') : '—';
         }
 
         // ==================================================
@@ -2993,7 +3441,7 @@
             EMPLOYEE_PAYMENTS.forEach(e => { const ref = (e.reference || '').trim().toLowerCase(); if (!ref) return; if (!refMap[ref]) refMap[ref] = []; refMap[ref].push(e); });
             Object.keys(refMap).forEach(ref => { if (refMap[ref].length > 1) issues.dupRef.push({ reference: refMap[ref][0].reference, employees: refMap[ref], total: refMap[ref].reduce((s, e) => s + safeNum(e.amount), 0) }); });
             EMPLOYEE_PAYMENTS.forEach(e => { if (e.status === 'pending') issues.pending.push({ ...e, daysPending: daysBetween(e.date) }); });
-            dividends.forEach(d => { if (['draft','approved','processing'].includes(d.status)) issues.dividends.push({ ...d, ageDays: daysBetween(d.createdAt) }); });
+            dividends.forEach(d => { if (['draft', 'approved', 'processing'].includes(d.status)) issues.dividends.push({ ...d, ageDays: daysBetween(d.createdAt) }); });
             return issues;
         }
 
@@ -3032,7 +3480,7 @@
             document.getElementById('reconBadgeDup').textContent = issues.dupRef.length;
             document.getElementById('reconBadgePending').textContent = issues.pending.length;
             document.getElementById('reconBadgeDiv').textContent = issues.dividends.length;
-            ['Summary','Missing','Dup','Pending','Div'].forEach(k => {
+            ['Summary', 'Missing', 'Dup', 'Pending', 'Div'].forEach(k => {
                 const b = document.getElementById('reconBadge' + k);
                 const tab = b.closest('.recon-tab');
                 tab.classList.toggle('empty', b.textContent === '0');
@@ -3041,7 +3489,7 @@
             const totalPaidEmployees = EMPLOYEE_PAYMENTS.filter(e => e.status === 'paid').reduce((s, e) => s + safeNum(e.amount), 0);
             const totalPending = EMPLOYEE_PAYMENTS.filter(e => e.status === 'pending').reduce((s, e) => s + safeNum(e.amount), 0);
             const totalDivPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
-            const totalDivUnpaid = dividends.filter(d => ['draft','approved','processing'].includes(d.status)).reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+            const totalDivUnpaid = dividends.filter(d => ['draft', 'approved', 'processing'].includes(d.status)).reduce((s, d) => s + safeNum(d.totalDistributable), 0);
 
             document.getElementById('reconStats').innerHTML = `
                 <div class="recon-stat good"><div class="recon-stat-label"><i class="fas fa-check-circle"></i> Paid Payments</div><div class="recon-stat-value">KSh ${fmt(totalPaidEmployees)}</div></div>
@@ -3076,7 +3524,7 @@
             document.querySelectorAll('.recon-section').forEach(s => s.classList.toggle('active', s.dataset.reconSection === tabName));
         }
         function closeReconAndEdit(employeeId) { closeReconModal(); openEmployeeModal(employeeId); }
-        
+
         // ==================================================
         // CHARTS
         // ==================================================
@@ -3115,209 +3563,1373 @@
             if (pulse) pulseLive();
         }
 
-        function computeSummaryFromRaw(rawData) {
-            function sumAny(keys) { let total = 0; rawData.forEach(g => (g.rows || []).forEach(r => { for (const k of keys) { const v = safeNum(r[k + '_amount']); if (v !== 0) { total += v; break; } } })); return Math.round(total * 100) / 100; }
-            const commonInvestmentTotal = sumAny(['commonInvestment']);
-            const routersTotal = sumAny(['routers']);
-            const kairoRoutersTotal = sumAny(['saved_6_kairo_routers','saved_5_kairo_routers','saved_4_kairo_routers','saved_3_kairo_routers','saved_2_kairo_routers','kairoRouters']);
-            const starlinkInvestmentTotal = sumAny(['saved_4_starlink_investment','saved_5_starlink_investment','saved_6_starlink_investment','saved_3_starlink_investment','saved_2_starlink_investment','starlinkInvestment']);
-            const starlinkVirtualInvestment = Math.round((STARLINK_VIRTUAL_BASE + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
-            return { commonInvestmentTotal, routersTotal, kairoRoutersTotal, starlinkInvestmentTotal, starlinkVirtualInvestment, totalTransactionFees: 0, lastUpdated: new Date().toISOString() };
-        }
-
         // ==================================================
-        // CLOUD — SERIALIZED WRITES (fixes disappearing data)
+        // INVESTOR MODAL — writes to `investors` table
         // ==================================================
-        let cloudWriteChain = Promise.resolve();
-
-        function enqueueCloudWrite(fn) {
-            cloudWriteChain = cloudWriteChain.then(fn, fn);
-            return cloudWriteChain;
-        }
-
-        // Single writer. Always merges ALL local state into the blob so no
-        // parallel save can clobber another field.
-        async function saveStateToCloud() {
-            if (!supabaseClient) return false;
-            return enqueueCloudWrite(async () => {
-                try {
-                    const { data: c } = await supabaseClient
-                        .from('expenditure_data')
-                        .select('data')
-                        .eq('id', 1)
-                        .single();
-
-                    const existing = c?.data || {};
-                    const merged = {
-                        ...existing,
-                        investors: investors,
-                        employees: EMPLOYEE_PAYMENTS,
-                        audit_logs: auditLogs,
-                        dividends: dividends
-                    };
-
-                    await supabaseClient.from('expenditure_data').upsert({
-                        id: 1,
-                        data: merged,
-                        last_updated: new Date().toISOString()
-                    }, { onConflict: 'id' });
-
-                    return true;
-                } catch (e) {
-                    showError('Save failed: ' + e.message);
-                    return false;
-                }
-            });
-        }
-
-        // Thin wrappers so existing callers keep working
-        async function saveInvestorsToCloud() { return saveStateToCloud(); }
-        async function saveEmployeesToCloud() { return saveStateToCloud(); }
-        async function saveAuditToCloud()    { return saveStateToCloud(); }
-        async function saveDividendsToCloud(){ return saveStateToCloud(); }
-
-        // DevTools recovery helpers
-        window.recoverDividends = async function () {
-            if (!dividends.length) {
-                console.warn('No local dividends in memory to recover.');
-                return;
-            }
-            console.log(`Pushing ${dividends.length} local dividends to cloud...`);
-            const ok = await saveStateToCloud();
-            console.log(ok ? 'Recovery save complete.' : 'Recovery save FAILED.');
-        };
-
-        window.inspectCloud = async function () {
-            if (!supabaseClient) { console.warn('Supabase not ready.'); return; }
-            const { data } = await supabaseClient
-                .from('expenditure_data').select('data').eq('id', 1).single();
-            const blob = data?.data || {};
-            console.table({
-                investors:  (blob.investors  || []).length,
-                employees:  (blob.employees  || []).length,
-                audit_logs: (blob.audit_logs || []).length,
-                dividends:  (blob.dividends  || []).length,
-                raw_rows:   (blob.data       || []).length
-            });
-            return blob;
-        };
-
-        // ==================================================
-        // FETCH — hardended against partial blobs
-        // ==================================================
-        async function fetchSummary() {
-            if (!supabaseClient) return false;
-            try {
-                const { data: result, error } = await supabaseClient.from('expenditure_data').select('data, last_updated').eq('id', 1).single();
-                if (error) { if (error.code === 'PGRST116') return false; throw error; }
-                if (result && result.data) {
-                    const cloud = result.data;
-
-                    if (Array.isArray(cloud.data) && cloud.data.length > 0) {
-                        summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: result.last_updated };
-                    } else {
-                        summary = { commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0, starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE, totalTransactionFees: 0, lastUpdated: result.last_updated };
-                    }
-
-                    // --- INVESTORS ---
-                    if (Array.isArray(cloud.investors) && cloud.investors.length > 0) {
-                        investors = cloud.investors.map(i => ({
-                            id: i.id || nextInvestorId(),
-                            name: i.name || 'Unnamed',
-                            equity: safeNum(i.equity),
-                            color: i.color || '#4fb6a8'
-                        }));
-                    } else if (investors.length === 0) {
-                        investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
-                        saveStateToCloud().catch(() => {});
-                    }
-
-                    // --- EMPLOYEES ---
-                    if (Array.isArray(cloud.employees) && cloud.employees.length > 0) {
-                        EMPLOYEE_PAYMENTS = cloud.employees.map(e => ({
-                            id: e.id,
-                            name: e.name || 'Unnamed',
-                            amount: safeNum(e.amount),
-                            reference: e.reference || '',
-                            status: e.status || 'paid',
-                            date: e.date || ''
-                        }));
-                        saveEmployeePayments();
-                    }
-
-                    // --- AUDIT LOGS (union merge by id) ---
-                    if (Array.isArray(cloud.audit_logs) && cloud.audit_logs.length > 0) {
-                        const known = new Set(auditLogs.map(l => l.id));
-                        const merged = [...auditLogs];
-                        cloud.audit_logs.forEach(l => {
-                            if (l && l.id && !known.has(l.id)) merged.push(l);
-                        });
-                        auditLogs = merged;
-                    }
-
-                    // --- DIVIDENDS (CRITICAL: never let empty cloud array wipe local state) ---
-                    if (Array.isArray(cloud.dividends) && cloud.dividends.length > 0) {
-                        const byId = new Map(dividends.map(d => [d.id, d]));
-                        cloud.dividends.forEach(d => { if (d && d.id) byId.set(d.id, d); });
-                        dividends = [...byId.values()];
-                    } else if (Array.isArray(cloud.dividends) && cloud.dividends.length === 0 && dividends.length > 0) {
-                        // Cloud was clobbered empty, but we still have local entries — push them back up.
-                        console.warn('[Recovery] Cloud dividends empty, local has entries. Re-saving.');
-                        saveStateToCloud().catch(() => {});
-                    }
-                    // else: cloud has no dividends key at all — keep local state untouched.
-
-                    return true;
-                }
-            } catch (e) { console.error('❌ Fetch error:', e); showError('Failed to load data: ' + e.message); }
-            return false;
-        }
-        
-        // ==================================================
-        // INVESTOR MODAL
-        // ==================================================
-        function openInvestorModal(investorId = null) {
+           function openInvestorModal(investorId = null) {
             editingInvestorId = investorId;
             const title = document.getElementById('investorModalTitle');
-            const nameEl = document.getElementById('invName');
-            const eqEl = document.getElementById('invEquity');
-            const colorEl = document.getElementById('invColor');
             const errEl = document.getElementById('invError');
             errEl.style.display = 'none';
-            if (investorId) { const inv = investors.find(i => i.id === investorId); if (!inv) return; title.textContent = '✏️ Edit Investor'; nameEl.value = inv.name; eqEl.value = inv.equity; colorEl.value = inv.color || '#4fb6a8'; }
-            else { title.textContent = '➕ Add Investor'; nameEl.value = ''; eqEl.value = ''; colorEl.value = pickColor(); }
+
+            if (investorId) {
+                const inv = investors.find(i => i.id === investorId);
+                if (!inv) return;
+                title.textContent = '✏️ Edit Investor';
+                document.getElementById('invName').value = inv.name || '';
+                document.getElementById('invNumber').value = inv.investorNumber || '';
+                document.getElementById('invPhone').value = inv.phone || '';
+                document.getElementById('invEmail').value = inv.email || '';
+                document.getElementById('invIdNumber').value = inv.idNumber || '';
+                document.getElementById('invAddress').value = inv.address || '';
+                document.getElementById('invJoinedDate').value = inv.joinedDate || '';
+                document.getElementById('invStatus').value = inv.status || 'active';
+                document.getElementById('invEquity').value = inv.equity || '';
+                document.getElementById('invColor').value = inv.color || '#4fb6a8';
+                document.getElementById('invNotes').value = inv.notes || '';
+            } else {
+                title.textContent = '➕ Add Investor';
+                const nextNum = 'INV-' + String(nextInvestorId()).padStart(3, '0');
+                document.getElementById('invName').value = '';
+                document.getElementById('invNumber').value = nextNum;
+                document.getElementById('invPhone').value = '';
+                document.getElementById('invEmail').value = '';
+                document.getElementById('invIdNumber').value = '';
+                document.getElementById('invAddress').value = '';
+                document.getElementById('invJoinedDate').value = todayISO();
+                document.getElementById('invStatus').value = 'active';
+                document.getElementById('invEquity').value = '';
+                document.getElementById('invColor').value = pickColor();
+                document.getElementById('invNotes').value = '';
+            }
             document.getElementById('investorModal').classList.add('show');
-            setTimeout(() => nameEl.focus(), 50);
+            setTimeout(() => document.getElementById('invName').focus(), 50);
         }
+
         function closeInvestorModal() { document.getElementById('investorModal').classList.remove('show'); editingInvestorId = null; }
+
         async function saveInvestor() {
             const name = document.getElementById('invName').value.trim();
             const equity = safeNum(document.getElementById('invEquity').value);
             const color = document.getElementById('invColor').value || '#4fb6a8';
             const errEl = document.getElementById('invError');
             errEl.style.display = 'none';
+
             if (!name) { errEl.textContent = '⚠️ Please enter a name.'; errEl.style.display = 'block'; return; }
             if (equity < 0) { errEl.textContent = '⚠️ Equity cannot be negative.'; errEl.style.display = 'block'; return; }
-            if (editingInvestorId) { const idx = investors.findIndex(i => i.id === editingInvestorId); if (idx !== -1) { const old = investors[idx].equity; investors[idx] = { ...investors[idx], name, equity, color }; logAudit('UPDATE', `Investor #${editingInvestorId}`, `Updated investor: ${name}`, old, equity); } }
-            else { const newId = nextInvestorId(); investors.push({ id: newId, name, equity, color }); logAudit('CREATE', `Investor #${newId}`, `Added investor: ${name}`, '', equity); }
-            closeInvestorModal(); renderAll(true); await saveInvestorsToCloud();
+
+            const row = {
+                name: name,
+                equity: equity,
+                color: color,
+                phone: document.getElementById('invPhone').value.trim() || null,
+                email: document.getElementById('invEmail').value.trim() || null,
+                id_number: document.getElementById('invIdNumber').value.trim() || null,
+                address: document.getElementById('invAddress').value.trim() || null,
+                investor_number: document.getElementById('invNumber').value.trim() || null,
+                status: document.getElementById('invStatus').value,
+                joined_date: document.getElementById('invJoinedDate').value || null,
+                notes: document.getElementById('invNotes').value.trim() || null
+            };
+
+            let ok = false;
+
+                  if (editingInvestorId) {
+                const oldInv = investors.find(i => i.id === editingInvestorId);
+                const oldEquity = oldInv ? safeNum(oldInv.equity) : 0;
+                row.updated_at = new Date().toISOString();
+                const { error } = await supabaseClient
+                    .from('investors')
+                    .update(row)
+                    .eq('id', editingInvestorId);
+                if (error) { errEl.textContent = '⚠️ Save failed: ' + error.message; errEl.style.display = 'block'; return; }
+                await logAudit('UPDATE', `Investor #${editingInvestorId}`, `Updated investor: ${name}`, oldEquity, equity);
+                // Log share transaction only if equity actually changed
+                if (oldEquity !== equity) {
+                    const action = equity > oldEquity ? 'additional' : 'adjustment';
+                    await logShareTransaction(
+                        editingInvestorId, action, oldEquity, equity,
+                        'ADMIN-EDIT', 'Equity updated via investor edit modal',
+                        `Admin updated ${name}'s equity from ${fmt(oldEquity)} to ${fmt(equity)}`
+                    );
+                }
+                ok = true;
+            } else {
+                const newId = nextInvestorId();
+                row.id = newId;
+                row.created_at = new Date().toISOString();
+                const { error } = await supabaseClient
+                    .from('investors')
+                    .insert(row);
+                if (error) { errEl.textContent = '⚠️ Save failed: ' + error.message; errEl.style.display = 'block'; return; }
+                await logAudit('CREATE', `Investor #${newId}`, `Added investor: ${name}`, '', equity);
+                // Log initial share transaction
+                await logShareTransaction(
+                    newId, 'initial', 0, equity,
+                    'NEW-INVESTOR', 'Initial investment on creation',
+                    `Investor ${name} added with equity ${fmt(equity)}`
+                );
+                ok = true;
+            }
+
+            if (ok) {
+                await fetchSummary();
+                closeInvestorModal();
+                renderAll(true);
+            }
         }
+
         async function deleteInvestor(investorId) {
             const inv = investors.find(i => i.id === investorId);
             if (!inv) return;
             if (!confirm(`Delete investor "${inv.name}"?`)) return;
-            logAudit('DELETE', `Investor #${investorId}`, `Deleted investor: ${inv.name}`, inv.equity, '');
-            investors = investors.filter(i => i.id !== investorId);
+
+            const { error } = await supabaseClient
+                .from('investors')
+                .delete()
+                .eq('id', investorId);
+
+            if (error) { showError('Delete failed: ' + error.message); return; }
+
+            await logAudit('DELETE', `Investor #${investorId}`, `Deleted investor: ${inv.name}`, inv.equity, '');
+            await fetchSummary();
             renderAll(true);
-            await saveInvestorsToCloud();
+        }
+
+                // ==================================================
+        // PROPOSALS (Phase 2c)
+        // ==================================================
+        function proposalInvestorLabel(p) {
+            if (p.investorId) {
+                const inv = investors.find(i => i.id === p.investorId);
+                return inv ? inv.name : `Investor #${p.investorId}`;
+            }
+            return p.prospectName || 'Unnamed Prospect';
+        }
+
+        function updateProposalsBadge() {
+            const badge = document.getElementById('proposalsCountNav');
+            if (!badge) return;
+            const active = proposals.filter(p => ['draft','sent','negotiating','accepted','approved'].includes(p.status)).length;
+            badge.textContent = active;
+            badge.style.display = active > 0 ? 'inline-flex' : 'none';
+        }
+
+        function populateProposalInvestorDropdowns() {
+            const opts = investors.map(i => `<option value="${i.id}">${escapeHTML(i.name)}</option>`).join('');
+            const formSel = document.getElementById('propFormInvestor');
+            if (formSel) formSel.innerHTML = opts;
+            const filterSel = document.getElementById('propFilterInvestor');
+            if (filterSel) filterSel.innerHTML = '<option value="">All Investors</option>' + opts;
+        }
+
+        function openProposalsModal() {
+            populateProposalInvestorDropdowns();
+            renderProposals();
+            document.getElementById('proposalsModal').classList.add('show');
+        }
+        function closeProposalsModal() {
+            document.getElementById('proposalsModal').classList.remove('show');
+        }
+
+        function renderProposals() {
+            const body = document.getElementById('proposalsBody');
+            if (!body) return;
+
+            const statusFilter = document.getElementById('propFilterStatus').value || '';
+            const investorFilter = document.getElementById('propFilterInvestor').value || '';
+            const q = (document.getElementById('propFilterSearch').value || '').toLowerCase();
+
+            let list = [...proposals];
+            if (statusFilter) list = list.filter(p => p.status === statusFilter);
+            if (investorFilter) list = list.filter(p => String(p.investorId) === investorFilter);
+            if (q) list = list.filter(p => (
+                (p.purpose || '') + ' ' +
+                (p.notes || '') + ' ' +
+                (p.prospectName || '') + ' ' +
+                proposalInvestorLabel(p)
+            ).toLowerCase().includes(q));
+
+            list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+            // Summary cards
+            const totals = {};
+            proposals.forEach(p => { totals[p.status] = (totals[p.status] || 0) + p.proposedAmount; });
+            document.getElementById('proposalSummary').innerHTML = `
+                <div class="recon-stat"><div class="recon-stat-label"><i class="fas fa-file"></i> TOTAL</div><div class="recon-stat-value">${proposals.length}</div></div>
+                <div class="recon-stat warn"><div class="recon-stat-label"><i class="fas fa-clock"></i> IN PROGRESS</div><div class="recon-stat-value">${(totals.draft||0)+(totals.sent||0)+(totals.negotiating||0)+(totals.accepted||0)+(totals.approved||0) > 0 ? proposals.filter(p=>['draft','sent','negotiating','accepted','approved'].includes(p.status)).length : 0}</div></div>
+                <div class="recon-stat good"><div class="recon-stat-label"><i class="fas fa-check-circle"></i> FUNDED</div><div class="recon-stat-value">KSh ${fmt(totals.funded || 0)}</div></div>
+                <div class="recon-stat bad"><div class="recon-stat-label"><i class="fas fa-times-circle"></i> REJECTED / CANCELLED</div><div class="recon-stat-value">${(totals.rejected||0)+(totals.cancelled||0) > 0 ? proposals.filter(p=>['rejected','cancelled'].includes(p.status)).length : 0}</div></div>
+            `;
+
+            if (!list.length) {
+                body.innerHTML = `<tr><td colspan="8"><div class="empty-row"><i class="fas fa-file-signature"></i>No proposals match your filters.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = list.map(p => {
+                const label = proposalInvestorLabel(p);
+                const isProspect = !p.investorId;
+                const pct = p.proposedEquityPct !== null ? p.proposedEquityPct.toFixed(2) + '%' : '—';
+                return `<tr>
+                    <td class="id-cell">PROP-${String(p.id).padStart(4,'0')}</td>
+                    <td>${escapeHTML(label)}${isProspect ? ' <span style="font-size:0.6rem; color:#e8b879;">(prospect)</span>' : ''}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(p.proposedAmount)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1;">${pct}</td>
+                    <td>${escapeHTML(p.purpose || '—')}</td>
+                    <td><span class="status-pill ${escapeHTML(p.status)}">${escapeHTML(p.status)}</span></td>
+                    <td style="font-size:0.72rem; color:#7f9bb8;">${escapeHTML(new Date(p.createdAt).toLocaleDateString())}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="edit-btn" onclick="openProposalDetail(${p.id})" title="View"><i class="fas fa-eye"></i></button>
+                            <button class="del-btn" onclick="deleteProposal(${p.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ============================================
+        // PROPOSAL FORM
+        // ============================================
+        function openProposalForm(proposalId = null) {
+            editingProposalId = proposalId;
+            populateProposalInvestorDropdowns();
+            const err = document.getElementById('proposalFormError');
+            err.style.display = 'none';
+
+            if (proposalId) {
+                const p = proposals.find(x => x.id === proposalId);
+                if (!p) return;
+                document.getElementById('proposalFormTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Proposal';
+                if (p.investorId) {
+                    document.getElementById('propFormInvestorType').value = 'existing';
+                    document.getElementById('propFormInvestor').value = p.investorId;
+                } else {
+                    document.getElementById('propFormInvestorType').value = 'prospect';
+                    document.getElementById('propFormProspectName').value = p.prospectName || '';
+                    document.getElementById('propFormProspectContact').value = p.prospectContact || '';
+                }
+                document.getElementById('propFormAmount').value = p.proposedAmount;
+                document.getElementById('propFormEquityPct').value = p.proposedEquityPct !== null ? p.proposedEquityPct : '';
+                document.getElementById('propFormPurpose').value = p.purpose || '';
+                document.getElementById('propFormTerms').value = p.terms || '';
+                document.getElementById('propFormExpiry').value = p.expiryDate || '';
+                document.getElementById('propFormNotes').value = p.notes || '';
+            } else {
+                document.getElementById('proposalFormTitle').innerHTML = '<i class="fas fa-plus-circle"></i> New Proposal';
+                document.getElementById('propFormInvestorType').value = 'existing';
+                document.getElementById('propFormProspectName').value = '';
+                document.getElementById('propFormProspectContact').value = '';
+                document.getElementById('propFormAmount').value = '';
+                document.getElementById('propFormEquityPct').value = '';
+                document.getElementById('propFormPurpose').value = '';
+                document.getElementById('propFormTerms').value = '';
+                document.getElementById('propFormExpiry').value = '';
+                document.getElementById('propFormNotes').value = '';
+            }
+
+            toggleProposalInvestorType();
+            document.getElementById('proposalFormModal').classList.add('show');
+            setTimeout(() => document.getElementById('propFormAmount').focus(), 100);
+        }
+
+        function closeProposalForm() {
+            document.getElementById('proposalFormModal').classList.remove('show');
+            editingProposalId = null;
+        }
+
+        function toggleProposalInvestorType() {
+            const type = document.getElementById('propFormInvestorType').value;
+            document.getElementById('propFormExistingWrap').style.display = type === 'existing' ? 'block' : 'none';
+            document.getElementById('propFormProspectWrap').style.display = type === 'prospect' ? 'block' : 'none';
+        }
+
+        async function saveProposal() {
+            const type = document.getElementById('propFormInvestorType').value;
+            const investorId = type === 'existing' ? parseInt(document.getElementById('propFormInvestor').value) : null;
+            const prospectName = type === 'prospect' ? document.getElementById('propFormProspectName').value.trim() : '';
+            const prospectContact = type === 'prospect' ? document.getElementById('propFormProspectContact').value.trim() : '';
+            const amount = safeNum(document.getElementById('propFormAmount').value);
+            const equityPct = document.getElementById('propFormEquityPct').value;
+            const purpose = document.getElementById('propFormPurpose').value.trim();
+            const terms = document.getElementById('propFormTerms').value.trim();
+            const expiry = document.getElementById('propFormExpiry').value || null;
+            const notes = document.getElementById('propFormNotes').value.trim();
+            const err = document.getElementById('proposalFormError');
+            err.style.display = 'none';
+
+            if (type === 'existing' && !investorId) { err.textContent = '⚠️ Please select an investor.'; err.style.display = 'block'; return; }
+            if (type === 'prospect' && !prospectName) { err.textContent = '⚠️ Please enter the prospect name.'; err.style.display = 'block'; return; }
+            if (amount <= 0) { err.textContent = '⚠️ Proposed amount must be greater than 0.'; err.style.display = 'block'; return; }
+
+            const row = {
+                investor_id: investorId,
+                prospect_name: prospectName || null,
+                prospect_contact: prospectContact || null,
+                proposed_amount: amount,
+                proposed_equity_pct: equityPct !== '' ? safeNum(equityPct) : null,
+                purpose: purpose || null,
+                terms: terms || null,
+                expiry_date: expiry,
+                notes: notes || null,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+
+            let ok = false;
+
+            if (editingProposalId) {
+                const { error } = await supabaseClient
+                    .from('proposals')
+                    .update(row)
+                    .eq('id', editingProposalId);
+                if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
+                await logAudit('UPDATE', `Proposal #${editingProposalId}`, `Updated proposal`, '', amount);
+                ok = true;
+            } else {
+                row.status = 'draft';
+                row.created_at = new Date().toISOString();
+                row.created_by = CURRENT_USER;
+                const { data, error } = await supabaseClient
+                    .from('proposals')
+                    .insert(row)
+                    .select('id')
+                    .single();
+                if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
+                await logAudit('CREATE', `Proposal #${data.id}`, `Created proposal for ${proposalInvestorLabel({ investorId, prospectName })}`, '', amount);
+                ok = true;
+            }
+
+            if (ok) {
+                closeProposalForm();
+                await fetchSummary();
+                renderProposals();
+            }
+        }
+
+        // ============================================
+        // PROPOSAL DETAIL + WORKFLOW
+        // ============================================
+        function openProposalDetail(id) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            currentDetailProposalId = id;
+
+            document.getElementById('propDetailTitle').textContent = `PROP-${String(p.id).padStart(4,'0')}`;
+
+            const steps = ['draft','sent','negotiating','accepted','approved','funded'];
+            const order = { draft: 0, sent: 1, negotiating: 2, accepted: 3, approved: 4, funded: 5, rejected: -1, cancelled: -1 };
+            const current = order[p.status] !== undefined ? order[p.status] : 0;
+
+            const flowHtml = steps.map(s => {
+                let cls = 'status-step';
+                if (p.status === 'rejected' || p.status === 'cancelled') { if (s === 'draft') cls += ' done'; }
+                else { if (order[s] < current) cls += ' done'; else if (order[s] === current) cls += ' active'; }
+                return `<span class="${cls}">${s}</span>`;
+            }).join('') + (p.status === 'rejected' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">rejected</span>` : '') + (p.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
+
+            const investorLabel = proposalInvestorLabel(p);
+            const pct = p.proposedEquityPct !== null ? p.proposedEquityPct.toFixed(2) + '%' : '—';
+
+            let html = `<div class="dividend-status-flow">${flowHtml}</div>`;
+
+            html += `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:1rem;">
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">For</div><div><strong>${escapeHTML(investorLabel)}</strong></div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Status</div><div><span class="status-pill ${escapeHTML(p.status)}">${escapeHTML(p.status)}</span></div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Proposed Amount</div><div style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#f4c98d;">KSh ${fmt(p.proposedAmount)}</div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Proposed Equity</div><div style="font-family:'JetBrains Mono',monospace; color:#7fded1;">${pct}</div></div>
+                    ${p.purpose ? `<div style="grid-column:1/-1;"><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Purpose</div><div>${escapeHTML(p.purpose)}</div></div>` : ''}
+                    ${p.terms ? `<div style="grid-column:1/-1;"><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Terms</div><div style="font-size:0.82rem;">${escapeHTML(p.terms)}</div></div>` : ''}
+                    ${p.expiryDate ? `<div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Expires</div><div>${escapeHTML(p.expiryDate)}</div></div>` : ''}
+                    ${p.notes ? `<div style="grid-column:1/-1;"><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Notes</div><div style="font-size:0.82rem;">${escapeHTML(p.notes)}</div></div>` : ''}
+                    ${p.rejectionReason ? `<div style="grid-column:1/-1;"><div style="font-size:0.65rem; color:#e8837a; text-transform:uppercase; letter-spacing:0.08em;">Rejection Reason</div><div style="font-size:0.82rem;">${escapeHTML(p.rejectionReason)}</div></div>` : ''}
+                    ${p.cancellationReason ? `<div style="grid-column:1/-1;"><div style="font-size:0.65rem; color:#e8837a; text-transform:uppercase; letter-spacing:0.08em;">Cancellation Reason</div><div style="font-size:0.82rem;">${escapeHTML(p.cancellationReason)}</div></div>` : ''}
+                </div>
+
+                <div style="font-size:0.72rem; color:#7f9bb8; font-family:'JetBrains Mono',monospace; padding:0.6rem; background:rgba(15,26,46,0.5); border-radius:10px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Created:</span><span>${escapeHTML(p.createdBy || '—')} · ${escapeHTML(new Date(p.createdAt).toLocaleString())}</span></div>
+                    ${p.sentAt ? `<div style="display:flex; justify-content:space-between;"><span>Sent:</span><span>${escapeHTML(new Date(p.sentAt).toLocaleString())}</span></div>` : ''}
+                    ${p.negotiatingAt ? `<div style="display:flex; justify-content:space-between;"><span>Negotiating since:</span><span>${escapeHTML(new Date(p.negotiatingAt).toLocaleString())}</span></div>` : ''}
+                    ${p.acceptedAt ? `<div style="display:flex; justify-content:space-between;"><span>Accepted:</span><span>${escapeHTML(new Date(p.acceptedAt).toLocaleString())}</span></div>` : ''}
+                    ${p.approvedAt ? `<div style="display:flex; justify-content:space-between;"><span>Approved:</span><span>${escapeHTML(new Date(p.approvedAt).toLocaleString())}</span></div>` : ''}
+                    ${p.fundedAt ? `<div style="display:flex; justify-content:space-between;"><span>Funded:</span><span>${escapeHTML(new Date(p.fundedAt).toLocaleString())}</span></div>` : ''}
+                </div>
+            `;
+
+            document.getElementById('propDetailBody').innerHTML = html;
+
+            // Action buttons based on status
+            const actions = document.getElementById('propDetailActions');
+            let actHtml = '';
+            if (p.status === 'draft') {
+                actHtml += `<button class="div-action-btn approve" onclick="advanceProposal(${p.id}, 'sent')"><i class="fas fa-paper-plane"></i> Mark as Sent</button>`;
+                actHtml += `<button class="div-action-btn cancel" onclick="cancelProposal(${p.id})"><i class="fas fa-ban"></i> Cancel</button>`;
+            } else if (p.status === 'sent') {
+                actHtml += `<button class="div-action-btn approve" onclick="advanceProposal(${p.id}, 'negotiating')"><i class="fas fa-comments"></i> Negotiating</button>`;
+                actHtml += `<button class="div-action-btn cancel" onclick="rejectProposal(${p.id})"><i class="fas fa-times"></i> Reject</button>`;
+            } else if (p.status === 'negotiating') {
+                actHtml += `<button class="div-action-btn approve" onclick="advanceProposal(${p.id}, 'accepted')"><i class="fas fa-check"></i> Mark Accepted</button>`;
+                actHtml += `<button class="div-action-btn cancel" onclick="rejectProposal(${p.id})"><i class="fas fa-times"></i> Reject</button>`;
+            } else if (p.status === 'accepted') {
+                actHtml += `<button class="div-action-btn approve" onclick="advanceProposal(${p.id}, 'approved')"><i class="fas fa-check-double"></i> Approve</button>`;
+                actHtml += `<button class="div-action-btn cancel" onclick="rejectProposal(${p.id})"><i class="fas fa-times"></i> Reject</button>`;
+            } else if (p.status === 'approved') {
+                actHtml += `<button class="div-action-btn paid" onclick="fundProposal(${p.id})"><i class="fas fa-hand-holding-usd"></i> Fund Proposal</button>`;
+                actHtml += `<button class="div-action-btn cancel" onclick="cancelProposal(${p.id})"><i class="fas fa-ban"></i> Cancel</button>`;
+            } else if (p.status === 'funded') {
+                actHtml += `<div style="font-size:0.82rem; color:#7ee0a2; padding:0.6rem;"><i class="fas fa-check-circle"></i> Proposal has been funded and converted to an investment.</div>`;
+            }
+            actHtml += `<button class="div-action-btn expand" onclick="openProposalForm(${p.id})"><i class="fas fa-edit"></i> Edit Details</button>`;
+            actHtml += `<button class="div-action-btn expand" onclick="printProposal(${p.id})"><i class="fas fa-print"></i> Print</button>`;
+            actions.innerHTML = actHtml;
+
+            document.getElementById('proposalDetailModal').classList.add('show');
+        }
+
+        function closeProposalDetail() {
+            document.getElementById('proposalDetailModal').classList.remove('show');
+            currentDetailProposalId = null;
+        }
+
+        async function advanceProposal(id, newStatus) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            const fieldMap = {
+                sent: 'sent_at',
+                negotiating: 'negotiating_at',
+                accepted: 'accepted_at',
+                approved: 'approved_at'
+            };
+            const upd = { status: newStatus, updated_at: new Date().toISOString(), updated_by: CURRENT_USER };
+            if (fieldMap[newStatus]) upd[fieldMap[newStatus]] = new Date().toISOString();
+
+            const { error } = await supabaseClient.from('proposals').update(upd).eq('id', id);
+            if (error) { showError('Update failed: ' + error.message); return; }
+
+            await logAudit('UPDATE', `Proposal #${id}`, `Advanced to ${newStatus}`, p.status, newStatus);
+            await fetchSummary();
+            renderProposals();
+            openProposalDetail(id);
+        }
+
+        async function rejectProposal(id) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            const reason = prompt('Reason for rejection:', '');
+            if (reason === null) return;
+            const { error } = await supabaseClient.from('proposals').update({
+                status: 'rejected',
+                rejected_at: new Date().toISOString(),
+                rejection_reason: reason || 'No reason provided',
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            }).eq('id', id);
+            if (error) { showError('Reject failed: ' + error.message); return; }
+            await logAudit('UPDATE', `Proposal #${id}`, `Rejected — Reason: ${reason || 'None'}`, p.status, 'rejected');
+            await fetchSummary();
+            renderProposals();
+            openProposalDetail(id);
+        }
+
+        async function cancelProposal(id) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            const reason = prompt('Reason for cancellation:', '');
+            if (reason === null) return;
+            const { error } = await supabaseClient.from('proposals').update({
+                status: 'cancelled',
+                cancelled_at: new Date().toISOString(),
+                cancellation_reason: reason || 'No reason provided',
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            }).eq('id', id);
+            if (error) { showError('Cancel failed: ' + error.message); return; }
+            await logAudit('UPDATE', `Proposal #${id}`, `Cancelled — Reason: ${reason || 'None'}`, p.status, 'cancelled');
+            await fetchSummary();
+            renderProposals();
+            openProposalDetail(id);
+        }
+
+        async function fundProposal(id) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            if (p.status !== 'approved') { showError('Only approved proposals can be funded.'); return; }
+            if (!p.investorId) { showError('Cannot fund a prospect proposal — convert to investor first.'); return; }
+            if (!confirm(`Fund proposal PROP-${String(id).padStart(4,'0')} for KSh ${fmt(p.proposedAmount)}? This will create a real investment and update ${proposalInvestorLabel(p)}'s equity.`)) return;
+
+            const inv = investors.find(i => i.id === p.investorId);
+            if (!inv) { showError('Investor not found.'); return; }
+
+            // 1. Insert investment record
+            const { data: invData, error: invErr } = await supabaseClient
+                .from('investments')
+                .insert({
+                    investor_id: p.investorId,
+                    date: todayISO(),
+                    amount: p.proposedAmount,
+                    type: 'additional',
+                    reference: `PROP-${String(id).padStart(4,'0')}`,
+                    notes: `Funded from proposal: ${p.purpose || 'No purpose'}`,
+                    created_by: CURRENT_USER
+                })
+                .select('id')
+                .single();
+
+            if (invErr) { showError('Investment creation failed: ' + invErr.message); return; }
+
+            // 2. Update investor's equity
+            const oldEquity = safeNum(inv.equity);
+            const newEquity = oldEquity + p.proposedAmount;
+            const { error: eqErr } = await supabaseClient
+                .from('investors')
+                .update({ equity: newEquity, updated_at: new Date().toISOString() })
+                .eq('id', p.investorId);
+            if (eqErr) { showError('Equity update failed: ' + eqErr.message); return; }
+
+            // 3. Log share transaction
+            await logShareTransaction(
+                p.investorId, 'additional', oldEquity, newEquity,
+                `PROP-${String(id).padStart(4,'0')}`,
+                `Funded proposal: ${p.purpose || 'No purpose'}`,
+                `Proposal funded with KSh ${fmt(p.proposedAmount)}`
+            );
+
+            // 4. Update proposal status
+            const { error: propErr } = await supabaseClient.from('proposals').update({
+                status: 'funded',
+                funded_at: new Date().toISOString(),
+                linked_investment_id: invData.id,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            }).eq('id', id);
+
+            if (propErr) { showError('Proposal update failed: ' + propErr.message); return; }
+
+            await logAudit('PAID', `Proposal #${id}`, `Funded — KSh ${fmt(p.proposedAmount)} to ${inv.name}`, p.status, 'funded');
+
+            await fetchSummary();
+            renderProposals();
+            openProposalDetail(id);
+            showToast('✅ Proposal funded and investment recorded', 'success');
+        }
+
+        async function deleteProposal(id) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            if (p.status === 'funded') { showError('Cannot delete a funded proposal.'); return; }
+            if (!confirm(`Delete proposal PROP-${String(id).padStart(4,'0')} permanently?`)) return;
+            const { error } = await supabaseClient.from('proposals').delete().eq('id', id);
+            if (error) { showError('Delete failed: ' + error.message); return; }
+            await logAudit('DELETE', `Proposal #${id}`, `Deleted proposal for ${proposalInvestorLabel(p)} — KSh ${fmt(p.proposedAmount)}`, p.proposedAmount, '');
+            closeProposalDetail();
+            await fetchSummary();
+            renderProposals();
+        }
+
+        function printProposal(id) {
+            const p = proposals.find(x => x.id === id);
+            if (!p) return;
+            const investorLabel = proposalInvestorLabel(p);
+            const pct = p.proposedEquityPct !== null ? p.proposedEquityPct.toFixed(2) + '%' : '—';
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Investment Proposal')}
+                    <table class="print-payment-table" style="margin-bottom:20px;">
+                        <tr><td>Reference</td><td>PROP-${String(p.id).padStart(4,'0')}</td></tr>
+                        <tr><td>Investor / Prospect</td><td><strong>${escapeHTML(investorLabel)}</strong></td></tr>
+                        <tr><td>Status</td><td><strong style="text-transform:uppercase;">${escapeHTML(p.status)}</strong></td></tr>
+                        <tr><td>Proposed Amount</td><td><strong>KSh ${fmt(p.proposedAmount)}</strong></td></tr>
+                        <tr><td>Proposed Equity</td><td>${pct}</td></tr>
+                        ${p.purpose ? `<tr><td>Purpose</td><td>${escapeHTML(p.purpose)}</td></tr>` : ''}
+                        ${p.terms ? `<tr><td>Terms</td><td>${escapeHTML(p.terms)}</td></tr>` : ''}
+                        ${p.expiryDate ? `<tr><td>Expires</td><td>${escapeHTML(p.expiryDate)}</td></tr>` : ''}
+                        ${p.notes ? `<tr><td>Notes</td><td>${escapeHTML(p.notes)}</td></tr>` : ''}
+                        <tr><td>Created</td><td>${escapeHTML(new Date(p.createdAt).toLocaleString())} by ${escapeHTML(p.createdBy || '—')}</td></tr>
+                    </table>
+                    <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p><p>Investor Signature: ______________________________</p></div>
+                    <div class="print-footer"><span>Starlink LLC · Investment Proposal</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
+        function printAllProposals() {
+            if (!proposals.length) { showError('No proposals to print.'); return; }
+            const rows = proposals.map(p => `<tr>
+                <td>PROP-${String(p.id).padStart(4,'0')}</td>
+                <td>${escapeHTML(proposalInvestorLabel(p))}</td>
+                <td style="text-align:right;">KSh ${fmt(p.proposedAmount)}</td>
+                <td>${escapeHTML(p.status)}</td>
+                <td>${escapeHTML(p.purpose || '—')}</td>
+            </tr>`).join('');
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('All Investment Proposals')}
+                    <table class="print-list">
+                        <thead><tr><th>Ref</th><th>Investor / Prospect</th><th style="text-align:right;">Amount</th><th>Status</th><th>Purpose</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
+
+                // ==================================================
+        // DILUTION SIMULATOR (Phase 2d)
+        // Pure in-memory math — never touches Supabase
+        // ==================================================
+        let dilChartInstance = null;
+
+        function openDilutionSimulator() {
+            document.getElementById('dilName').value = '';
+            document.getElementById('dilAmount').value = '';
+            document.getElementById('dilTargetPct').value = '';
+            document.getElementById('dilMode').value = 'add';
+            document.getElementById('dilResults').style.display = 'none';
+            document.getElementById('dilutionModal').classList.add('show');
+            updateDilutionInputs();
+        }
+
+        function closeDilutionSimulator() {
+            document.getElementById('dilutionModal').classList.remove('show');
+            if (dilChartInstance) { dilChartInstance.destroy(); dilChartInstance = null; }
+        }
+
+        function updateDilutionInputs() {
+            const mode = document.getElementById('dilMode').value;
+            const targetInput = document.getElementById('dilTargetPct');
+            const amountInput = document.getElementById('dilAmount');
+            if (mode === 'target') {
+                targetInput.style.display = '';
+                targetInput.disabled = false;
+                amountInput.placeholder = 'Amount (auto-calculated)';
+                amountInput.disabled = true;
+            } else {
+                targetInput.style.display = 'none';
+                targetInput.disabled = true;
+                amountInput.placeholder = 'Investment amount (KSh)';
+                amountInput.disabled = false;
+            }
+        }
+
+        function resetDilution() {
+            document.getElementById('dilName').value = '';
+            document.getElementById('dilAmount').value = '';
+            document.getElementById('dilTargetPct').value = '';
+            document.getElementById('dilResults').style.display = 'none';
+            if (dilChartInstance) { dilChartInstance.destroy(); dilChartInstance = null; }
+        }
+
+        function runDilutionSimulation() {
+            const mode = document.getElementById('dilMode').value;
+            const name = document.getElementById('dilName').value.trim() || 'New Investor';
+            const amount = safeNum(document.getElementById('dilAmount').value);
+            const targetPct = safeNum(document.getElementById('dilTargetPct').value);
+
+            if (mode === 'add' && amount <= 0) {
+                showError('⚠️ Please enter an investment amount.');
+                return;
+            }
+            if (mode === 'target' && (targetPct <= 0 || targetPct >= 100)) {
+                showError('⚠️ Target equity % must be between 0 and 100 (exclusive).');
+                return;
+            }
+
+            // Build current holders list
+            const all = buildInvestors();
+            const currentTotal = all.reduce((s, i) => s + i.equity, 0);
+
+            if (currentTotal <= 0) {
+                showError('⚠️ No equity currently exists — nothing to dilute.');
+                return;
+            }
+
+            // Current snapshot
+            const current = all.map(i => ({
+                name: i.name,
+                color: i.color,
+                isStarlink: !!i.isStarlink,
+                equity: safeNum(i.equity),
+                pct: (i.equity / currentTotal) * 100
+            }));
+
+            let newInvestorEquity = 0;
+            let newTotal = 0;
+
+            if (mode === 'add') {
+                // New investor's equity = their capital (amount)
+                newInvestorEquity = amount;
+                newTotal = currentTotal + amount;
+            } else {
+                // Target % mode: new investor gets targetPct of the new total
+                // newInvestorEquity / newTotal = targetPct / 100
+                // newInvestorEquity = newTotal - currentTotal
+                // => (newTotal - currentTotal) / newTotal = targetPct/100
+                // => 1 - currentTotal/newTotal = targetPct/100
+                // => currentTotal/newTotal = 1 - targetPct/100
+                // => newTotal = currentTotal / (1 - targetPct/100)
+                const p = targetPct / 100;
+                newTotal = currentTotal / (1 - p);
+                newInvestorEquity = newTotal - currentTotal;
+            }
+
+            // Compute post-investment ownership
+            // In "add" mode: existing holders keep their equity amount; only % changes
+            // In "target" mode: existing holders keep their equity amount; new total pushes % down
+            const after = current.map(h => ({
+                ...h,
+                newEquity: h.equity,
+                newPct: (h.equity / newTotal) * 100
+            }));
+
+            // Add the new investor row
+            after.push({
+                name: name,
+                color: '#c89a5b',
+                isStarlink: false,
+                isNew: true,
+                equity: 0,
+                pct: 0,
+                newEquity: newInvestorEquity,
+                newPct: (newInvestorEquity / newTotal) * 100
+            });
+
+            // Summary cards
+            const totalCurrent = currentTotal;
+            const totalAfter = newTotal;
+            const newInvPct = (newInvestorEquity / newTotal) * 100;
+
+            document.getElementById('dilSummary').innerHTML = `
+                <div class="recon-stat">
+                    <div class="recon-stat-label"><i class="fas fa-coins"></i> CURRENT TOTAL</div>
+                    <div class="recon-stat-value">KSh ${fmt(totalCurrent)}</div>
+                </div>
+                <div class="recon-stat good">
+                    <div class="recon-stat-label"><i class="fas fa-plus-circle"></i> NEW CAPITAL</div>
+                    <div class="recon-stat-value">KSh ${fmt(newInvestorEquity)}</div>
+                </div>
+                <div class="recon-stat warn">
+                    <div class="recon-stat-label"><i class="fas fa-chart-line"></i> NEW TOTAL</div>
+                    <div class="recon-stat-value">KSh ${fmt(totalAfter)}</div>
+                </div>
+                <div class="recon-stat ${newInvPct > 0 ? 'bad' : ''}">
+                    <div class="recon-stat-label"><i class="fas fa-user-plus"></i> NEW INVESTOR %</div>
+                    <div class="recon-stat-value">${newInvPct.toFixed(2)}%</div>
+                </div>
+            `;
+
+            // Table rows
+            const body = document.getElementById('dilTableBody');
+            const beforeSorted = [...after].sort((a, b) => (b.newPct || b.pct) - (a.newPct || a.pct));
+
+            body.innerHTML = beforeSorted.map(h => {
+                const pctChange = h.isNew ? null : (h.newPct - h.pct);
+                const rowClass = h.isNew ? 'recon-row-caution' : (h.isStarlink ? 'recon-row-caution' : '');
+                const changeLabel = h.isNew
+                    ? `<span style="color:#7ee0a2; font-weight:700;">+${h.newPct.toFixed(2)}%</span>`
+                    : `<span style="color:${pctChange < 0 ? '#f0a89f' : '#7ee0a2'}; font-weight:700;">${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}%</span>`;
+
+                return `<tr class="${rowClass}">
+                    <td>${escapeHTML(h.name)}${h.isNew ? ' <span class="starlink-tag" style="background:rgba(95,199,188,0.25); color:#7fded1; border-color:rgba(95,199,188,0.4);">NEW</span>' : ''}${h.isStarlink ? ' <span class="starlink-tag">virtual</span>' : ''}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">KSh ${fmt(h.equity)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">${h.pct.toFixed(2)}%</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#f2f0eb; font-weight:700;">KSh ${fmt(h.newEquity)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">${h.newPct.toFixed(2)}%</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">${changeLabel}</td>
+                </tr>`;
+            }).join('') + `
+                <tr class="total-row">
+                    <td><strong>TOTAL</strong></td>
+                    <td style="text-align:right;"><strong>KSh ${fmt(totalCurrent)}</strong></td>
+                    <td style="text-align:right;"><strong>100.00%</strong></td>
+                    <td style="text-align:right;"><strong>KSh ${fmt(totalAfter)}</strong></td>
+                    <td style="text-align:right;"><strong>100.00%</strong></td>
+                    <td></td>
+                </tr>
+            `;
+
+            // Reconcile note
+            const reconcileTxt = document.getElementById('dilReconcileText');
+            reconcileTxt.textContent = `Simulation complete. New investor would own ${newInvPct.toFixed(2)}% of ${name}. Existing holders diluted proportionally. Nothing has been saved.`;
+
+            // Chart
+            const chartCanvas = document.getElementById('dilChart');
+            if (dilChartInstance) dilChartInstance.destroy();
+            const hasLabels = typeof ChartDataLabels !== 'undefined';
+            if (hasLabels) { try { Chart.register(ChartDataLabels); } catch (e) {} }
+
+            dilChartInstance = new Chart(chartCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: beforeSorted.map(h => h.name),
+                    datasets: [
+                        {
+                            label: 'Current %',
+                            data: beforeSorted.map(h => h.pct),
+                            backgroundColor: 'rgba(120, 200, 220, 0.35)',
+                            borderColor: 'rgba(120, 200, 220, 0.7)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'After %',
+                            data: beforeSorted.map(h => h.newPct),
+                            backgroundColor: beforeSorted.map(h => h.isNew ? 'rgba(200, 154, 91, 0.7)' : 'rgba(95, 199, 188, 0.7)'),
+                            borderColor: beforeSorted.map(h => h.isNew ? '#c89a5b' : '#5fc7bc'),
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#c7d5e6', font: { size: 11 } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
+                            titleColor: '#f2f0eb',
+                            bodyColor: '#c7d5e6',
+                            borderColor: 'rgba(95, 199, 188, 0.5)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(ctx) {
+                                    return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%`;
+                                }
+                            }
+                        },
+                        datalabels: hasLabels ? {
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#c7d5e6',
+                            font: { size: 9, weight: '700', family: 'JetBrains Mono' },
+                            formatter: function(v) { return v >= 3 ? v.toFixed(1) + '%' : ''; },
+                            offset: 2
+                        } : {}
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(120, 200, 220, 0.06)' }, ticks: { color: '#7f9bb8', font: { size: 10 }, callback: v => v + '%' } },
+                        x: { grid: { display: false }, ticks: { color: '#c7d5e6', font: { size: 10, weight: '600' }, maxRotation: 30, minRotation: 15, autoSkip: false } }
+                    },
+                    layout: { padding: { top: 24, bottom: 6 } }
+                }
+            });
+
+            document.getElementById('dilResults').style.display = 'block';
+        }
+
+        function printDilutionSimulation() {
+            if (document.getElementById('dilResults').style.display === 'none') {
+                showError('⚠️ Run a simulation first.');
+                return;
+            }
+            const name = document.getElementById('dilName').value.trim() || 'New Investor';
+            const mode = document.getElementById('dilMode').value;
+            const modeLabel = mode === 'add' ? 'Add as new capital' : 'Target equity %';
+
+            // Read from the table
+            const body = document.getElementById('dilTableBody');
+            const rows = body.querySelectorAll('tr');
+            let rowsHtml = '';
+            rows.forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length < 6) return;
+                const rowClass = tr.classList.contains('total-row') ? 'style="font-weight:800; background:#f0f5fb;"' : '';
+                rowsHtml += `<tr ${rowClass}>`;
+                cells.forEach(td => { rowsHtml += `<td>${escapeHTML(td.textContent.trim())}</td>`; });
+                rowsHtml += `</tr>`;
+            });
+
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Dilution Simulation')}
+                    <p style="text-align:center; color:#5b6b7a; font-size:13px; margin-bottom:20px;">
+                        Scenario: <strong>${escapeHTML(name)}</strong> — Mode: ${escapeHTML(modeLabel)}
+                    </p>
+                    <table class="print-list">
+                        <thead>
+                            <tr>
+                                <th>Holder</th>
+                                <th style="text-align:right;">Current Equity</th>
+                                <th style="text-align:right;">Current %</th>
+                                <th style="text-align:right;">After Equity</th>
+                                <th style="text-align:right;">After %</th>
+                                <th style="text-align:right;">Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                    <div class="print-summary" style="margin-top:20px;">
+                        <h3>Note</h3>
+                        <p>This is a simulation only. Nothing has been saved to the database. To make this real, use the Proposals workflow.</p>
+                    </div>
+                    <div class="print-footer"><span>Starlink LLC · Dilution Simulator</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
+
+                // ==================================================
+        // SHARE LEDGER (Phase 2b)
+        // Every equity change is logged as an append-only row
+        // ==================================================
+        async function logShareTransaction(investorId, action, equityBefore, equityAfter, reference, notes, reason) {
+            if (!supabaseClient) return;
+            try {
+                const delta = equityAfter - equityBefore;
+                // Compute % before/after against the then-total
+                const totalBefore = investors.reduce((s, i) => s + (i.id === investorId ? equityBefore : i.equity), 0);
+                const totalAfter = investors.reduce((s, i) => s + (i.id === investorId ? equityAfter : i.equity), 0);
+                const pctBefore = totalBefore > 0 ? (equityBefore / totalBefore) * 100 : 0;
+                const pctAfter = totalAfter > 0 ? (equityAfter / totalAfter) * 100 : 0;
+
+                await supabaseClient.from('share_transactions').insert({
+                    investor_id: investorId,
+                    date: todayISO(),
+                    action: action,
+                    equity_before: equityBefore,
+                    equity_after: equityAfter,
+                    delta: delta,
+                    pct_before: +pctBefore.toFixed(4),
+                    pct_after: +pctAfter.toFixed(4),
+                    reference: reference || null,
+                    notes: notes || null,
+                    reason: reason || null,
+                    created_by: CURRENT_USER
+                });
+            } catch (e) {
+                console.warn('Share transaction log failed:', e.message);
+            }
         }
 
         // ==================================================
-        // EMPLOYEES
+        // CAP TABLE — computes ownership as of a date
         // ==================================================
-        function loadEmployeePayments() { try { const saved = localStorage.getItem('starlink_employee_payments'); if (saved) { const parsed = JSON.parse(saved); if (Array.isArray(parsed)) return parsed; } } catch (e) {} return DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({ ...e })); }
-        function saveEmployeePayments() { try { localStorage.setItem('starlink_employee_payments', JSON.stringify(EMPLOYEE_PAYMENTS)); } catch (e) {} }
+        async function computeCapTableAsOf(asOfDate) {
+            // Fetch all share transactions
+            let txns = [];
+            try {
+                const { data, error } = await supabaseClient
+                    .from('share_transactions')
+                    .select('*')
+                    .order('date', { ascending: true })
+                    .order('id', { ascending: true });
+                if (!error && Array.isArray(data)) txns = data;
+            } catch (e) { console.warn('Cap table fetch failed:', e.message); }
 
+            // Build per-investor balance as of the date
+            const balances = {}; // investorId -> { equity, lastChange, lastRef, date }
+
+            // Initialize all current investors at 0
+            investors.forEach(i => {
+                balances[i.id] = { equity: 0, lastChange: null, lastRef: '', date: null };
+            });
+
+            txns.forEach(t => {
+                if (asOfDate && t.date > asOfDate) return; // skip future
+                if (!balances[t.investor_id]) return;      // skip orphan
+                // For simplicity, take the latest equity_after at or before asOfDate
+                // (each row stores the running balance anyway)
+                const b = balances[t.investor_id];
+                b.equity = safeNum(t.equity_after);
+                b.lastChange = t.action;
+                b.lastRef = t.reference || '';
+                b.date = t.date;
+            });
+
+            return balances;
+        }
+
+        async function openCapTable() {
+            const modal = document.getElementById('capTableModal');
+            modal.classList.add('show');
+            // Default: show today
+            document.getElementById('capTableDate').value = todayISO();
+            await renderCapTable();
+        }
+
+        function closeCapTable() {
+            document.getElementById('capTableModal').classList.remove('show');
+        }
+
+        async function renderCapTable() {
+            const asOf = document.getElementById('capTableDate').value || null;
+            const balances = await computeCapTableAsOf(asOf);
+
+            // Build list of investors with balance
+            const rows = investors.map(inv => {
+                const b = balances[inv.id] || { equity: 0, lastChange: null, lastRef: '', date: null };
+                return {
+                    id: inv.id,
+                    name: inv.name,
+                    number: inv.investorNumber || '',
+                    equity: b.equity,
+                    lastChange: b.lastChange,
+                    lastRef: b.lastRef,
+                    date: b.date
+                };
+            });
+
+            // Add the synthetic Starlink Virtual row
+            rows.push({
+                id: null,
+                name: 'STARLINK LLC VIRTUAL',
+                number: '—',
+                equity: Math.round(safeNum(summary.starlinkVirtualInvestment)),
+                lastChange: 'live',
+                lastRef: 'derived',
+                date: null,
+                isStarlink: true
+            });
+
+            const grandTotal = rows.reduce((s, r) => s + r.equity, 0);
+
+            // Summary stats
+            document.getElementById('capTableSummary').innerHTML = `
+                <div class="recon-stat good">
+                    <div class="recon-stat-label"><i class="fas fa-users"></i> INVESTORS</div>
+                    <div class="recon-stat-value">${investors.length}</div>
+                </div>
+                <div class="recon-stat good">
+                    <div class="recon-stat-label"><i class="fas fa-coins"></i> TOTAL EQUITY</div>
+                    <div class="recon-stat-value">KSh ${fmt(grandTotal)}</div>
+                </div>
+                <div class="recon-stat ${asOf ? 'warn' : 'good'}">
+                    <div class="recon-stat-label"><i class="fas fa-calendar"></i> AS OF</div>
+                    <div class="recon-stat-value" style="font-size:1rem;">${asOf ? escapeHTML(asOf) : 'ALL-TIME'}</div>
+                </div>
+            `;
+
+            // Table rows
+            const body = document.getElementById('capTableBody');
+            if (!rows.length) {
+                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-users"></i>No investors yet.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = rows.map(r => {
+                const pct = grandTotal > 0 ? ((r.equity / grandTotal) * 100).toFixed(2) : '0.00';
+                const rowClass = r.isStarlink ? 'recon-row-caution' : '';
+                const changeLabel = r.lastChange && r.lastChange !== 'live' ? `<span class="status-pill ${r.lastChange === 'initial' ? 'approved' : 'paid'}" style="text-transform:capitalize;">${escapeHTML(r.lastChange)}</span>` : '—';
+                return `<tr class="${rowClass}">
+                    <td><strong>${escapeHTML(r.name)}</strong>${r.isStarlink ? ' <span class="starlink-tag">live</span>' : ''}</td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.number)}</span></td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(r.equity)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">${pct}%</td>
+                    <td>${changeLabel}${r.date ? ` <span style="font-size:0.7rem; color:#7f9bb8;">${escapeHTML(r.date)}</span>` : ''}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.lastRef || '—')}</td>
+                </tr>`;
+            }).join('') + `
+                <tr class="total-row">
+                    <td><strong>TOTAL</strong></td>
+                    <td></td>
+                    <td style="text-align:right;"><strong>KSh ${fmt(grandTotal)}</strong></td>
+                    <td style="text-align:right;"><strong>100.00%</strong></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `;
+
+            // Reconcile
+            const reconcileEl = document.getElementById('capTableReconcile');
+            const reconcileTxt = document.getElementById('capTableReconcileText');
+            if (grandTotal > 0) {
+                reconcileEl.classList.remove('warning');
+                reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders.`;
+            } else {
+                reconcileEl.classList.add('warning');
+                reconcileTxt.textContent = 'No equity recorded — cap table is empty.';
+            }
+        }
+
+        function printCapTable() {
+            const asOf = document.getElementById('capTableDate').value || 'All-time';
+            const body = document.getElementById('capTableBody');
+            const rows = body.querySelectorAll('tr');
+            let rowsHtml = '';
+            rows.forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length < 6) return;
+                const rowClass = tr.classList.contains('total-row') ? 'style="font-weight:800; background:#f0f5fb;"' : '';
+                rowsHtml += `<tr ${rowClass}>`;
+                cells.forEach(td => {
+                    rowsHtml += `<td>${escapeHTML(td.textContent.trim())}</td>`;
+                });
+                rowsHtml += `</tr>`;
+            });
+
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Capitalization Table')}
+                    <p style="text-align:center; color:#5b6b7a; font-size:13px; margin-bottom:20px;">
+                        As of: <strong>${escapeHTML(asOf)}</strong>
+                    </p>
+                    <table class="print-list">
+                        <thead>
+                            <tr>
+                                <th>Investor</th>
+                                <th>Investor #</th>
+                                <th style="text-align:right;">Equity (KSh)</th>
+                                <th style="text-align:right;">Ownership %</th>
+                                <th>Last Change</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                    <div class="print-footer">
+                        <span>Starlink LLC · Cap Table</span>
+                        <span>${escapeHTML(new Date().toLocaleString())}</span>
+                    </div>
+                </div>
+            `);
+        }
+
+        // ==================================================
+        // INVESTOR DETAIL + INVESTMENTS (Phase 2a)
+        // ==================================================
+        let currentDetailInvestorId = null;
+
+        async function openInvestorDetail(investorId) {
+            const inv = investors.find(i => i.id === investorId);
+            if (!inv) return;
+            currentDetailInvestorId = investorId;
+
+            document.getElementById('invDetailName').textContent = inv.name;
+
+            // Fetch investments for this investor
+            let invList = [];
+            try {
+                const { data, error } = await supabaseClient
+                    .from('investments')
+                    .select('*')
+                    .eq('investor_id', investorId)
+                    .order('date', { ascending: false });
+                if (!error && Array.isArray(data)) invList = data;
+            } catch (e) { console.warn('Investments fetch failed:', e); }
+
+            const totalInvested = invList
+                .filter(x => x.type !== 'withdrawal')
+                .reduce((s, x) => s + safeNum(x.amount), 0);
+            const totalWithdrawn = invList
+                .filter(x => x.type === 'withdrawal')
+                .reduce((s, x) => s + safeNum(x.amount), 0);
+            const netInvested = totalInvested - totalWithdrawn;
+
+            const statusPill = (inv.status === 'inactive') ? 'cancelled' :
+                               (inv.status === 'prospect') ? 'pending' : 'paid';
+
+            // Build detail body
+            let html = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:1rem;">
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Investor #</div><div style="font-family:'JetBrains Mono',monospace; color:#f2f0eb;">${escapeHTML(inv.investorNumber || '—')}</div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Status</div><div><span class="status-pill ${statusPill}">${escapeHTML(inv.status || 'active')}</span></div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Phone</div><div>${escapeHTML(inv.phone || '—')}</div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Email</div><div>${escapeHTML(inv.email || '—')}</div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">ID / Ref</div><div>${escapeHTML(inv.idNumber || '—')}</div></div>
+                    <div><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Joined</div><div>${escapeHTML(inv.joinedDate || '—')}</div></div>
+                    <div style="grid-column:1 / -1;"><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Address</div><div>${escapeHTML(inv.address || '—')}</div></div>
+                    ${inv.notes ? `<div style="grid-column:1 / -1;"><div style="font-size:0.65rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Notes</div><div style="font-size:0.82rem;">${escapeHTML(inv.notes)}</div></div>` : ''}
+                </div>
+
+                <div class="summary-row" style="margin-bottom:1rem;">
+                    <div class="summary-card income">
+                        <div class="summary-label"><i class="fas fa-arrow-down"></i> TOTAL INVESTED</div>
+                        <div class="summary-value">KSh ${fmt(totalInvested)}</div>
+                        <div class="summary-sub">${invList.filter(x => x.type !== 'withdrawal').length} contribution(s)</div>
+                    </div>
+                    <div class="summary-card ${totalWithdrawn > 0 ? 'expense' : ''}">
+                        <div class="summary-label"><i class="fas fa-arrow-up"></i> WITHDRAWN</div>
+                        <div class="summary-value">KSh ${fmt(totalWithdrawn)}</div>
+                        <div class="summary-sub">${invList.filter(x => x.type === 'withdrawal').length} withdrawal(s)</div>
+                    </div>
+                    <div class="summary-card investment">
+                        <div class="summary-label"><i class="fas fa-balance-scale"></i> CURRENT EQUITY</div>
+                        <div class="summary-value">KSh ${fmt(inv.equity)}</div>
+                        <div class="summary-sub">From the equity table</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+                    <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.9rem; color:#c7d5e6;">Investment History</h4>
+                    <button class="btn btn-primary" id="addInvestmentBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px;">
+                        <i class="fas fa-plus"></i> Add Investment
+                    </button>
+                </div>
+                <div class="employee-table-wrap">
+                    <table class="employee-table" style="min-width:auto;">
+                        <thead>
+                            <tr><th>Date</th><th>Type</th><th>Reference</th><th style="text-align:right;">Amount</th><th style="text-align:right;">Actions</th></tr>
+                        </thead>
+                        <tbody id="invDetailTableBody"></tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('invDetailBody').innerHTML = html;
+
+            // Render table rows
+            const tbody = document.getElementById('invDetailTableBody');
+            if (!invList.length) {
+                tbody.innerHTML = `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-receipt"></i>No contributions recorded yet.</div></td></tr>`;
+            } else {
+                tbody.innerHTML = invList.map(item => {
+                    const typeClass = item.type === 'initial' ? 'paid' :
+                                      item.type === 'additional' ? 'approved' : 'cancelled';
+                    const sign = item.type === 'withdrawal' ? '−' : '+';
+                    const amtClass = item.type === 'withdrawal' ? 'amount-expense' : 'amount-income';
+                    return `<tr>
+                        <td>${escapeHTML(item.date || '—')}</td>
+                        <td><span class="status-pill ${typeClass}" style="text-transform:capitalize;">${escapeHTML(item.type)}</span></td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem;">${escapeHTML(item.reference || '—')}</td>
+                        <td class="${amtClass}" style="text-align:right;">${sign} KSh ${fmt(item.amount)}</td>
+                        <td style="text-align:right;">
+                            <button class="del-btn" style="background:rgba(226,104,91,0.1); border:1px solid rgba(226,104,91,0.2); border-radius:8px; padding:0.3rem 0.55rem; cursor:pointer; color:#e8837a; font-size:0.8rem;" onclick="deleteInvestment(${item.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            document.getElementById('investorDetailModal').classList.add('show');
+
+            // Wire add investment button
+            document.getElementById('addInvestmentBtn').addEventListener('click', () => openInvestmentModal(investorId));
+        }
+
+        function closeInvestorDetail() {
+            document.getElementById('investorDetailModal').classList.remove('show');
+            currentDetailInvestorId = null;
+        }
+
+        function openInvestmentModal(investorId) {
+            const inv = investors.find(i => i.id === investorId);
+            if (!inv) return;
+
+            document.getElementById('investmentModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Add Investment';
+            document.getElementById('investmentInvestorLabel').textContent = `Investor: ${inv.name}`;
+            document.getElementById('invType').value = 'additional';
+            document.getElementById('invAmount').value = '';
+            document.getElementById('invDate').value = todayISO();
+            document.getElementById('invRef').value = '';
+            document.getElementById('invInvNotes').value = '';
+            document.getElementById('invInvError').style.display = 'none';
+            document.getElementById('investmentModal').dataset.investorId = investorId;
+            document.getElementById('investmentModal').classList.add('show');
+            setTimeout(() => document.getElementById('invAmount').focus(), 100);
+        }
+
+        function closeInvestmentModal() {
+            document.getElementById('investmentModal').classList.remove('show');
+        }
+
+        async function saveInvestment() {
+            const investorId = parseInt(document.getElementById('investmentModal').dataset.investorId);
+            const type = document.getElementById('invType').value;
+            const amount = safeNum(document.getElementById('invAmount').value);
+            const date = document.getElementById('invDate').value || todayISO();
+            const reference = document.getElementById('invRef').value.trim();
+            const notes = document.getElementById('invInvNotes').value.trim();
+            const errEl = document.getElementById('invInvError');
+            errEl.style.display = 'none';
+
+            if (!investorId) { errEl.textContent = '⚠️ No investor selected.'; errEl.style.display = 'block'; return; }
+            if (amount <= 0) { errEl.textContent = '⚠️ Enter an amount greater than 0.'; errEl.style.display = 'block'; return; }
+
+            const { error } = await supabaseClient
+                .from('investments')
+                .insert({
+                    investor_id: investorId,
+                    date: date,
+                    amount: amount,
+                    type: type,
+                    reference: reference || null,
+                    notes: notes || null,
+                    created_by: CURRENT_USER
+                });
+
+            if (error) {
+                errEl.textContent = '⚠️ Save failed: ' + error.message;
+                errEl.style.display = 'block';
+                return;
+            }
+
+                    await logAudit('CREATE', `Investment for Investor #${investorId}`,
+                `Added ${type} investment: KSh ${fmt(amount)}${reference ? ' (' + reference + ')' : ''}`,
+                '', amount);
+
+            // Log share transaction: for additional investment, add to equity
+            if (type !== 'withdrawal') {
+                const inv = investors.find(i => i.id === investorId);
+                const oldEquity = inv ? safeNum(inv.equity) : 0;
+                const newEquity = oldEquity + amount;
+
+                // Update investor equity in the investors table
+                try {
+                    await supabaseClient
+                        .from('investors')
+                        .update({ equity: newEquity, updated_at: new Date().toISOString() })
+                        .eq('id', investorId);
+                } catch (e) { console.warn('Equity update failed:', e.message); }
+
+                await logShareTransaction(
+                    investorId,
+                    type === 'initial' ? 'initial' : 'additional',
+                    oldEquity,
+                    newEquity,
+                    reference || 'INVESTMENT',
+                    notes || `Recorded ${type} investment`,
+                    `${type} investment of KSh ${fmt(amount)}`
+                );
+            } else {
+                // Withdrawal — subtract from equity
+                const inv = investors.find(i => i.id === investorId);
+                const oldEquity = inv ? safeNum(inv.equity) : 0;
+                const newEquity = Math.max(0, oldEquity - amount);
+
+                try {
+                    await supabaseClient
+                        .from('investors')
+                        .update({ equity: newEquity, updated_at: new Date().toISOString() })
+                        .eq('id', investorId);
+                } catch (e) { console.warn('Equity update failed:', e.message); }
+
+                await logShareTransaction(
+                    investorId, 'buyback', oldEquity, newEquity,
+                    reference || 'WITHDRAWAL',
+                    notes || 'Withdrawal',
+                    `Withdrawal of KSh ${fmt(amount)}`
+                );
+            }
+
+            closeInvestmentModal();
+            // Refresh from cloud so cap table + equity reflect the change
+            await fetchSummary();
+            renderAll(true);
+            // Reopen the detail view to show the new investment
+            openInvestorDetail(investorId);
+        }
+
+        async function deleteInvestment(investmentId) {
+            if (!confirm('Delete this investment record?')) return;
+
+            const { error } = await supabaseClient
+                .from('investments')
+                .delete()
+                .eq('id', investmentId);
+
+            if (error) { showError('Delete failed: ' + error.message); return; }
+
+            await logAudit('DELETE', `Investment #${investmentId}`, 'Deleted investment record', '', '');
+
+            if (currentDetailInvestorId) {
+                openInvestorDetail(currentDetailInvestorId);
+            }
+        }
+        // ==================================================
+        // EMPLOYEES — writes to `employees` table
+        // ==================================================
         function openEmployeeModal(employeeId = null) {
             editingEmployeeId = employeeId;
             const title = document.getElementById('employeeModalTitle');
@@ -3328,11 +4940,20 @@
             const date = document.getElementById('employeeDate');
             const error = document.getElementById('employeeError');
             error.textContent = ''; error.style.display = 'none';
-            if (employeeId === null) { title.innerHTML = '➕ Add Employee'; name.value = ''; amount.value = ''; ref.value = ''; status.value = 'paid'; date.value = todayISO(); }
-            else { const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId); if (!emp) return; title.innerHTML = '✏️ Edit Employee'; name.value = emp.name; amount.value = emp.amount; ref.value = emp.reference || ''; status.value = emp.status || 'paid'; date.value = emp.date || todayISO(); }
+            if (employeeId === null) {
+                title.innerHTML = '➕ Add Employee';
+                name.value = ''; amount.value = ''; ref.value = ''; status.value = 'paid'; date.value = todayISO();
+            } else {
+                const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
+                if (!emp) return;
+                title.innerHTML = '✏️ Edit Employee';
+                name.value = emp.name; amount.value = emp.amount; ref.value = emp.reference || '';
+                status.value = emp.status || 'paid'; date.value = emp.date || todayISO();
+            }
             document.getElementById('employeeModal').classList.add('show');
             setTimeout(() => name.focus(), 50);
         }
+
         function closeEmployeeModal() { document.getElementById('employeeModal').classList.remove('show'); editingEmployeeId = null; }
 
         async function saveEmployee() {
@@ -3345,21 +4966,51 @@
             error.textContent = ''; error.style.display = 'none';
             if (!name) { error.textContent = 'Please enter the employee name.'; error.style.display = 'block'; return; }
             if (amount <= 0) { error.textContent = 'Please enter a payment amount greater than 0.'; error.style.display = 'block'; return; }
-            if (reference) { const dup = EMPLOYEE_PAYMENTS.find(e => e.id !== editingEmployeeId && (e.reference || '').toLowerCase() === reference.toLowerCase()); if (dup) { error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`; error.style.display = 'block'; return; } }
-            if (editingEmployeeId === null) { const newId = nextEmployeeId(); EMPLOYEE_PAYMENTS.push({ id: newId, name, amount, reference, status, date }); logAudit('CREATE', `Employee #${newId}`, `Added payment for ${name} (${reference || 'no ref'})`, '', amount); }
-            else { const emp = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId); if (emp) { const oldAmount = emp.amount; const oldStatus = emp.status; emp.name = name; emp.amount = amount; emp.reference = reference; emp.status = status; emp.date = date; logAudit('UPDATE', `Employee #${editingEmployeeId}`, `Updated payment for ${name}`, `${oldAmount}/${oldStatus}`, `${amount}/${status}`); } }
-            saveEmployeePayments(); renderEmployeePayments(); closeEmployeeModal(); renderReconciliationBanner();
-            await saveEmployeesToCloud();
+            if (reference) {
+                const dup = EMPLOYEE_PAYMENTS.find(e => e.id !== editingEmployeeId && (e.reference || '').toLowerCase() === reference.toLowerCase());
+                if (dup) { error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`; error.style.display = 'block'; return; }
+            }
+
+            const row = { name, amount, reference: reference || null, status, date };
+            let ok = false;
+
+            if (editingEmployeeId === null) {
+                const newId = nextEmployeeId();
+                row.id = newId;
+                row.created_at = new Date().toISOString();
+                const { error: err } = await supabaseClient.from('employees').insert(row);
+                if (err) { error.textContent = '⚠️ Save failed: ' + err.message; error.style.display = 'block'; return; }
+                await logAudit('CREATE', `Employee #${newId}`, `Added payment for ${name} (${reference || 'no ref'})`, '', amount);
+                ok = true;
+            } else {
+                const old = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId);
+                row.updated_at = new Date().toISOString();
+                const { error: err } = await supabaseClient.from('employees').update(row).eq('id', editingEmployeeId);
+                if (err) { error.textContent = '⚠️ Save failed: ' + err.message; error.style.display = 'block'; return; }
+                await logAudit('UPDATE', `Employee #${editingEmployeeId}`, `Updated payment for ${name}`, `${old ? old.amount : ''}/${old ? old.status : ''}`, `${amount}/${status}`);
+                ok = true;
+            }
+
+            if (ok) {
+                await fetchSummary();
+                renderEmployeePayments();
+                renderReconciliationBanner();
+                closeEmployeeModal();
+            }
         }
 
         async function deleteEmployee(employeeId) {
             const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
             if (!employee) return;
             if (!confirm(`Delete employee "${employee.name}" from the payment list?`)) return;
-            logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
-            EMPLOYEE_PAYMENTS = EMPLOYEE_PAYMENTS.filter(e => e.id !== employeeId);
-            saveEmployeePayments(); renderEmployeePayments(); renderReconciliationBanner();
-            await saveEmployeesToCloud();
+
+            const { error } = await supabaseClient.from('employees').delete().eq('id', employeeId);
+            if (error) { showError('Delete failed: ' + error.message); return; }
+
+            await logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
+            await fetchSummary();
+            renderEmployeePayments();
+            renderReconciliationBanner();
         }
 
         function renderEmployeePayments() {
@@ -3395,7 +5046,7 @@
         function closeAuditModal() { document.getElementById('auditModal').classList.remove('show'); }
 
         // ==================================================
-        // DIVIDEND ENGINE
+        // DIVIDEND ENGINE — writes to `dividends` table
         // ==================================================
         function calcAllocations(total) {
             const all = buildInvestors();
@@ -3423,9 +5074,6 @@
             return `DIV-${y}-${m}-${rnd}`;
         }
 
-        // ------------------------------
-        // EDIT/DELETE GATE — with warning for locked statuses
-        // ------------------------------
         function requestEdit(dividendId) {
             const d = dividends.find(x => x.id === dividendId);
             if (!d) return;
@@ -3483,9 +5131,6 @@
             }
         }
 
-        // ------------------------------
-        // OPEN DIVIDEND MODAL (new or edit)
-        // ------------------------------
         function openDividendModal(editId = null, editReason = '') {
             editingDividendId = editId;
             const titleEl = document.getElementById('dividendModalTitle');
@@ -3511,6 +5156,7 @@
             document.getElementById('dividendModal').classList.add('show');
             setTimeout(() => document.getElementById('divTotal').focus(), 100);
         }
+
         function closeDividendModal() {
             document.getElementById('dividendModal').classList.remove('show');
             editingDividendId = null;
@@ -3576,30 +5222,53 @@
 
         async function confirmDividend() {
             if (!pendingDividend) return;
-            if (pendingDividend._isEdit) {
-                const idx = dividends.findIndex(x => x.id === pendingDividend.id);
-                if (idx !== -1) {
-                    const { _isEdit, _oldTotal, _oldPeriod, _oldStatus, ...clean } = pendingDividend;
-                    dividends[idx] = clean;
-                    const wasLocked = _oldStatus === 'approved' || _oldStatus === 'processing' || _oldStatus === 'paid';
-                    if (wasLocked) {
-                        logAudit('UPDATE', `Dividend ${clean.id}`,
-                            `⚠️ SILENT EDIT — ${_oldStatus.toUpperCase()} distribution edited. Old: ${_oldPeriod} / KSh ${fmt(_oldTotal)} → New: ${clean.periodLabel} / KSh ${fmt(clean.totalDistributable)}. Reason: ${clean.lastEditReason || 'not provided'}. Reconcile against external records.`,
-                            `${_oldTotal}/${_oldPeriod}`, `${clean.totalDistributable}/${clean.periodLabel}`, true);
-                    } else {
-                        logAudit('UPDATE', `Dividend ${clean.id}`, `Updated draft: ${_oldPeriod} (KSh ${fmt(_oldTotal)}) → ${clean.periodLabel} (KSh ${fmt(clean.totalDistributable)})`, `${_oldTotal}/${_oldPeriod}`, `${clean.totalDistributable}/${clean.periodLabel}`);
-                    }
+            const isEdit = !!pendingDividend._isEdit;
+            const wasLocked = pendingDividend._oldStatus === 'approved' || pendingDividend._oldStatus === 'processing' || pendingDividend._oldStatus === 'paid';
+
+            const row = {
+                id: pendingDividend.id,
+                period_label: pendingDividend.periodLabel,
+                total_distributable: pendingDividend.totalDistributable,
+                notes: pendingDividend.notes || null,
+                status: pendingDividend.status,
+                allocations: pendingDividend.allocations,
+                created_at: pendingDividend.createdAt,
+                created_by: pendingDividend.createdBy
+            };
+
+            if (isEdit) {
+                row.updated_at = new Date().toISOString();
+                row.updated_by = CURRENT_USER;
+                row.last_edited_at = pendingDividend.lastEditedAt;
+                row.last_edited_by = pendingDividend.lastEditedBy;
+                row.last_edit_reason = pendingDividend.lastEditReason;
+            }
+
+            const { error } = await supabaseClient
+                .from('dividends')
+                .upsert(row, { onConflict: 'id' });
+
+            if (error) { showError('Save failed: ' + error.message); return; }
+
+            if (isEdit) {
+                if (wasLocked) {
+                    await logAudit('UPDATE', `Dividend ${row.id}`,
+                        `⚠️ SILENT EDIT — ${pendingDividend._oldStatus.toUpperCase()} distribution edited. Old: ${pendingDividend._oldPeriod} / KSh ${fmt(pendingDividend._oldTotal)} → New: ${row.period_label} / KSh ${fmt(row.total_distributable)}. Reason: ${row.last_edit_reason || 'not provided'}.`,
+                        `${pendingDividend._oldTotal}/${pendingDividend._oldPeriod}`,
+                        `${row.total_distributable}/${row.period_label}`, true);
+                } else {
+                    await logAudit('UPDATE', `Dividend ${row.id}`, `Updated draft: ${pendingDividend._oldPeriod} → ${row.period_label}`, `${pendingDividend._oldTotal}/${pendingDividend._oldPeriod}`, `${row.total_distributable}/${row.period_label}`);
                 }
             } else {
-                dividends.push(pendingDividend);
-                logAudit('CREATE', `Dividend ${pendingDividend.id}`, `Created draft for ${pendingDividend.periodLabel} — KSh ${fmt(pendingDividend.totalDistributable)}`, '', pendingDividend.totalDistributable);
+                await logAudit('CREATE', `Dividend ${row.id}`, `Created draft for ${row.period_label} — KSh ${fmt(row.total_distributable)}`, '', row.total_distributable);
             }
-            const targetId = pendingDividend.id;
+
+            const targetId = row.id;
             pendingDividend = null;
             closePreviewModal();
+            await fetchSummary();
             renderDividendOverview();
             renderReconciliationBanner();
-            await saveDividendsToCloud();
             openDividendDetail(targetId);
         }
 
@@ -3607,18 +5276,22 @@
             const d = dividends.find(x => x.id === id);
             if (!d) return;
             const wasLocked = d.status === 'approved' || d.status === 'processing' || d.status === 'paid';
+
+            const { error } = await supabaseClient.from('dividends').delete().eq('id', id);
+            if (error) { showError('Delete failed: ' + error.message); return; }
+
             if (wasLocked) {
-                logAudit('DELETE', `Dividend ${id}`,
-                    `⚠️ SILENT DELETE — ${d.status.toUpperCase()} distribution (${d.periodLabel}, KSh ${fmt(d.totalDistributable)}) was permanently deleted. Reason: ${reason || 'not provided'}. This record cannot be recovered from the dashboard. Reconcile against external records.`,
+                await logAudit('DELETE', `Dividend ${id}`,
+                    `⚠️ SILENT DELETE — ${d.status.toUpperCase()} distribution (${d.periodLabel}, KSh ${fmt(d.totalDistributable)}) was permanently deleted. Reason: ${reason || 'not provided'}.`,
                     d.totalDistributable, '', true);
             } else {
-                logAudit('DELETE', `Dividend ${id}`, `Deleted ${d.status} distribution for ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, d.totalDistributable, '');
+                await logAudit('DELETE', `Dividend ${id}`, `Deleted ${d.status} distribution for ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, d.totalDistributable, '');
             }
-            dividends = dividends.filter(x => x.id !== id);
+
+            await fetchSummary();
             renderDividendOverview();
             renderReconciliationBanner();
             closeDividendDetail();
-            await saveDividendsToCloud();
             const hist = document.getElementById('dividendsHistoryModal');
             if (hist && hist.classList.contains('show')) openDividendsHistoryModal();
         }
@@ -3643,7 +5316,7 @@
 
             document.getElementById('detailBody').innerHTML = d.allocations.map(a => `<tr><td>${escapeHTML(a.name)}</td><td class="alloc-pct">${a.percentage.toFixed(2)}%</td><td class="alloc-amount">${fmt(a.amount)}</td><td class="alloc-amount" style="color:${a.roundingAdj >= 0 ? '#7ee0a2' : '#f0a89f'};">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td></tr>`).join('') + `<tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td colspan="2" style="text-align:right;"><strong>${fmt(d.allocations.reduce((s, a) => s + a.amount, 0))}</strong></td></tr>`;
 
-            document.getElementById('detailCreated').textContent = `${d.createdBy} · ${new Date(d.createdAt).toLocaleString()}`;
+            document.getElementById('detailCreated').textContent = `${d.createdBy || '—'} · ${new Date(d.createdAt).toLocaleString()}`;
             document.getElementById('detailApproved').textContent = d.approvedAt ? `${d.approvedBy} · ${new Date(d.approvedAt).toLocaleString()}` : '—';
             document.getElementById('detailPaid').textContent = d.paidAt ? new Date(d.paidAt).toLocaleString() : '—';
             document.getElementById('detailNotes').textContent = d.notes || '—';
@@ -3678,12 +5351,15 @@
             const d = dividends.find(x => x.id === id);
             if (!d) return;
             if (!confirm(`Approve distribution ${d.id} for ${d.periodLabel}?`)) return;
-            d.status = 'approved';
-            d.approvedAt = new Date().toISOString();
-            d.approvedBy = CURRENT_USER;
-            logAudit('APPROVE', `Dividend ${id}`, `Approved ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, 'draft', 'approved');
-            renderDividendOverview(); renderReconciliationBanner();
-            await saveDividendsToCloud();
+            const { error } = await supabaseClient
+                .from('dividends')
+                .update({ status: 'approved', approved_at: new Date().toISOString(), approved_by: CURRENT_USER })
+                .eq('id', id);
+            if (error) { showError('Approve failed: ' + error.message); return; }
+            await logAudit('APPROVE', `Dividend ${id}`, `Approved ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, 'draft', 'approved');
+            await fetchSummary();
+            renderDividendOverview();
+            renderReconciliationBanner();
             openDividendDetail(id);
         }
 
@@ -3692,11 +5368,15 @@
             if (!d) return;
             if (!confirm(`Mark distribution ${d.id} as PAID? This should only be done after actual payments have been made.`)) return;
             const oldStatus = d.status;
-            d.status = 'paid';
-            d.paidAt = new Date().toISOString();
-            logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}`, oldStatus, 'paid');
-            renderDividendOverview(); renderReconciliationBanner();
-            await saveDividendsToCloud();
+            const { error } = await supabaseClient
+                .from('dividends')
+                .update({ status: 'paid', paid_at: new Date().toISOString() })
+                .eq('id', id);
+            if (error) { showError('Mark paid failed: ' + error.message); return; }
+            await logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}`, oldStatus, 'paid');
+            await fetchSummary();
+            renderDividendOverview();
+            renderReconciliationBanner();
             openDividendDetail(id);
         }
 
@@ -3706,17 +5386,20 @@
             const reason = prompt('Reason for cancelling this distribution:', '');
             if (reason === null) return;
             const oldStatus = d.status;
-            d.status = 'cancelled';
-            d.cancelledAt = new Date().toISOString();
-            d.cancelReason = reason || 'No reason provided';
-            logAudit('CANCEL', `Dividend ${id}`, `Cancelled ${d.periodLabel} — Reason: ${d.cancelReason}`, oldStatus, 'cancelled');
-            renderDividendOverview(); renderReconciliationBanner();
-            await saveDividendsToCloud();
+            const { error } = await supabaseClient
+                .from('dividends')
+                .update({ status: 'cancelled', cancelled_at: new Date().toISOString(), cancel_reason: reason || 'No reason provided' })
+                .eq('id', id);
+            if (error) { showError('Cancel failed: ' + error.message); return; }
+            await logAudit('CANCEL', `Dividend ${id}`, `Cancelled ${d.periodLabel} — Reason: ${reason || 'No reason provided'}`, oldStatus, 'cancelled');
+            await fetchSummary();
+            renderDividendOverview();
+            renderReconciliationBanner();
             openDividendDetail(id);
         }
 
         // ==================================================
-        // DIVIDEND HISTORY
+        // DIVIDEND HISTORY MODAL (dynamic)
         // ==================================================
         function openDividendsHistoryModal() {
             const body = document.getElementById('dividendHistoryBody');
@@ -3748,6 +5431,7 @@
             document.getElementById('dividendsHistoryModal').classList.add('show');
         }
         function closeDividendsHistoryModal() { document.getElementById('dividendsHistoryModal').classList.remove('show'); }
+
         // ==================================================
         // PRINT
         // ==================================================
@@ -3807,12 +5491,9 @@
                         <tr><td>Status</td><td><strong style="text-transform:uppercase;">${escapeHTML(d.status)}</strong></td></tr>
                         <tr><td>Total Distributable</td><td><strong>KSh ${fmt(d.totalDistributable)}</strong></td></tr>
                         <tr><td>Shareholders</td><td>${d.allocations.length}</td></tr>
-                        <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy)}</td></tr>
+                        <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy || '—')}</td></tr>
                         ${d.approvedAt ? `<tr><td>Approved</td><td>${escapeHTML(new Date(d.approvedAt).toLocaleString())} by ${escapeHTML(d.approvedBy)}</td></tr>` : ''}
                         ${d.paidAt ? `<tr><td>Paid</td><td>${escapeHTML(new Date(d.paidAt).toLocaleString())}</td></tr>` : ''}
-                        ${d.cancelledAt ? `<tr><td>Cancelled</td><td>${escapeHTML(new Date(d.cancelledAt).toLocaleString())}</td></tr>` : ''}
-                        ${d.cancelReason ? `<tr><td>Cancellation Reason</td><td>${escapeHTML(d.cancelReason)}</td></tr>` : ''}
-                        ${d.notes ? `<tr><td>Notes</td><td>${escapeHTML(d.notes)}</td></tr>` : ''}
                         ${d.lastEditedAt ? `<tr style="background:#fff8e8;"><td>⚠️ Last Edited</td><td>${escapeHTML(new Date(d.lastEditedAt).toLocaleString())} by ${escapeHTML(d.lastEditedBy || '—')}<br>Reason: ${escapeHTML(d.lastEditReason || 'not provided')}</td></tr>` : ''}
                     </table>
                     <h3 style="color:#0b2b4a; font-size:16px; margin-bottom:10px;">Shareholder Allocations</h3>
@@ -3841,13 +5522,10 @@
                         <tr><td>Period</td><td><strong>${escapeHTML(d.periodLabel)}</strong></td></tr>
                         <tr><td>Status</td><td>${escapeHTML(d.status.toUpperCase())}</td></tr>
                         <tr><td>Total Distributable</td><td><strong>KSh ${fmt(d.totalDistributable)}</strong></td></tr>
-                        <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy)}</td></tr>
+                        <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy || '—')}</td></tr>
                         ${d.approvedAt ? `<tr><td>Approved</td><td>${escapeHTML(new Date(d.approvedAt).toLocaleString())} by ${escapeHTML(d.approvedBy)}</td></tr>` : ''}
                         ${d.paidAt ? `<tr><td>Paid</td><td>${escapeHTML(new Date(d.paidAt).toLocaleString())}</td></tr>` : ''}
-                        ${d.cancelledAt ? `<tr><td>Cancelled</td><td>${escapeHTML(new Date(d.cancelledAt).toLocaleString())}</td></tr>` : ''}
-                        ${d.cancelReason ? `<tr><td>Cancellation Reason</td><td>${escapeHTML(d.cancelReason)}</td></tr>` : ''}
                         ${d.notes ? `<tr><td>Notes</td><td>${escapeHTML(d.notes)}</td></tr>` : ''}
-                        ${d.lastEditedAt ? `<tr style="background:#fff8e8;"><td>⚠️ Last Edited</td><td>${escapeHTML(new Date(d.lastEditedAt).toLocaleString())} by ${escapeHTML(d.lastEditedBy || '—')}<br>Reason: ${escapeHTML(d.lastEditReason || 'not provided')}</td></tr>` : ''}
                     </table>
                     <table class="print-list">
                         <thead><tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr></thead>
@@ -3889,7 +5567,7 @@
 
         function printAuditLog() {
             const rows = [...auditLogs].reverse().slice(0, 500).map(l => `<tr${l.warning ? ' style="background:#fff0ee;"' : ''}><td>${escapeHTML(new Date(l.timestamp).toLocaleString())}</td><td>${escapeHTML(l.user)}</td><td>${escapeHTML(l.action)}${l.warning ? ' ⚠️' : ''}</td><td>${escapeHTML(l.target)}</td><td>${escapeHTML(l.details)}</td></tr>`).join('');
-            doPrint(`<div class="employee-print-report">${printHeader('Audit Log Report')}<table class="print-list"><thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table><div class="print-footer"><span>Client-side audit log — not tamper-proof</span><span>${escapeHTML(new Date().toLocaleString())}</span></div></div>`);
+            doPrint(`<div class="employee-print-report">${printHeader('Audit Log Report')}<table class="print-list"><thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table><div class="print-footer"><span>Starlink LLC</span><span>${escapeHTML(new Date().toLocaleString())}</span></div></div>`);
         }
 
         function printReconciliationReport() {
@@ -3912,8 +5590,29 @@
 
         function subscribeRealtime() {
             if (!supabaseClient) return;
-            supabaseClient.channel('expenditure-data-realtime')
+            // Subscribe to all relevant tables
+            supabaseClient.channel('starlink-tables')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditure_data', filter: 'id=eq.1' }, async () => {
+                    await fetchSummary();
+                    lastFetchAt = Date.now();
+                    renderAll(true);
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'investors' }, async () => {
+                    await fetchSummary();
+                    lastFetchAt = Date.now();
+                    renderAll(true);
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, async () => {
+                    await fetchSummary();
+                    lastFetchAt = Date.now();
+                    renderAll(true);
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'dividends' }, async () => {
+                    await fetchSummary();
+                    lastFetchAt = Date.now();
+                    renderAll(true);
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'audit_logs' }, async () => {
                     await fetchSummary();
                     lastFetchAt = Date.now();
                     renderAll(true);
@@ -3929,7 +5628,6 @@
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
-                // Skip if realtime just updated us <10s ago
                 if (Date.now() - lastFetchAt < 10000) return;
                 const ok = await fetchSummary();
                 lastFetchAt = Date.now();
@@ -3942,22 +5640,8 @@
                 const btn = e.target.closest('.btn');
                 if (btn) { const rect = btn.getBoundingClientRect(); btn.style.setProperty('--mx', (e.clientX - rect.left) + 'px'); btn.style.setProperty('--my', (e.clientY - rect.top) + 'px'); }
             });
-            document.addEventListener('click', (e) => {
-                const btn = e.target.closest('.btn, .print-employee-btn, .employee-edit-btn, .employee-delete-btn, .div-action-btn, .recon-tab, .div-edit-btn, .div-delete-btn');
-                if (!btn) return;
-                const rect = btn.getBoundingClientRect();
-                const ripple = document.createElement('span');
-                const size = Math.max(rect.width, rect.height);
-                ripple.style.cssText = `position:absolute; border-radius:50%; background:rgba(255,255,255,0.35); transform:scale(0); animation:rippleAnim 0.6s ease-out; pointer-events:none; width:${size}px; height:${size}px; left:${e.clientX-rect.left-size/2}px; top:${e.clientY-rect.top-size/2}px;`;
-                btn.style.position = 'relative'; btn.style.overflow = 'hidden';
-                btn.appendChild(ripple);
-                setTimeout(() => ripple.remove(), 600);
-            });
-            const style = document.createElement('style');
-            style.textContent = '@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }';
-            document.head.appendChild(style);
         }
-        
+
         // ==================================================
         // INIT
         // ==================================================
@@ -3965,26 +5649,87 @@
             setLoading(true);
             if (typeof supabase === 'undefined') { showError('Supabase library not loaded. Please refresh.'); setLoading(false); return; }
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
             const ok = await fetchSummary();
-            if (!ok) { investors = DEFAULT_INVESTORS.map(i => ({ ...i })); EMPLOYEE_PAYMENTS = loadEmployeePayments(); }
+            if (!ok) {
+                investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
+                EMPLOYEE_PAYMENTS = DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({ ...e }));
+            }
 
             renderAll(false);
             subscribeRealtime();
             startPolling();
             attachRipple();
 
-            // ---- Investors ----
+            // Investors
             document.getElementById('addInvestorBtn').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
             document.getElementById('invSave').addEventListener('click', saveInvestor);
             document.getElementById('investorModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorModal(); });
 
-            // ---- Employees ----
+            // Investor detail modal
+            document.getElementById('invDetailClose').addEventListener('click', closeInvestorDetail);
+            document.getElementById('investorDetailModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorDetail(); });
+
+            // Investment modal
+            document.getElementById('invInvestmentCancel').addEventListener('click', closeInvestmentModal);
+            document.getElementById('invInvestmentSave').addEventListener('click', saveInvestment);
+            document.getElementById('investmentModal').addEventListener('click', function(e) { if (e.target === this) closeInvestmentModal(); });
+            // Employees
             document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal(null));
             document.getElementById('employeeCancel').addEventListener('click', closeEmployeeModal);
             document.getElementById('employeeSave').addEventListener('click', saveEmployee);
             document.getElementById('employeeModal').addEventListener('click', function(e) { if (e.target === this) closeEmployeeModal(); });
+
+                        // Cap Table
+                                    // Proposals
+            // Dilution Simulator
+            document.getElementById('dilutionBtn').addEventListener('click', openDilutionSimulator);
+            document.getElementById('dilutionClose').addEventListener('click', closeDilutionSimulator);
+            document.getElementById('dilutionModal').addEventListener('click', function(e) { if (e.target === this) closeDilutionSimulator(); });
+            document.getElementById('dilMode').addEventListener('change', updateDilutionInputs);
+            document.getElementById('dilRunBtn').addEventListener('click', runDilutionSimulation);
+            document.getElementById('dilResetBtn').addEventListener('click', resetDilution);
+            document.getElementById('printDilutionBtn').addEventListener('click', printDilutionSimulation);
+
+
+            document.getElementById('proposalsBtn').addEventListener('click', openProposalsModal);
+            document.getElementById('proposalsClose').addEventListener('click', closeProposalsModal);
+            document.getElementById('proposalsModal').addEventListener('click', function(e) { if (e.target === this) closeProposalsModal(); });
+            document.getElementById('newProposalBtn').addEventListener('click', () => openProposalForm(null));
+            document.getElementById('printProposalsBtn').addEventListener('click', printAllProposals);
+
+            ['propFilterStatus', 'propFilterInvestor'].forEach(id => document.getElementById(id).addEventListener('change', renderProposals));
+            document.getElementById('propFilterSearch').addEventListener('input', renderProposals);
+            document.getElementById('propFilterClear').addEventListener('click', () => {
+                ['propFilterStatus', 'propFilterInvestor', 'propFilterSearch'].forEach(id => document.getElementById(id).value = '');
+                renderProposals();
+            });
+
+            // Proposal form
+            document.getElementById('propFormInvestorType').addEventListener('change', toggleProposalInvestorType);
+            document.getElementById('proposalFormCancel').addEventListener('click', closeProposalForm);
+            document.getElementById('proposalFormSave').addEventListener('click', saveProposal);
+            document.getElementById('proposalFormModal').addEventListener('click', function(e) { if (e.target === this) closeProposalForm(); });
+
+            // Proposal detail
+            document.getElementById('propDetailClose').addEventListener('click', closeProposalDetail);
+            document.getElementById('proposalDetailModal').addEventListener('click', function(e) { if (e.target === this) closeProposalDetail(); });
+
+            document.getElementById('capTableBtn').addEventListener('click', openCapTable);
+            document.getElementById('capTableClose').addEventListener('click', closeCapTable);
+            document.getElementById('capTableModal').addEventListener('click', function(e) { if (e.target === this) closeCapTable(); });
+            document.getElementById('printCapTableBtn').addEventListener('click', printCapTable);
+            document.getElementById('capTableDate').addEventListener('change', renderCapTable);
+            document.getElementById('capTableTodayBtn').addEventListener('click', () => {
+                document.getElementById('capTableDate').value = todayISO();
+                renderCapTable();
+            });
+            document.getElementById('capTableAllBtn').addEventListener('click', () => {
+                document.getElementById('capTableDate').value = '';
+                renderCapTable();
+            });
 
             document.getElementById('paymentsBtn').addEventListener('click', openPaymentsModal);
             document.getElementById('paymentsClose').addEventListener('click', closePaymentsModal);
@@ -3998,7 +5743,7 @@
                 renderEmployeePayments();
             });
 
-            // ---- Audit ----
+            // Audit
             document.getElementById('auditBtn').addEventListener('click', openAuditModal);
             document.getElementById('auditClose').addEventListener('click', closeAuditModal);
             document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
@@ -4010,7 +5755,7 @@
                 renderAuditLog();
             });
 
-            // ---- Reconciliation ----
+            // Reconciliation
             document.getElementById('reconBtn').addEventListener('click', openReconModal);
             document.getElementById('reconClose').addEventListener('click', closeReconModal);
             document.getElementById('reconModal').addEventListener('click', function(e) { if (e.target === this) closeReconModal(); });
@@ -4019,7 +5764,7 @@
                 tab.addEventListener('click', () => switchReconTab(tab.dataset.recon));
             });
 
-            // ---- Dividends ----
+            // Dividends
             document.getElementById('newDividendBtn').addEventListener('click', () => openDividendModal(null));
             document.getElementById('viewDividendsBtn').addEventListener('click', openDividendsHistoryModal);
             document.getElementById('dividendsBtn').addEventListener('click', openDividendsHistoryModal);
@@ -4037,12 +5782,10 @@
             document.getElementById('detailClose').addEventListener('click', closeDividendDetail);
             document.getElementById('dividendDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDividendDetail(); });
 
-            // ---- Edit warning gate ----
             document.getElementById('editWarningCancel').addEventListener('click', closeEditWarningModal);
             document.getElementById('editWarningConfirm').addEventListener('click', confirmEditWarning);
             document.getElementById('editWarningModal').addEventListener('click', function(e) { if (e.target === this) closeEditWarningModal(); });
 
-            // ---- Dynamically create Dividend History modal ----
             const historyModal = document.createElement('div');
             historyModal.className = 'modal-overlay';
             historyModal.id = 'dividendsHistoryModal';
@@ -4077,8 +5820,7 @@
                 openDividendModal(null);
             });
 
-            // ---- Initial login audit ----
-            logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
+            await logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
         }
 
