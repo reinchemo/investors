@@ -3192,8 +3192,17 @@
         // CLOUD SYNC — reads from JSON blob (expenditure summary only)
         // Investors, employees, dividends, audit_logs come from tables
         // ==================================================
-        async function fetchSummary() {
+                async function fetchSummary() {
             if (!supabaseClient) return false;
+            // Save last-known-good state in case the fetch fails partway through
+            const previousState = {
+                summary: summary,
+                investors: investors,
+                dividends: dividends,
+                EMPLOYEE_PAYMENTS: EMPLOYEE_PAYMENTS,
+                auditLogs: auditLogs,
+                proposals: proposals
+            };
             try {
                 // 1. Read shared blob for summary calculation + custom columns
                 const { data: blobResult, error: blobErr } = await supabaseClient
@@ -3334,8 +3343,15 @@
                 updateProposalsBadge();
 
                 return true;
-            } catch (e) {
-                console.warn('Fetch failed — using local state:', e.message);
+                        } catch (e) {
+                console.warn('Fetch failed — restoring last known state:', e.message);
+                // Roll back any partial updates
+                summary = previousState.summary;
+                investors = previousState.investors;
+                dividends = previousState.dividends;
+                EMPLOYEE_PAYMENTS = previousState.EMPLOYEE_PAYMENTS;
+                auditLogs = previousState.auditLogs;
+                proposals = previousState.proposals;
             }
             return false;
         }
@@ -5793,34 +5809,34 @@
         // ==================================================
         let lastFetchAt = 0;
 
-        function subscribeRealtime() {
+                function subscribeRealtime() {
             if (!supabaseClient) return;
             // Subscribe to all relevant tables
             supabaseClient.channel('starlink-tables')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditure_data', filter: 'id=eq.1' }, async () => {
-                    await fetchSummary();
+                    const ok = await fetchSummary();
                     lastFetchAt = Date.now();
-                    renderAll(true);
+                    if (ok) renderAll(true);
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'investors' }, async () => {
-                    await fetchSummary();
+                    const ok = await fetchSummary();
                     lastFetchAt = Date.now();
-                    renderAll(true);
+                    if (ok) renderAll(true);
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, async () => {
-                    await fetchSummary();
+                    const ok = await fetchSummary();
                     lastFetchAt = Date.now();
-                    renderAll(true);
+                    if (ok) renderAll(true);
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'dividends' }, async () => {
-                    await fetchSummary();
+                    const ok = await fetchSummary();
                     lastFetchAt = Date.now();
-                    renderAll(true);
+                    if (ok) renderAll(true);
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'audit_logs' }, async () => {
-                    await fetchSummary();
+                    const ok = await fetchSummary();
                     lastFetchAt = Date.now();
-                    renderAll(true);
+                    if (ok) renderAll(true);
                 })
                 .subscribe((status) => {
                     const st = document.getElementById('liveStatus');
@@ -5829,7 +5845,6 @@
                     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { st.textContent = 'Polling'; dot.style.background = '#e8b879'; }
                 });
         }
-
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
@@ -6033,5 +6048,7 @@
     </script>
 
 </body>
+
+</html>
 
 </html>
