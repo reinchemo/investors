@@ -2157,6 +2157,120 @@
         <div class="spinner"></div>
     </div>
 
+
+    <!-- INVESTOR TRANSACTIONS MODAL -->
+    <div class="modal-overlay" id="investorTxnModal">
+        <div class="modal-card" style="max-width:1200px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-receipt" style="color:#5fc7bc;"></i> Transactions</h3>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-ghost add-employee-btn" id="txnShowDeletedBtn"><i class="fas fa-trash-restore"></i> Show Deleted</button>
+                    <button class="btn btn-ghost add-employee-btn" id="printInvestorTxnsBtn"><i class="fas fa-print"></i> Print</button>
+                </div>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>This view reads from the <strong>finance app's</strong> transactions table. Editing a transaction here also affects the finance app. Payroll-generated rows are hidden — those live in the Payroll module.</span>
+            </div>
+
+            <div class="filter-bar">
+                <input type="date" id="invTxnFilterFrom" title="From date">
+                <input type="date" id="invTxnFilterTo" title="To date">
+                <select id="invTxnFilterType">
+                    <option value="">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expenditure</option>
+                </select>
+                <select id="invTxnFilterCategory">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="invTxnFilterLocation">
+                    <option value="">All Locations</option>
+                </select>
+                <input type="text" class="grow" id="invTxnFilterSearch" placeholder="Search description, reference, or ID...">
+                <button class="btn btn-ghost add-employee-btn" id="invTxnFilterClear"><i class="fas fa-times"></i> Clear</button>
+            </div>
+
+            <div id="invTxnSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+            <div class="employee-table-wrap">
+                <table class="employee-table" style="min-width:1000px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Reference</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th style="text-align:right;">Amount</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="investorTxnBody"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="investorTxnClose">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INVESTOR TRANSACTION EDIT MODAL -->
+    <div class="modal-overlay" id="investorTxnEditModal">
+        <div class="modal-card" style="max-width:560px;">
+            <h3 id="investorTxnEditTitle"><i class="fas fa-edit"></i> Edit Transaction</h3>
+
+            <div style="padding:0.6rem 0.9rem; background:rgba(200,154,91,0.08); border:1px solid rgba(200,154,91,0.25); border-radius:10px; font-size:0.75rem; color:#e8b879; margin-bottom:0.5rem;">
+                <i class="fas fa-lock"></i> Amount, date, and reference are locked here. To change those, use the finance app.
+            </div>
+
+            <label>Description</label>
+            <input type="text" id="invTxnEditDesc" maxlength="200">
+
+            <label>Notes</label>
+            <textarea id="invTxnEditNotes" maxlength="500"></textarea>
+
+            <label>Category</label>
+            <input type="text" id="invTxnEditCategory" maxlength="80" list="invTxnCategoryList">
+            <datalist id="invTxnCategoryList">
+                <option value="Customer Payments"></option>
+                <option value="Installation Fees"></option>
+                <option value="Equipment Sales"></option>
+                <option value="Other Income"></option>
+                <option value="Internet"></option>
+                <option value="Safaricom"></option>
+                <option value="Starlink"></option>
+                <option value="KPLC"></option>
+                <option value="Electricity"></option>
+                <option value="Equipment"></option>
+                <option value="Routers"></option>
+                <option value="Access Points"></option>
+                <option value="Fiber"></option>
+                <option value="Cables"></option>
+                <option value="Salaries"></option>
+                <option value="Transport"></option>
+                <option value="Repairs"></option>
+                <option value="Rent"></option>
+                <option value="Software"></option>
+                <option value="Marketing"></option>
+                <option value="Airtime"></option>
+                <option value="M-PESA Charges"></option>
+                <option value="Taxes"></option>
+                <option value="Loan Repayment"></option>
+                <option value="Other"></option>
+            </datalist>
+
+            <div class="modal-error" id="investorTxnEditError"></div>
+            <div class="modal-actions">
+                <button class="cancel" id="investorTxnEditCancel">Cancel</button>
+                <button class="save" id="investorTxnEditSave">Save Changes</button>
+            </div>
+        </div>
+    </div>
     <!-- EMPLOYEE PAYMENTS MODAL -->
     <div class="modal-overlay" id="paymentsModal">
         <div class="modal-card payments-modal-card">
@@ -2864,19 +2978,21 @@
                 <a href="finance.html" class="btn btn-primary">
                     <i class="fas fa-coins"></i><span>Finance</span>
                 </a>
+
+
                 <button class="btn btn-ghost" id="capTableBtn"><i class="fas fa-layer-group"></i> Cap Table</button>
                 <button class="btn btn-ghost" id="proposalsBtn"><i class="fas fa-file-signature"></i> Proposals <span id="proposalsCountNav" style="display:none; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(122,90,248,0.35); color:#b8a0ff; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="dilutionBtn"><i class="fas fa-flask"></i> Simulator</button>
+                <button class="btn btn-ghost" id="investorTxnBtn"><i class="fas fa-receipt"></i> Transactions</button>
                 <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
                 <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
                 <button class="btn btn-ghost" id="reconBtn"><i class="fas fa-balance-scale"></i> Reconcile <span id="reconCountNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(226,104,91,0.3); color:#f0a89f; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
-<a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
+                <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-external-link-alt"></i>
                     <span>Login Expenditures</span>
                 </a>
-                
             </div>
         </nav>
 
@@ -2899,8 +3015,8 @@
         </div>
 
         <div class="summary-row">
-            <div class="summary-card virtual">
-                <div class="summary-label"><i class="fas fa-landmark"></i> STARLINK VIRTUAL</div>
+            <div class="summary-card virtual" title="Reads from the retired expenditure app's frozen data snapshot. Will be replaced by the new transaction-based formula in a future update.">
+                <div class="summary-label"><i class="fas fa-landmark"></i> STARLINK VIRTUAL <i class="fas fa-lock" style="font-size:0.7rem; opacity:0.5; margin-left:4px;"></i></div>
                 <div class="summary-value" id="virtualInvestmentValue">0.00</div>
             </div>
             <div class="summary-card investment">
@@ -3038,6 +3154,9 @@
         let pendingDividend = null;
         let editingDividendId = null;
         let pendingEditAction = null;
+        let investorTxns = [];
+        let editingInvestorTxnId = null;
+        let showingDeletedTxns = false;
 
         // ==================================================
         // HELPERS
@@ -3121,6 +3240,55 @@
             const d2 = dateStr2 ? new Date(dateStr2) : new Date();
             return Math.max(0, Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)));
         }
+
+        // ==================================================
+        // INVESTOR TRANSACTIONS (reads finance app's transactions table)
+        // ==================================================
+        async function loadInvestorTxns() {
+            if (!supabaseClient) return false;
+            try {
+                const query = supabaseClient
+                    .from('transactions')
+                    .select('*')
+                    .in('type', ['income', 'expense'])
+                    .is('payroll_run_id', null)
+                    .order('date', {
+                        ascending: false
+                    })
+                    .limit(1000);
+
+                const {
+                    data,
+                    error
+                } = await query;
+                if (error) throw error;
+
+                investorTxns = (data || []).map(row => ({
+                    id: row.id,
+                    date: row.date,
+                    type: row.type,
+                    category: row.category,
+                    description: row.description,
+                    amount: safeNum(row.amount),
+                    method: row.method || '',
+                    reference: row.reference || '',
+                    location: row.location || '',
+                    locationId: row.location_id || null,
+                    status: row.status,
+                    notes: row.notes || '',
+                    deletedAt: row.deleted_at || null,
+                    deletedBy: row.deleted_by || '',
+                    deleteReason: row.delete_reason || '',
+                    createdAt: row.created_at,
+                    createdBy: row.created_by
+                }));
+                return true;
+            } catch (e) {
+                console.warn('Investor txns fetch failed:', e.message);
+            }
+            return false;
+        }
+
 
         // ==================================================
         // AUDIT — now writes to `audit_logs` table
@@ -3344,6 +3512,35 @@
                     updatedBy: r.updated_by
                 }));
 
+                // 7. Read transactions (income + expense only, exclude payroll rows)
+                const { data: invTxnRows, error: invTxnErr } = await supabaseClient
+                    .from('transactions')
+                    .select('*')
+                    .in('type', ['income', 'expense'])
+                    .is('payroll_run_id', null)
+                    .order('date', { ascending: false })
+                    .limit(1000);
+                if (invTxnErr) throw invTxnErr;
+                investorTxns = (invTxnRows || []).map(row => ({
+                    id: row.id,
+                    date: row.date,
+                    type: row.type,
+                    category: row.category,
+                    description: row.description,
+                    amount: safeNum(row.amount),
+                    method: row.method || '',
+                    reference: row.reference || '',
+                    location: row.location || '',
+                    locationId: row.location_id || null,
+                    status: row.status,
+                    notes: row.notes || '',
+                    deletedAt: row.deleted_at || null,
+                    deletedBy: row.deleted_by || '',
+                    deleteReason: row.delete_reason || '',
+                    createdAt: row.created_at,
+                    createdBy: row.created_by
+                }));
+
                 // Update nav badge for pending proposals
                 updateProposalsBadge();
 
@@ -3545,6 +3742,294 @@
             document.querySelectorAll('.recon-section').forEach(s => s.classList.toggle('active', s.dataset.reconSection === tabName));
         }
         function closeReconAndEdit(employeeId) { closeReconModal(); openEmployeeModal(employeeId); }
+
+
+
+                // ==================================================
+        // INVESTOR TRANSACTIONS RENDER
+        // ==================================================
+        function renderInvestorTxns() {
+            const body = document.getElementById('investorTxnBody');
+            if (!body) return;
+
+            // Populate category filter from unique values currently in the list
+            const catSel = document.getElementById('invTxnFilterCategory');
+            const currentCat = catSel.value;
+            const uniqueCats = Array.from(new Set(investorTxns.map(t => t.category).filter(Boolean))).sort();
+            const catOpts = '<option value="">All Categories</option>' +
+                uniqueCats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+            if (catSel.innerHTML !== catOpts) {
+                catSel.innerHTML = catOpts;
+                catSel.value = currentCat;
+            }
+
+            // Populate location filter from unique values
+            const locSel = document.getElementById('invTxnFilterLocation');
+            const currentLoc = locSel.value;
+            const uniqueLocs = Array.from(new Set(investorTxns.map(t => t.location).filter(Boolean))).sort();
+            const locOpts = '<option value="">All Locations</option>' +
+                uniqueLocs.map(l => `<option value="${escapeHTML(l)}">${escapeHTML(l)}</option>`).join('');
+            if (locSel.innerHTML !== locOpts) {
+                locSel.innerHTML = locOpts;
+                locSel.value = currentLoc;
+            }
+
+            const from = document.getElementById('invTxnFilterFrom').value || '';
+            const to = document.getElementById('invTxnFilterTo').value || '';
+            const typeFilter = document.getElementById('invTxnFilterType').value || '';
+            const catFilter = document.getElementById('invTxnFilterCategory').value || '';
+            const locFilter = document.getElementById('invTxnFilterLocation').value || '';
+            const q = (document.getElementById('invTxnFilterSearch').value || '').toLowerCase();
+
+            let filtered = [...investorTxns];
+
+            // Hide deleted unless "Show Deleted" is toggled
+            if (!showingDeletedTxns) filtered = filtered.filter(t => !t.deletedAt);
+
+            if (from) filtered = filtered.filter(t => (t.date || '') >= from);
+            if (to) filtered = filtered.filter(t => (t.date || '') <= to);
+            if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
+            if (catFilter) filtered = filtered.filter(t => t.category === catFilter);
+            if (locFilter) filtered = filtered.filter(t => t.location === locFilter);
+            if (q) filtered = filtered.filter(t => (
+                (t.description || '') + ' ' +
+                (t.reference || '') + ' ' +
+                (t.id || '')
+            ).toLowerCase().includes(q));
+
+            filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            // Summary cards — only count non-deleted toward totals
+            const activeForSummary = filtered.filter(t => !t.deletedAt);
+            const totalIncome = activeForSummary.filter(t => t.type === 'income').reduce((s, t) => s + safeNum(t.amount), 0);
+            const totalExpense = activeForSummary.filter(t => t.type === 'expense').reduce((s, t) => s + safeNum(t.amount), 0);
+            const net = totalIncome - totalExpense;
+
+            document.getElementById('invTxnSummary').innerHTML = `
+                <div class="recon-stat"><div class="recon-stat-label"><i class="fas fa-list"></i> COUNT</div><div class="recon-stat-value">${activeForSummary.length}</div></div>
+                <div class="recon-stat good"><div class="recon-stat-label"><i class="fas fa-arrow-down"></i> INCOME</div><div class="recon-stat-value">KSh ${fmt(totalIncome)}</div></div>
+                <div class="recon-stat bad"><div class="recon-stat-label"><i class="fas fa-arrow-up"></i> EXPENSES</div><div class="recon-stat-value">KSh ${fmt(totalExpense)}</div></div>
+                <div class="recon-stat ${net >= 0 ? 'good' : 'bad'}"><div class="recon-stat-label"><i class="fas fa-balance-scale"></i> NET</div><div class="recon-stat-value">${net >= 0 ? '' : '−'}KSh ${fmt(Math.abs(net))}</div></div>
+            `;
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="9"><div class="empty-row"><i class="fas fa-receipt"></i>No transactions match your filters.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = filtered.map(t => {
+                const typeClass = t.type === 'income' ? 'paid' : 'cancelled';
+                const typeLabel = t.type === 'income' ? 'Income' : 'Expense';
+                const sign = t.type === 'income' ? '+' : '−';
+                const amtClass = t.type === 'income' ? 'amount-income' : 'amount-expense';
+                const isDeleted = !!t.deletedAt;
+
+                const rowClass = isDeleted ? 'audit-row-warning' : '';
+                const deletedBadge = isDeleted ? ` <span class="audit-warning-badge">DELETED</span>` : '';
+
+                return `<tr class="${rowClass}">
+                    <td>${escapeHTML(t.date || '—')}</td>
+                    <td><span class="status-pill ${typeClass}">${typeLabel}</span></td>
+                    <td>${escapeHTML(t.category || '—')}</td>
+                    <td>${escapeHTML(t.description || '—')}${deletedBadge}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem;">${escapeHTML(t.reference || '—')}</td>
+                    <td>${escapeHTML(t.location || '—')}</td>
+                    <td><span class="status-pill ${escapeHTML(t.status)}">${escapeHTML(t.status)}</span></td>
+                    <td class="${amtClass}" style="text-align:right;">${sign} KSh ${fmt(t.amount)}</td>
+                    <td style="text-align:right;">
+                        <div class="row-actions">
+                            ${isDeleted
+                                ? `<button class="edit-btn" onclick="restoreInvestorTxn('${t.id}')" title="Restore"><i class="fas fa-undo"></i></button>`
+                                : `<button class="edit-btn" onclick="openInvestorTxnEdit('${t.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                                   <button class="del-btn" onclick="softDeleteInvestorTxn('${t.id}')" title="Delete"><i class="fas fa-trash"></i></button>`}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openInvestorTxnEdit(txnId) {
+            const t = investorTxns.find(x => x.id === txnId);
+            if (!t) return;
+            editingInvestorTxnId = txnId;
+
+            document.getElementById('investorTxnEditTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Transaction — ' + escapeHTML(t.id);
+            document.getElementById('invTxnEditDesc').value = t.description || '';
+            document.getElementById('invTxnEditNotes').value = t.notes || '';
+            document.getElementById('invTxnEditCategory').value = t.category || '';
+            document.getElementById('investorTxnEditError').style.display = 'none';
+
+            document.getElementById('investorTxnEditModal').classList.add('show');
+            setTimeout(() => document.getElementById('invTxnEditDesc').focus(), 100);
+        }
+
+        function closeInvestorTxnEdit() {
+            document.getElementById('investorTxnEditModal').classList.remove('show');
+            editingInvestorTxnId = null;
+        }
+
+        async function saveInvestorTxnEdit() {
+            const t = investorTxns.find(x => x.id === editingInvestorTxnId);
+            if (!t) return;
+
+            const description = document.getElementById('invTxnEditDesc').value.trim();
+            const notes = document.getElementById('invTxnEditNotes').value.trim();
+            const category = document.getElementById('invTxnEditCategory').value.trim();
+            const err = document.getElementById('investorTxnEditError');
+            err.style.display = 'none';
+
+            if (!description) {
+                err.textContent = '⚠️ Description cannot be empty.';
+                err.style.display = 'block';
+                return;
+            }
+
+            const { error } = await supabaseClient
+                .from('transactions')
+                .update({
+                    description: description,
+                    notes: notes || null,
+                    category: category || null,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', t.id);
+
+            if (error) {
+                err.textContent = '⚠️ Save failed: ' + error.message;
+                err.style.display = 'block';
+                return;
+            }
+
+            await logAudit('UPDATE', `Transaction ${t.id}`,
+                `Updated from investor app — description: "${t.description}" → "${description}", category: "${t.category}" → "${category}"`,
+                `${t.description} / ${t.category}`,
+                `${description} / ${category}`);
+
+            await loadInvestorTxns();
+            closeInvestorTxnEdit();
+            renderInvestorTxns();
+        }
+
+        async function softDeleteInvestorTxn(txnId) {
+            const t = investorTxns.find(x => x.id === txnId);
+            if (!t) return;
+
+            const reason = prompt(`Delete transaction "${t.id}"?\n\nThis is a soft delete — the record is hidden but not removed. It can be restored later.\n\nReason for deletion:`, '');
+            if (reason === null) return;
+
+            const { error } = await supabaseClient
+                .from('transactions')
+                .update({
+                    deleted_at: new Date().toISOString(),
+                    deleted_by: CURRENT_USER,
+                    delete_reason: reason || 'No reason provided',
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', t.id);
+
+            if (error) {
+                showError('Delete failed: ' + error.message);
+                return;
+            }
+
+            await logAudit('DELETE', `Transaction ${t.id}`,
+                `Soft-deleted from investor app — Reason: ${reason || 'not provided'}`,
+                t.amount, '');
+
+            await loadInvestorTxns();
+            renderInvestorTxns();
+            showToast('✅ Transaction hidden (restorable)', 'success');
+        }
+
+        async function restoreInvestorTxn(txnId) {
+            const t = investorTxns.find(x => x.id === txnId);
+            if (!t) return;
+
+            if (!confirm(`Restore transaction "${t.id}"?`)) return;
+
+            const { error } = await supabaseClient
+                .from('transactions')
+                .update({
+                    deleted_at: null,
+                    deleted_by: null,
+                    delete_reason: null,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', t.id);
+
+            if (error) {
+                showError('Restore failed: ' + error.message);
+                return;
+            }
+
+            await logAudit('UPDATE', `Transaction ${t.id}`,
+                `Restored from investor app`,
+                'deleted', 'active');
+
+            await loadInvestorTxns();
+            renderInvestorTxns();
+            showToast('✅ Transaction restored', 'success');
+        }
+
+        function printInvestorTxns() {
+            const from = document.getElementById('invTxnFilterFrom').value || '';
+            const to = document.getElementById('invTxnFilterTo').value || '';
+            const typeFilter = document.getElementById('invTxnFilterType').value || '';
+            const catFilter = document.getElementById('invTxnFilterCategory').value || '';
+            const locFilter = document.getElementById('invTxnFilterLocation').value || '';
+            const q = (document.getElementById('invTxnFilterSearch').value || '').toLowerCase();
+
+            let filtered = investorTxns.filter(t => !t.deletedAt);
+            if (from) filtered = filtered.filter(t => (t.date || '') >= from);
+            if (to) filtered = filtered.filter(t => (t.date || '') <= to);
+            if (typeFilter) filtered = filtered.filter(t => t.type === typeFilter);
+            if (catFilter) filtered = filtered.filter(t => t.category === catFilter);
+            if (locFilter) filtered = filtered.filter(t => t.location === locFilter);
+            if (q) filtered = filtered.filter(t => ((t.description || '') + ' ' + (t.reference || '') + ' ' + (t.id || '')).toLowerCase().includes(q));
+            filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            const totalIn = filtered.filter(t => t.type === 'income').reduce((s, t) => s + safeNum(t.amount), 0);
+            const totalEx = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + safeNum(t.amount), 0);
+
+            const rows = filtered.map(t => {
+                const sign = t.type === 'income' ? '+' : '−';
+                return `<tr>
+                    <td>${escapeHTML(t.date || '—')}</td>
+                    <td>${escapeHTML(t.type)}</td>
+                    <td>${escapeHTML(t.category || '—')}</td>
+                    <td>${escapeHTML(t.description || '—')}</td>
+                    <td style="font-family:monospace; font-size:11px;">${escapeHTML(t.reference || '—')}</td>
+                    <td>${escapeHTML(t.location || '—')}</td>
+                    <td style="text-align:right; font-weight:700;">${sign} KSh ${fmt(t.amount)}</td>
+                </tr>`;
+            }).join('');
+
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Transactions Report')}
+                    <table class="print-payment-table" style="margin-bottom:20px;">
+                        <tr><td>Period</td><td>${escapeHTML(from || 'All time')} ${to ? '→ ' + escapeHTML(to) : ''}</td></tr>
+                        <tr><td>Total Income</td><td><strong>KSh ${fmt(totalIn)}</strong></td></tr>
+                        <tr><td>Total Expenditure</td><td><strong>KSh ${fmt(totalEx)}</strong></td></tr>
+                        <tr><td>Net</td><td><strong>KSh ${fmt(totalIn - totalEx)}</strong></td></tr>
+                        <tr><td>Records</td><td>${filtered.length}</td></tr>
+                    </table>
+                    <table class="print-list">
+                        <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Reference</th><th>Location</th><th style="text-align:right;">Amount</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="print-footer"><span>Starlink LLC · Transactions</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
+        window.openInvestorTxnEdit = openInvestorTxnEdit;
+        window.softDeleteInvestorTxn = softDeleteInvestorTxn;
+        window.restoreInvestorTxn = restoreInvestorTxn;
+
 
         // ==================================================
         // CHARTS
@@ -5956,6 +6441,46 @@
                 renderCapTable();
             });
 
+                        // Investor transactions
+            document.getElementById('investorTxnBtn').addEventListener('click', async () => {
+                await loadInvestorTxns();
+                renderInvestorTxns();
+                document.getElementById('investorTxnModal').classList.add('show');
+            });
+            document.getElementById('investorTxnClose').addEventListener('click', () => {
+                document.getElementById('investorTxnModal').classList.remove('show');
+            });
+            document.getElementById('investorTxnModal').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+            document.getElementById('txnShowDeletedBtn').addEventListener('click', () => {
+                showingDeletedTxns = !showingDeletedTxns;
+                const btn = document.getElementById('txnShowDeletedBtn');
+                btn.innerHTML = showingDeletedTxns
+                    ? '<i class="fas fa-eye-slash"></i> Hide Deleted'
+                    : '<i class="fas fa-trash-restore"></i> Show Deleted';
+                renderInvestorTxns();
+            });
+            document.getElementById('printInvestorTxnsBtn').addEventListener('click', printInvestorTxns);
+
+            ['invTxnFilterFrom', 'invTxnFilterTo', 'invTxnFilterType', 'invTxnFilterCategory', 'invTxnFilterLocation'].forEach(id => {
+                document.getElementById(id).addEventListener('change', renderInvestorTxns);
+            });
+            document.getElementById('invTxnFilterSearch').addEventListener('input', renderInvestorTxns);
+            document.getElementById('invTxnFilterClear').addEventListener('click', () => {
+                ['invTxnFilterFrom', 'invTxnFilterTo', 'invTxnFilterType', 'invTxnFilterCategory', 'invTxnFilterLocation', 'invTxnFilterSearch'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+                renderInvestorTxns();
+            });
+
+            // Investor txn edit modal
+            document.getElementById('investorTxnEditCancel').addEventListener('click', closeInvestorTxnEdit);
+            document.getElementById('investorTxnEditSave').addEventListener('click', saveInvestorTxnEdit);
+            document.getElementById('investorTxnEditModal').addEventListener('click', function(e) {
+                if (e.target === this) closeInvestorTxnEdit();
+            });
+
             document.getElementById('paymentsBtn').addEventListener('click', openPaymentsModal);
             document.getElementById('paymentsClose').addEventListener('click', closePaymentsModal);
             document.getElementById('paymentsModal').addEventListener('click', function(e) { if (e.target === this) closePaymentsModal(); });
@@ -6053,6 +6578,10 @@
     </script>
 
 </body>
+
+</html>
+
+</html>
 
 </html>
 
