@@ -2858,6 +2858,7 @@
                     } = await supabaseClient
                         .from('transactions')
                         .select('*')
+                        .is('deleted_at', null)
                         .order('created_at', {
                             ascending: false
                         });
@@ -5498,26 +5499,30 @@
             if (t) openTxnModal(t);
         };
 
-        window.deleteTxn = function(id) {
+            window.deleteTxn = function(id) {
             const t = transactions.find(x => x.id === id);
             if (!t) return;
-            openConfirm(
-                '🗑️ Delete Transaction?',
-                `Delete ${t.id} — ${t.description} (KSh ${fmt(t.amount)})? This cannot be undone.`,
-                async() => {
-                    const { error } = await supabaseClient
-                        .from('transactions')
-                        .delete()
-                        .eq('id', id);
-                    if (error) {
-                        showToast('Delete failed: ' + error.message, 'error');
-                        return;
-                    }
-                    await fetchFromCloud();
-                    renderAll();
-                    showToast('✅ Transaction deleted', 'success');
+            const reason = prompt(`Delete ${t.id} — ${t.description} (KSh ${fmt(t.amount)})?\n\nThis is a soft delete. The record is hidden but not removed and can be restored later.\n\nReason for deletion:`, '');
+            if (reason === null) return;
+            (async () => {
+                const { error } = await supabaseClient
+                    .from('transactions')
+                    .update({
+                        deleted_at: new Date().toISOString(),
+                        deleted_by: CURRENT_USER,
+                        delete_reason: reason || 'No reason provided',
+                        updated_at: new Date().toISOString(),
+                        updated_by: CURRENT_USER
+                    })
+                    .eq('id', id);
+                if (error) {
+                    showToast('Delete failed: ' + error.message, 'error');
+                    return;
                 }
-            );
+                await fetchFromCloud();
+                renderAll();
+                showToast('✅ Transaction hidden (restorable)', 'success');
+            })();
         };
 
         window.approveTxn = async function(id) {
