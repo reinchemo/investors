@@ -224,6 +224,58 @@
             flex-wrap: wrap;
         }
         
+        .nav-toggle {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(120, 200, 220, 0.18);
+            color: #c7d5e6;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-toggle:hover {
+            background: rgba(120, 200, 220, 0.12);
+            border-color: rgba(95, 199, 188, 0.5);
+            color: #e8eef7;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: inline-flex;
+            }
+            .nav-actions {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                gap: 0.4rem;
+                margin-top: 0.8rem;
+                padding-top: 0.8rem;
+                border-top: 1px solid rgba(120, 200, 220, 0.1);
+            }
+            .nav-actions.open {
+                display: flex;
+            }
+            .nav-actions .btn,
+            .nav-actions a.btn {
+                width: 100%;
+                justify-content: flex-start;
+                min-height: 44px;
+                font-size: 0.85rem;
+                padding: 0.7rem 1rem;
+                border-radius: 14px;
+            }
+            .nav-actions .btn i {
+                width: 24px;
+                text-align: center;
+            }
+        }
+        
         .btn {
             border: 1px solid rgba(120, 200, 220, 0.18);
             padding: 0.55rem 1.1rem;
@@ -2971,7 +3023,10 @@
     <div class="dashboard">
         <nav class="nav">
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
-            <div class="nav-actions">
+            <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-actions" id="navActions">
                 <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-arrow-left"></i><span>Back Home</span>
                 </a>
@@ -6494,6 +6549,32 @@
             });
 
             // Audit
+                        // Mobile nav toggle
+            const navToggle = document.getElementById('navToggle');
+            const navActions = document.getElementById('navActions');
+            if (navToggle && navActions) {
+                navToggle.addEventListener('click', function() {
+                    navActions.classList.toggle('open');
+                    const icon = navToggle.querySelector('i');
+                    if (navActions.classList.contains('open')) {
+                        icon.className = 'fas fa-times';
+                    } else {
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+            }
+
+                        // Auto-close mobile menu when a nav button inside it is tapped
+            if (navActions) {
+                navActions.addEventListener('click', function(e) {
+                    const target = e.target.closest('.btn, button, a');
+                    if (target && window.innerWidth <= 768) {
+                        navActions.classList.remove('open');
+                        const icon = navToggle.querySelector('i');
+                        if (icon) icon.className = 'fas fa-bars';
+                    }
+                });
+            }
             document.getElementById('auditBtn').addEventListener('click', openAuditModal);
             document.getElementById('auditClose').addEventListener('click', closeAuditModal);
             document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
