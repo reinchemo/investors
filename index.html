@@ -2230,16 +2230,16 @@
                 <input type="date" id="invTxnFilterFrom" title="From date">
                 <input type="date" id="invTxnFilterTo" title="To date">
                 <select id="invTxnFilterType">
-                    <option value="">All Types</option>
-                    <option value="income">Income</option>
-                    <option value="expense">Expenditure</option>
-                </select>
+                <option value="">All Types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expenditure</option>
+            </select>
                 <select id="invTxnFilterCategory">
-                    <option value="">All Categories</option>
-                </select>
+                <option value="">All Categories</option>
+            </select>
                 <select id="invTxnFilterLocation">
-                    <option value="">All Locations</option>
-                </select>
+                <option value="">All Locations</option>
+            </select>
                 <input type="text" class="grow" id="invTxnFilterSearch" placeholder="Search description, reference, or ID...">
                 <button class="btn btn-ghost add-employee-btn" id="invTxnFilterClear"><i class="fas fa-times"></i> Clear</button>
             </div>
@@ -2289,32 +2289,32 @@
             <label>Category</label>
             <input type="text" id="invTxnEditCategory" maxlength="80" list="invTxnCategoryList">
             <datalist id="invTxnCategoryList">
-                <option value="Customer Payments"></option>
-                <option value="Installation Fees"></option>
-                <option value="Equipment Sales"></option>
-                <option value="Other Income"></option>
-                <option value="Internet"></option>
-                <option value="Safaricom"></option>
-                <option value="Starlink"></option>
-                <option value="KPLC"></option>
-                <option value="Electricity"></option>
-                <option value="Equipment"></option>
-                <option value="Routers"></option>
-                <option value="Access Points"></option>
-                <option value="Fiber"></option>
-                <option value="Cables"></option>
-                <option value="Salaries"></option>
-                <option value="Transport"></option>
-                <option value="Repairs"></option>
-                <option value="Rent"></option>
-                <option value="Software"></option>
-                <option value="Marketing"></option>
-                <option value="Airtime"></option>
-                <option value="M-PESA Charges"></option>
-                <option value="Taxes"></option>
-                <option value="Loan Repayment"></option>
-                <option value="Other"></option>
-            </datalist>
+            <option value="Customer Payments"></option>
+            <option value="Installation Fees"></option>
+            <option value="Equipment Sales"></option>
+            <option value="Other Income"></option>
+            <option value="Internet"></option>
+            <option value="Safaricom"></option>
+            <option value="Starlink"></option>
+            <option value="KPLC"></option>
+            <option value="Electricity"></option>
+            <option value="Equipment"></option>
+            <option value="Routers"></option>
+            <option value="Access Points"></option>
+            <option value="Fiber"></option>
+            <option value="Cables"></option>
+            <option value="Salaries"></option>
+            <option value="Transport"></option>
+            <option value="Repairs"></option>
+            <option value="Rent"></option>
+            <option value="Software"></option>
+            <option value="Marketing"></option>
+            <option value="Airtime"></option>
+            <option value="M-PESA Charges"></option>
+            <option value="Taxes"></option>
+            <option value="Loan Repayment"></option>
+            <option value="Other"></option>
+        </datalist>
 
             <div class="modal-error" id="investorTxnEditError"></div>
             <div class="modal-actions">
@@ -2323,6 +2323,7 @@
             </div>
         </div>
     </div>
+
     <!-- EMPLOYEE PAYMENTS MODAL -->
     <div class="modal-overlay" id="paymentsModal">
         <div class="modal-card payments-modal-card">
@@ -2337,11 +2338,11 @@
                 <input type="date" id="empFilterFrom" title="From date">
                 <input type="date" id="empFilterTo" title="To date">
                 <select id="empFilterStatus">
-                    <option value="">All Statuses</option>
-                    <option value="paid">Paid</option>
-                    <option value="pending">Pending</option>
-                    <option value="cancelled">Cancelled</option>
-                </select>
+                <option value="">All Statuses</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
                 <input type="text" class="grow" id="empFilterSearch" placeholder="Search name or reference...">
                 <button class="btn btn-ghost add-employee-btn" id="empFilterClear"><i class="fas fa-times"></i> Clear</button>
             </div>
@@ -2379,15 +2380,15 @@
             <div class="filter-bar">
                 <input type="date" id="auditFilterFrom"><input type="date" id="auditFilterTo">
                 <select id="auditFilterAction">
-                    <option value="">All Actions</option>
-                    <option value="CREATE">Create</option>
-                    <option value="UPDATE">Update</option>
-                    <option value="DELETE">Delete</option>
-                    <option value="LOGIN">Login</option>
-                    <option value="APPROVE">Approve</option>
-                    <option value="PAID">Mark Paid</option>
-                    <option value="CANCEL">Cancel</option>
-                </select>
+                <option value="">All Actions</option>
+                <option value="CREATE">Create</option>
+                <option value="UPDATE">Update</option>
+                <option value="DELETE">Delete</option>
+                <option value="LOGIN">Login</option>
+                <option value="APPROVE">Approve</option>
+                <option value="PAID">Mark Paid</option>
+                <option value="CANCEL">Cancel</option>
+            </select>
                 <input type="text" class="grow" id="auditFilterSearch" placeholder="Search user or target...">
                 <button class="btn btn-ghost add-employee-btn" id="auditFilterClear"><i class="fas fa-times"></i> Clear</button>
             </div>
@@ -2426,9 +2427,9 @@
                 <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; width:100%;">
                     <label style="font-size:0.7rem; font-weight:700; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Mode</label>
                     <select id="dilMode" style="min-width:220px;">
-                        <option value="add">Add as new capital (proportional dilution)</option>
-                        <option value="target">Target equity % for new investor</option>
-                    </select>
+                    <option value="add">Add as new capital (proportional dilution)</option>
+                    <option value="target">Target equity % for new investor</option>
+                </select>
                 </div>
             </div>
 
@@ -2437,80 +2438,11 @@
                 <input type="number" id="dilAmount" placeholder="Investment amount (KSh)" style="min-width:180px; flex:1;" min="0" step="1">
                 <input type="number" id="dilTargetPct" placeholder="Target % (e.g. 10)" style="min-width:140px;" min="0" max="99.9999" step="0.0001">
                 <button class="btn btn-primary" id="dilRunBtn" style="padding:0.55rem 1.2rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-play"></i> Simulate
-                </button>
+                <i class="fas fa-play"></i> Simulate
+            </button>
                 <button class="btn btn-ghost" id="dilResetBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-redo"></i> Reset
-                </button>
-            </div>
-
-            <div id="dilResults" style="display:none;">
-                <div id="dilSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
-
-                <div class="employee-table-wrap" style="margin-bottom:1rem;">
-                    <table class="employee-table" style="min-width:800px;">
-                        <thead>
-                            <tr>
-                                <th>Holder</th>
-                                <th style="text-align:right;">Current Equity</th>
-                                <th style="text-align:right;">Current %</th>
-                                <th style="text-align:right;">After Equity</th>
-                                <th style="text-align:right;">After %</th>
-                                <th style="text-align:right;">Change</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dilTableBody"></tbody>
-                    </table>
-                </div>
-
-                <div class="chart-wrapper" style="height:300px; margin-bottom:1rem;">
-                    <canvas id="dilChart"></canvas>
-                </div>
-
-                <div class="reconcile-note" id="dilReconcile" style="margin-top:1rem;">
-                    <i class="fas fa-check-circle"></i>
-                    <span id="dilReconcileText">Simulation ready.</span>
-                </div>
-            </div>
-
-            <div class="modal-actions">
-                <button class="cancel" id="dilutionClose">Close (Discard)</button>
-            </div>
-        </div>
-    </div>
-    <!-- DILUTION SIMULATOR MODAL -->
-    <div class="modal-overlay" id="dilutionModal">
-        <div class="modal-card" style="max-width:1000px;">
-            <div class="payments-modal-header">
-                <h3><i class="fas fa-flask" style="color:#5fc7bc;"></i> Dilution Simulator</h3>
-                <button class="btn btn-ghost add-employee-btn" id="printDilutionBtn"><i class="fas fa-print"></i> Print</button>
-            </div>
-
-            <div class="reconcile-note" style="margin-bottom:1rem;">
-                <i class="fas fa-info-circle"></i>
-                <span><strong>Sandbox only — nothing is saved.</strong> Model a hypothetical investment and see how it would affect ownership. Close this window to discard. To make it real, use <strong>Proposals</strong> instead.</span>
-            </div>
-
-            <div class="filter-bar" style="margin-bottom:1rem;">
-                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; width:100%;">
-                    <label style="font-size:0.7rem; font-weight:700; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em;">Mode</label>
-                    <select id="dilMode" style="min-width:220px;">
-                        <option value="add">Add as new capital (proportional dilution)</option>
-                        <option value="target">Target equity % for new investor</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="filter-bar" style="margin-bottom:1rem;">
-                <input type="text" id="dilName" placeholder="New investor name" style="min-width:180px; flex:1;" maxlength="80">
-                <input type="number" id="dilAmount" placeholder="Investment amount (KSh)" style="min-width:180px; flex:1;" min="0" step="1">
-                <input type="number" id="dilTargetPct" placeholder="Target % (e.g. 10)" style="min-width:140px;" min="0" max="99.9999" step="0.0001">
-                <button class="btn btn-primary" id="dilRunBtn" style="padding:0.55rem 1.2rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-play"></i> Simulate
-                </button>
-                <button class="btn btn-ghost" id="dilResetBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-redo"></i> Reset
-                </button>
+                <i class="fas fa-redo"></i> Reset
+            </button>
             </div>
 
             <div id="dilResults" style="display:none;">
@@ -2566,21 +2498,21 @@
 
             <div class="filter-bar">
                 <select id="propFilterStatus">
-                    <option value="">All Statuses</option>
-                    <option value="draft">Draft</option>
-                    <option value="sent">Sent</option>
-                    <option value="negotiating">Negotiating</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="approved">Approved</option>
-                    <option value="funded">Funded</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="cancelled">Cancelled</option>
-                </select>
+                <option value="">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="negotiating">Negotiating</option>
+                <option value="accepted">Accepted</option>
+                <option value="approved">Approved</option>
+                <option value="funded">Funded</option>
+                <option value="rejected">Rejected</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
                 <select id="propFilterInvestor"><option value="">All Investors</option></select>
                 <input type="text" class="grow" id="propFilterSearch" placeholder="Search purpose, notes, or prospect name...">
                 <button class="btn btn-ghost" id="propFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-times"></i> Clear
-                </button>
+                <i class="fas fa-times"></i> Clear
+            </button>
             </div>
 
             <div id="proposalSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
@@ -2614,9 +2546,9 @@
 
             <label>Proposal For</label>
             <select id="propFormInvestorType">
-                <option value="existing">Existing Investor</option>
-                <option value="prospect">New Prospect</option>
-            </select>
+            <option value="existing">Existing Investor</option>
+            <option value="prospect">New Prospect</option>
+        </select>
 
             <div id="propFormExistingWrap">
                 <label>Select Investor</label>
@@ -2666,6 +2598,7 @@
             <div class="modal-actions"><button class="cancel" id="propDetailClose">Close</button></div>
         </div>
     </div>
+
     <!-- CAP TABLE MODAL -->
     <div class="modal-overlay" id="capTableModal">
         <div class="modal-card" style="max-width:1000px;">
@@ -2683,11 +2616,11 @@
                 <label style="font-size:0.7rem; font-weight:700; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.08em; align-self:center;">📅 As of</label>
                 <input type="date" id="capTableDate" title="Show ownership as of this date">
                 <button class="btn btn-ghost" id="capTableTodayBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-calendar-day"></i> Today
-                </button>
+                <i class="fas fa-calendar-day"></i> Today
+            </button>
                 <button class="btn btn-ghost" id="capTableAllBtn" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
-                    <i class="fas fa-history"></i> All-time
-                </button>
+                <i class="fas fa-history"></i> All-time
+            </button>
             </div>
 
             <div id="capTableSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
@@ -2718,6 +2651,7 @@
             </div>
         </div>
     </div>
+
     <!-- RECONCILIATION MODAL -->
     <div class="modal-overlay" id="reconModal">
         <div class="modal-card" style="max-width: 1000px;">
@@ -2899,10 +2833,10 @@
             <input type="text" id="employeeRef" placeholder="M-Pesa code, bank ref, etc." maxlength="80">
             <label>Status</label>
             <select id="employeeStatus">
-                <option value="paid">Paid</option>
-                <option value="pending">Pending</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
             <label>Date</label>
             <input type="date" id="employeeDate">
             <div class="modal-error" id="employeeError"></div>
@@ -2913,7 +2847,6 @@
         </div>
     </div>
 
-    <!-- ADD / EDIT INVESTOR MODAL -->
     <!-- ADD / EDIT INVESTOR MODAL -->
     <div class="modal-overlay" id="investorModal">
         <div class="modal-card" style="max-width:560px;">
@@ -2944,10 +2877,10 @@
                 <div>
                     <label>Status</label>
                     <select id="invStatus">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="prospect">Prospect</option>
-                    </select>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="prospect">Prospect</option>
+                </select>
                 </div>
             </div>
             <label>Equity (KSh) <span style="color:#e8837a;">*</span></label>
@@ -2982,10 +2915,10 @@
             <p style="color:#7f9bb8; font-size:0.82rem; margin-bottom:0.5rem;" id="investmentInvestorLabel">—</p>
             <label>Type</label>
             <select id="invType">
-                <option value="initial">Initial Investment</option>
-                <option value="additional">Additional Investment</option>
-                <option value="withdrawal">Withdrawal</option>
-            </select>
+            <option value="initial">Initial Investment</option>
+            <option value="additional">Additional Investment</option>
+            <option value="withdrawal">Withdrawal</option>
+        </select>
             <label>Amount (KSh)</label>
             <input type="number" id="invAmount" placeholder="0" min="1" step="1">
             <label>Date</label>
@@ -3024,8 +2957,8 @@
         <nav class="nav">
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
             <button class="nav-toggle" id="navToggle" aria-label="Menu">
-                <i class="fas fa-bars"></i>
-            </button>
+            <i class="fas fa-bars"></i>
+        </button>
             <div class="nav-actions" id="navActions">
                 <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-arrow-left"></i><span>Back Home</span>
@@ -3241,6 +3174,24 @@
             setTimeout(() => el.classList.remove('show'), 6000);
         }
 
+        function showToast(msg, type) {
+            // simple toast implementation
+            console.log('Toast:', type, msg);
+            // You can replace with a proper toast UI
+            const el = document.getElementById('errorBanner');
+            el.textContent = msg;
+            el.style.background = type === 'success' ? 'rgba(111,203,147,0.15)' : 'rgba(226,104,91,0.12)';
+            el.style.color = type === 'success' ? '#7ee0a2' : '#f0a89f';
+            el.style.borderColor = type === 'success' ? 'rgba(111,203,147,0.3)' : 'rgba(226,104,91,0.3)';
+            el.classList.add('show');
+            setTimeout(() => {
+                el.classList.remove('show');
+                el.style.background = '';
+                el.style.color = '';
+                el.style.borderColor = '';
+            }, 3000);
+        }
+
         function setLoading(show) {
             document.getElementById('loadingOverlay').classList.toggle('show', show);
         }
@@ -3420,7 +3371,7 @@
         // CLOUD SYNC — reads from JSON blob (expenditure summary only)
         // Investors, employees, dividends, audit_logs come from tables
         // ==================================================
-                async function fetchSummary() {
+        async function fetchSummary() {
             if (!supabaseClient) return false;
             // Save last-known-good state in case the fetch fails partway through
             const previousState = {
@@ -3433,7 +3384,10 @@
             };
             try {
                 // 1. Read shared blob for summary calculation + custom columns
-                const { data: blobResult, error: blobErr } = await supabaseClient
+                const {
+                    data: blobResult,
+                    error: blobErr
+                } = await supabaseClient
                     .from('expenditure_data')
                     .select('data, last_updated')
                     .eq('id', 1)
@@ -3444,19 +3398,35 @@
                 if (blobResult && blobResult.data) {
                     const cloud = blobResult.data;
                     if (Array.isArray(cloud.data) && cloud.data.length > 0) {
-                        summary = { ...computeSummaryFromRaw(cloud.data), lastUpdated: blobResult.last_updated };
+                        summary = {
+                            ...computeSummaryFromRaw(cloud.data),
+                            lastUpdated: blobResult.last_updated
+                        };
                     } else {
-                        summary = { commonInvestmentTotal: 0, routersTotal: 0, kairoRoutersTotal: 0, starlinkInvestmentTotal: 0, starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE, totalTransactionFees: 0, lastUpdated: blobResult.last_updated };
+                        summary = {
+                            commonInvestmentTotal: 0,
+                            routersTotal: 0,
+                            kairoRoutersTotal: 0,
+                            starlinkInvestmentTotal: 0,
+                            starlinkVirtualInvestment: STARLINK_VIRTUAL_BASE,
+                            totalTransactionFees: 0,
+                            lastUpdated: blobResult.last_updated
+                        };
                     }
                 }
 
                 // 2. Read investors from table
-                const { data: invRows, error: invErr } = await supabaseClient
+                const {
+                    data: invRows,
+                    error: invErr
+                } = await supabaseClient
                     .from('investors')
                     .select('*')
-                    .order('id', { ascending: true });
+                    .order('id', {
+                        ascending: true
+                    });
                 if (invErr) throw invErr;
-                    investors = (invRows || []).map(r => ({
+                investors = (invRows || []).map(r => ({
                     id: r.id,
                     name: r.name,
                     equity: safeNum(r.equity),
@@ -3472,10 +3442,15 @@
                 }));
 
                 // 3. Read employees from table
-                const { data: empRows, error: empErr } = await supabaseClient
+                const {
+                    data: empRows,
+                    error: empErr
+                } = await supabaseClient
                     .from('employees')
                     .select('*')
-                    .order('date', { ascending: false });
+                    .order('date', {
+                        ascending: false
+                    });
                 if (empErr) throw empErr;
                 EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                     id: r.id,
@@ -3487,10 +3462,15 @@
                 }));
 
                 // 4. Read dividends from table
-                const { data: divRows, error: divErr } = await supabaseClient
+                const {
+                    data: divRows,
+                    error: divErr
+                } = await supabaseClient
                     .from('dividends')
                     .select('*')
-                    .order('created_at', { ascending: false });
+                    .order('created_at', {
+                        ascending: false
+                    });
                 if (divErr) throw divErr;
                 dividends = (divRows || []).map(r => ({
                     id: r.id,
@@ -3514,11 +3494,15 @@
                 }));
 
                 // 5. Read audit logs from table
-                           // 5. Read audit logs from table
-                const { data: auditRows, error: auditErr } = await supabaseClient
+                const {
+                    data: auditRows,
+                    error: auditErr
+                } = await supabaseClient
                     .from('audit_logs')
                     .select('*')
-                    .order('timestamp', { ascending: false })
+                    .order('timestamp', {
+                        ascending: false
+                    })
                     .limit(500);
                 if (auditErr) throw auditErr;
                 auditLogs = (auditRows || []).map(r => ({
@@ -3534,10 +3518,15 @@
                 }));
 
                 // 6. Read proposals
-                const { data: propRows, error: propErr } = await supabaseClient
+                const {
+                    data: propRows,
+                    error: propErr
+                } = await supabaseClient
                     .from('proposals')
                     .select('*')
-                    .order('created_at', { ascending: false });
+                    .order('created_at', {
+                        ascending: false
+                    });
                 if (propErr) throw propErr;
                 proposals = (propRows || []).map(r => ({
                     id: r.id,
@@ -3568,12 +3557,17 @@
                 }));
 
                 // 7. Read transactions (income + expense only, exclude payroll rows)
-                const { data: invTxnRows, error: invTxnErr } = await supabaseClient
+                const {
+                    data: invTxnRows,
+                    error: invTxnErr
+                } = await supabaseClient
                     .from('transactions')
                     .select('*')
                     .in('type', ['income', 'expense'])
                     .is('payroll_run_id', null)
-                    .order('date', { ascending: false })
+                    .order('date', {
+                        ascending: false
+                    })
                     .limit(1000);
                 if (invTxnErr) throw invTxnErr;
                 investorTxns = (invTxnRows || []).map(row => ({
@@ -3600,7 +3594,7 @@
                 updateProposalsBadge();
 
                 return true;
-                        } catch (e) {
+            } catch (e) {
                 console.warn('Fetch failed — restoring last known state:', e.message);
                 // Roll back any partial updates
                 summary = previousState.summary;
@@ -3613,13 +3607,47 @@
             return false;
         }
 
+        // ==================================================
+        // STARLINK INVESTMENT — fetched from the view (Phase 1a)
+        // Replaces the hardcoded STARLINK_VIRTUAL_BASE constant.
+        // ==================================================
+        let starlinkInvestmentTotalFromView = 0;
+
+        async function fetchStarlinkInvestmentTotal() {
+            if (!supabaseClient) return 0;
+            try {
+                const {
+                    data,
+                    error
+                } = await supabaseClient
+                    .from('starlink_virtual_capital_total')
+                    .select('total')
+                    .single();
+
+                if (error) {
+                    console.warn('Starlink Investment view fetch failed:', error.message);
+                    return starlinkInvestmentTotalFromView;
+                }
+
+                starlinkInvestmentTotalFromView = safeNum(data?.total);
+                console.log('📊 Starlink Investment total from view:', starlinkInvestmentTotalFromView);
+                return starlinkInvestmentTotalFromView;
+            } catch (e) {
+                console.warn('Starlink Investment fetch error:', e.message);
+                return starlinkInvestmentTotalFromView;
+            }
+        }
+
         function computeSummaryFromRaw(rawData) {
             function sumAny(keys) {
                 let total = 0;
                 rawData.forEach(g => (g.rows || []).forEach(r => {
                     for (const k of keys) {
                         const v = safeNum(r[k + '_amount']);
-                        if (v !== 0) { total += v; break; }
+                        if (v !== 0) {
+                            total += v;
+                            break;
+                        }
                     }
                 }));
                 return Math.round(total * 100) / 100;
@@ -3628,20 +3656,42 @@
             const routersTotal = sumAny(['routers']);
             const kairoRoutersTotal = sumAny(['saved_6_kairo_routers', 'saved_5_kairo_routers', 'saved_4_kairo_routers', 'saved_3_kairo_routers', 'saved_2_kairo_routers', 'kairoRouters']);
             const starlinkInvestmentTotal = sumAny(['saved_4_starlink_investment', 'saved_5_starlink_investment', 'saved_6_starlink_investment', 'saved_3_starlink_investment', 'saved_2_starlink_investment', 'starlinkInvestment']);
-            const starlinkVirtualInvestment = Math.round((STARLINK_VIRTUAL_BASE + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
-            return { commonInvestmentTotal, routersTotal, kairoRoutersTotal, starlinkInvestmentTotal, starlinkVirtualInvestment, totalTransactionFees: 0, lastUpdated: new Date().toISOString() };
+
+            // Phase 1a: base now comes from the transactions view, not a hardcoded constant
+            const starlinkVirtualInvestment = Math.round((starlinkInvestmentTotalFromView + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
+            return {
+                commonInvestmentTotal,
+                routersTotal,
+                kairoRoutersTotal,
+                starlinkInvestmentTotal,
+                starlinkVirtualInvestment,
+                totalTransactionFees: 0,
+                lastUpdated: new Date().toISOString()
+            };
         }
 
         // ==================================================
         // BUILD INVESTORS
         // ==================================================
         function buildInvestors() {
-            const list = investors.map(i => ({ id: i.id, name: i.name, color: i.color || '#4fb6a8', equity: safeNum(i.equity), isStarlink: false }));
-            list.push({ name: 'STARLINK LLC VIRTUAL', equity: Math.round(safeNum(summary.starlinkVirtualInvestment)), color: '#c89a5b', isStarlink: true, rawEquity: safeNum(summary.starlinkVirtualInvestment) });
+            const list = investors.map(i => ({
+                id: i.id,
+                name: i.name,
+                color: i.color || '#4fb6a8',
+                equity: safeNum(i.equity),
+                isStarlink: false
+            }));
+            list.push({
+                name: 'STARLINK LLC VIRTUAL',
+                equity: Math.round(safeNum(summary.starlinkVirtualInvestment)),
+                color: '#c89a5b',
+                isStarlink: true,
+                rawEquity: safeNum(summary.starlinkVirtualInvestment)
+            });
             return list;
         }
 
-            function renderTable() {
+        function renderTable() {
             const tbody = document.getElementById('investorTableBody');
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
@@ -3660,7 +3710,7 @@
                     </tr>`;
                 } else {
                     const statusClass = inv.status === 'inactive' ? 'cancelled' :
-                                        inv.status === 'prospect' ? 'pending' : 'paid';
+                        inv.status === 'prospect' ? 'pending' : 'paid';
                     html += `<tr class="${rowClass}">
                         <td><a href="#" class="investor-name-link" data-id="${inv.id}" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(inv.name)}</a></td>
                         <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#7f9bb8;">${escapeHTML(inv.investorNumber || '—')}</span></td>
@@ -3688,6 +3738,7 @@
 
             return totalEquity;
         }
+
         function renderSummaryCards() {
             document.getElementById('virtualInvestmentValue').textContent = fmtDec(summary.starlinkVirtualInvestment);
             document.getElementById('starlinkInvestmentValue').textContent = fmtDec(summary.starlinkInvestmentTotal);
@@ -3708,13 +3759,41 @@
         // RECONCILIATION
         // ==================================================
         function computeReconciliation() {
-            const issues = { missingRef: [], dupRef: [], pending: [], dividends: [] };
-            EMPLOYEE_PAYMENTS.forEach(e => { if (e.status === 'paid' && (!e.reference || e.reference.trim() === '')) issues.missingRef.push(e); });
+            const issues = {
+                missingRef: [],
+                dupRef: [],
+                pending: [],
+                dividends: []
+            };
+            EMPLOYEE_PAYMENTS.forEach(e => {
+                if (e.status === 'paid' && (!e.reference || e.reference.trim() === '')) issues.missingRef.push(e);
+            });
             const refMap = {};
-            EMPLOYEE_PAYMENTS.forEach(e => { const ref = (e.reference || '').trim().toLowerCase(); if (!ref) return; if (!refMap[ref]) refMap[ref] = []; refMap[ref].push(e); });
-            Object.keys(refMap).forEach(ref => { if (refMap[ref].length > 1) issues.dupRef.push({ reference: refMap[ref][0].reference, employees: refMap[ref], total: refMap[ref].reduce((s, e) => s + safeNum(e.amount), 0) }); });
-            EMPLOYEE_PAYMENTS.forEach(e => { if (e.status === 'pending') issues.pending.push({ ...e, daysPending: daysBetween(e.date) }); });
-            dividends.forEach(d => { if (['draft', 'approved', 'processing'].includes(d.status)) issues.dividends.push({ ...d, ageDays: daysBetween(d.createdAt) }); });
+            EMPLOYEE_PAYMENTS.forEach(e => {
+                const ref = (e.reference || '').trim().toLowerCase();
+                if (!ref) return;
+                if (!refMap[ref]) refMap[ref] = [];
+                refMap[ref].push(e);
+            });
+            Object.keys(refMap).forEach(ref => {
+                if (refMap[ref].length > 1) issues.dupRef.push({
+                    reference: refMap[ref][0].reference,
+                    employees: refMap[ref],
+                    total: refMap[ref].reduce((s, e) => s + safeNum(e.amount), 0)
+                });
+            });
+            EMPLOYEE_PAYMENTS.forEach(e => {
+                if (e.status === 'pending') issues.pending.push({
+                    ...e,
+                    daysPending: daysBetween(e.date)
+                });
+            });
+            dividends.forEach(d => {
+                if (['draft', 'approved', 'processing'].includes(d.status)) issues.dividends.push({
+                    ...d,
+                    ageDays: daysBetween(d.createdAt)
+                });
+            });
             return issues;
         }
 
@@ -3722,7 +3801,10 @@
             const issues = computeReconciliation();
             const totalIssues = issues.missingRef.length + issues.dupRef.length + issues.pending.length + issues.dividends.length;
             const navBadge = document.getElementById('reconCountNav');
-            if (navBadge) { navBadge.textContent = totalIssues; navBadge.style.display = totalIssues > 0 ? 'inline-flex' : 'none'; }
+            if (navBadge) {
+                navBadge.textContent = totalIssues;
+                navBadge.style.display = totalIssues > 0 ? 'inline-flex' : 'none';
+            }
             const banner = document.getElementById('reconBanner');
             const countEl = document.getElementById('reconBannerCount');
             const titleEl = document.getElementById('reconBannerTitle');
@@ -3733,7 +3815,8 @@
                 countEl.textContent = '✓ no issues';
                 listEl.innerHTML = `<div class="recon-line"><span><i class="fas fa-check-circle" style="color:#7ee0a2;"></i> All records reconcile cleanly. No action needed.</span></div>`;
             } else {
-                banner.classList.add('show'); banner.classList.remove('ok');
+                banner.classList.add('show');
+                banner.classList.remove('ok');
                 titleEl.textContent = 'Reconciliation Warnings';
                 countEl.textContent = totalIssues + ' issue' + (totalIssues !== 1 ? 's' : '');
                 let lines = [];
@@ -3774,8 +3857,13 @@
             `;
 
             const noteEl = document.getElementById('reconSummaryNote');
-            if (totalIssues === 0) { noteEl.classList.remove('warning'); noteEl.innerHTML = `<i class="fas fa-check-circle"></i><span>All records reconcile cleanly.</span>`; }
-            else { noteEl.classList.add('warning'); noteEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${totalIssues} reconciliation issue${totalIssues !== 1 ? 's' : ''} found.</span>`; }
+            if (totalIssues === 0) {
+                noteEl.classList.remove('warning');
+                noteEl.innerHTML = `<i class="fas fa-check-circle"></i><span>All records reconcile cleanly.</span>`;
+            } else {
+                noteEl.classList.add('warning');
+                noteEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${totalIssues} reconciliation issue${totalIssues !== 1 ? 's' : ''} found.</span>`;
+            }
 
             document.getElementById('reconMissingRefBody').innerHTML = !issues.missingRef.length ? `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>All paid payments have references.</div></td></tr>` :
                 issues.missingRef.map(e => `<tr class="recon-row-warning"><td><strong>${escapeHTML(e.name)}</strong></td><td class="employee-amount">KSh ${fmt(e.amount)}</td><td><span class="status-pill paid">paid</span></td><td>${escapeHTML(e.date || '—')}</td><td style="text-align:right;"><button class="div-action-btn expand" onclick="closeReconAndEdit(${e.id})"><i class="fas fa-edit"></i> Add Ref</button></td></tr>`).join('');
@@ -3790,17 +3878,29 @@
                 issues.dividends.map(d => `<tr class="${d.ageDays > 30 ? 'recon-row-warning' : 'recon-row-caution'}"><td><span class="div-ref">${escapeHTML(d.id)}</span></td><td><strong>${escapeHTML(d.periodLabel)}</strong></td><td><span class="status-pill ${escapeHTML(d.status)}">${escapeHTML(d.status)}</span></td><td class="employee-amount">KSh ${fmt(d.totalDistributable)}</td><td><strong style="color:${d.ageDays > 30 ? '#f0a89f' : '#e8b879'};">${d.ageDays} days</strong></td></tr>`).join('');
         }
 
-        function openReconModal() { renderReconciliationModal(); document.getElementById('reconModal').classList.add('show'); switchReconTab('summary'); }
-        function closeReconModal() { document.getElementById('reconModal').classList.remove('show'); }
+        function openReconModal() {
+            renderReconciliationModal();
+            document.getElementById('reconModal').classList.add('show');
+            switchReconTab('summary');
+        }
+
+        function closeReconModal() {
+            document.getElementById('reconModal').classList.remove('show');
+        }
+
         function switchReconTab(tabName) {
             document.querySelectorAll('.recon-tab').forEach(t => t.classList.toggle('active', t.dataset.recon === tabName));
             document.querySelectorAll('.recon-section').forEach(s => s.classList.toggle('active', s.dataset.reconSection === tabName));
         }
-        function closeReconAndEdit(employeeId) { closeReconModal(); openEmployeeModal(employeeId); }
+
+        function closeReconAndEdit(employeeId) {
+            closeReconModal();
+            openEmployeeModal(employeeId);
+        }
 
 
 
-                // ==================================================
+        // ==================================================
         // INVESTOR TRANSACTIONS RENDER
         // ==================================================
         function renderInvestorTxns() {
@@ -3939,7 +4039,9 @@
                 return;
             }
 
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('transactions')
                 .update({
                     description: description,
@@ -3973,7 +4075,9 @@
             const reason = prompt(`Delete transaction "${t.id}"?\n\nThis is a soft delete — the record is hidden but not removed. It can be restored later.\n\nReason for deletion:`, '');
             if (reason === null) return;
 
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('transactions')
                 .update({
                     deleted_at: new Date().toISOString(),
@@ -4004,7 +4108,9 @@
 
             if (!confirm(`Restore transaction "${t.id}"?`)) return;
 
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('transactions')
                 .update({
                     deleted_at: null,
@@ -4095,22 +4201,189 @@
             const values = all.map(i => i.equity);
             const colors = all.map(i => i.color);
             const hasLabels = typeof ChartDataLabels !== 'undefined';
-            if (hasLabels) { try { Chart.register(ChartDataLabels); } catch (e) {} }
+            if (hasLabels) {
+                try {
+                    Chart.register(ChartDataLabels);
+                } catch (e) {}
+            }
 
             const pieCanvas = document.getElementById('pieChart');
             if (pieChartInstance) pieChartInstance.destroy();
             pieChartInstance = new Chart(pieCanvas.getContext('2d'), {
                 type: 'pie',
-                data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: 'rgba(20, 32, 52, 0.6)', borderWidth: 3, hoverOffset: 22, hoverBorderColor: 'rgba(95, 199, 188, 0.9)', hoverBorderWidth: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, animation: { duration: 900, easing: 'easeOutQuart' }, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11, weight: '600', family: 'Plus Jakarta Sans' }, color: '#c7d5e6', usePointStyle: true, pointStyle: 'circle' } }, tooltip: { backgroundColor: 'rgba(10, 20, 35, 0.95)', titleColor: '#f2f0eb', bodyColor: '#c7d5e6', borderColor: 'rgba(95, 199, 188, 0.5)', borderWidth: 1, padding: 12, cornerRadius: 10, callbacks: { label: function(ctx) { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(2) : '0.00'; return `${ctx.label}: KSh ${fmt(ctx.parsed)} (${pct}%)`; } } }, datalabels: hasLabels ? { color: '#ffffff', font: { size: 11, weight: '700', family: 'Space Grotesk' }, formatter: function(v, ctx) { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); const pct = total > 0 ? (v / total) * 100 : 0; return pct >= 5 ? pct.toFixed(1) + '%' : ''; }, display: function(ctx) { const total = ctx.dataset.data.reduce((a, b) => a + b, 0); const v = ctx.dataset.data[ctx.dataIndex]; return total > 0 && (v / total) * 100 >= 5; } } : {} } }
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: 'rgba(20, 32, 52, 0.6)',
+                        borderWidth: 3,
+                        hoverOffset: 22,
+                        hoverBorderColor: 'rgba(95, 199, 188, 0.9)',
+                        hoverBorderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 900,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 12,
+                                font: {
+                                    size: 11,
+                                    weight: '600',
+                                    family: 'Plus Jakarta Sans'
+                                },
+                                color: '#c7d5e6',
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
+                            titleColor: '#f2f0eb',
+                            bodyColor: '#c7d5e6',
+                            borderColor: 'rgba(95, 199, 188, 0.5)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(ctx) {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(2) : '0.00';
+                                    return `${ctx.label}: KSh ${fmt(ctx.parsed)} (${pct}%)`;
+                                }
+                            }
+                        },
+                        datalabels: hasLabels ? {
+                            color: '#ffffff',
+                            font: {
+                                size: 11,
+                                weight: '700',
+                                family: 'Space Grotesk'
+                            },
+                            formatter: function(v, ctx) {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? (v / total) * 100 : 0;
+                                return pct >= 5 ? pct.toFixed(1) + '%' : '';
+                            },
+                            display: function(ctx) {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const v = ctx.dataset.data[ctx.dataIndex];
+                                return total > 0 && (v / total) * 100 >= 5;
+                            }
+                        } : {}
+                    }
+                }
             });
 
             const barCanvas = document.getElementById('barChart');
             if (barChartInstance) barChartInstance.destroy();
             barChartInstance = new Chart(barCanvas.getContext('2d'), {
                 type: 'bar',
-                data: { labels, datasets: [{ label: 'Equity (KSh)', data: values, backgroundColor: colors.map(c => c + 'dd'), borderColor: colors, borderWidth: 2, borderRadius: 8, barPercentage: 0.7, categoryPercentage: 0.8, hoverBackgroundColor: colors.map(c => c), hoverBorderColor: '#ffffff' }] },
-                options: { responsive: true, maintainAspectRatio: false, animation: { duration: 900, easing: 'easeOutQuart' }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10, 20, 35, 0.95)', titleColor: '#f2f0eb', bodyColor: '#c7d5e6', borderColor: 'rgba(95, 199, 188, 0.5)', borderWidth: 1, padding: 12, cornerRadius: 10, callbacks: { label: function(ctx) { return `KSh ${fmt(ctx.parsed.y)}`; } } }, datalabels: hasLabels ? { anchor: 'end', align: 'top', color: '#c7d5e6', font: { size: 10, weight: '700', family: 'JetBrains Mono' }, formatter: function(v) { return fmt(v); }, offset: 4 } : {} }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(120, 200, 220, 0.06)' }, ticks: { callback: function(v) { return 'KSh ' + fmt(v); }, font: { size: 10, family: 'JetBrains Mono' }, color: '#7f9bb8' } }, x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600', family: 'Plus Jakarta Sans' }, color: '#c7d5e6', maxRotation: 30, minRotation: 15, autoSkip: false } } }, layout: { padding: { top: 24, bottom: 6 } } }
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Equity (KSh)',
+                        data: values,
+                        backgroundColor: colors.map(c => c + 'dd'),
+                        borderColor: colors,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.8,
+                        hoverBackgroundColor: colors.map(c => c),
+                        hoverBorderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 900,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 20, 35, 0.95)',
+                            titleColor: '#f2f0eb',
+                            bodyColor: '#c7d5e6',
+                            borderColor: 'rgba(95, 199, 188, 0.5)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(ctx) {
+                                    return `KSh ${fmt(ctx.parsed.y)}`;
+                                }
+                            }
+                        },
+                        datalabels: hasLabels ? {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#c7d5e6',
+                            font: {
+                                size: 10,
+                                weight: '700',
+                                family: 'JetBrains Mono'
+                            },
+                            formatter: function(v) {
+                                return fmt(v);
+                            },
+                            offset: 4
+                        } : {}
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(120, 200, 220, 0.06)'
+                            },
+                            ticks: {
+                                callback: function(v) {
+                                    return 'KSh ' + fmt(v);
+                                },
+                                font: {
+                                    size: 10,
+                                    family: 'JetBrains Mono'
+                                },
+                                color: '#7f9bb8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10,
+                                    weight: '600',
+                                    family: 'Plus Jakarta Sans'
+                                },
+                                color: '#c7d5e6',
+                                maxRotation: 30,
+                                minRotation: 15,
+                                autoSkip: false
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 24,
+                            bottom: 6
+                        }
+                    }
+                }
             });
         }
 
@@ -4127,7 +4400,7 @@
         // ==================================================
         // INVESTOR MODAL — writes to `investors` table
         // ==================================================
-           function openInvestorModal(investorId = null) {
+        function openInvestorModal(investorId = null) {
             editingInvestorId = investorId;
             const title = document.getElementById('investorModalTitle');
             const errEl = document.getElementById('invError');
@@ -4167,7 +4440,10 @@
             setTimeout(() => document.getElementById('invName').focus(), 50);
         }
 
-        function closeInvestorModal() { document.getElementById('investorModal').classList.remove('show'); editingInvestorId = null; }
+        function closeInvestorModal() {
+            document.getElementById('investorModal').classList.remove('show');
+            editingInvestorId = null;
+        }
 
         async function saveInvestor() {
             const name = document.getElementById('invName').value.trim();
@@ -4176,8 +4452,16 @@
             const errEl = document.getElementById('invError');
             errEl.style.display = 'none';
 
-            if (!name) { errEl.textContent = '⚠️ Please enter a name.'; errEl.style.display = 'block'; return; }
-            if (equity < 0) { errEl.textContent = '⚠️ Equity cannot be negative.'; errEl.style.display = 'block'; return; }
+            if (!name) {
+                errEl.textContent = '⚠️ Please enter a name.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (equity < 0) {
+                errEl.textContent = '⚠️ Equity cannot be negative.';
+                errEl.style.display = 'block';
+                return;
+            }
 
             const row = {
                 name: name,
@@ -4195,15 +4479,21 @@
 
             let ok = false;
 
-                  if (editingInvestorId) {
+            if (editingInvestorId) {
                 const oldInv = investors.find(i => i.id === editingInvestorId);
                 const oldEquity = oldInv ? safeNum(oldInv.equity) : 0;
                 row.updated_at = new Date().toISOString();
-                const { error } = await supabaseClient
+                const {
+                    error
+                } = await supabaseClient
                     .from('investors')
                     .update(row)
                     .eq('id', editingInvestorId);
-                if (error) { errEl.textContent = '⚠️ Save failed: ' + error.message; errEl.style.display = 'block'; return; }
+                if (error) {
+                    errEl.textContent = '⚠️ Save failed: ' + error.message;
+                    errEl.style.display = 'block';
+                    return;
+                }
                 await logAudit('UPDATE', `Investor #${editingInvestorId}`, `Updated investor: ${name}`, oldEquity, equity);
                 // Log share transaction only if equity actually changed
                 if (oldEquity !== equity) {
@@ -4219,10 +4509,16 @@
                 const newId = nextInvestorId();
                 row.id = newId;
                 row.created_at = new Date().toISOString();
-                const { error } = await supabaseClient
+                const {
+                    error
+                } = await supabaseClient
                     .from('investors')
                     .insert(row);
-                if (error) { errEl.textContent = '⚠️ Save failed: ' + error.message; errEl.style.display = 'block'; return; }
+                if (error) {
+                    errEl.textContent = '⚠️ Save failed: ' + error.message;
+                    errEl.style.display = 'block';
+                    return;
+                }
                 await logAudit('CREATE', `Investor #${newId}`, `Added investor: ${name}`, '', equity);
                 // Log initial share transaction
                 await logShareTransaction(
@@ -4245,19 +4541,24 @@
             if (!inv) return;
             if (!confirm(`Delete investor "${inv.name}"?`)) return;
 
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('investors')
                 .delete()
                 .eq('id', investorId);
 
-            if (error) { showError('Delete failed: ' + error.message); return; }
+            if (error) {
+                showError('Delete failed: ' + error.message);
+                return;
+            }
 
             await logAudit('DELETE', `Investor #${investorId}`, `Deleted investor: ${inv.name}`, inv.equity, '');
             await fetchSummary();
             renderAll(true);
         }
 
-                // ==================================================
+        // ==================================================
         // PROPOSALS (Phase 2c)
         // ==================================================
         function proposalInvestorLabel(p) {
@@ -4271,7 +4572,7 @@
         function updateProposalsBadge() {
             const badge = document.getElementById('proposalsCountNav');
             if (!badge) return;
-            const active = proposals.filter(p => ['draft','sent','negotiating','accepted','approved'].includes(p.status)).length;
+            const active = proposals.filter(p => ['draft', 'sent', 'negotiating', 'accepted', 'approved'].includes(p.status)).length;
             badge.textContent = active;
             badge.style.display = active > 0 ? 'inline-flex' : 'none';
         }
@@ -4289,6 +4590,7 @@
             renderProposals();
             document.getElementById('proposalsModal').classList.add('show');
         }
+
         function closeProposalsModal() {
             document.getElementById('proposalsModal').classList.remove('show');
         }
@@ -4315,7 +4617,9 @@
 
             // Summary cards
             const totals = {};
-            proposals.forEach(p => { totals[p.status] = (totals[p.status] || 0) + p.proposedAmount; });
+            proposals.forEach(p => {
+                totals[p.status] = (totals[p.status] || 0) + p.proposedAmount;
+            });
             document.getElementById('proposalSummary').innerHTML = `
                 <div class="recon-stat"><div class="recon-stat-label"><i class="fas fa-file"></i> TOTAL</div><div class="recon-stat-value">${proposals.length}</div></div>
                 <div class="recon-stat warn"><div class="recon-stat-label"><i class="fas fa-clock"></i> IN PROGRESS</div><div class="recon-stat-value">${(totals.draft||0)+(totals.sent||0)+(totals.negotiating||0)+(totals.accepted||0)+(totals.approved||0) > 0 ? proposals.filter(p=>['draft','sent','negotiating','accepted','approved'].includes(p.status)).length : 0}</div></div>
@@ -4420,9 +4724,21 @@
             const err = document.getElementById('proposalFormError');
             err.style.display = 'none';
 
-            if (type === 'existing' && !investorId) { err.textContent = '⚠️ Please select an investor.'; err.style.display = 'block'; return; }
-            if (type === 'prospect' && !prospectName) { err.textContent = '⚠️ Please enter the prospect name.'; err.style.display = 'block'; return; }
-            if (amount <= 0) { err.textContent = '⚠️ Proposed amount must be greater than 0.'; err.style.display = 'block'; return; }
+            if (type === 'existing' && !investorId) {
+                err.textContent = '⚠️ Please select an investor.';
+                err.style.display = 'block';
+                return;
+            }
+            if (type === 'prospect' && !prospectName) {
+                err.textContent = '⚠️ Please enter the prospect name.';
+                err.style.display = 'block';
+                return;
+            }
+            if (amount <= 0) {
+                err.textContent = '⚠️ Proposed amount must be greater than 0.';
+                err.style.display = 'block';
+                return;
+            }
 
             const row = {
                 investor_id: investorId,
@@ -4441,23 +4757,36 @@
             let ok = false;
 
             if (editingProposalId) {
-                const { error } = await supabaseClient
+                const {
+                    error
+                } = await supabaseClient
                     .from('proposals')
                     .update(row)
                     .eq('id', editingProposalId);
-                if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
+                }
                 await logAudit('UPDATE', `Proposal #${editingProposalId}`, `Updated proposal`, '', amount);
                 ok = true;
             } else {
                 row.status = 'draft';
                 row.created_at = new Date().toISOString();
                 row.created_by = CURRENT_USER;
-                const { data, error } = await supabaseClient
+                const {
+                    data,
+                    error
+                } = await supabaseClient
                     .from('proposals')
                     .insert(row)
                     .select('id')
                     .single();
-                if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
+                }
                 await logAudit('CREATE', `Proposal #${data.id}`, `Created proposal for ${proposalInvestorLabel({ investorId, prospectName })}`, '', amount);
                 ok = true;
             }
@@ -4479,14 +4808,27 @@
 
             document.getElementById('propDetailTitle').textContent = `PROP-${String(p.id).padStart(4,'0')}`;
 
-            const steps = ['draft','sent','negotiating','accepted','approved','funded'];
-            const order = { draft: 0, sent: 1, negotiating: 2, accepted: 3, approved: 4, funded: 5, rejected: -1, cancelled: -1 };
+            const steps = ['draft', 'sent', 'negotiating', 'accepted', 'approved', 'funded'];
+            const order = {
+                draft: 0,
+                sent: 1,
+                negotiating: 2,
+                accepted: 3,
+                approved: 4,
+                funded: 5,
+                rejected: -1,
+                cancelled: -1
+            };
             const current = order[p.status] !== undefined ? order[p.status] : 0;
 
             const flowHtml = steps.map(s => {
                 let cls = 'status-step';
-                if (p.status === 'rejected' || p.status === 'cancelled') { if (s === 'draft') cls += ' done'; }
-                else { if (order[s] < current) cls += ' done'; else if (order[s] === current) cls += ' active'; }
+                if (p.status === 'rejected' || p.status === 'cancelled') {
+                    if (s === 'draft') cls += ' done';
+                } else {
+                    if (order[s] < current) cls += ' done';
+                    else if (order[s] === current) cls += ' active';
+                }
                 return `<span class="${cls}">${s}</span>`;
             }).join('') + (p.status === 'rejected' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">rejected</span>` : '') + (p.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
 
@@ -4563,11 +4905,20 @@
                 accepted: 'accepted_at',
                 approved: 'approved_at'
             };
-            const upd = { status: newStatus, updated_at: new Date().toISOString(), updated_by: CURRENT_USER };
+            const upd = {
+                status: newStatus,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
             if (fieldMap[newStatus]) upd[fieldMap[newStatus]] = new Date().toISOString();
 
-            const { error } = await supabaseClient.from('proposals').update(upd).eq('id', id);
-            if (error) { showError('Update failed: ' + error.message); return; }
+            const {
+                error
+            } = await supabaseClient.from('proposals').update(upd).eq('id', id);
+            if (error) {
+                showError('Update failed: ' + error.message);
+                return;
+            }
 
             await logAudit('UPDATE', `Proposal #${id}`, `Advanced to ${newStatus}`, p.status, newStatus);
             await fetchSummary();
@@ -4580,14 +4931,19 @@
             if (!p) return;
             const reason = prompt('Reason for rejection:', '');
             if (reason === null) return;
-            const { error } = await supabaseClient.from('proposals').update({
+            const {
+                error
+            } = await supabaseClient.from('proposals').update({
                 status: 'rejected',
                 rejected_at: new Date().toISOString(),
                 rejection_reason: reason || 'No reason provided',
                 updated_at: new Date().toISOString(),
                 updated_by: CURRENT_USER
             }).eq('id', id);
-            if (error) { showError('Reject failed: ' + error.message); return; }
+            if (error) {
+                showError('Reject failed: ' + error.message);
+                return;
+            }
             await logAudit('UPDATE', `Proposal #${id}`, `Rejected — Reason: ${reason || 'None'}`, p.status, 'rejected');
             await fetchSummary();
             renderProposals();
@@ -4599,14 +4955,19 @@
             if (!p) return;
             const reason = prompt('Reason for cancellation:', '');
             if (reason === null) return;
-            const { error } = await supabaseClient.from('proposals').update({
+            const {
+                error
+            } = await supabaseClient.from('proposals').update({
                 status: 'cancelled',
                 cancelled_at: new Date().toISOString(),
                 cancellation_reason: reason || 'No reason provided',
                 updated_at: new Date().toISOString(),
                 updated_by: CURRENT_USER
             }).eq('id', id);
-            if (error) { showError('Cancel failed: ' + error.message); return; }
+            if (error) {
+                showError('Cancel failed: ' + error.message);
+                return;
+            }
             await logAudit('UPDATE', `Proposal #${id}`, `Cancelled — Reason: ${reason || 'None'}`, p.status, 'cancelled');
             await fetchSummary();
             renderProposals();
@@ -4616,15 +4977,27 @@
         async function fundProposal(id) {
             const p = proposals.find(x => x.id === id);
             if (!p) return;
-            if (p.status !== 'approved') { showError('Only approved proposals can be funded.'); return; }
-            if (!p.investorId) { showError('Cannot fund a prospect proposal — convert to investor first.'); return; }
+            if (p.status !== 'approved') {
+                showError('Only approved proposals can be funded.');
+                return;
+            }
+            if (!p.investorId) {
+                showError('Cannot fund a prospect proposal — convert to investor first.');
+                return;
+            }
             if (!confirm(`Fund proposal PROP-${String(id).padStart(4,'0')} for KSh ${fmt(p.proposedAmount)}? This will create a real investment and update ${proposalInvestorLabel(p)}'s equity.`)) return;
 
             const inv = investors.find(i => i.id === p.investorId);
-            if (!inv) { showError('Investor not found.'); return; }
+            if (!inv) {
+                showError('Investor not found.');
+                return;
+            }
 
             // 1. Insert investment record
-            const { data: invData, error: invErr } = await supabaseClient
+            const {
+                data: invData,
+                error: invErr
+            } = await supabaseClient
                 .from('investments')
                 .insert({
                     investor_id: p.investorId,
@@ -4638,16 +5011,27 @@
                 .select('id')
                 .single();
 
-            if (invErr) { showError('Investment creation failed: ' + invErr.message); return; }
+            if (invErr) {
+                showError('Investment creation failed: ' + invErr.message);
+                return;
+            }
 
             // 2. Update investor's equity
             const oldEquity = safeNum(inv.equity);
             const newEquity = oldEquity + p.proposedAmount;
-            const { error: eqErr } = await supabaseClient
+            const {
+                error: eqErr
+            } = await supabaseClient
                 .from('investors')
-                .update({ equity: newEquity, updated_at: new Date().toISOString() })
+                .update({
+                    equity: newEquity,
+                    updated_at: new Date().toISOString()
+                })
                 .eq('id', p.investorId);
-            if (eqErr) { showError('Equity update failed: ' + eqErr.message); return; }
+            if (eqErr) {
+                showError('Equity update failed: ' + eqErr.message);
+                return;
+            }
 
             // 3. Log share transaction
             await logShareTransaction(
@@ -4658,7 +5042,9 @@
             );
 
             // 4. Update proposal status
-            const { error: propErr } = await supabaseClient.from('proposals').update({
+            const {
+                error: propErr
+            } = await supabaseClient.from('proposals').update({
                 status: 'funded',
                 funded_at: new Date().toISOString(),
                 linked_investment_id: invData.id,
@@ -4666,7 +5052,10 @@
                 updated_by: CURRENT_USER
             }).eq('id', id);
 
-            if (propErr) { showError('Proposal update failed: ' + propErr.message); return; }
+            if (propErr) {
+                showError('Proposal update failed: ' + propErr.message);
+                return;
+            }
 
             await logAudit('PAID', `Proposal #${id}`, `Funded — KSh ${fmt(p.proposedAmount)} to ${inv.name}`, p.status, 'funded');
 
@@ -4679,10 +5068,18 @@
         async function deleteProposal(id) {
             const p = proposals.find(x => x.id === id);
             if (!p) return;
-            if (p.status === 'funded') { showError('Cannot delete a funded proposal.'); return; }
+            if (p.status === 'funded') {
+                showError('Cannot delete a funded proposal.');
+                return;
+            }
             if (!confirm(`Delete proposal PROP-${String(id).padStart(4,'0')} permanently?`)) return;
-            const { error } = await supabaseClient.from('proposals').delete().eq('id', id);
-            if (error) { showError('Delete failed: ' + error.message); return; }
+            const {
+                error
+            } = await supabaseClient.from('proposals').delete().eq('id', id);
+            if (error) {
+                showError('Delete failed: ' + error.message);
+                return;
+            }
             await logAudit('DELETE', `Proposal #${id}`, `Deleted proposal for ${proposalInvestorLabel(p)} — KSh ${fmt(p.proposedAmount)}`, p.proposedAmount, '');
             closeProposalDetail();
             await fetchSummary();
@@ -4716,7 +5113,10 @@
         }
 
         function printAllProposals() {
-            if (!proposals.length) { showError('No proposals to print.'); return; }
+            if (!proposals.length) {
+                showError('No proposals to print.');
+                return;
+            }
             const rows = proposals.map(p => `<tr>
                 <td>PROP-${String(p.id).padStart(4,'0')}</td>
                 <td>${escapeHTML(proposalInvestorLabel(p))}</td>
@@ -4737,7 +5137,7 @@
         }
 
 
-                // ==================================================
+        // ==================================================
         // DILUTION SIMULATOR (Phase 2d)
         // Pure in-memory math — never touches Supabase
         // ==================================================
@@ -4755,7 +5155,10 @@
 
         function closeDilutionSimulator() {
             document.getElementById('dilutionModal').classList.remove('show');
-            if (dilChartInstance) { dilChartInstance.destroy(); dilChartInstance = null; }
+            if (dilChartInstance) {
+                dilChartInstance.destroy();
+                dilChartInstance = null;
+            }
         }
 
         function updateDilutionInputs() {
@@ -4780,7 +5183,10 @@
             document.getElementById('dilAmount').value = '';
             document.getElementById('dilTargetPct').value = '';
             document.getElementById('dilResults').style.display = 'none';
-            if (dilChartInstance) { dilChartInstance.destroy(); dilChartInstance = null; }
+            if (dilChartInstance) {
+                dilChartInstance.destroy();
+                dilChartInstance = null;
+            }
         }
 
         function runDilutionSimulation() {
@@ -4825,20 +5231,12 @@
                 newTotal = currentTotal + amount;
             } else {
                 // Target % mode: new investor gets targetPct of the new total
-                // newInvestorEquity / newTotal = targetPct / 100
-                // newInvestorEquity = newTotal - currentTotal
-                // => (newTotal - currentTotal) / newTotal = targetPct/100
-                // => 1 - currentTotal/newTotal = targetPct/100
-                // => currentTotal/newTotal = 1 - targetPct/100
-                // => newTotal = currentTotal / (1 - targetPct/100)
                 const p = targetPct / 100;
                 newTotal = currentTotal / (1 - p);
                 newInvestorEquity = newTotal - currentTotal;
             }
 
             // Compute post-investment ownership
-            // In "add" mode: existing holders keep their equity amount; only % changes
-            // In "target" mode: existing holders keep their equity amount; new total pushes % down
             const after = current.map(h => ({
                 ...h,
                 newEquity: h.equity,
@@ -4888,9 +5286,9 @@
             body.innerHTML = beforeSorted.map(h => {
                 const pctChange = h.isNew ? null : (h.newPct - h.pct);
                 const rowClass = h.isNew ? 'recon-row-caution' : (h.isStarlink ? 'recon-row-caution' : '');
-                const changeLabel = h.isNew
-                    ? `<span style="color:#7ee0a2; font-weight:700;">+${h.newPct.toFixed(2)}%</span>`
-                    : `<span style="color:${pctChange < 0 ? '#f0a89f' : '#7ee0a2'}; font-weight:700;">${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}%</span>`;
+                const changeLabel = h.isNew ?
+                    `<span style="color:#7ee0a2; font-weight:700;">+${h.newPct.toFixed(2)}%</span>` :
+                    `<span style="color:${pctChange < 0 ? '#f0a89f' : '#7ee0a2'}; font-weight:700;">${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}%</span>`;
 
                 return `<tr class="${rowClass}">
                     <td>${escapeHTML(h.name)}${h.isNew ? ' <span class="starlink-tag" style="background:rgba(95,199,188,0.25); color:#7fded1; border-color:rgba(95,199,188,0.4);">NEW</span>' : ''}${h.isStarlink ? ' <span class="starlink-tag">virtual</span>' : ''}</td>
@@ -4919,14 +5317,17 @@
             const chartCanvas = document.getElementById('dilChart');
             if (dilChartInstance) dilChartInstance.destroy();
             const hasLabels = typeof ChartDataLabels !== 'undefined';
-            if (hasLabels) { try { Chart.register(ChartDataLabels); } catch (e) {} }
+            if (hasLabels) {
+                try {
+                    Chart.register(ChartDataLabels);
+                } catch (e) {}
+            }
 
             dilChartInstance = new Chart(chartCanvas.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: beforeSorted.map(h => h.name),
-                    datasets: [
-                        {
+                    datasets: [{
                             label: 'Current %',
                             data: beforeSorted.map(h => h.pct),
                             backgroundColor: 'rgba(120, 200, 220, 0.35)',
@@ -4948,7 +5349,15 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top', labels: { color: '#c7d5e6', font: { size: 11 } } },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#c7d5e6',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
                         tooltip: {
                             backgroundColor: 'rgba(10, 20, 35, 0.95)',
                             titleColor: '#f2f0eb',
@@ -4965,16 +5374,53 @@
                             anchor: 'end',
                             align: 'end',
                             color: '#c7d5e6',
-                            font: { size: 9, weight: '700', family: 'JetBrains Mono' },
-                            formatter: function(v) { return v >= 3 ? v.toFixed(1) + '%' : ''; },
+                            font: {
+                                size: 9,
+                                weight: '700',
+                                family: 'JetBrains Mono'
+                            },
+                            formatter: function(v) {
+                                return v >= 3 ? v.toFixed(1) + '%' : '';
+                            },
                             offset: 2
                         } : {}
                     },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(120, 200, 220, 0.06)' }, ticks: { color: '#7f9bb8', font: { size: 10 }, callback: v => v + '%' } },
-                        x: { grid: { display: false }, ticks: { color: '#c7d5e6', font: { size: 10, weight: '600' }, maxRotation: 30, minRotation: 15, autoSkip: false } }
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(120, 200, 220, 0.06)'
+                            },
+                            ticks: {
+                                color: '#7f9bb8',
+                                font: {
+                                    size: 10
+                                },
+                                callback: v => v + '%'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#c7d5e6',
+                                font: {
+                                    size: 10,
+                                    weight: '600'
+                                },
+                                maxRotation: 30,
+                                minRotation: 15,
+                                autoSkip: false
+                            }
+                        }
                     },
-                    layout: { padding: { top: 24, bottom: 6 } }
+                    layout: {
+                        padding: {
+                            top: 24,
+                            bottom: 6
+                        }
+                    }
                 }
             });
 
@@ -4999,7 +5445,9 @@
                 if (cells.length < 6) return;
                 const rowClass = tr.classList.contains('total-row') ? 'style="font-weight:800; background:#f0f5fb;"' : '';
                 rowsHtml += `<tr ${rowClass}>`;
-                cells.forEach(td => { rowsHtml += `<td>${escapeHTML(td.textContent.trim())}</td>`; });
+                cells.forEach(td => {
+                    rowsHtml += `<td>${escapeHTML(td.textContent.trim())}</td>`;
+                });
                 rowsHtml += `</tr>`;
             });
 
@@ -5030,34 +5478,52 @@
                 </div>
             `);
         }
+
         // ==================================================
         // INVESTOR STATEMENT PRINT (Phase 2e)
         // ==================================================
         async function printInvestorStatement(investorId) {
             const inv = investors.find(i => i.id === investorId);
-            if (!inv) { showError('Investor not found.'); return; }
+            if (!inv) {
+                showError('Investor not found.');
+                return;
+            }
 
             let investmentList = [];
             let shareTxnList = [];
 
             try {
-                const { data: invData } = await supabaseClient
+                const {
+                    data: invData
+                } = await supabaseClient
                     .from('investments')
                     .select('*')
                     .eq('investor_id', investorId)
-                    .order('date', { ascending: true });
+                    .order('date', {
+                        ascending: true
+                    });
                 investmentList = invData || [];
-            } catch (e) { console.warn('Investments fetch failed:', e.message); }
+            } catch (e) {
+                console.warn('Investments fetch failed:', e.message);
+            }
 
             try {
-                const { data: shareData } = await supabaseClient
+                const {
+                    data: shareData
+                } = await supabaseClient
                     .from('share_transactions')
                     .select('*')
                     .eq('investor_id', investorId)
-                    .order('date', { ascending: true })
-                    .order('id', { ascending: true });
+                    .order('date', {
+                        ascending: true
+                    })
+                    .order('id', {
+                        ascending: true
+                    });
                 shareTxnList = shareData || [];
-            } catch (e) { console.warn('Share txns fetch failed:', e.message); }
+            } catch (e) {
+                console.warn('Share txns fetch failed:', e.message);
+            }
 
             const dividendRows = [];
             dividends.forEach(d => {
@@ -5230,7 +5696,7 @@
         }
 
 
-                // ==================================================
+        // ==================================================
         // SHARE LEDGER (Phase 2b)
         // Every equity change is logged as an append-only row
         // ==================================================
@@ -5267,35 +5733,28 @@
         // CAP TABLE — computes ownership as of a date
         // ==================================================
         async function computeCapTableAsOf(asOfDate) {
-            // Fetch all share transactions
-            let txns = [];
-            try {
-                const { data, error } = await supabaseClient
-                    .from('share_transactions')
-                    .select('*')
-                    .order('date', { ascending: true })
-                    .order('id', { ascending: true });
-                if (!error && Array.isArray(data)) txns = data;
-            } catch (e) { console.warn('Cap table fetch failed:', e.message); }
+            const effectiveDate = asOfDate || todayISO();
 
-            // Build per-investor balance as of the date
-            const balances = {}; // investorId -> { equity, lastChange, lastRef, date }
-
-            // Initialize all current investors at 0
-            investors.forEach(i => {
-                balances[i.id] = { equity: 0, lastChange: null, lastRef: '', date: null };
+            const {
+                data,
+                error
+            } = await supabaseClient.rpc('equity_as_of', {
+                p_as_of: effectiveDate
             });
 
-            txns.forEach(t => {
-                if (asOfDate && t.date > asOfDate) return; // skip future
-                if (!balances[t.investor_id]) return;      // skip orphan
-                // For simplicity, take the latest equity_after at or before asOfDate
-                // (each row stores the running balance anyway)
-                const b = balances[t.investor_id];
-                b.equity = safeNum(t.equity_after);
-                b.lastChange = t.action;
-                b.lastRef = t.reference || '';
-                b.date = t.date;
+            if (error) {
+                console.warn('equity_as_of failed:', error.message);
+                return {};
+            }
+
+            const balances = {};
+            (data || []).forEach(row => {
+                balances[row.investor_id] = {
+                    equity: safeNum(row.equity),
+                    lastChange: row.last_change,
+                    lastRef: row.last_ref || '',
+                    date: row.last_date
+                };
             });
 
             return balances;
@@ -5319,7 +5778,12 @@
 
             // Build list of investors with balance
             const rows = investors.map(inv => {
-                const b = balances[inv.id] || { equity: 0, lastChange: null, lastRef: '', date: null };
+                const b = balances[inv.id] || {
+                    equity: 0,
+                    lastChange: null,
+                    lastRef: '',
+                    date: null
+                };
                 return {
                     id: inv.id,
                     name: inv.name,
@@ -5461,13 +5925,20 @@
             // Fetch investments for this investor
             let invList = [];
             try {
-                const { data, error } = await supabaseClient
+                const {
+                    data,
+                    error
+                } = await supabaseClient
                     .from('investments')
                     .select('*')
                     .eq('investor_id', investorId)
-                    .order('date', { ascending: false });
+                    .order('date', {
+                        ascending: false
+                    });
                 if (!error && Array.isArray(data)) invList = data;
-            } catch (e) { console.warn('Investments fetch failed:', e); }
+            } catch (e) {
+                console.warn('Investments fetch failed:', e);
+            }
 
             const totalInvested = invList
                 .filter(x => x.type !== 'withdrawal')
@@ -5478,7 +5949,7 @@
             const netInvested = totalInvested - totalWithdrawn;
 
             const statusPill = (inv.status === 'inactive') ? 'cancelled' :
-                               (inv.status === 'prospect') ? 'pending' : 'paid';
+                (inv.status === 'prospect') ? 'pending' : 'paid';
 
             // Build detail body
             let html = `
@@ -5511,7 +5982,7 @@
                     </div>
                 </div>
 
-                               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; gap:0.5rem; flex-wrap:wrap;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; gap:0.5rem; flex-wrap:wrap;">
                     <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.9rem; color:#c7d5e6;">Investment History</h4>
                     <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
                         <button class="btn btn-ghost" id="printStatementBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px;">
@@ -5542,7 +6013,7 @@
             } else {
                 tbody.innerHTML = invList.map(item => {
                     const typeClass = item.type === 'initial' ? 'paid' :
-                                      item.type === 'additional' ? 'approved' : 'cancelled';
+                        item.type === 'additional' ? 'approved' : 'cancelled';
                     const sign = item.type === 'withdrawal' ? '−' : '+';
                     const amtClass = item.type === 'withdrawal' ? 'amount-expense' : 'amount-income';
                     return `<tr>
@@ -5600,20 +6071,40 @@
             const errEl = document.getElementById('invInvError');
             errEl.style.display = 'none';
 
-            if (!investorId) { errEl.textContent = '⚠️ No investor selected.'; errEl.style.display = 'block'; return; }
-            if (amount <= 0) { errEl.textContent = '⚠️ Enter an amount greater than 0.'; errEl.style.display = 'block'; return; }
+            if (!investorId) {
+                errEl.textContent = '⚠️ No investor selected.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (amount <= 0) {
+                errEl.textContent = '⚠️ Enter an amount greater than 0.';
+                errEl.style.display = 'block';
+                return;
+            }
 
-            const { error } = await supabaseClient
-                .from('investments')
-                .insert({
-                    investor_id: investorId,
-                    date: date,
-                    amount: amount,
-                    type: type,
-                    reference: reference || null,
-                    notes: notes || null,
-                    created_by: CURRENT_USER
-                });
+            // Stable idempotency key so a double-click cannot create two injections.
+            const idemKey = reference ?
+                `INV-${investorId}-${type}-${amount}-${date}-${reference}` :
+                `INV-${investorId}-${type}-${amount}-${date}-${Date.now()}`;
+
+            const inv = investors.find(i => i.id === investorId);
+            const reason = `${type} capital injection of KSh ${fmt(amount)}` +
+                (inv ? ` to ${inv.name}` : '');
+
+            const {
+                data,
+                error
+            } = await supabaseClient.rpc('record_capital_injection', {
+                p_investor_id: investorId,
+                p_amount: amount,
+                p_date: date,
+                p_type: type,
+                p_reference: reference || null,
+                p_notes: notes || null,
+                p_reason: reason,
+                p_actor: CURRENT_USER,
+                p_idempotency_key: idemKey
+            });
 
             if (error) {
                 errEl.textContent = '⚠️ Save failed: ' + error.message;
@@ -5621,71 +6112,33 @@
                 return;
             }
 
-                    await logAudit('CREATE', `Investment for Investor #${investorId}`,
-                `Added ${type} investment: KSh ${fmt(amount)}${reference ? ' (' + reference + ')' : ''}`,
-                '', amount);
-
-            // Log share transaction: for additional investment, add to equity
-            if (type !== 'withdrawal') {
-                const inv = investors.find(i => i.id === investorId);
-                const oldEquity = inv ? safeNum(inv.equity) : 0;
-                const newEquity = oldEquity + amount;
-
-                // Update investor equity in the investors table
-                try {
-                    await supabaseClient
-                        .from('investors')
-                        .update({ equity: newEquity, updated_at: new Date().toISOString() })
-                        .eq('id', investorId);
-                } catch (e) { console.warn('Equity update failed:', e.message); }
-
-                await logShareTransaction(
-                    investorId,
-                    type === 'initial' ? 'initial' : 'additional',
-                    oldEquity,
-                    newEquity,
-                    reference || 'INVESTMENT',
-                    notes || `Recorded ${type} investment`,
-                    `${type} investment of KSh ${fmt(amount)}`
-                );
-            } else {
-                // Withdrawal — subtract from equity
-                const inv = investors.find(i => i.id === investorId);
-                const oldEquity = inv ? safeNum(inv.equity) : 0;
-                const newEquity = Math.max(0, oldEquity - amount);
-
-                try {
-                    await supabaseClient
-                        .from('investors')
-                        .update({ equity: newEquity, updated_at: new Date().toISOString() })
-                        .eq('id', investorId);
-                } catch (e) { console.warn('Equity update failed:', e.message); }
-
-                await logShareTransaction(
-                    investorId, 'buyback', oldEquity, newEquity,
-                    reference || 'WITHDRAWAL',
-                    notes || 'Withdrawal',
-                    `Withdrawal of KSh ${fmt(amount)}`
-                );
+            if (data && data.status === 'already_recorded') {
+                showToast('ℹ️ This injection was already recorded.', 'info');
+                closeInvestmentModal();
+                return;
             }
 
             closeInvestmentModal();
-            // Refresh from cloud so cap table + equity reflect the change
             await fetchSummary();
             renderAll(true);
-            // Reopen the detail view to show the new investment
             openInvestorDetail(investorId);
+            showToast('✅ Investment recorded', 'success');
         }
 
         async function deleteInvestment(investmentId) {
             if (!confirm('Delete this investment record?')) return;
 
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('investments')
                 .delete()
                 .eq('id', investmentId);
 
-            if (error) { showError('Delete failed: ' + error.message); return; }
+            if (error) {
+                showError('Delete failed: ' + error.message);
+                return;
+            }
 
             await logAudit('DELETE', `Investment #${investmentId}`, 'Deleted investment record', '', '');
 
@@ -5693,6 +6146,7 @@
                 openInvestorDetail(currentDetailInvestorId);
             }
         }
+
         // ==================================================
         // EMPLOYEES — writes to `employees` table
         // ==================================================
@@ -5705,22 +6159,33 @@
             const status = document.getElementById('employeeStatus');
             const date = document.getElementById('employeeDate');
             const error = document.getElementById('employeeError');
-            error.textContent = ''; error.style.display = 'none';
+            error.textContent = '';
+            error.style.display = 'none';
             if (employeeId === null) {
                 title.innerHTML = '➕ Add Employee';
-                name.value = ''; amount.value = ''; ref.value = ''; status.value = 'paid'; date.value = todayISO();
+                name.value = '';
+                amount.value = '';
+                ref.value = '';
+                status.value = 'paid';
+                date.value = todayISO();
             } else {
                 const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
                 if (!emp) return;
                 title.innerHTML = '✏️ Edit Employee';
-                name.value = emp.name; amount.value = emp.amount; ref.value = emp.reference || '';
-                status.value = emp.status || 'paid'; date.value = emp.date || todayISO();
+                name.value = emp.name;
+                amount.value = emp.amount;
+                ref.value = emp.reference || '';
+                status.value = emp.status || 'paid';
+                date.value = emp.date || todayISO();
             }
             document.getElementById('employeeModal').classList.add('show');
             setTimeout(() => name.focus(), 50);
         }
 
-        function closeEmployeeModal() { document.getElementById('employeeModal').classList.remove('show'); editingEmployeeId = null; }
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('show');
+            editingEmployeeId = null;
+        }
 
         async function saveEmployee() {
             const name = document.getElementById('employeeName').value.trim();
@@ -5729,30 +6194,61 @@
             const status = document.getElementById('employeeStatus').value;
             const date = document.getElementById('employeeDate').value || todayISO();
             const error = document.getElementById('employeeError');
-            error.textContent = ''; error.style.display = 'none';
-            if (!name) { error.textContent = 'Please enter the employee name.'; error.style.display = 'block'; return; }
-            if (amount <= 0) { error.textContent = 'Please enter a payment amount greater than 0.'; error.style.display = 'block'; return; }
+            error.textContent = '';
+            error.style.display = 'none';
+            if (!name) {
+                error.textContent = 'Please enter the employee name.';
+                error.style.display = 'block';
+                return;
+            }
+            if (amount <= 0) {
+                error.textContent = 'Please enter a payment amount greater than 0.';
+                error.style.display = 'block';
+                return;
+            }
             if (reference) {
                 const dup = EMPLOYEE_PAYMENTS.find(e => e.id !== editingEmployeeId && (e.reference || '').toLowerCase() === reference.toLowerCase());
-                if (dup) { error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`; error.style.display = 'block'; return; }
+                if (dup) {
+                    error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`;
+                    error.style.display = 'block';
+                    return;
+                }
             }
 
-            const row = { name, amount, reference: reference || null, status, date };
+            const row = {
+                name,
+                amount,
+                reference: reference || null,
+                status,
+                date
+            };
             let ok = false;
 
             if (editingEmployeeId === null) {
                 const newId = nextEmployeeId();
                 row.id = newId;
                 row.created_at = new Date().toISOString();
-                const { error: err } = await supabaseClient.from('employees').insert(row);
-                if (err) { error.textContent = '⚠️ Save failed: ' + err.message; error.style.display = 'block'; return; }
+                const {
+                    error: err
+                } = await supabaseClient.from('employees').insert(row);
+                if (err) {
+                    error.textContent = '⚠️ Save failed: ' + err.message;
+                    error.style.display = 'block';
+                    return;
+                }
                 await logAudit('CREATE', `Employee #${newId}`, `Added payment for ${name} (${reference || 'no ref'})`, '', amount);
                 ok = true;
             } else {
                 const old = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId);
                 row.updated_at = new Date().toISOString();
-                const { error: err } = await supabaseClient.from('employees').update(row).eq('id', editingEmployeeId);
-                if (err) { error.textContent = '⚠️ Save failed: ' + err.message; error.style.display = 'block'; return; }
+                const {
+                    error: err
+                } = await supabaseClient.from('employees').update(row).eq('id', editingEmployeeId);
+                if (err) {
+                    error.textContent = '⚠️ Save failed: ' + err.message;
+                    error.style.display = 'block';
+                    return;
+                }
                 await logAudit('UPDATE', `Employee #${editingEmployeeId}`, `Updated payment for ${name}`, `${old ? old.amount : ''}/${old ? old.status : ''}`, `${amount}/${status}`);
                 ok = true;
             }
@@ -5770,8 +6266,13 @@
             if (!employee) return;
             if (!confirm(`Delete employee "${employee.name}" from the payment list?`)) return;
 
-            const { error } = await supabaseClient.from('employees').delete().eq('id', employeeId);
-            if (error) { showError('Delete failed: ' + error.message); return; }
+            const {
+                error
+            } = await supabaseClient.from('employees').delete().eq('id', employeeId);
+            if (error) {
+                showError('Delete failed: ' + error.message);
+                return;
+            }
 
             await logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
             await fetchSummary();
@@ -5793,7 +6294,11 @@
             if (status) list = list.filter(e => e.status === status);
             if (q) list = list.filter(e => (e.name + ' ' + (e.reference || '')).toLowerCase().includes(q));
             list.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-            if (!list.length) { body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-receipt"></i>No employee payments match your filters.</div></td></tr>`; totalEl.textContent = 'KSh 0'; return; }
+            if (!list.length) {
+                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-receipt"></i>No employee payments match your filters.</div></td></tr>`;
+                totalEl.textContent = 'KSh 0';
+                return;
+            }
             body.innerHTML = list.map(emp => `<tr>
                 <td><strong>${escapeHTML(emp.name)}</strong></td>
                 <td>${escapeHTML(emp.date || '-')}</td>
@@ -5806,10 +6311,23 @@
             totalEl.textContent = 'KSh ' + fmt(total);
         }
 
-        function openPaymentsModal() { renderEmployeePayments(); document.getElementById('paymentsModal').classList.add('show'); }
-        function closePaymentsModal() { document.getElementById('paymentsModal').classList.remove('show'); }
-        function openAuditModal() { renderAuditLog(); document.getElementById('auditModal').classList.add('show'); }
-        function closeAuditModal() { document.getElementById('auditModal').classList.remove('show'); }
+        function openPaymentsModal() {
+            renderEmployeePayments();
+            document.getElementById('paymentsModal').classList.add('show');
+        }
+
+        function closePaymentsModal() {
+            document.getElementById('paymentsModal').classList.remove('show');
+        }
+
+        function openAuditModal() {
+            renderAuditLog();
+            document.getElementById('auditModal').classList.add('show');
+        }
+
+        function closeAuditModal() {
+            document.getElementById('auditModal').classList.remove('show');
+        }
 
         // ==================================================
         // DIVIDEND ENGINE — writes to `dividends` table
@@ -5821,15 +6339,38 @@
             const raw = all.map((inv, idx) => {
                 const pct = (inv.equity / totalEquity) * 100;
                 const rawAmt = total * (pct / 100);
-                return { investorId: inv.id || ('virtual_' + idx), name: inv.name, equity: inv.equity, percentage: pct, rawAmount: rawAmt, floorAmount: Math.floor(rawAmt), roundingAdj: 0 };
+                return {
+                    investorId: inv.id || ('virtual_' + idx),
+                    name: inv.name,
+                    equity: inv.equity,
+                    percentage: pct,
+                    rawAmount: rawAmt,
+                    floorAmount: Math.floor(rawAmt),
+                    roundingAdj: 0
+                };
             });
             const floorSum = raw.reduce((s, r) => s + r.floorAmount, 0);
             let remainder = Math.round(total) - floorSum;
             const sorted = [...raw].sort((a, b) => (b.rawAmount - b.floorAmount) - (a.rawAmount - a.floorAmount));
             let i = 0;
-            while (remainder > 0 && i < sorted.length * 10) { sorted[i % sorted.length].floorAmount += 1; remainder -= 1; i++; }
-            raw.forEach(r => { const match = sorted.find(s => s.investorId === r.investorId); if (match) r.floorAmount = match.floorAmount; r.roundingAdj = +(r.floorAmount - r.rawAmount).toFixed(4); });
-            return raw.map(r => ({ investorId: r.investorId, name: r.name, equity: r.equity, percentage: +r.percentage.toFixed(4), amount: r.floorAmount, roundingAdj: r.roundingAdj }));
+            while (remainder > 0 && i < sorted.length * 10) {
+                sorted[i % sorted.length].floorAmount += 1;
+                remainder -= 1;
+                i++;
+            }
+            raw.forEach(r => {
+                const match = sorted.find(s => s.investorId === r.investorId);
+                if (match) r.floorAmount = match.floorAmount;
+                r.roundingAdj = +(r.floorAmount - r.rawAmount).toFixed(4);
+            });
+            return raw.map(r => ({
+                investorId: r.investorId,
+                name: r.name,
+                equity: r.equity,
+                percentage: +r.percentage.toFixed(4),
+                amount: r.floorAmount,
+                roundingAdj: r.roundingAdj
+            }));
         }
 
         function generateDividendId() {
@@ -5845,7 +6386,10 @@
             if (!d) return;
             const isLocked = d.status === 'approved' || d.status === 'processing' || d.status === 'paid';
             if (isLocked) {
-                pendingEditAction = { type: 'dividend-edit', id: dividendId };
+                pendingEditAction = {
+                    type: 'dividend-edit',
+                    id: dividendId
+                };
                 document.getElementById('editWarningText').innerHTML = `This distribution is already marked as <strong>${escapeHTML(d.status.toUpperCase())}</strong>. Editing it will create a mismatch with your external records. The audit log will flag this edit prominently.`;
                 document.getElementById('editReasonInput').value = '';
                 document.getElementById('editWarningError').style.display = 'none';
@@ -5861,7 +6405,10 @@
             if (!d) return;
             const isLocked = d.status === 'approved' || d.status === 'processing' || d.status === 'paid';
             if (isLocked) {
-                pendingEditAction = { type: 'dividend-delete', id: dividendId };
+                pendingEditAction = {
+                    type: 'dividend-delete',
+                    id: dividendId
+                };
                 document.getElementById('editWarningText').innerHTML = `This distribution is already marked as <strong>${escapeHTML(d.status.toUpperCase())}</strong>. Deleting it will remove a record that may already exist in your external ledger. The audit log will flag this deletion prominently.`;
                 document.getElementById('editReasonInput').value = '';
                 document.getElementById('editWarningError').style.display = 'none';
@@ -5914,7 +6461,10 @@
             } else {
                 titleEl.innerHTML = '<i class="fas fa-calculator"></i> New Dividend Distribution';
                 document.getElementById('divTotal').value = '';
-                document.getElementById('divPeriod').value = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+                document.getElementById('divPeriod').value = new Date().toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                });
                 document.getElementById('divNotes').value = '';
                 window._editReason = '';
                 window._oldStatus = null;
@@ -5936,10 +6486,22 @@
             const notes = document.getElementById('divNotes').value.trim();
             const errEl = document.getElementById('divError');
             errEl.style.display = 'none';
-            if (total <= 0) { errEl.textContent = '⚠️ Enter a distributable amount greater than 0.'; errEl.style.display = 'block'; return; }
-            if (!period) { errEl.textContent = '⚠️ Enter a period label (e.g. September 2026).'; errEl.style.display = 'block'; return; }
+            if (total <= 0) {
+                errEl.textContent = '⚠️ Enter a distributable amount greater than 0.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (!period) {
+                errEl.textContent = '⚠️ Enter a period label (e.g. September 2026).';
+                errEl.style.display = 'block';
+                return;
+            }
             const dup = dividends.find(d => d.id !== editingDividendId && d.periodLabel.toLowerCase() === period.toLowerCase() && d.status !== 'cancelled');
-            if (dup) { errEl.textContent = `⚠️ A distribution for "${period}" already exists (${dup.status}).`; errEl.style.display = 'block'; return; }
+            if (dup) {
+                errEl.textContent = `⚠️ A distribution for "${period}" already exists (${dup.status}).`;
+                errEl.style.display = 'block';
+                return;
+            }
 
             const allocations = calcAllocations(total);
             const allocSum = allocations.reduce((s, a) => s + a.amount, 0);
@@ -5967,7 +6529,21 @@
                     };
                 }
             } else {
-                pendingDividend = { id: generateDividendId(), periodLabel: period, totalDistributable: total, notes, allocations, status: 'draft', createdAt: new Date().toISOString(), createdBy: CURRENT_USER, approvedAt: null, approvedBy: null, paidAt: null, cancelledAt: null, cancelReason: null };
+                pendingDividend = {
+                    id: generateDividendId(),
+                    periodLabel: period,
+                    totalDistributable: total,
+                    notes,
+                    allocations,
+                    status: 'draft',
+                    createdAt: new Date().toISOString(),
+                    createdBy: CURRENT_USER,
+                    approvedAt: null,
+                    approvedBy: null,
+                    paidAt: null,
+                    cancelledAt: null,
+                    cancelReason: null
+                };
             }
 
             document.getElementById('previewTotal').textContent = 'KSh ' + fmt(total);
@@ -5977,14 +6553,21 @@
 
             const reconcileEl = document.getElementById('previewReconcile');
             const reconcileTxt = document.getElementById('previewReconcileText');
-            if (reconciled) { reconcileEl.classList.remove('warning'); reconcileTxt.textContent = `Allocations reconcile exactly to KSh ${fmt(total)}. Ready to save.`; }
-            else { reconcileEl.classList.add('warning'); reconcileTxt.textContent = `Allocations total KSh ${fmt(allocSum)} but distributable is KSh ${fmt(total)}.`; }
+            if (reconciled) {
+                reconcileEl.classList.remove('warning');
+                reconcileTxt.textContent = `Allocations reconcile exactly to KSh ${fmt(total)}. Ready to save.`;
+            } else {
+                reconcileEl.classList.add('warning');
+                reconcileTxt.textContent = `Allocations total KSh ${fmt(allocSum)} but distributable is KSh ${fmt(total)}.`;
+            }
 
             closeDividendModal();
             document.getElementById('previewModal').classList.add('show');
         }
 
-        function closePreviewModal() { document.getElementById('previewModal').classList.remove('show'); }
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
 
         async function confirmDividend() {
             if (!pendingDividend) return;
@@ -6010,11 +6593,18 @@
                 row.last_edit_reason = pendingDividend.lastEditReason;
             }
 
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('dividends')
-                .upsert(row, { onConflict: 'id' });
+                .upsert(row, {
+                    onConflict: 'id'
+                });
 
-            if (error) { showError('Save failed: ' + error.message); return; }
+            if (error) {
+                showError('Save failed: ' + error.message);
+                return;
+            }
 
             if (isEdit) {
                 if (wasLocked) {
@@ -6043,8 +6633,13 @@
             if (!d) return;
             const wasLocked = d.status === 'approved' || d.status === 'processing' || d.status === 'paid';
 
-            const { error } = await supabaseClient.from('dividends').delete().eq('id', id);
-            if (error) { showError('Delete failed: ' + error.message); return; }
+            const {
+                error
+            } = await supabaseClient.from('dividends').delete().eq('id', id);
+            if (error) {
+                showError('Delete failed: ' + error.message);
+                return;
+            }
 
             if (wasLocked) {
                 await logAudit('DELETE', `Dividend ${id}`,
@@ -6071,12 +6666,22 @@
 
             const steps = ['draft', 'approved', 'processing', 'paid'];
             const flow = document.getElementById('detailFlow');
-            const order = { draft: 0, approved: 1, processing: 2, paid: 3, cancelled: -1 };
+            const order = {
+                draft: 0,
+                approved: 1,
+                processing: 2,
+                paid: 3,
+                cancelled: -1
+            };
             const current = order[d.status] !== undefined ? order[d.status] : 0;
             flow.innerHTML = steps.map(s => {
                 let cls = 'status-step';
-                if (d.status === 'cancelled') { if (s === 'draft') cls += ' done'; }
-                else { if (order[s] < current) cls += ' done'; else if (order[s] === current) cls += ' active'; }
+                if (d.status === 'cancelled') {
+                    if (s === 'draft') cls += ' done';
+                } else {
+                    if (order[s] < current) cls += ' done';
+                    else if (order[s] === current) cls += ' active';
+                }
                 return `<span class="${cls}">${s}</span>`;
             }).join('') + (d.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
 
@@ -6111,17 +6716,29 @@
 
             document.getElementById('dividendDetailModal').classList.add('show');
         }
-        function closeDividendDetail() { document.getElementById('dividendDetailModal').classList.remove('show'); }
+
+        function closeDividendDetail() {
+            document.getElementById('dividendDetailModal').classList.remove('show');
+        }
 
         async function approveDividend(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
             if (!confirm(`Approve distribution ${d.id} for ${d.periodLabel}?`)) return;
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('dividends')
-                .update({ status: 'approved', approved_at: new Date().toISOString(), approved_by: CURRENT_USER })
+                .update({
+                    status: 'approved',
+                    approved_at: new Date().toISOString(),
+                    approved_by: CURRENT_USER
+                })
                 .eq('id', id);
-            if (error) { showError('Approve failed: ' + error.message); return; }
+            if (error) {
+                showError('Approve failed: ' + error.message);
+                return;
+            }
             await logAudit('APPROVE', `Dividend ${id}`, `Approved ${d.periodLabel} — KSh ${fmt(d.totalDistributable)}`, 'draft', 'approved');
             await fetchSummary();
             renderDividendOverview();
@@ -6132,18 +6749,36 @@
         async function markPaid(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
-            if (!confirm(`Mark distribution ${d.id} as PAID? This should only be done after actual payments have been made.`)) return;
+            if (!confirm(`Mark ${d.id} as PAID?\n\nThis will create ${d.allocations ? d.allocations.length : 0} ledger transactions totalling KSh ${fmt(d.totalDistributable)}.`)) return;
+
             const oldStatus = d.status;
-            const { error } = await supabaseClient
-                .from('dividends')
-                .update({ status: 'paid', paid_at: new Date().toISOString() })
-                .eq('id', id);
-            if (error) { showError('Mark paid failed: ' + error.message); return; }
-            await logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}`, oldStatus, 'paid');
+            const {
+                data,
+                error
+            } = await supabaseClient.rpc('mark_dividend_paid', {
+                p_dividend_id: id,
+                p_actor: CURRENT_USER
+            });
+
+            if (error) {
+                showError('Mark paid failed: ' + error.message);
+                return;
+            }
+
+            if (data && data.status === 'already_paid') {
+                showToast('ℹ️ This dividend is already paid.', 'info');
+                return;
+            }
+
+            await logAudit('PAID', `Dividend ${id}`,
+                `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}. Created ${data?.transactions_created || 0} ledger entries.`,
+                oldStatus, 'paid');
+
             await fetchSummary();
             renderDividendOverview();
             renderReconciliationBanner();
             openDividendDetail(id);
+            showToast(`✅ Paid. ${data?.transactions_created || 0} ledger entries created.`, 'success');
         }
 
         async function cancelDividend(id) {
@@ -6152,11 +6787,20 @@
             const reason = prompt('Reason for cancelling this distribution:', '');
             if (reason === null) return;
             const oldStatus = d.status;
-            const { error } = await supabaseClient
+            const {
+                error
+            } = await supabaseClient
                 .from('dividends')
-                .update({ status: 'cancelled', cancelled_at: new Date().toISOString(), cancel_reason: reason || 'No reason provided' })
+                .update({
+                    status: 'cancelled',
+                    cancelled_at: new Date().toISOString(),
+                    cancel_reason: reason || 'No reason provided'
+                })
                 .eq('id', id);
-            if (error) { showError('Cancel failed: ' + error.message); return; }
+            if (error) {
+                showError('Cancel failed: ' + error.message);
+                return;
+            }
             await logAudit('CANCEL', `Dividend ${id}`, `Cancelled ${d.periodLabel} — Reason: ${reason || 'No reason provided'}`, oldStatus, 'cancelled');
             await fetchSummary();
             renderDividendOverview();
@@ -6196,7 +6840,10 @@
             }
             document.getElementById('dividendsHistoryModal').classList.add('show');
         }
-        function closeDividendsHistoryModal() { document.getElementById('dividendsHistoryModal').classList.remove('show'); }
+
+        function closeDividendsHistoryModal() {
+            document.getElementById('dividendsHistoryModal').classList.remove('show');
+        }
 
         // ==================================================
         // PRINT
@@ -6207,14 +6854,26 @@
             printArea.innerHTML = html;
             printArea.style.display = 'block';
             requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
-            const cleanup = () => { printArea.style.display = 'none'; printArea.innerHTML = ''; window.removeEventListener('afterprint', cleanup); };
+            const cleanup = () => {
+                printArea.style.display = 'none';
+                printArea.innerHTML = '';
+                window.removeEventListener('afterprint', cleanup);
+            };
             window.addEventListener('afterprint', cleanup);
-            setTimeout(() => { if (printArea.style.display !== 'none') cleanup(); }, 60000);
+            setTimeout(() => {
+                if (printArea.style.display !== 'none') cleanup();
+            }, 60000);
         }
-        function printHeader(title) { return `<div class="print-header"><h1>STARLINK LLC</h1><h2>${escapeHTML(title)}</h2><p>Generated: ${escapeHTML(new Date().toLocaleString())}</p></div>`; }
+
+        function printHeader(title) {
+            return `<div class="print-header"><h1>STARLINK LLC</h1><h2>${escapeHTML(title)}</h2><p>Generated: ${escapeHTML(new Date().toLocaleString())}</p></div>`;
+        }
 
         function printAllDividends() {
-            if (!dividends.length) { showError('No dividends to print.'); return; }
+            if (!dividends.length) {
+                showError('No dividends to print.');
+                return;
+            }
             const sorted = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
             const grandTotal = sorted.reduce((s, d) => s + safeNum(d.totalDistributable), 0);
             const totalPaid = sorted.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
@@ -6305,7 +6964,10 @@
 
         function printEmployeeReport(employeeId) {
             const emp = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
-            if (!emp) { showError('Employee not found.'); return; }
+            if (!emp) {
+                showError('Employee not found.');
+                return;
+            }
             const date = new Date().toLocaleDateString();
             doPrint(`
                 <div class="employee-print-report">
@@ -6354,47 +7016,84 @@
         // ==================================================
         let lastFetchAt = 0;
 
-                function subscribeRealtime() {
+        function subscribeRealtime() {
             if (!supabaseClient) return;
             // Subscribe to all relevant tables
             supabaseClient.channel('starlink-tables')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditure_data', filter: 'id=eq.1' }, async () => {
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'expenditure_data',
+                    filter: 'id=eq.1'
+                }, async () => {
                     const ok = await fetchSummary();
                     lastFetchAt = Date.now();
                     if (ok) renderAll(true);
                 })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'investors' }, async () => {
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'investors'
+                }, async () => {
                     const ok = await fetchSummary();
                     lastFetchAt = Date.now();
                     if (ok) renderAll(true);
                 })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, async () => {
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'employees'
+                }, async () => {
                     const ok = await fetchSummary();
                     lastFetchAt = Date.now();
                     if (ok) renderAll(true);
                 })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'dividends' }, async () => {
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'dividends'
+                }, async () => {
                     const ok = await fetchSummary();
                     lastFetchAt = Date.now();
                     if (ok) renderAll(true);
                 })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'audit_logs' }, async () => {
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'audit_logs'
+                }, async () => {
                     const ok = await fetchSummary();
                     lastFetchAt = Date.now();
                     if (ok) renderAll(true);
+                })
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'transactions'
+                }, async () => {
+                    await fetchStarlinkInvestmentTotal();
+                    lastFetchAt = Date.now();
+                    renderAll(true);
                 })
                 .subscribe((status) => {
                     const st = document.getElementById('liveStatus');
                     const dot = document.getElementById('liveDot');
-                    if (status === 'SUBSCRIBED') { st.textContent = 'Live'; dot.style.background = ''; }
-                    else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') { st.textContent = 'Polling'; dot.style.background = '#e8b879'; }
+                    if (status === 'SUBSCRIBED') {
+                        st.textContent = 'Live';
+                        dot.style.background = '';
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                        st.textContent = 'Polling';
+                        dot.style.background = '#e8b879';
+                    }
                 });
         }
+
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
                 if (Date.now() - lastFetchAt < 10000) return;
                 const ok = await fetchSummary();
+                await fetchStarlinkInvestmentTotal();
                 lastFetchAt = Date.now();
                 if (ok) renderAll(true);
             }, 30000);
@@ -6403,7 +7102,11 @@
         function attachRipple() {
             document.addEventListener('mousemove', (e) => {
                 const btn = e.target.closest('.btn');
-                if (btn) { const rect = btn.getBoundingClientRect(); btn.style.setProperty('--mx', (e.clientX - rect.left) + 'px'); btn.style.setProperty('--my', (e.clientY - rect.top) + 'px'); }
+                if (btn) {
+                    const rect = btn.getBoundingClientRect();
+                    btn.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
+                    btn.style.setProperty('--my', (e.clientY - rect.top) + 'px');
+                }
             });
         }
 
@@ -6412,13 +7115,23 @@
         // ==================================================
         async function init() {
             setLoading(true);
-            if (typeof supabase === 'undefined') { showError('Supabase library not loaded. Please refresh.'); setLoading(false); return; }
+            if (typeof supabase === 'undefined') {
+                showError('Supabase library not loaded. Please refresh.');
+                setLoading(false);
+                return;
+            }
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            await fetchStarlinkInvestmentTotal();
 
             const ok = await fetchSummary();
             if (!ok) {
-                investors = DEFAULT_INVESTORS.map(i => ({ ...i }));
-                EMPLOYEE_PAYMENTS = DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({ ...e }));
+                investors = DEFAULT_INVESTORS.map(i => ({
+                    ...i
+                }));
+                EMPLOYEE_PAYMENTS = DEFAULT_EMPLOYEE_PAYMENTS.map(e => ({
+                    ...e
+                }));
             }
 
             renderAll(false);
@@ -6431,28 +7144,37 @@
             document.getElementById('addInvestorBtn2').addEventListener('click', () => openInvestorModal(null));
             document.getElementById('invCancel').addEventListener('click', closeInvestorModal);
             document.getElementById('invSave').addEventListener('click', saveInvestor);
-            document.getElementById('investorModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorModal(); });
+            document.getElementById('investorModal').addEventListener('click', function(e) {
+                if (e.target === this) closeInvestorModal();
+            });
 
             // Investor detail modal
             document.getElementById('invDetailClose').addEventListener('click', closeInvestorDetail);
-            document.getElementById('investorDetailModal').addEventListener('click', function(e) { if (e.target === this) closeInvestorDetail(); });
+            document.getElementById('investorDetailModal').addEventListener('click', function(e) {
+                if (e.target === this) closeInvestorDetail();
+            });
 
             // Investment modal
             document.getElementById('invInvestmentCancel').addEventListener('click', closeInvestmentModal);
             document.getElementById('invInvestmentSave').addEventListener('click', saveInvestment);
-            document.getElementById('investmentModal').addEventListener('click', function(e) { if (e.target === this) closeInvestmentModal(); });
+            document.getElementById('investmentModal').addEventListener('click', function(e) {
+                if (e.target === this) closeInvestmentModal();
+            });
+
             // Employees
             document.getElementById('addEmployeeBtn').addEventListener('click', () => openEmployeeModal(null));
             document.getElementById('employeeCancel').addEventListener('click', closeEmployeeModal);
             document.getElementById('employeeSave').addEventListener('click', saveEmployee);
-            document.getElementById('employeeModal').addEventListener('click', function(e) { if (e.target === this) closeEmployeeModal(); });
+            document.getElementById('employeeModal').addEventListener('click', function(e) {
+                if (e.target === this) closeEmployeeModal();
+            });
 
-                        // Cap Table
-                                    // Proposals
             // Dilution Simulator
             document.getElementById('dilutionBtn').addEventListener('click', openDilutionSimulator);
             document.getElementById('dilutionClose').addEventListener('click', closeDilutionSimulator);
-            document.getElementById('dilutionModal').addEventListener('click', function(e) { if (e.target === this) closeDilutionSimulator(); });
+            document.getElementById('dilutionModal').addEventListener('click', function(e) {
+                if (e.target === this) closeDilutionSimulator();
+            });
             document.getElementById('dilMode').addEventListener('change', updateDilutionInputs);
             document.getElementById('dilRunBtn').addEventListener('click', runDilutionSimulation);
             document.getElementById('dilResetBtn').addEventListener('click', resetDilution);
@@ -6461,7 +7183,9 @@
 
             document.getElementById('proposalsBtn').addEventListener('click', openProposalsModal);
             document.getElementById('proposalsClose').addEventListener('click', closeProposalsModal);
-            document.getElementById('proposalsModal').addEventListener('click', function(e) { if (e.target === this) closeProposalsModal(); });
+            document.getElementById('proposalsModal').addEventListener('click', function(e) {
+                if (e.target === this) closeProposalsModal();
+            });
             document.getElementById('newProposalBtn').addEventListener('click', () => openProposalForm(null));
             document.getElementById('printProposalsBtn').addEventListener('click', printAllProposals);
 
@@ -6476,15 +7200,21 @@
             document.getElementById('propFormInvestorType').addEventListener('change', toggleProposalInvestorType);
             document.getElementById('proposalFormCancel').addEventListener('click', closeProposalForm);
             document.getElementById('proposalFormSave').addEventListener('click', saveProposal);
-            document.getElementById('proposalFormModal').addEventListener('click', function(e) { if (e.target === this) closeProposalForm(); });
+            document.getElementById('proposalFormModal').addEventListener('click', function(e) {
+                if (e.target === this) closeProposalForm();
+            });
 
             // Proposal detail
             document.getElementById('propDetailClose').addEventListener('click', closeProposalDetail);
-            document.getElementById('proposalDetailModal').addEventListener('click', function(e) { if (e.target === this) closeProposalDetail(); });
+            document.getElementById('proposalDetailModal').addEventListener('click', function(e) {
+                if (e.target === this) closeProposalDetail();
+            });
 
             document.getElementById('capTableBtn').addEventListener('click', openCapTable);
             document.getElementById('capTableClose').addEventListener('click', closeCapTable);
-            document.getElementById('capTableModal').addEventListener('click', function(e) { if (e.target === this) closeCapTable(); });
+            document.getElementById('capTableModal').addEventListener('click', function(e) {
+                if (e.target === this) closeCapTable();
+            });
             document.getElementById('printCapTableBtn').addEventListener('click', printCapTable);
             document.getElementById('capTableDate').addEventListener('change', renderCapTable);
             document.getElementById('capTableTodayBtn').addEventListener('click', () => {
@@ -6496,7 +7226,7 @@
                 renderCapTable();
             });
 
-                        // Investor transactions
+            // Investor transactions
             document.getElementById('investorTxnBtn').addEventListener('click', async () => {
                 await loadInvestorTxns();
                 renderInvestorTxns();
@@ -6511,9 +7241,9 @@
             document.getElementById('txnShowDeletedBtn').addEventListener('click', () => {
                 showingDeletedTxns = !showingDeletedTxns;
                 const btn = document.getElementById('txnShowDeletedBtn');
-                btn.innerHTML = showingDeletedTxns
-                    ? '<i class="fas fa-eye-slash"></i> Hide Deleted'
-                    : '<i class="fas fa-trash-restore"></i> Show Deleted';
+                btn.innerHTML = showingDeletedTxns ?
+                    '<i class="fas fa-eye-slash"></i> Hide Deleted' :
+                    '<i class="fas fa-trash-restore"></i> Show Deleted';
                 renderInvestorTxns();
             });
             document.getElementById('printInvestorTxnsBtn').addEventListener('click', printInvestorTxns);
@@ -6538,7 +7268,9 @@
 
             document.getElementById('paymentsBtn').addEventListener('click', openPaymentsModal);
             document.getElementById('paymentsClose').addEventListener('click', closePaymentsModal);
-            document.getElementById('paymentsModal').addEventListener('click', function(e) { if (e.target === this) closePaymentsModal(); });
+            document.getElementById('paymentsModal').addEventListener('click', function(e) {
+                if (e.target === this) closePaymentsModal();
+            });
             document.getElementById('printAllEmployeesBtn').addEventListener('click', printAllEmployees);
 
             ['empFilterFrom', 'empFilterTo', 'empFilterStatus'].forEach(id => document.getElementById(id).addEventListener('change', renderEmployeePayments));
@@ -6548,8 +7280,7 @@
                 renderEmployeePayments();
             });
 
-            // Audit
-                        // Mobile nav toggle
+            // Mobile nav toggle
             const navToggle = document.getElementById('navToggle');
             const navActions = document.getElementById('navActions');
             if (navToggle && navActions) {
@@ -6564,7 +7295,7 @@
                 });
             }
 
-                        // Auto-close mobile menu when a nav button inside it is tapped
+            // Auto-close mobile menu when a nav button inside it is tapped
             if (navActions) {
                 navActions.addEventListener('click', function(e) {
                     const target = e.target.closest('.btn, button, a');
@@ -6575,9 +7306,12 @@
                     }
                 });
             }
+
             document.getElementById('auditBtn').addEventListener('click', openAuditModal);
             document.getElementById('auditClose').addEventListener('click', closeAuditModal);
-            document.getElementById('auditModal').addEventListener('click', function(e) { if (e.target === this) closeAuditModal(); });
+            document.getElementById('auditModal').addEventListener('click', function(e) {
+                if (e.target === this) closeAuditModal();
+            });
             document.getElementById('printAuditBtn').addEventListener('click', printAuditLog);
             ['auditFilterFrom', 'auditFilterTo', 'auditFilterAction'].forEach(id => document.getElementById(id).addEventListener('change', renderAuditLog));
             document.getElementById('auditFilterSearch').addEventListener('input', renderAuditLog);
@@ -6589,7 +7323,9 @@
             // Reconciliation
             document.getElementById('reconBtn').addEventListener('click', openReconModal);
             document.getElementById('reconClose').addEventListener('click', closeReconModal);
-            document.getElementById('reconModal').addEventListener('click', function(e) { if (e.target === this) closeReconModal(); });
+            document.getElementById('reconModal').addEventListener('click', function(e) {
+                if (e.target === this) closeReconModal();
+            });
             document.getElementById('printReconBtn').addEventListener('click', printReconciliationReport);
             document.querySelectorAll('.recon-tab').forEach(tab => {
                 tab.addEventListener('click', () => switchReconTab(tab.dataset.recon));
@@ -6601,7 +7337,9 @@
             document.getElementById('dividendsBtn').addEventListener('click', openDividendsHistoryModal);
             document.getElementById('divCancel').addEventListener('click', closeDividendModal);
             document.getElementById('divPreviewBtn').addEventListener('click', previewDividend);
-            document.getElementById('dividendModal').addEventListener('click', function(e) { if (e.target === this) closeDividendModal(); });
+            document.getElementById('dividendModal').addEventListener('click', function(e) {
+                if (e.target === this) closeDividendModal();
+            });
             document.getElementById('previewBack').addEventListener('click', () => {
                 const keepReason = window._editReason;
                 const keepEdit = editingDividendId;
@@ -6609,13 +7347,19 @@
                 openDividendModal(keepEdit, keepReason);
             });
             document.getElementById('previewConfirm').addEventListener('click', confirmDividend);
-            document.getElementById('previewModal').addEventListener('click', function(e) { if (e.target === this) closePreviewModal(); });
+            document.getElementById('previewModal').addEventListener('click', function(e) {
+                if (e.target === this) closePreviewModal();
+            });
             document.getElementById('detailClose').addEventListener('click', closeDividendDetail);
-            document.getElementById('dividendDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDividendDetail(); });
+            document.getElementById('dividendDetailModal').addEventListener('click', function(e) {
+                if (e.target === this) closeDividendDetail();
+            });
 
             document.getElementById('editWarningCancel').addEventListener('click', closeEditWarningModal);
             document.getElementById('editWarningConfirm').addEventListener('click', confirmEditWarning);
-            document.getElementById('editWarningModal').addEventListener('click', function(e) { if (e.target === this) closeEditWarningModal(); });
+            document.getElementById('editWarningModal').addEventListener('click', function(e) {
+                if (e.target === this) closeEditWarningModal();
+            });
 
             const historyModal = document.createElement('div');
             historyModal.className = 'modal-overlay';
@@ -6643,7 +7387,9 @@
                 </div>
             `;
             document.body.appendChild(historyModal);
-            historyModal.addEventListener('click', function(e) { if (e.target === this) closeDividendsHistoryModal(); });
+            historyModal.addEventListener('click', function(e) {
+                if (e.target === this) closeDividendsHistoryModal();
+            });
             document.getElementById('dividendsHistoryClose').addEventListener('click', closeDividendsHistoryModal);
             document.getElementById('printAllDividendsBtn').addEventListener('click', printAllDividends);
             document.getElementById('newDividendFromHistoryBtn').addEventListener('click', () => {
@@ -6659,11 +7405,5 @@
     </script>
 
 </body>
-
-</html>
-
-</html>
-
-</html>
 
 </html>
