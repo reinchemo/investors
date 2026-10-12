@@ -1563,15 +1563,22 @@
             <select id="txnCategory"></select>
             <label>Description</label>
             <input type="text" id="txnDesc" placeholder="e.g. Customer payment for Kimbo site" maxlength="200">
-            <div class="modal-row">
+            <div class="modal-row-3">
                 <div>
                     <label>Amount (KSh)</label>
                     <input type="number" id="txnAmount" placeholder="0" min="0" step="1">
                 </div>
                 <div>
+                    <label>Fee (KSh)</label>
+                    <input type="number" id="txnFee" placeholder="0" min="0" step="1" value="0">
+                </div>
+                <div>
                     <label>Date</label>
                     <input type="date" id="txnDate">
                 </div>
+            </div>
+            <div id="txnNetPreview" style="display:none; padding:0.5rem 0.8rem; margin-top:0.5rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.25); border-radius:10px; font-size:0.78rem; color:#7fded1; font-family:'JetBrains Mono',monospace;">
+                Net after fee: <strong id="txnNetPreviewValue">0</strong>
             </div>
             <label>Payment Method</label>
             <select id="txnMethod">
@@ -1608,6 +1615,191 @@
         </div>
     </div>
 
+    <!-- CATEGORY ADD / EDIT MODAL -->
+    <!-- BUDGET MODAL (§28) -->
+    <div class="modal-overlay" id="budgetModal">
+        <div class="modal-card" style="max-width:520px;">
+            <h3 id="budgetModalTitle"><i class="fas fa-plus-circle"></i> New Budget Line</h3>
+
+            <label>Period (YYYY-MM) <span style="color:#e8837a;">*</span></label>
+            <input type="month" id="budPeriod" style="font-family:'JetBrains Mono',monospace;">
+
+            <label>Category <span style="color:#e8837a;">*</span></label>
+            <select id="budCategory"></select>
+
+            <label>Location (optional — leave blank for company-wide)</label>
+            <select id="budLocation"></select>
+
+            <label>Budget Amount (KSh) <span style="color:#e8837a;">*</span></label>
+            <input type="number" id="budAmount" placeholder="0" min="0" step="1">
+
+            <label>Active</label>
+            <select id="budActive">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+
+            <label>Notes</label>
+            <textarea id="budNotes" placeholder="Optional context..." maxlength="500"></textarea>
+
+            <div class="modal-error" id="budgetError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="budgetCancel">Cancel</button>
+                <button class="save" id="budgetSave">Save Budget</button>
+            </div>
+        </div>
+    </div>
+    <!-- RECURRING TEMPLATE MODAL (§19) -->
+    <div class="modal-overlay" id="recurringModal">
+        <div class="modal-card" style="max-width:560px;">
+            <h3 id="recurringModalTitle"><i class="fas fa-plus-circle"></i> New Recurring Template</h3>
+
+            <label>Description <span style="color:#e8837a;">*</span></label>
+            <input type="text" id="recDescription" placeholder="e.g. KPLC Electricity — Ruiru" maxlength="200">
+
+            <div class="modal-row">
+                <div>
+                    <label>Type <span style="color:#e8837a;">*</span></label>
+                    <select id="recType">
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Category <span style="color:#e8837a;">*</span></label>
+                    <select id="recCategory"></select>
+                </div>
+            </div>
+
+            <div class="modal-row-3">
+                <div>
+                    <label>Amount (KSh) <span style="color:#e8837a;">*</span></label>
+                    <input type="number" id="recAmount" placeholder="0" min="0" step="1">
+                </div>
+                <div>
+                    <label>Fee (KSh)</label>
+                    <input type="number" id="recFee" placeholder="0" min="0" step="1" value="0">
+                </div>
+                <div>
+                    <label>Day of Month <span style="color:#e8837a;">*</span></label>
+                    <input type="number" id="recDay" placeholder="1–28" min="1" max="28" step="1" value="1">
+                </div>
+            </div>
+
+            <div class="modal-row">
+                <div>
+                    <label>Method</label>
+                    <select id="recMethod">
+                        <option value="mpesa">M-Pesa</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="cash">Cash</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Location</label>
+                    <select id="recLocation"></select>
+                </div>
+            </div>
+
+            <label>Next Run Date <span style="color:#e8837a;">*</span></label>
+            <input type="date" id="recNextRun">
+
+            <label>Active</label>
+            <select id="recActive">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+
+            <label>Notes</label>
+            <textarea id="recNotes" placeholder="Optional context..." maxlength="500"></textarea>
+
+            <div class="modal-error" id="recurringError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="recurringCancel">Cancel</button>
+                <button class="save" id="recurringSave">Save Template</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal-card" style="max-width:520px;">
+            <h3 id="categoryModalTitle"><i class="fas fa-plus-circle"></i> New Category</h3>
+
+            <label>Kind <span style="color:#e8837a;">*</span></label>
+            <select id="catKind">
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+                <option value="capital">Capital</option>
+            </select>
+
+            <label>Code <span style="color:#e8837a;">*</span></label>
+            <input type="text" id="catCode" placeholder="e.g. staff_welfare" maxlength="60" style="font-family:'JetBrains Mono',monospace; text-transform:lowercase;">
+            <div style="font-size:0.68rem; color:#7f9bb8; margin-top:0.25rem;">
+                Lowercase, underscore-separated. Cannot be changed after creation.
+            </div>
+
+            <label>Name <span style="color:#e8837a;">*</span></label>
+            <input type="text" id="catName" placeholder="e.g. Staff Welfare" maxlength="80">
+
+            <label>Description (optional)</label>
+            <textarea id="catDescription" placeholder="What this category is used for..." maxlength="300"></textarea>
+
+            <div class="modal-row">
+                <div>
+                    <label>Sort Order</label>
+                    <input type="number" id="catSortOrder" value="100" min="0" step="10">
+                </div>
+                <div>
+                    <label>Active</label>
+                    <select id="catActive">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-error" id="categoryError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="categoryCancel">Cancel</button>
+                <button class="save" id="categorySave">Save Category</button>
+            </div>
+        </div>
+    </div>
+    <!-- REVERSE TRANSACTION MODAL -->
+    <div class="modal-overlay" id="reverseModal">
+        <div class="modal-card" style="max-width:520px;">
+            <h3><i class="fas fa-undo-alt" style="color:#e8b879;"></i> Reverse Transaction</h3>
+
+            <div class="audit-banner" style="margin-bottom:1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    Reversing <strong>does not delete</strong> the original. It creates a mirror entry that cancels it out, and marks the original as reversed. Both rows remain visible in the ledger for audit purposes.
+                </div>
+            </div>
+
+            <div id="reverseTxnSummary" style="padding:0.7rem 0.9rem; background:rgba(15,26,46,0.5); border-radius:10px; margin-bottom:0.5rem; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:#c7d5e6; line-height:1.6;">
+                —
+            </div>
+
+            <label>Reason for reversal <span style="color:#e8837a;">*</span></label>
+            <input type="text" id="reverseReason" placeholder="e.g. duplicate entry, wrong amount, misposted" maxlength="200">
+
+            <div class="modal-error" id="reverseError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="reverseCancel">Cancel</button>
+                <button class="save" id="reverseConfirm" style="background:linear-gradient(135deg,#c04a3a,#e2685b);">
+                    <i class="fas fa-undo-alt"></i> Confirm Reversal
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- CONFIRM MODAL -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-card" style="max-width:420px;">
@@ -2251,6 +2443,9 @@
             <button class="tab" data-view="stock"><i class="fas fa-boxes"></i> Stock</button>
             <button class="tab" data-view="customers"><i class="fas fa-user-tie"></i> Customers</button>
             <button class="tab" data-view="projects"><i class="fas fa-diagram-project"></i> Projects</button>
+            <button class="tab" data-view="categories"><i class="fas fa-tags"></i> Categories</button>
+            <button class="tab" data-view="recurring"><i class="fas fa-redo-alt"></i> Recurring</button>
+            <button class="tab" data-view="budgets"><i class="fas fa-bullseye"></i> Budgets</button>
 
         </div>
 
@@ -2333,6 +2528,8 @@
                                 <th>Location</th>
                                 <th>Status</th>
                                 <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Fee</th>
+                                <th style="text-align:right;">Net</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
@@ -3320,6 +3517,242 @@
                 </div>
             </div>
         </div>
+        <!-- ============================================================ -->
+        <!-- CATEGORIES VIEW (Section 18)                                 -->
+        <!-- ============================================================ -->
+        <div class="view" data-view="categories">
+            <div class="headline">
+                <h1><i class="fas fa-tags" style="color:#5fc7bc;"></i> Categories</h1>
+                <button class="btn btn-primary" id="newCategoryBtn"><i class="fas fa-plus"></i> New Category</button>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>Categories drive the dropdowns in the transaction modal and the grouping in every report. Deactivating a category hides it from new transactions but preserves all historical data. Only soft-delete if you are absolutely sure.</span>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-list"></i> TOTAL ACTIVE</div>
+                    <div class="summary-value" id="catCountActive">0</div>
+                    <div class="summary-sub" id="catCountTotal">0 total</div>
+                </div>
+                <div class="summary-card income">
+                    <div class="summary-label"><i class="fas fa-arrow-down"></i> INCOME</div>
+                    <div class="summary-value" id="catCountIncome">0</div>
+                    <div class="summary-sub">Active income categories</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-arrow-up"></i> EXPENSE</div>
+                    <div class="summary-value" id="catCountExpense">0</div>
+                    <div class="summary-sub">Active expense categories</div>
+                </div>
+                <div class="summary-card capital">
+                    <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL</div>
+                    <div class="summary-value" id="catCountCapital">0</div>
+                    <div class="summary-sub">Active capital categories</div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="catFilterKind">
+                    <option value="">All Kinds</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                    <option value="capital">Capital</option>
+                </select>
+                <select id="catFilterActive">
+                    <option value="active" selected>Active Only</option>
+                    <option value="all">All (incl. inactive)</option>
+                    <option value="inactive">Inactive Only</option>
+                </select>
+                <input type="text" class="grow" id="catFilterSearch" placeholder="Search name or code...">
+                <button class="btn btn-ghost" id="catFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div class="table-section">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Kind</th>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th style="text-align:right;">Sort</th>
+                                <th>Status</th>
+                                <th>System</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- RECURRING EXPENDITURE VIEW (§19)                             -->
+        <!-- ============================================================ -->
+        <div class="view" data-view="recurring">
+            <div class="headline">
+                <h1><i class="fas fa-redo-alt" style="color:#5fc7bc;"></i> Recurring Templates</h1>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-primary" id="runDueRecurringBtn"><i class="fas fa-play"></i> Run Due Now</button>
+                    <button class="btn btn-ghost" id="newRecurringBtn"><i class="fas fa-plus"></i> New Template</button>
+                </div>
+            </div>
+
+            <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1;">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    Templates post to the ledger as normal transactions when you click <strong>Run Due Now</strong>. Nothing auto-runs in the background. Each post links back to the template via <code>last_txn_id</code>, so re-running is safe.
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-list"></i> TOTAL TEMPLATES</div>
+                    <div class="summary-value" id="recCountTotal">0</div>
+                    <div class="summary-sub" id="recCountActive">0 active</div>
+                </div>
+                <div class="summary-card income">
+                    <div class="summary-label"><i class="fas fa-calendar-check"></i> DUE NOW</div>
+                    <div class="summary-value" id="recCountDue">0</div>
+                    <div class="summary-sub">Ready to post</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-money-bill-wave"></i> MONTHLY VALUE</div>
+                    <div class="summary-value" id="recMonthlyValue">KSh 0</div>
+                    <div class="summary-sub">Sum of active templates</div>
+                </div>
+                <div class="summary-card capital">
+                    <div class="summary-label"><i class="fas fa-history"></i> POSTED (ALL-TIME)</div>
+                    <div class="summary-value" id="recPostedCount">0</div>
+                    <div class="summary-sub">From this module</div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="recFilterActive">
+                    <option value="active" selected>Active Only</option>
+                    <option value="all">All Templates</option>
+                    <option value="inactive">Paused Only</option>
+                </select>
+                <select id="recFilterType">
+                    <option value="">All Types</option>
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                </select>
+                <input type="text" class="grow" id="recFilterSearch" placeholder="Search description, category, or location...">
+                <button class="btn btn-ghost" id="recFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div class="table-section">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:center;">Day</th>
+                                <th>Next Run</th>
+                                <th>Last Txn</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recurringBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- BUDGETS VIEW (§28)                                           -->
+        <!-- ============================================================ -->
+        <div class="view" data-view="budgets">
+            <div class="headline">
+                <h1><i class="fas fa-bullseye" style="color:#5fc7bc;"></i> Budget vs Actual <small id="budgetPeriodLabel">—</small></h1>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <input type="month" id="budgetPeriodPicker" style="padding:0.55rem 0.9rem; background:rgba(255,255,255,0.04); border:1px solid rgba(120,200,220,0.2); border-radius:10px; color:#f2f0eb; font-family:'JetBrains Mono',monospace;">
+                    <button class="btn btn-ghost" id="budgetRefreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-primary" id="newBudgetBtn"><i class="fas fa-plus"></i> New Budget Line</button>
+                </div>
+            </div>
+
+            <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1;">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    Set a monthly budget per category. Actual figures are pulled live from the ledger — <strong>only counted when status is posted/approved and the entry is not reversed or soft-deleted</strong>. Variance shows how much room you have left
+                    (positive = under budget).
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-bullseye"></i> TOTAL BUDGETED</div>
+                    <div class="summary-value" id="budTotalBudgeted">KSh 0</div>
+                    <div class="summary-sub" id="budCountLines">0 lines</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL ACTUAL</div>
+                    <div class="summary-value" id="budTotalActual">KSh 0</div>
+                    <div class="summary-sub" id="budCountTxns">0 transactions</div>
+                </div>
+                <div class="summary-card" id="budVarianceCard">
+                    <div class="summary-label"><i class="fas fa-balance-scale"></i> VARIANCE</div>
+                    <div class="summary-value" id="budTotalVariance">KSh 0</div>
+                    <div class="summary-sub" id="budTotalUsage">0% used</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-exclamation-triangle"></i> OVER BUDGET</div>
+                    <div class="summary-value" id="budOverCount">0</div>
+                    <div class="summary-sub">Categories over 100%</div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="budFilterStatus">
+                    <option value="">All</option>
+                    <option value="under">Under 75%</option>
+                    <option value="warning">75–99%</option>
+                    <option value="over">Over budget</option>
+                </select>
+                <input type="text" class="grow" id="budFilterSearch" placeholder="Search category or location...">
+                <button class="btn btn-ghost" id="budFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div class="table-section">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th style="text-align:right;">Budget</th>
+                                <th style="text-align:right;">Actual</th>
+                                <th style="text-align:right;">Variance</th>
+                                <th style="text-align:right;">% Used</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="budgetsBody"></tbody>
+                        <tfoot id="budgetsFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         <!-- BACKUP VIEW -->
         <div class="view" data-view="backup">
@@ -3462,6 +3895,1005 @@
             };
         }
 
+
+        // ==================================================
+        // §82 — SHARED VALIDATION HELPERS
+        // ==================================================
+        const Validation = {
+            // Returns null if valid, or an error string if not
+            amount: (v, opts = {}) => {
+                const min = opts.min !== undefined ? opts.min : 0.01;
+                const max = opts.max !== undefined ? opts.max : 999999999999;
+                if (v === '' || v === null || v === undefined) return 'Amount is required.';
+                const n = typeof v === 'number' ? v : parseFloat(v);
+                if (isNaN(n)) return 'Amount must be a number.';
+                if (n < min) return `Amount must be at least ${min}.`;
+                if (n > max) return `Amount cannot exceed ${max.toLocaleString()}.`;
+                if (!isFinite(n)) return 'Amount is not a valid number.';
+                return null;
+            },
+
+            date: (v, opts = {}) => {
+                if (!v) return opts.required === false ? null : 'Date is required.';
+                const d = new Date(v);
+                if (isNaN(d.getTime())) return 'Date is not valid.';
+                const min = opts.min ? new Date(opts.min) : new Date('2000-01-01');
+                const max = opts.max ? new Date(opts.max) : new Date(new Date().getFullYear() + 1, 11, 31);
+                if (d < min) return `Date cannot be before ${min.toISOString().slice(0, 10)}.`;
+                if (d > max) return `Date cannot be after ${max.toISOString().slice(0, 10)}.`;
+                return null;
+            },
+
+            text: (v, opts = {}) => {
+                const label = opts.label || 'This field';
+                const min = opts.min || 1;
+                const max = opts.max || 500;
+                const s = String(v == null ? '' : v).trim();
+                if (s.length < min) return opts.required === false ? null : `${label} is required.`;
+                if (s.length > max) return `${label} cannot exceed ${max} characters.`;
+                if (opts.pattern && !opts.pattern.test(s)) return opts.patternMsg || `${label} format is invalid.`;
+                return null;
+            },
+
+            email: (v, opts = {}) => {
+                if (!v) return opts.required === false ? null : 'Email is required.';
+                const s = String(v).trim();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s)) return 'Email format is invalid.';
+                if (s.length > 120) return 'Email is too long.';
+                return null;
+            },
+
+            phone: (v, opts = {}) => {
+                if (!v) return opts.required === false ? null : 'Phone is required.';
+                const s = String(v).replace(/\s/g, '');
+                if (!/^\+?\d{7,15}$/.test(s)) return 'Phone must be 7–15 digits, optionally starting with +.';
+                return null;
+            },
+
+            code: (v, opts = {}) => {
+                if (!v) return 'Code is required.';
+                const s = String(v).trim().toLowerCase();
+                if (!/^[a-z0-9_]{2,60}$/.test(s)) return 'Code must be 2–60 lowercase letters, digits, or underscores.';
+                return null;
+            },
+
+            reference: (v, opts = {}) => {
+                if (!v) return opts.required === false ? null : null; // references usually optional
+                const s = String(v).trim();
+                if (s.length > 80) return 'Reference cannot exceed 80 characters.';
+                if (!/^[A-Za-z0-9._\-\/]+$/.test(s)) return 'Reference contains invalid characters (letters, digits, . _ - / only).';
+                return null;
+            },
+
+            // Returns the first error message, or null if all pass
+            // Pass an array of [validatorResult, fieldLabel]
+            firstError: (checks) => {
+                for (const [err, label] of checks) {
+                    if (err) return err;
+                }
+                return null;
+            },
+
+            // Sanitize a string for storage: trim, collapse whitespace, strip control chars
+            sanitize: (v, max = 500) => {
+                if (v == null) return '';
+                return String(v)
+                    .replace(/[\u0000-\u001F\u007F]/g, '') // strip control chars
+                    .replace(/\s+/g, ' ') // collapse whitespace
+                    .trim()
+                    .slice(0, max);
+            }
+        };
+
+        // ==================================================
+        // §74 — OPTIMISTIC CONCURRENCY HELPERS
+        // ==================================================
+        // Every editable row carries a `version` integer. On save we send the
+        // version we read. If the DB's version differs, the UPDATE affects 0
+        // rows and we know someone else changed the record first.
+        async function saveWithVersionCheck(table, id, patch, expectedVersion, opts = {}) {
+            const payload = {...patch,
+                version: expectedVersion
+            };
+            const {
+                data,
+                error
+            } = await supabaseClient
+                .from(table)
+                .update(payload)
+                .eq('id', id)
+                .eq('version', expectedVersion)
+                .select('version')
+                .maybeSingle();
+
+            if (error) {
+                if (error.code === '23505') {
+                    return {
+                        ok: false,
+                        kind: 'duplicate',
+                        error
+                    };
+                }
+                return {
+                    ok: false,
+                    kind: 'error',
+                    error
+                };
+            }
+
+            if (!data) {
+                // No row matched (id, version) — either the row was deleted or
+                // someone else bumped the version between our read and write.
+                const {
+                    data: current
+                } = await supabaseClient
+                    .from(table)
+                    .select('*')
+                    .eq('id', id)
+                    .maybeSingle();
+
+                if (!current) {
+                    return {
+                        ok: false,
+                        kind: 'deleted',
+                        message: 'This record no longer exists.'
+                    };
+                }
+                return {
+                    ok: false,
+                    kind: 'conflict',
+                    message: 'This record was changed by someone else. Reloading the latest version.',
+                    latest: current
+                };
+            }
+
+            return {
+                ok: true,
+                newVersion: data.version
+            };
+        }
+
+        async function handleConflict(table, id, errEl, opts = {}) {
+            // Re-fetch the whole table so the local cache is fresh
+            if (table === 'transactions') {
+                await fetchFromCloud();
+            } else if (table === 'staff') {
+                await loadStaffFromCloud();
+            } else if (table === 'locations') {
+                await loadLocationsFromCloud();
+            } else if (table === 'assets') {
+                await loadAssetsFromCloud();
+            } else if (table === 'categories') {
+                await fetchCategories();
+                await fetchRecurring();
+            }
+
+            if (errEl) {
+                errEl.textContent = '⚠️ This record was changed by someone else. The latest version has been loaded — please review and try again.';
+                errEl.style.display = 'block';
+            }
+            if (typeof renderAll === 'function') renderAll(false);
+        }
+
+        // ==================================================
+        // §19 — RECURRING EXPENDITURE
+        // ==================================================
+        let recurringTemplates = [];
+        let editingRecurringId = null;
+
+        async function fetchRecurring() {
+            if (!supabaseClient) return;
+            try {
+                const {
+                    data,
+                    error
+                } = await supabaseClient
+                    .from('recurring_templates')
+                    .select('*')
+                    .order('active', {
+                        ascending: false
+                    })
+                    .order('next_run_date', {
+                        ascending: true
+                    })
+                    .order('description', {
+                        ascending: true
+                    });
+                if (error) throw error;
+                recurringTemplates = (data || []).map(r => ({
+                    id: r.id,
+                    description: r.description,
+                    amount: safeNum(r.amount),
+                    fee: safeNum(r.fee),
+                    category: r.category,
+                    type: r.type,
+                    method: r.method || 'mpesa',
+                    location: r.location || '',
+                    locationId: r.location_id || null,
+                    dayOfMonth: r.day_of_month,
+                    nextRunDate: r.next_run_date,
+                    lastRunDate: r.last_run_date,
+                    lastTxnId: r.last_txn_id || null,
+                    active: r.active !== false,
+                    notes: r.notes || '',
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    version: r.version || 1
+                }));
+            } catch (e) {
+                console.warn('Recurring fetch failed:', e.message);
+                recurringTemplates = [];
+            }
+        }
+
+        function recIsDue(t) {
+            if (!t.active) return false;
+            const today = todayISO();
+            return (t.nextRunDate || '') <= today;
+        }
+
+        function renderRecurring() {
+            const body = document.getElementById('recurringBody');
+            if (!body) return;
+
+            const activeF = document.getElementById('recFilterActive').value || 'active';
+            const typeF = document.getElementById('recFilterType').value || '';
+            const q = (document.getElementById('recFilterSearch').value || '').toLowerCase();
+
+            let filtered = [...recurringTemplates];
+            if (activeF === 'active') filtered = filtered.filter(t => t.active);
+            else if (activeF === 'inactive') filtered = filtered.filter(t => !t.active);
+            if (typeF) filtered = filtered.filter(t => t.type === typeF);
+            if (q) filtered = filtered.filter(t =>
+                (t.description + ' ' + (t.category || '') + ' ' + (t.location || '')).toLowerCase().includes(q)
+            );
+
+            const active = recurringTemplates.filter(t => t.active);
+            const due = recurringTemplates.filter(recIsDue);
+            const monthly = active.reduce((s, t) => s + t.amount, 0);
+            const posted = recurringTemplates.filter(t => t.lastTxnId).length;
+
+            document.getElementById('recCountTotal').textContent = recurringTemplates.length;
+            document.getElementById('recCountActive').textContent = active.length + ' active';
+            document.getElementById('recCountDue').textContent = due.length;
+            document.getElementById('recMonthlyValue').textContent = 'KSh ' + fmt(monthly);
+            document.getElementById('recPostedCount').textContent = posted;
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="10"><div class="empty-row"><i class="fas fa-redo-alt"></i>No recurring templates match your filter.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = filtered.map(t => {
+                const isDue = recIsDue(t);
+                const dueBadge = isDue ? ' <span class="audit-warning-badge">DUE</span>' : '';
+                const typePill = t.type === 'income' ? 'paid' : 'cancelled';
+                const statusPill = t.active ? 'active' : 'inactive';
+                const statusLabel = t.active ? 'Active' : 'Paused';
+
+                return `<tr class="${isDue ? 'recon-row-caution' : ''}">
+                    <td><strong>${escapeHTML(t.description)}</strong>${dueBadge}</td>
+                    <td><span class="status-pill ${typePill}">${escapeHTML(t.type)}</span></td>
+                    <td>${escapeHTML(t.category || '—')}</td>
+                    <td>${escapeHTML(t.location || '—')}</td>
+                    <td class="${t.type === 'income' ? 'amount-income' : 'amount-expense'}" style="text-align:right;">${t.type === 'income' ? '+' : '−'} KSh ${fmt(t.amount)}</td>
+                    <td style="text-align:center; font-family:'JetBrains Mono',monospace;">${t.dayOfMonth}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(t.nextRunDate || '—')}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${t.lastTxnId ? escapeHTML(t.lastTxnId) : '—'}</td>
+                    <td><span class="status-pill ${statusPill}">${statusLabel}</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="edit-btn" onclick="openRecurringModal(${t.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="edit-btn" onclick="toggleRecurringActive(${t.id})" title="${t.active ? 'Pause' : 'Resume'}"><i class="fas fa-${t.active ? 'pause' : 'play'}"></i></button>
+                            <button class="del-btn" onclick="deleteRecurring(${t.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function populateRecurringCategoryDropdown(type, selected = null) {
+            const source = (liveCategories && liveCategories[type]) || CATEGORIES[type] || [];
+            const sel = document.getElementById('recCategory');
+            sel.innerHTML = source.map(c =>
+                `<option value="${escapeHTML(c)}" ${c === selected ? 'selected' : ''}>${escapeHTML(c)}</option>`
+            ).join('');
+        }
+
+        function populateRecurringLocationDropdown(selected = null) {
+            const sel = document.getElementById('recLocation');
+            const active = locations.filter(l => l.active).sort((a, b) => a.name.localeCompare(b.name));
+            sel.innerHTML = '<option value="">— No location —</option>' + active.map(l =>
+                `<option value="${escapeHTML(l.name)}" ${l.name === selected ? 'selected' : ''}>${escapeHTML(l.name)}</option>`
+            ).join('');
+        }
+
+        function openRecurringModal(id = null) {
+            editingRecurringId = id;
+            const err = document.getElementById('recurringError');
+            err.style.display = 'none';
+
+            if (id) {
+                const t = recurringTemplates.find(x => x.id === id);
+                if (!t) return;
+                document.getElementById('recurringModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Recurring Template';
+                document.getElementById('recDescription').value = t.description;
+                document.getElementById('recType').value = t.type;
+                populateRecurringCategoryDropdown(t.type, t.category);
+                document.getElementById('recAmount').value = t.amount;
+                document.getElementById('recFee').value = t.fee;
+                document.getElementById('recDay').value = t.dayOfMonth;
+                document.getElementById('recMethod').value = t.method;
+                populateRecurringLocationDropdown(t.location);
+                document.getElementById('recNextRun').value = t.nextRunDate || todayISO();
+                document.getElementById('recActive').value = String(t.active);
+                document.getElementById('recNotes').value = t.notes || '';
+            } else {
+                document.getElementById('recurringModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> New Recurring Template';
+                document.getElementById('recDescription').value = '';
+                document.getElementById('recType').value = 'expense';
+                populateRecurringCategoryDropdown('expense');
+                document.getElementById('recAmount').value = '';
+                document.getElementById('recFee').value = '0';
+                document.getElementById('recDay').value = 1;
+                document.getElementById('recMethod').value = 'mpesa';
+                populateRecurringLocationDropdown(null);
+                document.getElementById('recNextRun').value = todayISO();
+                document.getElementById('recActive').value = 'true';
+                document.getElementById('recNotes').value = '';
+            }
+
+            document.getElementById('recurringModal').classList.add('show');
+            setTimeout(() => document.getElementById('recDescription').focus(), 100);
+        }
+
+        function closeRecurringModal() {
+            document.getElementById('recurringModal').classList.remove('show');
+            editingRecurringId = null;
+        }
+
+        async function saveRecurring() {
+            const description = Validation.sanitize(document.getElementById('recDescription').value, 200);
+            const type = document.getElementById('recType').value;
+            const category = document.getElementById('recCategory').value;
+            const amount = safeNum(document.getElementById('recAmount').value);
+            const fee = safeNum(document.getElementById('recFee').value);
+            const dayOfMonth = parseInt(document.getElementById('recDay').value, 10);
+            const method = document.getElementById('recMethod').value;
+            const location = document.getElementById('recLocation').value || null;
+            const nextRunDate = document.getElementById('recNextRun').value;
+            const active = document.getElementById('recActive').value === 'true';
+            const notes = Validation.sanitize(document.getElementById('recNotes').value, 500);
+            const err = document.getElementById('recurringError');
+            err.style.display = 'none';
+
+            const checks = [
+                [Validation.text(description, {
+                    label: 'Description',
+                    min: 3,
+                    max: 200
+                }), 'Description'],
+                [amount <= 0 ? 'Amount must be greater than 0.' : null, 'Amount'],
+                [fee < 0 ? 'Fee cannot be negative.' : null, 'Fee'],
+                [fee > amount ? 'Fee cannot be greater than the amount.' : null, 'Fee'],
+                [!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 28 ? 'Day of month must be between 1 and 28.' : null, 'Day'],
+                [Validation.date(nextRunDate, {
+                    required: true
+                }), 'Next run date'],
+                [!category ? 'Please pick a category.' : null, 'Category']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
+                err.style.display = 'block';
+                return;
+            }
+
+            const matchedLoc = locations.find(l => l.name === location);
+            const row = {
+                description,
+                type,
+                category,
+                amount,
+                fee,
+                day_of_month: dayOfMonth,
+                method,
+                location,
+                location_id: matchedLoc ? matchedLoc.id : null,
+                next_run_date: nextRunDate,
+                active,
+                notes: notes || null,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+
+            const wasEditing = !!editingRecurringId;
+
+            if (wasEditing) {
+                const original = recurringTemplates.find(x => x.id === editingRecurringId);
+                const expectedVersion = original ? (original.version || 1) : 1;
+                const result = await saveWithVersionCheck('recurring_templates', editingRecurringId, row, expectedVersion);
+                if (!result.ok) {
+                    if (result.kind === 'conflict' || result.kind === 'deleted') {
+                        await fetchRecurring();
+                        err.textContent = '⚠️ This template was changed by someone else. Latest version reloaded — review and try again.';
+                        err.style.display = 'block';
+                        renderRecurring();
+                        return;
+                    }
+                    err.textContent = '⚠️ Save failed: ' + ((result.error && result.error.message) || 'unknown');
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('UPDATE', `Recurring #${editingRecurringId}`, `Updated template: ${description}`, '', description);
+                showToast('✅ Template updated', 'success');
+            } else {
+                row.created_by = CURRENT_USER;
+                const {
+                    error
+                } = await supabaseClient.from('recurring_templates').insert(row);
+                if (error) {
+                    if (error.code === '23505') {
+                        err.textContent = '⚠️ An active template with this description and day already exists.';
+                    } else {
+                        err.textContent = '⚠️ Save failed: ' + error.message;
+                    }
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('CREATE', `Recurring`, `Created template: ${description} (day ${dayOfMonth})`, '', description);
+                showToast('✅ Template created', 'success');
+            }
+
+            await fetchRecurring();
+            closeRecurringModal();
+            renderRecurring();
+        }
+
+        async function toggleRecurringActive(id) {
+            const t = recurringTemplates.find(x => x.id === id);
+            if (!t) return;
+            const newState = !t.active;
+            const verb = newState ? 'resume' : 'pause';
+            if (!confirm(`Are you sure you want to ${verb} "${t.description}"?`)) return;
+
+            const expectedVersion = t.version || 1;
+            const result = await saveWithVersionCheck('recurring_templates', id, {
+                    active: newState,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                },
+                expectedVersion);
+            if (!result.ok) {
+                showToast('Update failed: ' + ((result.error && result.error.message) || 'conflict'), 'error');
+                await fetchRecurring();
+                renderRecurring();
+                return;
+            }
+
+            await logAudit('UPDATE', `Recurring #${id}`, `${newState ? 'Resumed' : 'Paused'}: ${t.description}`, t.active, newState);
+            await fetchRecurring();
+            renderRecurring();
+            showToast(`✅ Template ${newState ? 'resumed' : 'paused'}`, 'success');
+        }
+
+        async function deleteRecurring(id) {
+            const t = recurringTemplates.find(x => x.id === id);
+            if (!t) return;
+            const reason = prompt(`Delete template "${t.description}"?\n\nReason:`, '');
+            if (reason === null) return;
+            const {
+                error
+            } = await supabaseClient.from('recurring_templates').delete().eq('id', id);
+            if (error) {
+                showToast('Delete failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('DELETE', `Recurring #${id}`, `Deleted template: ${t.description} — Reason: ${reason || 'not provided'}`, t.description, '');
+            await fetchRecurring();
+            renderRecurring();
+            showToast('✅ Template deleted', 'success');
+        }
+
+        async function runDueRecurring() {
+            const due = recurringTemplates.filter(recIsDue);
+            if (!due.length) {
+                showToast('ℹ️ Nothing is due right now.', 'info');
+                return;
+            }
+            const total = due.reduce((s, t) => s + t.amount, 0);
+            if (!confirm(`Post ${due.length} transaction(s) totalling KSh ${fmt(total)}?\n\nEach will be created as a normal ledger entry.`)) return;
+
+            const btn = document.getElementById('runDueRecurringBtn');
+            btn.disabled = true;
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+
+            let success = 0;
+            let failed = 0;
+            const results = [];
+
+            for (const t of due) {
+                const y = new Date().getFullYear();
+                const idSuffix = Date.now() % 1000000 + success;
+                const newId = `TXN-${y}-${String(idSuffix).padStart(6, '0')}`;
+                const idemKey = `RECUR-${t.id}-${t.nextRunDate}`;
+
+                const {
+                    error
+                } = await supabaseClient.rpc('post_transaction', {
+                    p_id: newId,
+                    p_date: todayISO(),
+                    p_actual_date: todayISO(),
+                    p_actual_time: null,
+                    p_type: t.type,
+                    p_category: t.category,
+                    p_description: t.description + ' [auto: ' + t.dayOfMonth + '/' + t.nextRunDate.slice(0, 7) + ']',
+                    p_amount: t.amount,
+                    p_fee: t.fee,
+                    p_method: t.method,
+                    p_reference: null,
+                    p_location: t.location,
+                    p_location_id: t.locationId,
+                    p_staff_id: null,
+                    p_payroll_run_id: null,
+                    p_notes: `Recurring template #${t.id}`,
+                    p_source: 'recurring',
+                    p_idempotency_key: idemKey,
+                    p_created_by: CURRENT_USER
+                });
+
+                if (error) {
+                    failed++;
+                    results.push({
+                        id: t.id,
+                        ok: false,
+                        msg: error.message
+                    });
+                } else {
+                    success++;
+                    // Advance next_run_date by 1 month
+                    const cur = new Date(t.nextRunDate);
+                    cur.setMonth(cur.getMonth() + 1);
+                    const newNextRun = cur.toISOString().slice(0, 10);
+
+                    await supabaseClient.from('recurring_templates').update({
+                        last_run_date: todayISO(),
+                        last_txn_id: newId,
+                        next_run_date: newNextRun,
+                        updated_at: new Date().toISOString(),
+                        updated_by: CURRENT_USER
+                    }).eq('id', t.id);
+
+                    results.push({
+                        id: t.id,
+                        ok: true,
+                        txn: newId
+                    });
+                }
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+
+            await fetchRecurring();
+            await fetchFromCloud();
+            renderAll();
+            renderRecurring();
+
+            if (failed === 0) {
+                showToast(`✅ Posted ${success} transaction(s)`, 'success');
+            } else {
+                showToast(`⚠️ ${success} posted, ${failed} failed. Check console.`, 'error');
+                console.warn('Recurring post failures:', results.filter(r => !r.ok));
+            }
+        }
+
+        function setupRecurringFilters() {
+            ['recFilterActive', 'recFilterType'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderRecurring);
+            });
+            const search = document.getElementById('recFilterSearch');
+            if (search) search.addEventListener('input', debounce(renderRecurring, 300));
+            const clear = document.getElementById('recFilterClear');
+            if (clear) clear.addEventListener('click', () => {
+                document.getElementById('recFilterActive').value = 'active';
+                document.getElementById('recFilterType').value = '';
+                document.getElementById('recFilterSearch').value = '';
+                renderRecurring();
+            });
+
+            const newBtn = document.getElementById('newRecurringBtn');
+            if (newBtn) newBtn.addEventListener('click', () => openRecurringModal(null));
+            const saveBtn = document.getElementById('recurringSave');
+            if (saveBtn) saveBtn.addEventListener('click', saveRecurring);
+            const cancelBtn = document.getElementById('recurringCancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeRecurringModal);
+            const modal = document.getElementById('recurringModal');
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === this) closeRecurringModal();
+            });
+
+            const runBtn = document.getElementById('runDueRecurringBtn');
+            if (runBtn) runBtn.addEventListener('click', runDueRecurring);
+
+            const typeSel = document.getElementById('recType');
+            if (typeSel) typeSel.addEventListener('change', (e) => populateRecurringCategoryDropdown(e.target.value));
+        }
+
+        window.openRecurringModal = openRecurringModal;
+        window.toggleRecurringActive = toggleRecurringActive;
+        window.deleteRecurring = deleteRecurring;
+
+        // ==================================================
+        // §28 — BUDGET VS ACTUAL
+        // ==================================================
+        let budgetsList = [];
+        let editingBudgetId = null;
+
+        async function fetchBudgets() {
+            if (!supabaseClient) return;
+            try {
+                const {
+                    data,
+                    error
+                } = await supabaseClient
+                    .from('budgets')
+                    .select('*')
+                    .order('period', {
+                        ascending: false
+                    })
+                    .order('category', {
+                        ascending: true
+                    });
+                if (error) throw error;
+                budgetsList = (data || []).map(r => ({
+                    id: r.id,
+                    period: r.period,
+                    category: r.category,
+                    location: r.location || '',
+                    amount: safeNum(r.amount),
+                    notes: r.notes || '',
+                    active: r.active !== false,
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    version: r.version || 1
+                }));
+            } catch (e) {
+                console.warn('Budgets fetch failed:', e.message);
+                budgetsList = [];
+            }
+        }
+
+        function budgetActualFor(period, category, location) {
+            // Sum of expense transactions in this period/category/location
+            // Only count posted/approved, non-reversed, non-deleted rows
+            const list = transactions.filter(t => {
+                if (t.type !== 'expense') return false;
+                if (!t.date || t.date.slice(0, 7) !== period) return false;
+                if ((t.category || '') !== category) return false;
+                if (location && (t.location || '') !== location) return false;
+                if (location === '' && false) return false; // "all locations" budget line still sums everything
+                if (t.reversedAt) return false;
+                if (t.status !== 'posted' && t.status !== 'approved') return false;
+                return true;
+            });
+            return {
+                total: list.reduce((s, t) => s + safeNum(t.amount), 0),
+                count: list.length
+            };
+        }
+
+        function budgetStatus(usage) {
+            if (usage >= 100) return {
+                label: 'Over budget',
+                pill: 'rejected',
+                key: 'over'
+            };
+            if (usage >= 75) return {
+                label: 'Warning',
+                pill: 'pending',
+                key: 'warning'
+            };
+            return {
+                label: 'On track',
+                pill: 'paid',
+                key: 'under'
+            };
+        }
+
+        function renderBudgets() {
+            const body = document.getElementById('budgetsBody');
+            const foot = document.getElementById('budgetsFoot');
+            if (!body) return;
+
+            const picker = document.getElementById('budgetPeriodPicker');
+            if (picker && !picker.value) {
+                const now = new Date();
+                picker.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            }
+            const period = picker ? picker.value : '';
+            document.getElementById('budgetPeriodLabel').textContent = period || '—';
+
+            const statusF = document.getElementById('budFilterStatus').value || '';
+            const q = (document.getElementById('budFilterSearch').value || '').toLowerCase();
+
+            const periodBudgets = budgetsList.filter(b => b.period === period && b.active);
+
+            const rows = periodBudgets.map(b => {
+                const actual = budgetActualFor(b.period, b.category, b.location);
+                const usage = b.amount > 0 ? (actual.total / b.amount) * 100 : 0;
+                return {
+                    id: b.id,
+                    category: b.category,
+                    location: b.location,
+                    budget: b.amount,
+                    actual: actual.total,
+                    variance: b.amount - actual.total,
+                    usage: usage,
+                    count: actual.count,
+                    status: budgetStatus(usage)
+                };
+            });
+
+            let filtered = rows;
+            if (statusF) filtered = filtered.filter(r => r.status.key === statusF);
+            if (q) filtered = filtered.filter(r =>
+                (r.category + ' ' + (r.location || '')).toLowerCase().includes(q)
+            );
+
+            filtered.sort((a, b) => b.usage - a.usage);
+
+            const totalBudgeted = rows.reduce((s, r) => s + r.budget, 0);
+            const totalActual = rows.reduce((s, r) => s + r.actual, 0);
+            const totalVariance = totalBudgeted - totalActual;
+            const totalUsage = totalBudgeted > 0 ? (totalActual / totalBudgeted) * 100 : 0;
+            const overCount = rows.filter(r => r.usage >= 100).length;
+
+            document.getElementById('budTotalBudgeted').textContent = 'KSh ' + fmt(totalBudgeted);
+            document.getElementById('budCountLines').textContent = periodBudgets.length + ' line(s)';
+            document.getElementById('budTotalActual').textContent = 'KSh ' + fmt(totalActual);
+            document.getElementById('budCountTxns').textContent = rows.reduce((s, r) => s + r.count, 0) + ' transaction(s)';
+            document.getElementById('budTotalVariance').textContent = (totalVariance >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(totalVariance));
+            document.getElementById('budTotalUsage').textContent = totalUsage.toFixed(1) + '% used';
+            document.getElementById('budOverCount').textContent = overCount;
+
+            const varCard = document.getElementById('budVarianceCard');
+            varCard.classList.remove('income', 'expense');
+            if (totalVariance >= 0) varCard.classList.add('income');
+            else varCard.classList.add('expense');
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="8"><div class="empty-row"><i class="fas fa-bullseye"></i>No budget lines for ${escapeHTML(period)}. Click "New Budget Line" to add one.</div></td></tr>`;
+                foot.innerHTML = '';
+                return;
+            }
+
+            body.innerHTML = filtered.map(r => {
+                const varClass = r.variance >= 0 ? 'amount-income' : 'amount-expense';
+                const varSign = r.variance >= 0 ? '+' : '−';
+                return `<tr class="${r.usage >= 100 ? 'recon-row-warning' : r.usage >= 75 ? 'recon-row-caution' : ''}">
+                    <td><strong>${escapeHTML(r.category)}</strong></td>
+                    <td>${escapeHTML(r.location || '— all —')}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">KSh ${fmt(r.budget)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">KSh ${fmt(r.actual)}</td>
+                    <td class="${varClass}" style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">${varSign} KSh ${fmt(Math.abs(r.variance))}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">${r.usage.toFixed(1)}%</td>
+                    <td><span class="status-pill ${r.status.pill}">${r.status.label}</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="edit-btn" onclick="openBudgetModal(${r.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="del-btn" onclick="deleteBudget(${r.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const filteredBudget = filtered.reduce((s, r) => s + r.budget, 0);
+            const filteredActual = filtered.reduce((s, r) => s + r.actual, 0);
+            const filteredVariance = filteredBudget - filteredActual;
+            const filteredUsage = filteredBudget > 0 ? (filteredActual / filteredBudget) * 100 : 0;
+
+            foot.innerHTML = `<tr class="payroll-total-row">
+                <td>TOTAL</td>
+                <td></td>
+                <td style="text-align:right;">KSh ${fmt(filteredBudget)}</td>
+                <td style="text-align:right;">KSh ${fmt(filteredActual)}</td>
+                <td style="text-align:right;">${filteredVariance >= 0 ? '+' : '−'} KSh ${fmt(Math.abs(filteredVariance))}</td>
+                <td style="text-align:right;">${filteredUsage.toFixed(1)}%</td>
+                <td colspan="2"></td>
+            </tr>`;
+        }
+
+        function populateBudgetCategoryDropdown(selected = null) {
+            const source = (liveCategories && liveCategories.expense) || CATEGORIES.expense || [];
+            const sel = document.getElementById('budCategory');
+            sel.innerHTML = source.map(c =>
+                `<option value="${escapeHTML(c)}" ${c === selected ? 'selected' : ''}>${escapeHTML(c)}</option>`
+            ).join('');
+        }
+
+        function populateBudgetLocationDropdown(selected = null) {
+            const sel = document.getElementById('budLocation');
+            const active = locations.filter(l => l.active).sort((a, b) => a.name.localeCompare(b.name));
+            sel.innerHTML = '<option value="">— All locations —</option>' + active.map(l =>
+                `<option value="${escapeHTML(l.name)}" ${l.name === selected ? 'selected' : ''}>${escapeHTML(l.name)}</option>`
+            ).join('');
+        }
+
+        function openBudgetModal(id = null) {
+            editingBudgetId = id;
+            const err = document.getElementById('budgetError');
+            err.style.display = 'none';
+
+            const picker = document.getElementById('budgetPeriodPicker');
+            const defaultPeriod = picker && picker.value ? picker.value : (() => {
+                const n = new Date();
+                return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+            })();
+
+            if (id) {
+                const b = budgetsList.find(x => x.id === id);
+                if (!b) return;
+                document.getElementById('budgetModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Budget Line';
+                document.getElementById('budPeriod').value = b.period;
+                populateBudgetCategoryDropdown(b.category);
+                populateBudgetLocationDropdown(b.location);
+                document.getElementById('budAmount').value = b.amount;
+                document.getElementById('budActive').value = String(b.active);
+                document.getElementById('budNotes').value = b.notes || '';
+            } else {
+                document.getElementById('budgetModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> New Budget Line';
+                document.getElementById('budPeriod').value = defaultPeriod;
+                populateBudgetCategoryDropdown();
+                populateBudgetLocationDropdown(null);
+                document.getElementById('budAmount').value = '';
+                document.getElementById('budActive').value = 'true';
+                document.getElementById('budNotes').value = '';
+            }
+
+            document.getElementById('budgetModal').classList.add('show');
+            setTimeout(() => document.getElementById('budAmount').focus(), 100);
+        }
+
+        function closeBudgetModal() {
+            document.getElementById('budgetModal').classList.remove('show');
+            editingBudgetId = null;
+        }
+
+        async function saveBudget() {
+            const period = document.getElementById('budPeriod').value;
+            const category = document.getElementById('budCategory').value;
+            const location = document.getElementById('budLocation').value || null;
+            const amount = safeNum(document.getElementById('budAmount').value);
+            const active = document.getElementById('budActive').value === 'true';
+            const notes = Validation.sanitize(document.getElementById('budNotes').value, 500);
+            const err = document.getElementById('budgetError');
+            err.style.display = 'none';
+
+            const checks = [
+                [!period || !/^\d{4}-\d{2}$/.test(period) ? 'Period must be in YYYY-MM format.' : null, 'Period'],
+                [!category ? 'Please pick a category.' : null, 'Category'],
+                [amount <= 0 ? 'Budget amount must be greater than 0.' : null, 'Amount']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
+                err.style.display = 'block';
+                return;
+            }
+
+            const row = {
+                period,
+                category,
+                location,
+                amount,
+                active,
+                notes: notes || null,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+
+            const wasEditing = !!editingBudgetId;
+
+            if (wasEditing) {
+                const original = budgetsList.find(x => x.id === editingBudgetId);
+                const expectedVersion = original ? (original.version || 1) : 1;
+                const result = await saveWithVersionCheck('budgets', editingBudgetId, row, expectedVersion);
+                if (!result.ok) {
+                    if (result.kind === 'conflict' || result.kind === 'deleted') {
+                        await fetchBudgets();
+                        err.textContent = '⚠️ This budget was changed by someone else. Latest version reloaded — review and try again.';
+                        err.style.display = 'block';
+                        renderBudgets();
+                        return;
+                    }
+                    err.textContent = '⚠️ Save failed: ' + ((result.error && result.error.message) || 'unknown');
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('UPDATE', `Budget #${editingBudgetId}`, `Updated budget: ${category} ${period} — KSh ${fmt(amount)}`, '', amount);
+                showToast('✅ Budget updated', 'success');
+            } else {
+                row.created_by = CURRENT_USER;
+                const {
+                    error
+                } = await supabaseClient.from('budgets').insert(row);
+                if (error) {
+                    if (error.code === '23505') {
+                        err.textContent = '⚠️ A budget for this category, period, and location already exists.';
+                    } else {
+                        err.textContent = '⚠️ Save failed: ' + error.message;
+                    }
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('CREATE', `Budget`, `Created budget: ${category} ${period} — KSh ${fmt(amount)}`, '', amount);
+                showToast('✅ Budget created', 'success');
+            }
+
+            await fetchBudgets();
+            closeBudgetModal();
+            renderBudgets();
+        }
+
+        async function deleteBudget(id) {
+            const b = budgetsList.find(x => x.id === id);
+            if (!b) return;
+            if (!confirm(`Delete budget "${b.category}" for ${b.period}?`)) return;
+            const {
+                error
+            } = await supabaseClient.from('budgets').delete().eq('id', id);
+            if (error) {
+                showToast('Delete failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('DELETE', `Budget #${id}`, `Deleted budget: ${b.category} ${b.period}`, b.amount, '');
+            await fetchBudgets();
+            renderBudgets();
+            showToast('✅ Budget deleted', 'success');
+        }
+
+        function setupBudgetFilters() {
+            const picker = document.getElementById('budgetPeriodPicker');
+            if (picker) picker.addEventListener('change', renderBudgets);
+
+            const refreshBtn = document.getElementById('budgetRefreshBtn');
+            if (refreshBtn) refreshBtn.addEventListener('click', renderBudgets);
+
+            ['budFilterStatus'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderBudgets);
+            });
+            const search = document.getElementById('budFilterSearch');
+            if (search) search.addEventListener('input', debounce(renderBudgets, 300));
+            const clear = document.getElementById('budFilterClear');
+            if (clear) clear.addEventListener('click', () => {
+                document.getElementById('budFilterStatus').value = '';
+                document.getElementById('budFilterSearch').value = '';
+                renderBudgets();
+            });
+
+            const newBtn = document.getElementById('newBudgetBtn');
+            if (newBtn) newBtn.addEventListener('click', () => openBudgetModal(null));
+            const saveBtn = document.getElementById('budgetSave');
+            if (saveBtn) saveBtn.addEventListener('click', saveBudget);
+            const cancelBtn = document.getElementById('budgetCancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeBudgetModal);
+            const modal = document.getElementById('budgetModal');
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === this) closeBudgetModal();
+            });
+        }
+
+        window.openBudgetModal = openBudgetModal;
+        window.deleteBudget = deleteBudget;
+
         function showToast(msg, type = 'info') {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -3474,6 +4906,24 @@
                 t.classList.remove('show');
                 setTimeout(() => t.remove(), 400);
             }, 3000);
+        }
+        async function logAudit(action, target, details, oldVal = '', newVal = '', isWarning = false) {
+            if (!supabaseClient) return;
+            try {
+                await supabaseClient.from('audit_logs').insert({
+                    id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                    timestamp: new Date().toISOString(),
+                    user_name: CURRENT_USER,
+                    action: action,
+                    target: target || '',
+                    details: details || '',
+                    old_value: oldVal !== undefined && oldVal !== null ? String(oldVal) : '',
+                    new_value: newVal !== undefined && newVal !== null ? String(newVal) : '',
+                    warning: !!isWarning
+                });
+            } catch (e) {
+                console.warn('Audit log failed:', e.message);
+            }
         }
 
         function nextTxnId() {
@@ -3516,7 +4966,14 @@
                     category: row.category,
                     description: row.description,
                     amount: safeNum(row.amount),
+                    fee: safeNum(row.fee),
+                    netAmount: safeNum(row.net_amount),
+                    actualDate: row.actual_date || row.date,
                     method: row.method,
+                    reversalOf: row.reversal_of || null,
+                    version: row.version || 1,
+                    reversedAt: row.reversed_at || null,
+                    reversalReason: row.reversal_reason || null,
                     reference: row.reference || '',
                     location: row.location || '',
                     locationId: row.location_id || null,
@@ -3539,7 +4996,10 @@
                     const match = String(t.id || '').match(/(\d{6})$/);
                     return match ? Math.max(m, parseInt(match[1], 10)) : m;
                 }, 0);
-                sequence = maxSeq + 1;
+                // Use timestamp-based suffix so we never collide with soft-deleted rows
+                // that aren't in the in-memory list.
+                const timeSuffix = Date.now() % 1000000;
+                sequence = Math.max(maxSeq + 1, timeSuffix);
 
                 lastSyncAt = new Date().toISOString();
                 return true;
@@ -3875,13 +5335,13 @@
             document.getElementById('ledgerBadge').textContent = filtered.length;
 
             if (!filtered.length) {
-                body.innerHTML = `<tr><td colspan="10"><div class="empty-row"><i class="fas fa-book"></i>No transactions match your filters.</div></td></tr>`;
+                body.innerHTML = `<tr><td colspan="12"><div class="empty-row"><i class="fas fa-book"></i>No transactions match your filters.</div></td></tr>`;
                 return;
             }
 
             body.innerHTML = filtered.map(t => `
-                <tr>
-                    <td class="id-cell">${escapeHTML(t.id)}</td>
+                             <tr class="${t.reversedAt ? 'recon-row-warning' : ''}">
+                    <td class="id-cell">${escapeHTML(t.id)}${t.reversedAt ? ' <span class="audit-warning-badge">REVERSED</span>' : ''}</td>
                     <td>${escapeHTML(t.date || '—')}</td>
                     <td><span class="status-pill" style="background:rgba(120,200,220,0.15); color:#c7d5e6; border-color:rgba(120,200,220,0.3);">${escapeHTML(txnTypeLabel(t.type))}</span></td>
                     <td>${escapeHTML(t.category || '—')}</td>
@@ -3889,11 +5349,18 @@
                     <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(t.reference || '—')}</td>
                     <td>${escapeHTML(t.location || '—')}</td>
                     <td><span class="status-pill ${escapeHTML(t.status)}">${escapeHTML(t.status)}</span></td>
-                    <td class="${txnAmountClass(t.type)}" style="text-align:right;">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</td>
-                    <td>
+                                      <td class="${txnAmountClass(t.type)}" style="text-align:right;">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:${t.fee > 0 ? '#e8b879' : '#5a6f88'};">${t.fee > 0 ? 'KSh ' + fmt(t.fee) : '—'}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:#c7d5e6;">${t.netAmount !== null && t.netAmount !== undefined ? 'KSh ' + fmt(t.netAmount) : '—'}</td>
+                                       <td>
                         <div class="row-actions">
-                            <button class="edit-btn" onclick="editTxn('${t.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="del-btn" onclick="deleteTxn('${t.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            ${t.reversedAt
+                                ? `<span title="Reversed on ${escapeHTML(new Date(t.reversedAt).toLocaleString())}" style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.35rem 0.55rem; border-radius:8px; background:rgba(226,104,91,0.12); border:1px solid rgba(226,104,91,0.35); color:#f0a89f; font-size:0.72rem; font-family:'JetBrains Mono',monospace;">
+                                    <i class="fas fa-ban"></i> REVERSED
+                                   </span>`
+                                : `<button class="edit-btn" onclick="editTxn('${t.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                                   <button class="del-btn" onclick="deleteTxn('${t.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                                   <button class="reverse-btn" onclick="openReverseModal('${t.id}')" title="Reverse transaction"><i class="fas fa-undo-alt"></i></button>`}
                         </div>
                     </td>
                 </tr>
@@ -4837,33 +6304,47 @@
             editingStaffId = null;
         }
 
-        async function saveStaff() {
-            const employeeNumber = document.getElementById('stfNumber').value.trim();
+                async function saveStaff() {
+            // §82 — sanitize text inputs before validation
+            const employeeNumber = Validation.sanitize(document.getElementById('stfNumber').value, 20);
             const status = document.getElementById('stfStatus').value;
-            const fullName = document.getElementById('stfName').value.trim();
-            const role = document.getElementById('stfRole').value.trim();
-            const phone = document.getElementById('stfPhone').value.trim();
-            const email = document.getElementById('stfEmail').value.trim();
-            const nationalId = document.getElementById('stfIdNumber').value.trim();
+            const fullName = Validation.sanitize(document.getElementById('stfName').value, 100);
+            const role = Validation.sanitize(document.getElementById('stfRole').value, 80);
+            const phone = Validation.sanitize(document.getElementById('stfPhone').value, 30);
+            const email = Validation.sanitize(document.getElementById('stfEmail').value, 120);
+            const nationalId = Validation.sanitize(document.getElementById('stfIdNumber').value, 40);
             const locationIdRaw = document.getElementById('stfLocation').value;
             const locationId = locationIdRaw ? parseInt(locationIdRaw, 10) : null;
-            const address = document.getElementById('stfAddress').value.trim();
+            const address = Validation.sanitize(document.getElementById('stfAddress').value, 200);
             const salaryRaw = document.getElementById('stfSalary').value;
             const salary = salaryRaw === '' ? null : safeNum(salaryRaw);
             const startDate = document.getElementById('stfStartDate').value || null;
             const endDate = document.getElementById('stfEndDate').value || null;
             const paymentMethod = document.getElementById('stfPaymentMethod').value || null;
-            const paymentDetails = document.getElementById('stfPaymentDetails').value.trim();
-            const notes = document.getElementById('stfNotes').value.trim();
+            const paymentDetails = Validation.sanitize(document.getElementById('stfPaymentDetails').value, 120);
+            const notes = Validation.sanitize(document.getElementById('stfNotes').value, 500);
             const err = document.getElementById('staffError');
             err.style.display = 'none';
 
-            if (!fullName) {
-                err.textContent = '⚠️ Please enter the full name.';
+                      const checks = [
+                [Validation.text(fullName, { label: 'Full name', min: 2, max: 100 }), 'Full name'],
+                [Validation.email(email, { required: false }), 'Email'],
+                [Validation.phone(phone, { required: false }), 'Phone'],
+                [salary !== null && salary < 0 ? 'Salary cannot be negative.' : null, 'Salary'],
+                [Validation.date(startDate, { required: false }), 'Start date'],
+                [Validation.date(endDate, { required: false }), 'End date']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
                 err.style.display = 'block';
                 return;
             }
-
+            if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+                err.textContent = '⚠️ End date cannot be before start date.';
+                err.style.display = 'block';
+                return;
+            }
             const row = {
                 employee_number: employeeNumber || null,
                 full_name: fullName,
@@ -5027,16 +6508,23 @@
         }
 
         async function saveLocation() {
-            const name = document.getElementById('locName').value.trim();
-            const code = document.getElementById('locCode').value.trim().toUpperCase();
+                        const name = Validation.sanitize(document.getElementById('locName').value, 80);
+            const code = Validation.sanitize(document.getElementById('locCode').value, 10).toUpperCase();
             const openedAt = document.getElementById('locOpenedAt').value || null;
             const active = document.getElementById('locActive').checked;
-            const notes = document.getElementById('locNotes').value.trim();
+            const notes = Validation.sanitize(document.getElementById('locNotes').value, 500);
             const err = document.getElementById('locError');
             err.style.display = 'none';
 
-            if (!name) {
-                err.textContent = '⚠️ Please enter a location name.';
+                        const checks = [
+                [Validation.text(name, { label: 'Location name', min: 2, max: 80 }), 'Location name'],
+                [code && !/^[A-Z0-9]{2,10}$/.test(code) ? 'Code must be 2–10 uppercase letters or digits.' : null, 'Code'],
+                [Validation.date(openedAt, { required: false }), 'Opened date'],
+                [Validation.text(notes, { label: 'Notes', min: 0, max: 500, required: false }), 'Notes']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
                 err.style.display = 'block';
                 return;
             }
@@ -5054,13 +6542,11 @@
             const wasEditing = !!editingLocationId;
 
             if (wasEditing) {
-                const { error } = await supabaseClient
-                    .from('locations')
-                    .update(row)
-                    .eq('id', editingLocationId);
-                if (error) {
-                    err.textContent = '⚠️ Save failed: ' + error.message;
-                    err.style.display = 'block';
+                              const original = locations.find(l => l.id === editingLocationId);
+                const expectedVersion = original ? (original.version || 1) : 1;
+                const result = await saveWithVersionCheck('locations', editingLocationId, row, expectedVersion);
+                if (!result.ok) {
+                    await handleConflict('locations', editingLocationId, err);
                     return;
                 }
             } else {
@@ -5307,18 +6793,23 @@
 
         function wizardNext() {
             if (currentWizardStep === 1) {
-                const period = document.getElementById('pwPeriod').value.trim();
+                const period = Validation.sanitize(document.getElementById('pwPeriod').value, 7);
                 const runDate = document.getElementById('pwRunDate').value;
                 const err = document.getElementById('pwError1');
                 err.style.display = 'none';
 
-                if (!/^\d{4}-\d{2}$/.test(period)) {
-                    err.textContent = '⚠️ Period must be in YYYY-MM format (e.g. 2026-09).';
-                    err.style.display = 'block';
-                    return;
-                }
-                if (!runDate) {
-                    err.textContent = '⚠️ Please pick a run date.';
+                const periodOk = /^\d{4}-(0[1-9]|1[0-2])$/.test(period);
+                const periodYear = periodOk ? parseInt(period.slice(0, 4), 10) : 0;
+                const now = new Date();
+                const checks = [
+                    [Validation.text(period, { label: 'Period', min: 7, max: 7 }), 'Period'],
+                    [!periodOk ? 'Period must be in YYYY-MM format (e.g. 2026-09).' : null, 'Period'],
+                    [periodOk && (periodYear < 2000 || periodYear > now.getFullYear() + 1) ? `Period year must be between 2000 and ${now.getFullYear() + 1}.` : null, 'Period'],
+                    [Validation.date(runDate, { required: true }), 'Run date']
+                ];
+                const firstErr = Validation.firstError(checks);
+                if (firstErr) {
+                    err.textContent = '⚠️ ' + firstErr;
                     err.style.display = 'block';
                     return;
                 }
@@ -5651,7 +7142,7 @@
             if (view === 'payroll')     renderPayroll();
             if (view === 'assets')      renderAssets();
             if (view === 'tasks')       renderTasks();
-
+            if (view === 'budgets')     renderBudgets();
             // Reports: only refresh the currently visible report section
             if (view === 'reports') {
                 const activeReport = document.querySelector('.report-section:not([style*="display: none"])');
@@ -5739,10 +7230,10 @@
         }
 
         async function saveAsset() {
-            const assetTag = document.getElementById('astTag').value.trim();
-            const category = document.getElementById('astCategory').value.trim();
-            const description = document.getElementById('astDescription').value.trim();
-            const serialNumber = document.getElementById('astSerial').value.trim();
+                       const assetTag = Validation.sanitize(document.getElementById('astTag').value, 30);
+            const category = Validation.sanitize(document.getElementById('astCategory').value, 60);
+            const description = Validation.sanitize(document.getElementById('astDescription').value, 200);
+            const serialNumber = Validation.sanitize(document.getElementById('astSerial').value, 80);
             const purchaseDate = document.getElementById('astPurchaseDate').value || null;
             const purchaseCostRaw = document.getElementById('astPurchaseCost').value;
             const currentValueRaw = document.getElementById('astCurrentValue').value;
@@ -5757,12 +7248,19 @@
             const err = document.getElementById('assetError');
             err.style.display = 'none';
 
-            if (!description) {
-                err.textContent = '⚠️ Please enter a description.';
+                    const checks = [
+                [Validation.text(description, { label: 'Description', min: 3, max: 200 }), 'Description'],
+                [Validation.date(purchaseDate, { required: false }), 'Purchase date'],
+                [purchaseCost !== null && purchaseCost < 0 ? 'Purchase cost cannot be negative.' : null, 'Purchase cost'],
+                [currentValue !== null && currentValue < 0 ? 'Current value cannot be negative.' : null, 'Current value'],
+                [assetTag && !/^[A-Z0-9\-_]{2,30}$/i.test(assetTag) ? 'Asset tag may only contain letters, digits, hyphens, and underscores.' : null, 'Asset tag']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
                 err.style.display = 'block';
                 return;
             }
-
             const row = {
                 asset_tag: assetTag || null,
                 category: category || null,
@@ -5999,6 +7497,7 @@
                 populateCategoryDropdown(txn.type || 'income', txn.category);
                 document.getElementById('txnDesc').value = txn.description || '';
                 document.getElementById('txnAmount').value = txn.amount || '';
+                                document.getElementById('txnFee').value = txn.fee || 0;
                 document.getElementById('txnDate').value = txn.date || todayISO();
                 document.getElementById('txnMethod').value = txn.method || 'cash';
                 document.getElementById('txnRef').value = txn.reference || '';
@@ -6012,6 +7511,7 @@
                 document.getElementById('txnDesc').value = '';
                 document.getElementById('txnAmount').value = '';
                 document.getElementById('txnDate').value = todayISO();
+                                document.getElementById('txnFee').value = '0';
                 document.getElementById('txnMethod').value = 'cash';
                 document.getElementById('txnRef').value = '';
                 populateLocationDropdown('Head Office');
@@ -6021,6 +7521,24 @@
 
             document.getElementById('txnModal').classList.add('show');
             setTimeout(() => document.getElementById('txnDesc').focus(), 100);
+                        // Live net preview
+            const amountInput = document.getElementById('txnAmount');
+            const feeInput = document.getElementById('txnFee');
+            const previewBox = document.getElementById('txnNetPreview');
+            const previewVal = document.getElementById('txnNetPreviewValue');
+            const recompute = () => {
+                const a = safeNum(amountInput.value);
+                const f = safeNum(feeInput.value);
+                if (f > 0) {
+                    previewBox.style.display = 'block';
+                    previewVal.textContent = 'KSh ' + fmt(a - f);
+                } else {
+                    previewBox.style.display = 'none';
+                }
+            };
+            amountInput.addEventListener('input', recompute);
+            feeInput.addEventListener('input', recompute);
+            recompute();
         }
 
         function closeTxnModal() {
@@ -6031,27 +7549,35 @@
         async function saveTxn() {
             const type = document.getElementById('txnType').value;
             const category = document.getElementById('txnCategory').value;
-            const description = document.getElementById('txnDesc').value.trim();
-            const amount = safeNum(document.getElementById('txnAmount').value);
+            const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);            const amount = safeNum(document.getElementById('txnAmount').value);
+                        const fee = safeNum(document.getElementById('txnFee').value);
             const date = document.getElementById('txnDate').value || todayISO();
             const method = document.getElementById('txnMethod').value;
             const reference = document.getElementById('txnRef').value.trim();
             const location = document.getElementById('txnLocation').value;
             const status = document.getElementById('txnStatus').value;
-            const notes = document.getElementById('txnNotes').value.trim();
-            const err = document.getElementById('txnError');
+
+            const notes = Validation.sanitize(document.getElementById('txnNotes').value, 1000);            const err = document.getElementById('txnError');
             err.style.display = 'none';
 
-            if (!description) {
-                err.textContent = '⚠️ Please enter a description.';
+                     // §82 — full validation
+            const checks = [
+                [Validation.text(description, { label: 'Description', min: 3, max: 200 }), 'Description'],
+                [Validation.amount(amount, { min: 0.01 }), 'Amount'],
+                [Validation.date(date, { required: true }), 'Date'],
+                [Validation.reference(reference, { required: false }), 'Reference'],
+                [fee > amount ? 'Fee cannot be greater than the amount.' : null, 'Fee'],
+                [fee < 0 ? 'Fee cannot be negative.' : null, 'Fee'],
+                [Validation.text(notes, { label: 'Notes', min: 0, max: 1000, required: false }), 'Notes']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
                 err.style.display = 'block';
                 return;
             }
-            if (amount <= 0) {
-                err.textContent = '⚠️ Please enter an amount greater than 0.';
-                err.style.display = 'block';
-                return;
-            }
+
+            // Reference duplicate check (existing)
             if (reference) {
                 const ref = reference.toUpperCase();
                 const dup = transactions.find(t => t.id !== editingTxnId && (t.reference || '').toUpperCase() === ref);
@@ -6070,6 +7596,7 @@
                 category: category,
                 description: description,
                 amount: amount,
+                  fee: fee,
                 method: method,
                 reference: reference || null,
                 location: location || null,
@@ -6082,36 +7609,96 @@
             const wasEditing = !!editingTxnId;
 
             if (wasEditing) {
-                row.updated_at = new Date().toISOString();
+                // ---------- EDIT: direct update ----------
+                // post_transaction() is for NEW postings only. Editing an existing
+                // transaction must not go through the idempotency path, because the
+                // key would collide with the original insert.
+                              row.updated_at = new Date().toISOString();
                 row.updated_by = CURRENT_USER;
-                const { error } = await supabaseClient
-                    .from('transactions')
-                    .update(row)
-                    .eq('id', editingTxnId);
-                if (error) {
-                    err.textContent = '⚠️ Save failed: ' + error.message;
+
+                const original = transactions.find(t => t.id === editingTxnId);
+                if (!original) {
+                    err.textContent = '⚠️ Original transaction not found in local cache.';
                     err.style.display = 'block';
+                    return;
+                }
+                const expectedVersion = original.version || 1;
+
+                const result = await saveWithVersionCheck('transactions', editingTxnId, row, expectedVersion);
+
+                if (!result.ok) {
+                    if (result.kind === 'conflict' || result.kind === 'deleted') {
+                        await handleConflict('transactions', editingTxnId, err);
+                    } else if (result.kind === 'duplicate') {
+                        err.textContent = '⚠️ A transaction with this reference already exists.';
+                        err.style.display = 'block';
+                    } else {
+                        err.textContent = '⚠️ Save failed: ' + (result.error?.message || 'unknown error');
+                        err.style.display = 'block';
+                    }
                     return;
                 }
             } else {
-                row.id = nextTxnId();
-                row.created_by = CURRENT_USER;
-                row.created_at = new Date().toISOString();
-                const { error } = await supabaseClient
-                    .from('transactions')
-                    .insert(row);
-                if (error) {
-                    err.textContent = '⚠️ Save failed: ' + error.message;
-                    err.style.display = 'block';
-                    return;
-                }
+                // ---------- NEW: go through post_transaction() ----------
+                // Idempotency key: same inputs -> same key -> same row returned on retry.
+                const idemKey = reference
+                    ? `TXN-${type}-${amount}-${date}-${reference.toUpperCase()}`
+                    : `TXN-${type}-${amount}-${date}-${Date.now()}`;
+
+                const newId = nextTxnId();
+                const matchedLocationRow = locations.find(l => l.name === location);
+
+                const { data: rpcId, error } = await supabaseClient.rpc('post_transaction', {
+                    p_id:              newId,
+                    p_date:            date,
+                    p_actual_date:     date,
+                    p_actual_time:     null,
+                    p_type:            type,
+                    p_category:        category,
+                    p_description:     description,
+                    p_amount:          amount,
+                    p_fee:             fee,
+                    p_method:          method,
+                    p_reference:       reference || null,
+                    p_location:        location || null,
+                    p_location_id:     matchedLocationRow ? matchedLocationRow.id : null,
+                    p_staff_id:        null,
+                    p_payroll_run_id:  null,
+                    p_notes:           notes || null,
+                    p_source:          'manual',
+                    p_idempotency_key: idemKey,
+                    p_created_by:      CURRENT_USER
+                });
+
+         if (error) {
+    const errCode = String(error.code || '');
+    const errMsg  = String(error.message || '').toLowerCase();
+    if (errCode === '23505') {
+        if (errMsg.includes('duplicate') || errMsg.includes('reference')) {
+            err.textContent = '⚠️ A transaction with this reference already exists.';
+        } else if (errMsg.includes('transactions_pkey') || errMsg.includes('primary key')) {
+            err.textContent = '⚠️ ID collision — refreshing IDs. Please try saving again.';
+            await fetchFromCloud();
+        } else {
+            err.textContent = '⚠️ Duplicate detected: ' + (error.message || 'unknown');
+        }
+    } else {
+        err.textContent = '⚠️ Save failed: ' + (error.message || 'unknown error');
+    }
+    err.style.display = 'block';
+    return;
+}
+
+                // rpcId is the transaction ID (either the new one, or the existing
+                // one if the same idempotency key was already posted).
+                console.log('✅ Posted transaction:', rpcId);
                 sequence++;
             }
-
-            await fetchFromCloud();
-            closeTxnModal();
+                        await fetchFromCloud();
             renderAll();
-            showToast(wasEditing ? '✅ Transaction updated' : '✅ Transaction saved', 'success');
+            closeTxnModal();
+            showToast(wasEditing ? '✅ Transaction updated' : '✅ Transaction posted', 'success');
+            
         }
 
         // ==================================================
@@ -6147,6 +7734,410 @@
                 showToast('✅ Transaction hidden (restorable)', 'success');
             })();
         };
+
+                // ==================================================
+        // SECTION 31 — REVERSAL FUNCTIONS
+        // ==================================================
+        let reversingTxnId = null;
+
+        window.openReverseModal = function(id) {
+            const t = transactions.find(x => x.id === id);
+            if (!t) return;
+
+            if (t.reversedAt) {
+                showToast('⚠️ This transaction is already reversed.', 'error');
+                return;
+            }
+            if (t.status === 'draft') {
+                showToast('⚠️ Only posted or approved transactions can be reversed.', 'error');
+                return;
+            }
+
+            reversingTxnId = id;
+
+            document.getElementById('reverseTxnSummary').innerHTML = `
+                <div>ID: <strong>${escapeHTML(t.id)}</strong></div>
+                <div>Date: ${escapeHTML(t.date || '—')}</div>
+                <div>Type: ${escapeHTML(t.type)}</div>
+                <div>Category: ${escapeHTML(t.category || '—')}</div>
+                <div>Description: ${escapeHTML(t.description || '—')}</div>
+                <div>Amount: <strong style="color:#f0a89f;">KSh ${fmt(t.amount)}</strong></div>
+                ${t.fee > 0 ? `<div>Fee: KSh ${fmt(t.fee)}</div>` : ''}
+                ${t.reference ? `<div>Reference: ${escapeHTML(t.reference)}</div>` : ''}
+            `;
+
+            document.getElementById('reverseReason').value = '';
+            document.getElementById('reverseError').style.display = 'none';
+            document.getElementById('reverseModal').classList.add('show');
+            setTimeout(() => document.getElementById('reverseReason').focus(), 100);
+        };
+
+        window.closeReverseModal = function() {
+            document.getElementById('reverseModal').classList.remove('show');
+            reversingTxnId = null;
+        };
+
+        window.confirmReversal = async function() {
+            if (!reversingTxnId) return;
+
+            const reason = document.getElementById('reverseReason').value.trim();
+            const err = document.getElementById('reverseError');
+            err.style.display = 'none';
+
+            if (!reason) {
+                err.textContent = '⚠️ Please enter a reason for the reversal.';
+                err.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('reverseConfirm');
+            btn.disabled = true;
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reversing...';
+
+            const { data, error } = await supabaseClient.rpc('reverse_transaction', {
+                p_original_id: reversingTxnId,
+                p_reason:      reason,
+                p_actor:       CURRENT_USER
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+
+            if (error) {
+                if ((error.message || '').includes('already_reversed')) {
+                    err.textContent = '⚠️ This transaction has already been reversed.';
+                } else if ((error.message || '').includes('Only posted')) {
+                    err.textContent = '⚠️ Only posted or approved transactions can be reversed.';
+                } else {
+                    err.textContent = '⚠️ Reversal failed: ' + (error.message || 'unknown error');
+                }
+                err.style.display = 'block';
+                return;
+            }
+
+            if (data && data.status === 'already_reversed') {
+                err.textContent = '⚠️ Already reversed — refreshing.';
+                err.style.display = 'block';
+                await fetchFromCloud();
+                renderAll();
+                setTimeout(closeReverseModal, 800);
+                return;
+            }
+
+            await logAudit(
+                'UPDATE',
+                `Transaction ${reversingTxnId}`,
+                `⚠️ REVERSED — Reason: ${reason}. Reversal entry: ${data ? data.reversal_id : '—'}. Amount: KSh ${data ? fmt(data.amount) : '—'}.`,
+                'active',
+                'reversed',
+                true
+            );
+
+            closeReverseModal();
+            await fetchFromCloud();
+            renderAll();
+            showToast('✅ Transaction reversed', 'success');
+        };
+
+        function setupReverseModal() {
+            const cancelBtn = document.getElementById('reverseCancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', window.closeReverseModal);
+
+            const confirmBtn = document.getElementById('reverseConfirm');
+            if (confirmBtn) confirmBtn.addEventListener('click', window.confirmReversal);
+
+            const modal = document.getElementById('reverseModal');
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === this) window.closeReverseModal();
+            });
+        }
+
+                // ==================================================
+        // SECTION 18 — CATEGORIES MANAGEMENT
+        // ==================================================
+        let categoriesList = [];
+        let editingCategoryId = null;
+
+        async function fetchCategories() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('categories')
+                    .select('*')
+                    .is('deleted_at', null)
+                    .order('kind', { ascending: true })
+                    .order('sort_order', { ascending: true })
+                    .order('name', { ascending: true });
+                if (error) throw error;
+                categoriesList = (data || []).map(r => ({
+                    id: r.id,
+                    code: r.code,
+                    name: r.name,
+                    kind: r.kind,
+                    description: r.description || '',
+                    sortOrder: safeNum(r.sort_order) || 100,
+                    active: r.active !== false,
+                    isSystem: !!r.is_system,
+                    metadata: r.metadata || {},
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by
+                }));
+            } catch (e) {
+                console.warn('Categories fetch failed:', e.message);
+                categoriesList = [];
+            }
+        }
+
+        function categoryKindLabel(k) {
+            if (k === 'income') return 'Income';
+            if (k === 'expense') return 'Expense';
+            if (k === 'capital') return 'Capital';
+            return k;
+        }
+
+        function categoryKindPill(k) {
+            if (k === 'income') return 'paid';
+            if (k === 'expense') return 'cancelled';
+            if (k === 'capital') return 'approved';
+            return 'draft';
+        }
+
+        function renderCategories() {
+            const body = document.getElementById('categoriesBody');
+            if (!body) return;
+
+            const kindF = document.getElementById('catFilterKind').value || '';
+            const activeF = document.getElementById('catFilterActive').value || 'active';
+            const q = (document.getElementById('catFilterSearch').value || '').toLowerCase();
+
+            let filtered = [...categoriesList];
+            if (kindF) filtered = filtered.filter(c => c.kind === kindF);
+            if (activeF === 'active') filtered = filtered.filter(c => c.active);
+            else if (activeF === 'inactive') filtered = filtered.filter(c => !c.active);
+            if (q) filtered = filtered.filter(c =>
+                (c.name || '').toLowerCase().includes(q) ||
+                (c.code || '').toLowerCase().includes(q)
+            );
+
+            const active = categoriesList.filter(c => c.active);
+            document.getElementById('catCountActive').textContent = active.length;
+            document.getElementById('catCountTotal').textContent = categoriesList.length + ' total';
+            document.getElementById('catCountIncome').textContent = active.filter(c => c.kind === 'income').length;
+            document.getElementById('catCountExpense').textContent = active.filter(c => c.kind === 'expense').length;
+            document.getElementById('catCountCapital').textContent = active.filter(c => c.kind === 'capital').length;
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="8"><div class="empty-row"><i class="fas fa-tags"></i>No categories match your filter.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = filtered.map(c => `
+                <tr>
+                    <td><span class="status-pill ${categoryKindPill(c.kind)}">${escapeHTML(categoryKindLabel(c.kind))}</span></td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#7f9bb8;">${escapeHTML(c.code)}</td>
+                    <td><strong>${escapeHTML(c.name)}</strong></td>
+                    <td style="font-size:0.8rem; color:#a8b8d4;">${escapeHTML(c.description || '—')}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${c.sortOrder}</td>
+                    <td>${c.active
+                        ? '<span class="status-pill active">Active</span>'
+                        : '<span class="status-pill inactive">Inactive</span>'}</td>
+                    <td>${c.isSystem
+                        ? '<span class="info-chip">System</span>'
+                        : '<span style="color:#7f9bb8; font-size:0.72rem;">Custom</span>'}</td>
+                    <td style="text-align:right;">
+                        <div class="row-actions">
+                            <button class="edit-btn" onclick="openCategoryModal(${c.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="del-btn" onclick="toggleCategoryActive(${c.id})" title="${c.active ? 'Deactivate' : 'Reactivate'}">
+                                <i class="fas fa-${c.active ? 'ban' : 'check'}"></i>
+                            </button>
+                            ${c.isSystem
+                                ? ''
+                                : `<button class="del-btn" style="color:#e8837a;" onclick="deleteCategory(${c.id})" title="Delete"><i class="fas fa-trash"></i></button>`}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openCategoryModal(id) {
+            editingCategoryId = id || null;
+            const err = document.getElementById('categoryError');
+            err.style.display = 'none';
+
+            if (id) {
+                const c = categoriesList.find(x => x.id === id);
+                if (!c) return;
+                document.getElementById('categoryModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Category';
+                document.getElementById('catKind').value = c.kind;
+                document.getElementById('catKind').disabled = true;
+                document.getElementById('catCode').value = c.code;
+                document.getElementById('catCode').disabled = true;
+                document.getElementById('catName').value = c.name;
+                document.getElementById('catDescription').value = c.description || '';
+                document.getElementById('catSortOrder').value = c.sortOrder;
+                document.getElementById('catActive').value = String(c.active);
+            } else {
+                document.getElementById('categoryModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> New Category';
+                document.getElementById('catKind').value = 'expense';
+                document.getElementById('catKind').disabled = false;
+                document.getElementById('catCode').value = '';
+                document.getElementById('catCode').disabled = false;
+                document.getElementById('catName').value = '';
+                document.getElementById('catDescription').value = '';
+                document.getElementById('catSortOrder').value = 100;
+                document.getElementById('catActive').value = 'true';
+            }
+
+            document.getElementById('categoryModal').classList.add('show');
+            setTimeout(() => document.getElementById('catName').focus(), 100);
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('show');
+            editingCategoryId = null;
+        }
+
+        async function saveCategory() {
+            const kind = document.getElementById('catKind').value;
+            const code = document.getElementById('catCode').value.trim().toLowerCase();
+            const name = document.getElementById('catName').value.trim();
+            const description = document.getElementById('catDescription').value.trim();
+            const sortOrder = parseInt(document.getElementById('catSortOrder').value, 10) || 100;
+            const active = document.getElementById('catActive').value === 'true';
+            const err = document.getElementById('categoryError');
+            err.style.display = 'none';
+
+            if (!name) { err.textContent = '⚠️ Name is required.'; err.style.display = 'block'; return; }
+            if (!editingCategoryId) {
+                if (!code) { err.textContent = '⚠️ Code is required.'; err.style.display = 'block'; return; }
+                if (!/^[a-z0-9_]+$/.test(code)) {
+                    err.textContent = '⚠️ Code must contain only lowercase letters, numbers, and underscores.';
+                    err.style.display = 'block';
+                    return;
+                }
+                const dup = categoriesList.find(c => c.code === code && c.kind === kind);
+                if (dup) {
+                    err.textContent = `⚠️ A ${kind} category with code "${code}" already exists.`;
+                    err.style.display = 'block';
+                    return;
+                }
+            }
+
+            const row = {
+                name: name,
+                description: description || null,
+                sort_order: sortOrder,
+                active: active,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+
+            const wasEditing = !!editingCategoryId;
+
+            if (wasEditing) {
+                               const original = categoriesList.find(c => c.id === editingCategoryId);
+                const expectedVersion = original ? (original.version || 1) : 1;
+                const result = await saveWithVersionCheck('categories', editingCategoryId, row, expectedVersion);
+                if (!result.ok) {
+                    await handleConflict('categories', editingCategoryId, err);
+                    return;
+                }
+                await logAudit('UPDATE', `Category #${editingCategoryId}`, `Updated category: ${name}`, '', name);
+                showToast('✅ Category updated', 'success');
+            } else {
+                row.kind = kind;
+                row.code = code;
+                row.is_system = false;
+                row.created_by = CURRENT_USER;
+                const { error } = await supabaseClient.from('categories').insert(row);
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('CREATE', `Category ${kind}/${code}`, `Created category: ${name}`, '', name);
+                showToast('✅ Category created', 'success');
+            }
+
+            await fetchCategories();
+            closeCategoryModal();
+            renderCategories();
+        }
+
+        async function toggleCategoryActive(id) {
+            const c = categoriesList.find(x => x.id === id);
+            if (!c) return;
+            const newState = !c.active;
+            const verb = newState ? 'reactivate' : 'deactivate';
+            if (!confirm(`Are you sure you want to ${verb} "${c.name}"?`)) return;
+
+            const { error } = await supabaseClient
+                .from('categories')
+                .update({ active: newState, updated_at: new Date().toISOString(), updated_by: CURRENT_USER })
+                .eq('id', id);
+            if (error) { showToast('Update failed: ' + error.message, 'error'); return; }
+
+            await logAudit('UPDATE', `Category #${id}`, `${newState ? 'Reactivated' : 'Deactivated'} category: ${c.name}`, c.active, newState);
+            await fetchCategories();
+            renderCategories();
+            showToast(`✅ Category ${newState ? 'reactivated' : 'deactivated'}`, 'success');
+        }
+
+        async function deleteCategory(id) {
+            const c = categoriesList.find(x => x.id === id);
+            if (!c) return;
+            if (c.isSystem) { showToast('⚠️ System categories cannot be deleted.', 'error'); return; }
+            const reason = prompt(`Delete category "${c.name}"?\n\nThis is a soft delete — the category is hidden but historical transactions keep their category name. Restorable by a database admin.\n\nReason:`, '');
+            if (reason === null) return;
+            const { error } = await supabaseClient
+                .from('categories')
+                .update({
+                    deleted_at: new Date().toISOString(),
+                    deleted_by: CURRENT_USER,
+                    delete_reason: reason || 'No reason provided',
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+            if (error) { showToast('Delete failed: ' + error.message, 'error'); return; }
+
+            await logAudit('DELETE', `Category #${id}`, `Deleted category: ${c.name} — Reason: ${reason || 'not provided'}`, c.name, '');
+            await fetchCategories();
+            renderCategories();
+            showToast('✅ Category deleted (soft)', 'success');
+        }
+
+        function setupCategoryFilters() {
+            ['catFilterKind', 'catFilterActive'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderCategories);
+            });
+            const search = document.getElementById('catFilterSearch');
+            if (search) search.addEventListener('input', debounce(renderCategories, 300));
+            const clear = document.getElementById('catFilterClear');
+            if (clear) clear.addEventListener('click', () => {
+                document.getElementById('catFilterKind').value = '';
+                document.getElementById('catFilterActive').value = 'active';
+                document.getElementById('catFilterSearch').value = '';
+                renderCategories();
+            });
+
+            const newBtn = document.getElementById('newCategoryBtn');
+            if (newBtn) newBtn.addEventListener('click', () => openCategoryModal(null));
+            const saveBtn = document.getElementById('categorySave');
+            if (saveBtn) saveBtn.addEventListener('click', saveCategory);
+            const cancelBtn = document.getElementById('categoryCancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeCategoryModal);
+            const modal = document.getElementById('categoryModal');
+            if (modal) modal.addEventListener('click', function(e) { if (e.target === this) closeCategoryModal(); });
+        }
+
+        window.openCategoryModal = openCategoryModal;
+        window.toggleCategoryActive = toggleCategoryActive;
+        window.deleteCategory = deleteCategory;
 
         window.approveTxn = async function(id) {
             const t = transactions.find(x => x.id === id);
@@ -6366,6 +8357,9 @@
                     if (view === 'payroll') renderPayroll();
                     if (view === 'assets') renderAssets();
                     if (view === 'tasks') renderTasks();
+                                        if (view === 'categories') { fetchCategories().then(renderCategories); }
+                                                            if (view === 'recurring') { fetchRecurring().then(renderRecurring); }
+                                                                                if (view === 'budgets') { fetchBudgets().then(renderBudgets); }
                     if (view === 'attendance') { fetchAttendanceToday().then(renderAttendance); }
                     if (view === 'stock') { fetchStock().then(renderStock); }
                     if (view === 'reports') renderPnL();
@@ -6786,8 +8780,8 @@
         }
 
         async function saveTask() {
-            const title = document.getElementById('tskTitle').value.trim();
-            const description = document.getElementById('tskDescription').value.trim();
+                        const title = Validation.sanitize(document.getElementById('tskTitle').value, 200);
+            const description = Validation.sanitize(document.getElementById('tskDescription').value, 1000);
             const categoryCode = document.getElementById('tskCategory').value || null;
             const priority = document.getElementById('tskPriority').value;
             const assigneeRaw = document.getElementById('tskAssignee').value;
@@ -6796,14 +8790,32 @@
             const locationId = locationRaw ? parseInt(locationRaw, 10) : null;
             const startDate = document.getElementById('tskStartDate').value || null;
             const deadline = document.getElementById('tskDeadline').value || null;
-            const instructions = document.getElementById('tskInstructions').value.trim();
-            const expectedResult = document.getElementById('tskExpectedResult').value.trim();
-            const notes = document.getElementById('tskNotes').value.trim();
+            const instructions = Validation.sanitize(document.getElementById('tskInstructions').value, 1000);
+            const expectedResult = Validation.sanitize(document.getElementById('tskExpectedResult').value, 500);
+            const notes = Validation.sanitize(document.getElementById('tskNotes').value, 500);
             const err = document.getElementById('taskError');
             err.style.display = 'none';
 
-            if (!title) { err.textContent = '⚠️ Title is required.'; err.style.display = 'block'; return; }
-
+            const checks = [
+                [Validation.text(title, { label: 'Title', min: 3, max: 200 }), 'Title'],
+                [Validation.text(description, { label: 'Description', min: 0, max: 1000, required: false }), 'Description'],
+                [Validation.date(startDate, { required: false }), 'Start date'],
+                [Validation.date(deadline, { required: false }), 'Deadline'],
+                [Validation.text(instructions, { label: 'Instructions', min: 0, max: 1000, required: false }), 'Instructions'],
+                [Validation.text(expectedResult, { label: 'Expected result', min: 0, max: 500, required: false }), 'Expected result'],
+                [Validation.text(notes, { label: 'Notes', min: 0, max: 500, required: false }), 'Notes']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
+                err.style.display = 'block';
+                return;
+            }
+            if (startDate && deadline && new Date(deadline) < new Date(startDate)) {
+                err.textContent = '⚠️ Deadline cannot be before start date.';
+                err.style.display = 'block';
+                return;
+            }
             const wasEditing = !!editingTaskId;
 
             if (wasEditing) {
@@ -7622,6 +9634,7 @@
 
             await fetchFromCloud();
             await fetchCategoriesFromCloud();
+                        await fetchCategories();
             await fetchTaskCategories();
             await fetchTasksFromCloud();
                         await fetchAttendanceToday();
@@ -7657,9 +9670,12 @@
                 document.getElementById('locRepTo').value = y + '-12-31';
             })();
 
-            setupTabs();
+                        setupTabs();
             setupFilters();
             setupTaskFilters();
+            setupCategoryFilters();
+                        setupRecurringFilters();
+                                    setupBudgetFilters();
 
             // Wire task modal buttons
                         const newCustBtn = document.getElementById('newCustomerBtn');
@@ -7848,12 +9864,10 @@
             showToast('✅ Finance engine ready', 'success');
         }
 
+
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 
-</html>
-
-</html>
 
 </html>
