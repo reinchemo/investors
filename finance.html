@@ -1616,6 +1616,56 @@
     </div>
 
     <!-- CATEGORY ADD / EDIT MODAL -->
+    <!-- LEAVE MODAL (§43) -->
+    <div class="modal-overlay" id="leaveModal">
+        <div class="modal-card" style="max-width:560px;">
+            <h3 id="leaveModalTitle"><i class="fas fa-plane-departure"></i> Log Leave</h3>
+
+            <label>Staff <span style="color:#e8837a;">*</span></label>
+            <select id="lvStaff"></select>
+
+            <label>Leave Type <span style="color:#e8837a;">*</span></label>
+            <select id="lvType">
+                <option value="annual">Annual Leave</option>
+                <option value="sick">Sick Leave</option>
+                <option value="unpaid">Unpaid Leave</option>
+                <option value="maternity">Maternity</option>
+                <option value="paternity">Paternity</option>
+                <option value="compassionate">Compassionate</option>
+                <option value="study">Study</option>
+                <option value="other">Other</option>
+            </select>
+
+            <div class="modal-row">
+                <div>
+                    <label>Start Date <span style="color:#e8837a;">*</span></label>
+                    <input type="date" id="lvStartDate">
+                </div>
+                <div>
+                    <label>End Date <span style="color:#e8837a;">*</span></label>
+                    <input type="date" id="lvEndDate">
+                </div>
+            </div>
+
+            <div id="lvDaysPreview" style="display:none; padding:0.55rem 0.9rem; margin-top:0.5rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.25); border-radius:10px; font-size:0.8rem; color:#7fded1; font-family:'JetBrains Mono',monospace;">
+                Days: <strong id="lvDaysPreviewValue">0</strong>
+            </div>
+
+            <label>Reason</label>
+            <textarea id="lvReason" placeholder="Short reason for leave..." maxlength="300"></textarea>
+
+            <label>Notes (internal)</label>
+            <textarea id="lvNotes" placeholder="Optional context..." maxlength="500"></textarea>
+
+            <div class="modal-error" id="leaveError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="leaveCancel">Cancel</button>
+                <button class="save" id="leaveSave">Save Leave Request</button>
+            </div>
+        </div>
+    </div>
+
     <!-- OVERTIME MODAL (§42) -->
     <div class="modal-overlay" id="overtimeModal">
         <div class="modal-card" style="max-width:520px;">
@@ -2487,6 +2537,7 @@
             <button class="tab" data-view="recurring"><i class="fas fa-redo-alt"></i> Recurring</button>
             <button class="tab" data-view="budgets"><i class="fas fa-bullseye"></i> Budgets</button>
             <button class="tab" data-view="overtime"><i class="fas fa-clock"></i> Overtime</button>
+            <button class="tab" data-view="leave"><i class="fas fa-plane-departure"></i> Leave</button>
 
         </div>
 
@@ -3400,7 +3451,12 @@
             <div class="headline">
                 <h1><i class="fas fa-clock" style="color:#5fc7bc;"></i> Attendance <small id="attDateLabel">—</small></h1>
             </div>
-
+            <div class="info-banner" id="onLeaveTodayBanner" style="display:none; background:linear-gradient(135deg, rgba(200,154,91,0.15), rgba(200,154,91,0.03)); border-color:rgba(200,154,91,0.4); color:#e8b879;">
+                <i class="fas fa-plane-departure"></i>
+                <div>
+                    <strong>On Leave Today:</strong> <span id="onLeaveTodayList">—</span>
+                </div>
+            </div>
             <div class="filter-bar" style="margin-bottom:1rem;">
                 <select id="attStaffSelect" style="min-width:240px;">
             <option value="">— Select staff —</option>
@@ -3880,52 +3936,74 @@
 
         <!-- ============================================================ -->
         <!-- OVERTIME VIEW (§42)                                          -->
-        <!-- ============================================================ -->
         
+
+        <!-- ============================================================ -->
+        <!-- LEAVE VIEW (§43)                                             -->
+        <!-- ============================================================ -->
+        <div class="view" data-view="leave">
+            <div class="headline">
+                <h1><i class="fas fa-plane-departure" style="color:#5fc7bc;"></i> Leave Management</h1>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-ghost" id="leaveRefreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-primary" id="newLeaveBtn"><i class="fas fa-plus"></i> Log Leave</button>
+                </div>
+            </div>
 
             <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1;">
                 <i class="fas fa-info-circle"></i>
                 <div>
-                    Only <strong>approved</strong> overtime for the current payroll period is included when you run payroll. Approved entries become locked once the payroll run is posted.
+                    <strong>Approved</strong> leave shows on the Attendance tab under "On Leave Today" and appears in the staff member's detail view. Annual balance is calculated as entitlement minus approved annual days taken this year.
                 </div>
             </div>
 
             <div class="summary-row">
                 <div class="summary-card">
-                    <div class="summary-label"><i class="fas fa-list"></i> ENTRIES</div>
-                    <div class="summary-value" id="otCountTotal">0</div>
-                    <div class="summary-sub" id="otCountStatus">—</div>
+                    <div class="summary-label"><i class="fas fa-list"></i> TOTAL REQUESTS</div>
+                    <div class="summary-value" id="lvCountTotal">0</div>
+                    <div class="summary-sub" id="lvCountBreakdown">—</div>
                 </div>
                 <div class="summary-card">
                     <div class="summary-label"><i class="fas fa-hourglass-half"></i> PENDING</div>
-                    <div class="summary-value" id="otCountPending">0</div>
+                    <div class="summary-value" id="lvCountPending">0</div>
                     <div class="summary-sub">Awaiting approval</div>
                 </div>
                 <div class="summary-card income">
-                    <div class="summary-label"><i class="fas fa-check-circle"></i> APPROVED VALUE</div>
-                    <div class="summary-value" id="otTotalApproved">KSh 0</div>
-                    <div class="summary-sub">In selected period</div>
+                    <div class="summary-label"><i class="fas fa-check-circle"></i> APPROVED (THIS YEAR)</div>
+                    <div class="summary-value" id="lvCountApprovedYtd">0</div>
+                    <div class="summary-sub">Days approved YTD</div>
                 </div>
                 <div class="summary-card expense">
-                    <div class="summary-label"><i class="fas fa-money-bill-wave"></i> PAID</div>
-                    <div class="summary-value" id="otTotalPaid">KSh 0</div>
-                    <div class="summary-sub">Already on payroll</div>
+                    <div class="summary-label"><i class="fas fa-user-clock"></i> ON LEAVE TODAY</div>
+                    <div class="summary-value" id="lvOnLeaveToday">0</div>
+                    <div class="summary-sub">Staff currently out</div>
                 </div>
             </div>
 
             <div class="filter-bar">
-                <select id="otFilterStatus">
+                <select id="lvFilterStatus">
                     <option value="">All Statuses</option>
-                    <option value="pending">Pending</option>
+                    <option value="pending" selected>Pending</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
-                    <option value="paid">Paid</option>
+                    <option value="cancelled">Cancelled</option>
                 </select>
-                <select id="otFilterStaff">
+                <select id="lvFilterType">
+                    <option value="">All Types</option>
+                    <option value="annual">Annual</option>
+                    <option value="sick">Sick</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="maternity">Maternity</option>
+                    <option value="paternity">Paternity</option>
+                    <option value="compassionate">Compassionate</option>
+                    <option value="study">Study</option>
+                    <option value="other">Other</option>
+                </select>
+                <select id="lvFilterStaff">
                     <option value="">All Staff</option>
                 </select>
-                <input type="text" class="grow" id="otFilterSearch" placeholder="Search reason or notes...">
-                <button class="btn btn-ghost" id="otFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                <input type="text" class="grow" id="lvFilterSearch" placeholder="Search reason, staff name...">
+                <button class="btn btn-ghost" id="lvFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
                     <i class="fas fa-times"></i> Clear
                 </button>
             </div>
@@ -3936,63 +4014,62 @@
                         <thead>
                             <tr>
                                 <th>Staff</th>
-                                <th>Period</th>
-                                <th style="text-align:right;">Hours</th>
-                                <th style="text-align:right;">Rate</th>
-                                <th style="text-align:right;">Amount</th>
+                                <th>Type</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th style="text-align:right;">Days</th>
                                 <th>Reason</th>
                                 <th>Status</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="overtimeBody"></tbody>
-                        <tfoot id="overtimeFoot"></tfoot>
+                        <tbody id="leaveBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
-        <!-- BACKUP VIEW -->
-        <div class="view" data-view="backup">
-            <div class="headline">
-                <h1><i class="fas fa-database"></i> Backup & Restore</h1>
+    <!-- BACKUP VIEW -->
+    <div class="view" data-view="backup">
+        <div class="headline">
+            <h1><i class="fas fa-database"></i> Backup & Restore</h1>
+        </div>
+        <div class="summary-row">
+            <div class="summary-card">
+                <div class="summary-label"><i class="fas fa-file-alt"></i> TOTAL TRANSACTIONS</div>
+                <div class="summary-value" id="backupCount">0</div>
+                <div class="summary-sub">Currently stored</div>
             </div>
-            <div class="summary-row">
-                <div class="summary-card">
-                    <div class="summary-label"><i class="fas fa-file-alt"></i> TOTAL TRANSACTIONS</div>
-                    <div class="summary-value" id="backupCount">0</div>
-                    <div class="summary-sub">Currently stored</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-label"><i class="fas fa-clock"></i> LAST UPDATED</div>
-                    <div class="summary-value" id="backupUpdated" style="font-size:0.9rem;">—</div>
-                    <div class="summary-sub">From cloud</div>
-                </div>
+            <div class="summary-card">
+                <div class="summary-label"><i class="fas fa-clock"></i> LAST UPDATED</div>
+                <div class="summary-value" id="backupUpdated" style="font-size:0.9rem;">—</div>
+                <div class="summary-sub">From cloud</div>
             </div>
-            <div class="table-section">
-                <div class="table-section-header">
-                    <h4><i class="fas fa-download" style="color:#5fc7bc; margin-right:0.4rem;"></i> Export / Import</h4>
-                </div>
-                <div style="padding:1.2rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
-                    <button class="btn btn-primary" id="exportJsonBtn">
+        </div>
+        <div class="table-section">
+            <div class="table-section-header">
+                <h4><i class="fas fa-download" style="color:#5fc7bc; margin-right:0.4rem;"></i> Export / Import</h4>
+            </div>
+            <div style="padding:1.2rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+                <button class="btn btn-primary" id="exportJsonBtn">
                         <i class="fas fa-download"></i> Export Full Backup (JSON)
                     </button>
-                    <button class="btn btn-ghost" id="importJsonBtn">
+                <button class="btn btn-ghost" id="importJsonBtn">
                         <i class="fas fa-upload"></i> Import From JSON
                     </button>
-                    <button class="btn btn-ghost" id="exportCsvAllBtn">
+                <button class="btn btn-ghost" id="exportCsvAllBtn">
                         <i class="fas fa-file-csv"></i> Export All as CSV
                     </button>
-                </div>
-                <div style="padding:0 1.2rem 1.2rem; color:#7f9bb8; font-size:0.78rem; line-height:1.6;">
-                    <strong style="color:#e8b879;">Note:</strong> Backups are manual. Automated daily backups require Supabase Pro ($25/mo) — that's a Phase 1.5 task. Save your JSON exports somewhere safe (external drive, cloud storage).
-                </div>
+            </div>
+            <div style="padding:0 1.2rem 1.2rem; color:#7f9bb8; font-size:0.78rem; line-height:1.6;">
+                <strong style="color:#e8b879;">Note:</strong> Backups are manual. Automated daily backups require Supabase Pro ($25/mo) — that's a Phase 1.5 task. Save your JSON exports somewhere safe (external drive, cloud storage).
             </div>
         </div>
+    </div>
 
-        <div class="footer-note">
-            <span><i class="fas fa-database"></i> <span id="syncStatus">Connected to Supabase</span></span>
-            <span><i class="fas fa-clock"></i> Last sync: <span id="lastSyncTime">—</span></span>
-        </div>
+    <div class="footer-note">
+        <span><i class="fas fa-database"></i> <span id="syncStatus">Connected to Supabase</span></span>
+        <span><i class="fas fa-clock"></i> Last sync: <span id="lastSyncTime">—</span></span>
+    </div>
     </div>
 
     <script>
@@ -5006,6 +5083,7 @@
                     if (result.kind === 'conflict' || result.kind === 'deleted') {
                         await fetchBudgets();
                         await fetchOvertime();
+                        await fetchLeave();
                         err.textContent = '⚠️ This budget was changed by someone else. Latest version reloaded — review and try again.';
                         err.style.display = 'block';
                         renderBudgets();
@@ -5538,6 +5616,500 @@
         window.revertOvertime = revertOvertime;
         window.deleteOvertime = deleteOvertime;
 
+        // ==================================================
+        // §43 — LEAVE MANAGEMENT
+        // ==================================================
+        let leaveRequests = [];
+        let editingLeaveId = null;
+
+        function leaveTypeLabel(t) {
+            const map = {
+                annual: 'Annual',
+                sick: 'Sick',
+                unpaid: 'Unpaid',
+                maternity: 'Maternity',
+                paternity: 'Paternity',
+                compassionate: 'Compassionate',
+                study: 'Study',
+                other: 'Other'
+            };
+            return map[t] || t;
+        }
+
+        async function fetchLeave() {
+            if (!supabaseClient) return;
+            try {
+                const {
+                    data,
+                    error
+                } = await supabaseClient
+                    .from('leave_requests')
+                    .select('*')
+                    .order('start_date', {
+                        ascending: false
+                    });
+                if (error) throw error;
+                leaveRequests = (data || []).map(r => ({
+                    id: r.id,
+                    staffId: r.staff_id,
+                    leaveType: r.leave_type,
+                    startDate: r.start_date,
+                    endDate: r.end_date,
+                    days: r.days,
+                    reason: r.reason || '',
+                    status: r.status,
+                    approvedAt: r.approved_at,
+                    approvedBy: r.approved_by,
+                    rejectedAt: r.rejected_at,
+                    rejectedBy: r.rejected_by,
+                    rejectionReason: r.rejection_reason || '',
+                    cancelledAt: r.cancelled_at,
+                    cancelledBy: r.cancelled_by,
+                    cancellationReason: r.cancellation_reason || '',
+                    notes: r.notes || '',
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    version: r.version || 1
+                }));
+            } catch (e) {
+                console.warn('Leave fetch failed:', e.message);
+                leaveRequests = [];
+            }
+        }
+
+        function countWorkingDays(startISO, endISO) {
+            if (!startISO || !endISO) return 0;
+            const start = new Date(startISO);
+            const end = new Date(endISO);
+            if (isNaN(start) || isNaN(end) || end < start) return 0;
+            let count = 0;
+            const d = new Date(start);
+            while (d <= end) {
+                const dow = d.getDay();
+                if (dow !== 0 && dow !== 6) count++;
+                d.setDate(d.getDate() + 1);
+            }
+            return count;
+        }
+
+        function renderLeave() {
+            const body = document.getElementById('leaveBody');
+            if (!body) return;
+
+            const staffSel = document.getElementById('lvFilterStaff');
+            const currentStaff = staffSel.value;
+            staffSel.innerHTML = '<option value="">All Staff</option>' +
+                staff.map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}</option>`).join('');
+            staffSel.value = currentStaff;
+
+            const statusF = document.getElementById('lvFilterStatus').value;
+            const typeF = document.getElementById('lvFilterType').value;
+            const staffF = document.getElementById('lvFilterStaff').value;
+            const q = (document.getElementById('lvFilterSearch').value || '').toLowerCase();
+
+            let filtered = [...leaveRequests];
+            if (statusF) filtered = filtered.filter(l => l.status === statusF);
+            if (typeF) filtered = filtered.filter(l => l.leaveType === typeF);
+            if (staffF) filtered = filtered.filter(l => String(l.staffId) === staffF);
+            if (q) {
+                filtered = filtered.filter(l => {
+                    const s = staff.find(x => x.id === l.staffId);
+                    const name = s ? s.fullName : '';
+                    return ((l.reason || '') + ' ' + (l.notes || '') + ' ' + name).toLowerCase().includes(q);
+                });
+            }
+
+            filtered.sort((a, b) => (b.startDate || '').localeCompare(a.startDate || ''));
+
+            // Summary stats
+            const today = todayISO();
+            const thisYear = today.slice(0, 4);
+            const pendingCount = leaveRequests.filter(l => l.status === 'pending').length;
+            const approvedYtd = leaveRequests
+                .filter(l => l.status === 'approved' && l.startDate && l.startDate.slice(0, 4) === thisYear)
+                .reduce((s, l) => s + l.days, 0);
+            const onLeaveToday = leaveRequests.filter(l =>
+                l.status === 'approved' &&
+                l.startDate <= today &&
+                l.endDate >= today
+            ).length;
+
+            document.getElementById('lvCountTotal').textContent = leaveRequests.length;
+            document.getElementById('lvCountBreakdown').textContent =
+                `${leaveRequests.filter(l => l.status === 'approved').length} approved · ${leaveRequests.filter(l => l.status === 'rejected').length} rejected`;
+            document.getElementById('lvCountPending').textContent = pendingCount;
+            document.getElementById('lvCountApprovedYtd').textContent = approvedYtd;
+            document.getElementById('lvOnLeaveToday').textContent = onLeaveToday;
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="8"><div class="empty-row"><i class="fas fa-plane-departure"></i>No leave requests match your filter.</div></td></tr>`;
+                return;
+            }
+
+            body.innerHTML = filtered.map(l => {
+                const s = staff.find(x => x.id === l.staffId);
+                const name = s ? s.fullName : `Staff #${l.staffId}`;
+                const isCurrentlyOnLeave = l.status === 'approved' && l.startDate <= today && l.endDate >= today;
+                const rowClass = isCurrentlyOnLeave ? 'recon-row-caution' : (l.status === 'rejected' ? 'recon-row-warning' : '');
+
+                let actionsHtml = '';
+                if (l.status === 'pending') {
+                    actionsHtml = `
+                        <button class="edit-btn" onclick="openLeaveModal(${l.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="approve-btn" onclick="approveLeave(${l.id})" title="Approve"><i class="fas fa-check"></i></button>
+                        <button class="del-btn" onclick="rejectLeave(${l.id})" title="Reject"><i class="fas fa-times"></i></button>
+                        <button class="del-btn" onclick="cancelLeave(${l.id})" title="Cancel"><i class="fas fa-trash"></i></button>`;
+                } else if (l.status === 'approved') {
+                    actionsHtml = `<button class="del-btn" onclick="cancelLeave(${l.id})" title="Cancel leave"><i class="fas fa-ban"></i></button>`;
+                } else {
+                    actionsHtml = `<button class="del-btn" onclick="deleteLeave(${l.id})" title="Delete"><i class="fas fa-trash"></i></button>`;
+                }
+
+                const typePill = l.leaveType === 'annual' ? 'approved' :
+                    l.leaveType === 'sick' ? 'pending' :
+                    l.leaveType === 'unpaid' ? 'rejected' : 'draft';
+
+                return `<tr class="${rowClass}">
+                    <td><strong>${escapeHTML(name)}</strong></td>
+                    <td><span class="status-pill ${typePill}">${escapeHTML(leaveTypeLabel(l.leaveType))}</span></td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(l.startDate)}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(l.endDate)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">${l.days}</td>
+                    <td style="font-size:0.8rem; color:#a8b8d4;">${escapeHTML(l.reason || '—')}</td>
+                    <td><span class="status-pill ${escapeHTML(l.status)}">${escapeHTML(l.status)}</span>${isCurrentlyOnLeave ? ' <span class="audit-warning-badge">ON LEAVE</span>' : ''}</td>
+                    <td><div class="row-actions">${actionsHtml}</div></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function populateLeaveStaffDropdown(selected = null) {
+            const sel = document.getElementById('lvStaff');
+            const active = staff.filter(s => s.status === 'active').sort((a, b) => a.fullName.localeCompare(b.fullName));
+            sel.innerHTML = active.map(s =>
+                `<option value="${s.id}" ${s.id === selected ? 'selected' : ''}>${escapeHTML(s.fullName)}${s.employeeNumber ? ' (' + escapeHTML(s.employeeNumber) + ')' : ''}</option>`
+            ).join('');
+        }
+
+        function wireLeaveDaysPreview() {
+            const start = document.getElementById('lvStartDate');
+            const end = document.getElementById('lvEndDate');
+            if (start && !start._wired) {
+                start.addEventListener('change', updateLeaveDaysPreview);
+                start._wired = true;
+            }
+            if (end && !end._wired) {
+                end.addEventListener('change', updateLeaveDaysPreview);
+                end._wired = true;
+            }
+        }
+
+        function updateLeaveDaysPreview() {
+            const start = document.getElementById('lvStartDate').value;
+            const end = document.getElementById('lvEndDate').value;
+            const box = document.getElementById('lvDaysPreview');
+            const val = document.getElementById('lvDaysPreviewValue');
+            const days = countWorkingDays(start, end);
+            if (days > 0) {
+                box.style.display = 'block';
+                val.textContent = days + ' working day' + (days === 1 ? '' : 's');
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        function openLeaveModal(id = null) {
+            editingLeaveId = id;
+            const err = document.getElementById('leaveError');
+            err.style.display = 'none';
+
+            if (id) {
+                const l = leaveRequests.find(x => x.id === id);
+                if (!l) return;
+                document.getElementById('leaveModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Leave Request';
+                populateLeaveStaffDropdown(l.staffId);
+                document.getElementById('lvType').value = l.leaveType;
+                document.getElementById('lvStartDate').value = l.startDate;
+                document.getElementById('lvEndDate').value = l.endDate;
+                document.getElementById('lvReason').value = l.reason || '';
+                document.getElementById('lvNotes').value = l.notes || '';
+            } else {
+                document.getElementById('leaveModalTitle').innerHTML = '<i class="fas fa-plane-departure"></i> Log Leave';
+                populateLeaveStaffDropdown();
+                document.getElementById('lvType').value = 'annual';
+                document.getElementById('lvStartDate').value = todayISO();
+                document.getElementById('lvEndDate').value = todayISO();
+                document.getElementById('lvReason').value = '';
+                document.getElementById('lvNotes').value = '';
+            }
+
+            wireLeaveDaysPreview();
+            updateLeaveDaysPreview();
+            document.getElementById('leaveModal').classList.add('show');
+            setTimeout(() => document.getElementById('lvStartDate').focus(), 100);
+        }
+
+        function closeLeaveModal() {
+            document.getElementById('leaveModal').classList.remove('show');
+            editingLeaveId = null;
+        }
+
+        async function saveLeave() {
+            const staffRaw = document.getElementById('lvStaff').value;
+            const staffId = staffRaw ? parseInt(staffRaw, 10) : null;
+            const leaveType = document.getElementById('lvType').value;
+            const startDate = document.getElementById('lvStartDate').value;
+            const endDate = document.getElementById('lvEndDate').value;
+            const reason = Validation.sanitize(document.getElementById('lvReason').value, 300);
+            const notes = Validation.sanitize(document.getElementById('lvNotes').value, 500);
+            const err = document.getElementById('leaveError');
+            err.style.display = 'none';
+
+            const checks = [
+                [!staffId ? 'Please select a staff member.' : null, 'Staff'],
+                [Validation.date(startDate, {
+                    required: true
+                }), 'Start date'],
+                [Validation.date(endDate, {
+                    required: true
+                }), 'End date']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
+                err.style.display = 'block';
+                return;
+            }
+            if (endDate < startDate) {
+                err.textContent = '⚠️ End date cannot be before start date.';
+                err.style.display = 'block';
+                return;
+            }
+
+            const days = countWorkingDays(startDate, endDate);
+            if (days <= 0) {
+                err.textContent = '⚠️ The selected range has no working days.';
+                err.style.display = 'block';
+                return;
+            }
+
+            // Overlap check
+            const overlap = leaveRequests.find(l =>
+                l.id !== editingLeaveId &&
+                l.staffId === staffId && ['pending', 'approved'].includes(l.status) &&
+                !(endDate < l.startDate || startDate > l.endDate)
+            );
+            if (overlap) {
+                err.textContent = `⚠️ Overlaps with existing ${overlap.status} leave (${overlap.startDate} → ${overlap.endDate}).`;
+                err.style.display = 'block';
+                return;
+            }
+
+            const row = {
+                staff_id: staffId,
+                leave_type: leaveType,
+                start_date: startDate,
+                end_date: endDate,
+                days: days,
+                reason: reason || null,
+                notes: notes || null,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+
+            const wasEditing = !!editingLeaveId;
+
+            if (wasEditing) {
+                const original = leaveRequests.find(x => x.id === editingLeaveId);
+                const expectedVersion = original ? (original.version || 1) : 1;
+                const result = await saveWithVersionCheck('leave_requests', editingLeaveId, row, expectedVersion);
+                if (!result.ok) {
+                    if (result.kind === 'conflict' || result.kind === 'deleted') {
+                        await fetchLeave();
+                        err.textContent = '⚠️ This request was changed by someone else. Latest version reloaded.';
+                        err.style.display = 'block';
+                        renderLeave();
+                        return;
+                    }
+                    err.textContent = '⚠️ Save failed: ' + ((result.error && result.error.message) || 'unknown');
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('UPDATE', `Leave #${editingLeaveId}`, `Updated leave: ${leaveTypeLabel(leaveType)} ${startDate}→${endDate}`, '', '');
+                showToast('✅ Leave updated', 'success');
+            } else {
+                row.status = 'pending';
+                row.created_by = CURRENT_USER;
+                const {
+                    error
+                } = await supabaseClient.from('leave_requests').insert(row);
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('CREATE', 'Leave', `Logged leave: ${leaveTypeLabel(leaveType)} for staff #${staffId} (${days}d)`, '', '');
+                showToast('✅ Leave request logged', 'success');
+            }
+
+            await fetchLeave();
+            closeLeaveModal();
+            renderLeave();
+        }
+
+        async function approveLeave(id) {
+            const l = leaveRequests.find(x => x.id === id);
+            if (!l) return;
+            if (!confirm(`Approve ${l.days}-day ${leaveTypeLabel(l.leaveType)} leave?`)) return;
+
+            const {
+                error
+            } = await supabaseClient
+                .from('leave_requests')
+                .update({
+                    status: 'approved',
+                    approved_at: new Date().toISOString(),
+                    approved_by: CURRENT_USER,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+
+            if (error) {
+                showToast('Approve failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('APPROVE', `Leave #${id}`, `Approved ${l.days}d leave`, 'pending', 'approved');
+            await fetchLeave();
+            renderLeave();
+            showToast('✅ Leave approved', 'success');
+        }
+
+        async function rejectLeave(id) {
+            const l = leaveRequests.find(x => x.id === id);
+            if (!l) return;
+            const reason = prompt('Reason for rejection:', '');
+            if (reason === null) return;
+            const {
+                error
+            } = await supabaseClient
+                .from('leave_requests')
+                .update({
+                    status: 'rejected',
+                    rejected_at: new Date().toISOString(),
+                    rejected_by: CURRENT_USER,
+                    rejection_reason: reason || 'No reason provided',
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+            if (error) {
+                showToast('Reject failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('UPDATE', `Leave #${id}`, `Rejected: ${reason || 'no reason'}`, 'pending', 'rejected');
+            await fetchLeave();
+            renderLeave();
+            showToast('Leave rejected', 'info');
+        }
+
+        async function cancelLeave(id) {
+            const l = leaveRequests.find(x => x.id === id);
+            if (!l) return;
+            const reason = prompt('Reason for cancellation:', '');
+            if (reason === null) return;
+            const {
+                error
+            } = await supabaseClient
+                .from('leave_requests')
+                .update({
+                    status: 'cancelled',
+                    cancelled_at: new Date().toISOString(),
+                    cancelled_by: CURRENT_USER,
+                    cancellation_reason: reason || 'No reason provided',
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+            if (error) {
+                showToast('Cancel failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('CANCEL', `Leave #${id}`, `Cancelled: ${reason || 'no reason'}`, l.status, 'cancelled');
+            await fetchLeave();
+            renderLeave();
+            showToast('Leave cancelled', 'info');
+        }
+
+        async function deleteLeave(id) {
+            const l = leaveRequests.find(x => x.id === id);
+            if (!l) return;
+            if (l.status === 'approved') {
+                showToast('⚠️ Cannot delete an approved leave. Cancel it instead.', 'error');
+                return;
+            }
+            if (!confirm(`Delete this leave request permanently?`)) return;
+            const {
+                error
+            } = await supabaseClient.from('leave_requests').delete().eq('id', id);
+            if (error) {
+                showToast('Delete failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('DELETE', `Leave #${id}`, `Deleted ${l.days}d request`, l.days, '');
+            await fetchLeave();
+            renderLeave();
+            showToast('✅ Leave deleted', 'success');
+        }
+
+        function setupLeaveFilters() {
+            const refreshBtn = document.getElementById('leaveRefreshBtn');
+            if (refreshBtn) refreshBtn.addEventListener('click', renderLeave);
+
+            ['lvFilterStatus', 'lvFilterType', 'lvFilterStaff'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderLeave);
+            });
+            const search = document.getElementById('lvFilterSearch');
+            if (search) search.addEventListener('input', debounce(renderLeave, 300));
+            const clear = document.getElementById('lvFilterClear');
+            if (clear) clear.addEventListener('click', () => {
+                document.getElementById('lvFilterStatus').value = '';
+                document.getElementById('lvFilterType').value = '';
+                document.getElementById('lvFilterStaff').value = '';
+                document.getElementById('lvFilterSearch').value = '';
+                renderLeave();
+            });
+
+            const newBtn = document.getElementById('newLeaveBtn');
+            if (newBtn) newBtn.addEventListener('click', () => openLeaveModal(null));
+            const saveBtn = document.getElementById('leaveSave');
+            if (saveBtn) saveBtn.addEventListener('click', saveLeave);
+            const cancelBtn = document.getElementById('leaveCancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeLeaveModal);
+            const modal = document.getElementById('leaveModal');
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === this) closeLeaveModal();
+            });
+        }
+
+        // Helper for other views to know who's on leave today
+        function staffOnLeaveToday() {
+            const today = todayISO();
+            return leaveRequests.filter(l =>
+                l.status === 'approved' &&
+                l.startDate <= today &&
+                l.endDate >= today
+            );
+        }
+
+        window.openLeaveModal = openLeaveModal;
+        window.approveLeave = approveLeave;
+        window.rejectLeave = rejectLeave;
+        window.cancelLeave = cancelLeave;
+        window.deleteLeave = deleteLeave;
+
         function showToast(msg, type = 'info') {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -5744,6 +6316,7 @@
                     endDate: row.end_date || '',
                     status: row.status || 'active',
                     locationId: row.location_id || null,
+                    annualLeaveDays: row.annual_leave_days || 21,
                     notes: row.notes || '',
                     createdAt: row.created_at,
                     createdBy: row.created_by,
@@ -7103,8 +7676,42 @@
                     <div class="detail-cell"><div class="lbl">Payment Method</div><div class="val">${escapeHTML(s.paymentMethod || '—')}</div></div>
                     <div class="detail-cell"><div class="lbl">Payment Details</div><div class="val">${escapeHTML(s.paymentDetails || '—')}</div></div>
                     <div class="detail-cell full"><div class="lbl">Address</div><div class="val">${escapeHTML(s.address || '—')}</div></div>
-                    ${s.notes ? `<div class="detail-cell full"><div class="lbl">Notes</div><div class="val" style="font-size:0.85rem;">${escapeHTML(s.notes)}</div></div>` : ''}
+                                       ${s.notes ? `<div class="detail-cell full"><div class="lbl">Notes</div><div class="val" style="font-size:0.85rem;">${escapeHTML(s.notes)}</div></div>` : ''}
                 </div>
+
+                ${(function() {
+                    const myLeave = leaveRequests.filter(l => l.staffId === staffId);
+                    if (!myLeave.length) return '';
+                    const thisYear = new Date().getFullYear();
+                    const annualUsed = myLeave
+                        .filter(l => l.status === 'approved' && l.leaveType === 'annual' && l.startDate.slice(0, 4) === String(thisYear))
+                        .reduce((sum, l) => sum + l.days, 0);
+                    const entitlement = s.annualLeaveDays || 21;
+                    const remaining = Math.max(0, entitlement - annualUsed);
+                    const rows = myLeave
+                        .sort((a, b) => (b.startDate || '').localeCompare(a.startDate || ''))
+                        .slice(0, 10)
+                        .map(l => `<tr>
+                            <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem;">${escapeHTML(l.startDate)} → ${escapeHTML(l.endDate)}</td>
+                            <td>${escapeHTML(leaveTypeLabel(l.leaveType))}</td>
+                            <td style="text-align:right; font-family:'JetBrains Mono',monospace;">${l.days}d</td>
+                            <td><span class="status-pill ${escapeHTML(l.status)}">${escapeHTML(l.status)}</span></td>
+                        </tr>`).join('');
+                    return `
+                        <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.92rem; color:#c7d5e6; margin:1.2rem 0 0.6rem;">Leave</h4>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.6rem; margin-bottom:0.8rem;">
+                            <div class="detail-cell"><div class="lbl">Entitlement</div><div class="val" style="font-family:'JetBrains Mono',monospace;">${entitlement}d / year</div></div>
+                            <div class="detail-cell"><div class="lbl">Annual Used (${thisYear})</div><div class="val" style="font-family:'JetBrains Mono',monospace;">${annualUsed}d</div></div>
+                            <div class="detail-cell"><div class="lbl">Remaining</div><div class="val" style="font-family:'JetBrains Mono',monospace; color:${remaining > 0 ? '#7ee0a2' : '#f0a89f'};">${remaining}d</div></div>
+                        </div>
+                        <div class="table-section" style="max-height:220px; overflow-y:auto;">
+                            <table class="data-table" style="min-width:auto;">
+                                <thead><tr><th>Dates</th><th>Type</th><th style="text-align:right;">Days</th><th>Status</th></tr></thead>
+                                <tbody>${rows}</tbody>
+                            </table>
+                        </div>
+                    `;
+                })()}
             `;
 
             document.getElementById('staffDetailBody').innerHTML = html;
@@ -7812,6 +8419,7 @@
             if (view === 'tasks')       renderTasks();
             if (view === 'budgets')     renderBudgets();
                         if (view === 'overtime')    renderOvertime();
+                                    if (view === 'leave')       renderLeave();
             // Reports: only refresh the currently visible report section
             if (view === 'reports') {
                 const activeReport = document.querySelector('.report-section:not([style*="display: none"])');
@@ -9030,6 +9638,7 @@
                                                             if (view === 'recurring') { fetchRecurring().then(renderRecurring); }
                                                                                 if (view === 'budgets') { fetchBudgets().then(renderBudgets); }
                                                                                                     if (view === 'overtime') { fetchOvertime().then(renderOvertime); }
+                                                                                                                        if (view === 'leave') { fetchLeave().then(renderLeave); }
                     if (view === 'attendance') { fetchAttendanceToday().then(renderAttendance); }
                     if (view === 'stock') { fetchStock().then(renderStock); }
                     if (view === 'reports') renderPnL();
@@ -10213,6 +10822,21 @@
         function renderAttendance() {
             const body = document.getElementById('attendanceBody');
             if (!body) return;
+                        // §43 — show who's on leave today
+            const onLeave = staffOnLeaveToday();
+            const banner = document.getElementById('onLeaveTodayBanner');
+            const list = document.getElementById('onLeaveTodayList');
+            if (banner && list) {
+                if (onLeave.length) {
+                    banner.style.display = 'flex';
+                    list.textContent = onLeave.map(l => {
+                        const s = staff.find(x => x.id === l.staffId);
+                        return s ? s.fullName + ' (' + leaveTypeLabel(l.leaveType) + ')' : 'Staff #' + l.staffId;
+                    }).join(' · ');
+                } else {
+                    banner.style.display = 'none';
+                }
+            }
 
             // Populate staff dropdown
             const sel = document.getElementById('attStaffSelect');
@@ -10347,6 +10971,7 @@
                         setupRecurringFilters();
                                     setupBudgetFilters();
                                                 setupOvertimeFilters();
+                                                            setupLeaveFilters();
 
             // Wire task modal buttons
                         const newCustBtn = document.getElementById('newCustomerBtn');
