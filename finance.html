@@ -2542,6 +2542,7 @@
             <button class="tab" data-view="budgets"><i class="fas fa-bullseye"></i> Budgets</button>
             <button class="tab" data-view="overtime"><i class="fas fa-clock"></i> Overtime</button>
             <button class="tab" data-view="leave"><i class="fas fa-plane-departure"></i> Leave</button>
+                        <button class="tab" data-view="health"><i class="fas fa-heartbeat"></i> Health</button>
 
         </div>
 
@@ -4032,6 +4033,79 @@
                 </div>
             </div>
         </div>
+        <!-- ============================================================ -->
+        <!-- SYSTEM HEALTH VIEW (§76)                                     -->
+        <!-- ============================================================ -->
+        <div class="view" data-view="health">
+            <div class="headline">
+                <h1><i class="fas fa-heartbeat" style="color:#5fc7bc;"></i> System Health <small id="healthCheckedAt">—</small></h1>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-primary" id="healthRefreshBtn"><i class="fas fa-sync"></i> Re-check</button>
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card" id="healthConnCard">
+                    <div class="summary-label"><i class="fas fa-plug"></i> CONNECTION</div>
+                    <div class="summary-value" id="healthConnValue">—</div>
+                    <div class="summary-sub" id="healthConnSub">—</div>
+                </div>
+                <div class="summary-card income">
+                    <div class="summary-label"><i class="fas fa-database"></i> TOTAL RECORDS</div>
+                    <div class="summary-value" id="healthRowCount">0</div>
+                    <div class="summary-sub" id="healthTableCount">0 tables</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-exclamation-triangle"></i> WARNINGS</div>
+                    <div class="summary-value" id="healthWarnCount">0</div>
+                    <div class="summary-sub" id="healthWarnSub">—</div>
+                </div>
+                <div class="summary-card capital">
+                    <div class="summary-label"><i class="fas fa-clock"></i> LAST WRITE</div>
+                    <div class="summary-value" id="healthLastWrite" style="font-size:1rem;">—</div>
+                    <div class="summary-sub" id="healthLastWriteSub">—</div>
+                </div>
+            </div>
+
+            <!-- Checks grid -->
+            <div class="table-section" style="margin-bottom:1.2rem;">
+                <div class="table-section-header">
+                    <h4><i class="fas fa-clipboard-check" style="color:#5fc7bc; margin-right:0.4rem;"></i> Health Checks</h4>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Check</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="healthChecksBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table row counts -->
+            <div class="table-section">
+                <div class="table-section-header">
+                    <h4><i class="fas fa-list" style="color:#5fc7bc; margin-right:0.4rem;"></i> Table Row Counts</h4>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th style="text-align:right;">Rows</th>
+                                <th style="text-align:right;">Latest Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="healthTablesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- BACKUP VIEW -->
         <div class="view" data-view="backup">
             <div class="headline">
@@ -6980,6 +7054,291 @@
             if (modal) modal.addEventListener('click', function(e) {
                 if (e.target === this) closeEscalationModal();
             });
+        }
+
+                // ==================================================
+        // §76 — SYSTEM HEALTH MONITORING
+        // ==================================================
+        const HEALTH_TABLES = [
+            { name: 'transactions',      label: 'Transactions',      timeCol: 'created_at' },
+            { name: 'locations',         label: 'Locations',         timeCol: 'created_at' },
+            { name: 'staff',             label: 'Staff',             timeCol: 'created_at' },
+            { name: 'payroll_runs',      label: 'Payroll Runs',      timeCol: 'created_at' },
+            { name: 'payroll_items',     label: 'Payroll Items',     timeCol: 'created_at' },
+            { name: 'assets',            label: 'Assets',            timeCol: 'created_at' },
+            { name: 'asset_movements',   label: 'Asset Movements',   timeCol: 'created_at' },
+            { name: 'tasks',             label: 'Tasks',             timeCol: 'created_at' },
+            { name: 'task_comments',     label: 'Task Comments',     timeCol: 'created_at' },
+            { name: 'attendance',        label: 'Attendance',        timeCol: 'created_at' },
+            { name: 'stock_items',       label: 'Stock Items',       timeCol: 'created_at' },
+            { name: 'customers',         label: 'Customers',         timeCol: 'created_at' },
+            { name: 'projects',          label: 'Projects',          timeCol: 'created_at' },
+            { name: 'categories',        label: 'Categories',        timeCol: 'created_at' },
+            { name: 'recurring_templates', label: 'Recurring Templates', timeCol: 'created_at' },
+            { name: 'budgets',           label: 'Budgets',           timeCol: 'created_at' },
+            { name: 'overtime_entries',  label: 'Overtime Entries',  timeCol: 'created_at' },
+            { name: 'leave_requests',    label: 'Leave Requests',    timeCol: 'created_at' },
+            { name: 'notifications',     label: 'Notifications',     timeCol: 'created_at' },
+            { name: 'escalation_rules',  label: 'Escalation Rules',  timeCol: 'updated_at' },
+            { name: 'audit_logs',        label: 'Audit Logs',        timeCol: 'timestamp' }
+        ];
+
+        let healthResults = [];
+
+        function healthStatusPill(status) {
+            // status: 'ok' | 'warn' | 'error'
+            if (status === 'ok')    return 'paid';
+            if (status === 'warn')  return 'pending';
+            if (status === 'error') return 'rejected';
+            return 'draft';
+        }
+
+        function healthStatusIcon(status) {
+            if (status === 'ok')    return '✅';
+            if (status === 'warn')  return '⚠️';
+            if (status === 'error') return '🔴';
+            return 'ℹ️';
+        }
+
+        async function healthCheckOne(tableName) {
+            try {
+                const { count, error } = await supabaseClient
+                    .from(tableName)
+                    .select('*', { count: 'exact', head: true });
+                if (error) {
+                    return { ok: false, count: 0, error: error.message };
+                }
+                return { ok: true, count: count || 0, error: null };
+            } catch (e) {
+                return { ok: false, count: 0, error: e.message };
+            }
+        }
+
+        async function healthFetchLatest(tableName, timeCol) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from(tableName)
+                    .select(timeCol)
+                    .order(timeCol, { ascending: false, nullsFirst: false })
+                    .limit(1)
+                    .maybeSingle();
+                if (error || !data) return null;
+                return data[timeCol] || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function healthRunAll() {
+            const body = document.getElementById('healthTablesBody');
+            const checksBody = document.getElementById('healthChecksBody');
+            const checkedAt = document.getElementById('healthCheckedAt');
+            const connValue = document.getElementById('healthConnValue');
+            const connSub = document.getElementById('healthConnSub');
+            const connCard = document.getElementById('healthConnCard');
+            const rowCount = document.getElementById('healthRowCount');
+            const tableCount = document.getElementById('healthTableCount');
+            const warnCount = document.getElementById('healthWarnCount');
+            const warnSub = document.getElementById('healthWarnSub');
+            const lastWrite = document.getElementById('healthLastWrite');
+            const lastWriteSub = document.getElementById('healthLastWriteSub');
+
+            if (body) body.innerHTML = `<tr><td colspan="3"><div class="empty-row"><i class="fas fa-spinner fa-spin"></i>Running checks…</div></td></tr>`;
+            if (checksBody) checksBody.innerHTML = `<tr><td colspan="3"><div class="empty-row"><i class="fas fa-spinner fa-spin"></i>Running checks…</div></td></tr>`;
+
+            const startTime = Date.now();
+
+            // 1. Basic connection test — try reading 1 row from transactions
+            const pingResult = await healthCheckOne('transactions');
+            const elapsedMs = Date.now() - startTime;
+
+            const checks = [];
+            const tables = [];
+
+            if (pingResult.ok) {
+                checks.push({
+                    status: 'ok',
+                    name: 'Supabase connection',
+                    details: `Reachable in ${elapsedMs}ms`
+                });
+                connValue.textContent = 'OK';
+                connValue.style.color = '#7ee0a2';
+                connSub.textContent = 'Ping ' + elapsedMs + 'ms';
+                connCard.classList.remove('expense', 'income');
+                connCard.classList.add('income');
+            } else {
+                checks.push({
+                    status: 'error',
+                    name: 'Supabase connection',
+                    details: pingResult.error
+                });
+                connValue.textContent = 'FAIL';
+                connValue.style.color = '#f0a89f';
+                connSub.textContent = pingResult.error;
+                connCard.classList.remove('income');
+                connCard.classList.add('expense');
+            }
+
+            // 2. Per-table counts
+            let totalRows = 0;
+            let okTables = 0;
+            let errorTables = 0;
+            let lastActivity = null;
+            let lastActivityTable = null;
+
+            for (const t of HEALTH_TABLES) {
+                const res = await healthCheckOne(t.name);
+                let latest = null;
+                if (res.ok) {
+                    latest = await healthFetchLatest(t.name, t.timeCol);
+                    okTables++;
+                    totalRows += res.count;
+                    if (latest && (!lastActivity || latest > lastActivity)) {
+                        lastActivity = latest;
+                        lastActivityTable = t.label;
+                    }
+                } else {
+                    errorTables++;
+                }
+                tables.push({
+                    name: t.name,
+                    label: t.label,
+                    ok: res.ok,
+                    count: res.count,
+                    error: res.error,
+                    latest: latest
+                });
+            }
+
+            // Summary card — records
+            if (rowCount) rowCount.textContent = totalRows.toLocaleString();
+            if (tableCount) tableCount.textContent = HEALTH_TABLES.length + ' tables · ' + okTables + ' ok';
+
+            // 3. Additional checks
+            // Orphan transactions (no locationId, but location text set)
+            const orphanLoc = transactions.filter(t => !t.locationId && t.location).length;
+            checks.push({
+                status: orphanLoc > 0 ? 'warn' : 'ok',
+                name: 'Orphan transactions (location text without location_id)',
+                details: orphanLoc + ' record(s)'
+            });
+
+            // Transactions with pending > 30 days
+            const pendingOld = transactions.filter(t => {
+                if (t.status !== 'pending' || !t.createdAt) return false;
+                const ageDays = (Date.now() - new Date(t.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+                return ageDays > 30;
+            }).length;
+            checks.push({
+                status: pendingOld > 0 ? 'warn' : 'ok',
+                name: 'Pending approvals older than 30 days',
+                details: pendingOld + ' record(s)'
+            });
+
+            // Reversed transactions not matching a mirror
+            const reversedWithNoMirror = transactions.filter(t => {
+                if (!t.reversedAt) return false;
+                const hasMirror = transactions.some(m =>
+                    m.reversalOf === t.id
+                );
+                return !hasMirror;
+            }).length;
+            checks.push({
+                status: reversedWithNoMirror > 0 ? 'warn' : 'ok',
+                name: 'Reversed transactions without mirror entry',
+                details: reversedWithNoMirror + ' record(s)'
+            });
+
+            // Unread notifications count
+            const unreadNotifs = notifList.filter(n => !n.readAt).length;
+            checks.push({
+                status: unreadNotifs > 50 ? 'warn' : 'ok',
+                name: 'Unread notifications',
+                details: unreadNotifs + ' unread'
+            });
+
+            // Escalation rules present
+            const escCount = escalationRules.filter(r => r.active).length;
+            checks.push({
+                status: escCount > 0 ? 'ok' : 'warn',
+                name: 'Active escalation rules',
+                details: escCount + ' rule(s) enabled'
+            });
+
+            // Table errors
+            if (errorTables > 0) {
+                checks.push({
+                    status: 'error',
+                    name: 'Table read errors',
+                    details: errorTables + ' table(s) failed to query'
+                });
+            } else {
+                checks.push({
+                    status: 'ok',
+                    name: 'All tables reachable',
+                    details: okTables + '/' + HEALTH_TABLES.length + ' tables OK'
+                });
+            }
+
+            // Summary card — warnings
+            const warnTotal = checks.filter(c => c.status === 'warn' || c.status === 'error').length;
+            if (warnCount) {
+                warnCount.textContent = warnTotal;
+                warnCount.style.color = warnTotal === 0 ? '#7ee0a2' : (warnTotal <= 2 ? '#e8b879' : '#f0a89f');
+            }
+            if (warnSub) {
+                warnSub.textContent = warnTotal === 0 ? 'Everything looks clean' : warnTotal + ' issue(s) found';
+            }
+
+            // Last write
+            if (lastActivity) {
+                if (lastWrite) lastWrite.textContent = formatTimestamp(lastActivity);
+                if (lastWriteSub) lastWriteSub.textContent = lastActivityTable || '—';
+            } else {
+                if (lastWrite) lastWrite.textContent = '—';
+                if (lastWriteSub) lastWriteSub.textContent = 'No recent activity';
+            }
+
+            if (checkedAt) {
+                checkedAt.textContent = new Date().toLocaleTimeString('en-GB');
+            }
+
+            // Render checks
+            if (checksBody) {
+                checksBody.innerHTML = checks.map(c => `
+                    <tr class="${c.status === 'error' ? 'recon-row-warning' : (c.status === 'warn' ? 'recon-row-caution' : '')}">
+                        <td><strong>${escapeHTML(c.name)}</strong></td>
+                        <td><span class="status-pill ${healthStatusPill(c.status)}">${healthStatusIcon(c.status)} ${escapeHTML(c.status)}</span></td>
+                        <td style="font-size:0.82rem; color:#a8b8d4;">${escapeHTML(c.details)}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Render tables
+            if (body) {
+                body.innerHTML = tables.map(t => `
+                    <tr class="${!t.ok ? 'recon-row-warning' : ''}">
+                        <td>
+                            <strong>${escapeHTML(t.label)}</strong>
+                            <div style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:#7f9bb8;">${escapeHTML(t.name)}</div>
+                        </td>
+                        <td style="text-align:right; font-family:'JetBrains Mono',monospace;">
+                            ${t.ok ? t.count.toLocaleString() : '<span style="color:#f0a89f;">error</span>'}
+                        </td>
+                        <td style="text-align:right; font-size:0.78rem; color:#a8b8d4;">
+                            ${t.latest ? escapeHTML(formatTimestamp(t.latest)) : (t.ok ? '—' : escapeHTML(t.error || ''))}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            healthResults = { checks, tables, totalRows, warnTotal };
+            return healthResults;
+        }
+
+        function setupHealth() {
+            const btn = document.getElementById('healthRefreshBtn');
+            if (btn) btn.addEventListener('click', () => healthRunAll());
         }
 
 
@@ -10519,6 +10878,7 @@
                                                                                 if (view === 'budgets') { fetchBudgets().then(renderBudgets); }
                                                                                                     if (view === 'overtime') { fetchOvertime().then(renderOvertime); }
                                                                                                                         if (view === 'leave') { fetchLeave().then(renderLeave); }
+                                                                                                                                            if (view === 'health') { healthRunAll(); }
                     if (view === 'attendance') { fetchAttendanceToday().then(renderAttendance); }
                     if (view === 'stock') { fetchStock().then(renderStock); }
                     if (view === 'reports') renderPnL();
@@ -11854,7 +12214,7 @@
                                                             setupLeaveFilters();
                                                                         setupNotifications();
                                                                                     setupEscalation();
-
+            setupHealth();
             // Wire task modal buttons
                         const newCustBtn = document.getElementById('newCustomerBtn');
             if (newCustBtn) newCustBtn.addEventListener('click', () => openCustomerModal(null));
