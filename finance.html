@@ -1616,6 +1616,46 @@
     </div>
 
     <!-- CATEGORY ADD / EDIT MODAL -->
+    <!-- OVERTIME MODAL (§42) -->
+    <div class="modal-overlay" id="overtimeModal">
+        <div class="modal-card" style="max-width:520px;">
+            <h3 id="overtimeModalTitle"><i class="fas fa-clock"></i> Log Overtime</h3>
+
+            <label>Staff <span style="color:#e8837a;">*</span></label>
+            <select id="otStaff"></select>
+
+            <label>Period (YYYY-MM) <span style="color:#e8837a;">*</span></label>
+            <input type="month" id="otPeriod" style="font-family:'JetBrains Mono',monospace;">
+
+            <div class="modal-row">
+                <div>
+                    <label>Hours <span style="color:#e8837a;">*</span></label>
+                    <input type="number" id="otHours" placeholder="0" min="0.25" step="0.25">
+                </div>
+                <div>
+                    <label>Rate per Hour (KSh) <span style="color:#e8837a;">*</span></label>
+                    <input type="number" id="otRate" placeholder="0" min="0" step="1">
+                </div>
+            </div>
+
+            <div id="otAmountPreview" style="display:none; padding:0.55rem 0.9rem; margin-top:0.5rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.25); border-radius:10px; font-size:0.8rem; color:#7fded1; font-family:'JetBrains Mono',monospace;">
+                Total: <strong id="otAmountPreviewValue">KSh 0</strong>
+            </div>
+
+            <label>Reason</label>
+            <input type="text" id="otReason" placeholder="e.g. Emergency router install at Ruiru" maxlength="200">
+
+            <label>Notes</label>
+            <textarea id="otNotes" placeholder="Optional context..." maxlength="500"></textarea>
+
+            <div class="modal-error" id="overtimeError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="overtimeCancel">Cancel</button>
+                <button class="save" id="overtimeSave">Save Overtime</button>
+            </div>
+        </div>
+    </div>
     <!-- BUDGET MODAL (§28) -->
     <div class="modal-overlay" id="budgetModal">
         <div class="modal-card" style="max-width:520px;">
@@ -2446,6 +2486,7 @@
             <button class="tab" data-view="categories"><i class="fas fa-tags"></i> Categories</button>
             <button class="tab" data-view="recurring"><i class="fas fa-redo-alt"></i> Recurring</button>
             <button class="tab" data-view="budgets"><i class="fas fa-bullseye"></i> Budgets</button>
+            <button class="tab" data-view="overtime"><i class="fas fa-clock"></i> Overtime</button>
 
         </div>
 
@@ -3754,6 +3795,162 @@
             </div>
         </div>
 
+
+        <!-- ============================================================ -->
+        <!-- OVERTIME VIEW (§42)                                          -->
+        <!-- ============================================================ -->
+        <div class="view" data-view="overtime">
+            <div class="headline">
+                <h1><i class="fas fa-clock" style="color:#5fc7bc;"></i> Overtime <small id="otPeriodLabel">—</small></h1>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <input type="month" id="otPeriodPicker" style="padding:0.55rem 0.9rem; background:rgba(255,255,255,0.04); border:1px solid rgba(120,200,220,0.2); border-radius:10px; color:#f2f0eb; font-family:'JetBrains Mono',monospace;">
+                    <button class="btn btn-ghost" id="otRefreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-primary" id="newOvertimeBtn"><i class="fas fa-plus"></i> Log Overtime</button>
+                </div>
+            </div>
+
+            <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1;">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    Only <strong>approved</strong> overtime for the current payroll period is included when you run payroll. Approved entries become locked once the payroll run is posted.
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-list"></i> ENTRIES</div>
+                    <div class="summary-value" id="otCountTotal">0</div>
+                    <div class="summary-sub" id="otCountStatus">—</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-hourglass-half"></i> PENDING</div>
+                    <div class="summary-value" id="otCountPending">0</div>
+                    <div class="summary-sub">Awaiting approval</div>
+                </div>
+                <div class="summary-card income">
+                    <div class="summary-label"><i class="fas fa-check-circle"></i> APPROVED VALUE</div>
+                    <div class="summary-value" id="otTotalApproved">KSh 0</div>
+                    <div class="summary-sub">In selected period</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-money-bill-wave"></i> PAID</div>
+                    <div class="summary-value" id="otTotalPaid">KSh 0</div>
+                    <div class="summary-sub">Already on payroll</div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="otFilterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="paid">Paid</option>
+                </select>
+                <select id="otFilterStaff">
+                    <option value="">All Staff</option>
+                </select>
+                <input type="text" class="grow" id="otFilterSearch" placeholder="Search reason or notes...">
+                <button class="btn btn-ghost" id="otFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div class="table-section">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Staff</th>
+                                <th>Period</th>
+                                <th style="text-align:right;">Hours</th>
+                                <th style="text-align:right;">Rate</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overtimeBody"></tbody>
+                        <tfoot id="overtimeFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- OVERTIME VIEW (§42)                                          -->
+        <!-- ============================================================ -->
+        
+
+            <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1;">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    Only <strong>approved</strong> overtime for the current payroll period is included when you run payroll. Approved entries become locked once the payroll run is posted.
+                </div>
+            </div>
+
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-list"></i> ENTRIES</div>
+                    <div class="summary-value" id="otCountTotal">0</div>
+                    <div class="summary-sub" id="otCountStatus">—</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-hourglass-half"></i> PENDING</div>
+                    <div class="summary-value" id="otCountPending">0</div>
+                    <div class="summary-sub">Awaiting approval</div>
+                </div>
+                <div class="summary-card income">
+                    <div class="summary-label"><i class="fas fa-check-circle"></i> APPROVED VALUE</div>
+                    <div class="summary-value" id="otTotalApproved">KSh 0</div>
+                    <div class="summary-sub">In selected period</div>
+                </div>
+                <div class="summary-card expense">
+                    <div class="summary-label"><i class="fas fa-money-bill-wave"></i> PAID</div>
+                    <div class="summary-value" id="otTotalPaid">KSh 0</div>
+                    <div class="summary-sub">Already on payroll</div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="otFilterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="paid">Paid</option>
+                </select>
+                <select id="otFilterStaff">
+                    <option value="">All Staff</option>
+                </select>
+                <input type="text" class="grow" id="otFilterSearch" placeholder="Search reason or notes...">
+                <button class="btn btn-ghost" id="otFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+            </div>
+
+            <div class="table-section">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Staff</th>
+                                <th>Period</th>
+                                <th style="text-align:right;">Hours</th>
+                                <th style="text-align:right;">Rate</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="overtimeBody"></tbody>
+                        <tfoot id="overtimeFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
         <!-- BACKUP VIEW -->
         <div class="view" data-view="backup">
             <div class="headline">
@@ -4808,6 +5005,7 @@
                 if (!result.ok) {
                     if (result.kind === 'conflict' || result.kind === 'deleted') {
                         await fetchBudgets();
+                        await fetchOvertime();
                         err.textContent = '⚠️ This budget was changed by someone else. Latest version reloaded — review and try again.';
                         err.style.display = 'block';
                         renderBudgets();
@@ -4893,6 +5091,452 @@
 
         window.openBudgetModal = openBudgetModal;
         window.deleteBudget = deleteBudget;
+
+        // ==================================================
+        // §42 — OVERTIME
+        // ==================================================
+        let overtimeEntries = [];
+        let editingOvertimeId = null;
+
+        async function fetchOvertime() {
+            if (!supabaseClient) return;
+            try {
+                const {
+                    data,
+                    error
+                } = await supabaseClient
+                    .from('overtime_entries')
+                    .select('*')
+                    .order('period', {
+                        ascending: false
+                    })
+                    .order('created_at', {
+                        ascending: false
+                    });
+                if (error) throw error;
+                overtimeEntries = (data || []).map(r => ({
+                    id: r.id,
+                    staffId: r.staff_id,
+                    period: r.period,
+                    hours: safeNum(r.hours),
+                    ratePerHour: safeNum(r.rate_per_hour),
+                    amount: safeNum(r.amount),
+                    reason: r.reason || '',
+                    status: r.status,
+                    approvedAt: r.approved_at,
+                    approvedBy: r.approved_by,
+                    rejectedAt: r.rejected_at,
+                    rejectedBy: r.rejected_by,
+                    rejectionReason: r.rejection_reason || '',
+                    payrollRunId: r.payroll_run_id,
+                    transactionId: r.transaction_id,
+                    paidAt: r.paid_at,
+                    notes: r.notes || '',
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    version: r.version || 1
+                }));
+            } catch (e) {
+                console.warn('Overtime fetch failed:', e.message);
+                overtimeEntries = [];
+            }
+        }
+
+        function otPeriodFromPicker() {
+            const picker = document.getElementById('otPeriodPicker');
+            if (picker && !picker.value) {
+                const n = new Date();
+                picker.value = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+            }
+            return picker ? picker.value : '';
+        }
+
+        function renderOvertime() {
+            const body = document.getElementById('overtimeBody');
+            const foot = document.getElementById('overtimeFoot');
+            if (!body) return;
+
+            const period = otPeriodFromPicker();
+            document.getElementById('otPeriodLabel').textContent = period || '—';
+
+            // Populate staff filter
+            const staffSel = document.getElementById('otFilterStaff');
+            const currentStaff = staffSel.value;
+            staffSel.innerHTML = '<option value="">All Staff</option>' +
+                staff.map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}</option>`).join('');
+            staffSel.value = currentStaff;
+
+            const statusF = document.getElementById('otFilterStatus').value || '';
+            const staffF = document.getElementById('otFilterStaff').value || '';
+            const q = (document.getElementById('otFilterSearch').value || '').toLowerCase();
+
+            let periodEntries = overtimeEntries.filter(e => e.period === period);
+            let filtered = [...periodEntries];
+            if (statusF) filtered = filtered.filter(e => e.status === statusF);
+            if (staffF) filtered = filtered.filter(e => String(e.staffId) === staffF);
+            if (q) filtered = filtered.filter(e => ((e.reason || '') + ' ' + (e.notes || '')).toLowerCase().includes(q));
+
+            filtered.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+            const pending = periodEntries.filter(e => e.status === 'pending');
+            const approved = periodEntries.filter(e => e.status === 'approved');
+            const paid = periodEntries.filter(e => e.status === 'paid');
+            const approvedValue = approved.reduce((s, e) => s + e.amount, 0);
+            const paidValue = paid.reduce((s, e) => s + e.amount, 0);
+
+            document.getElementById('otCountTotal').textContent = periodEntries.length;
+            document.getElementById('otCountStatus').textContent =
+                `${pending.length} pending · ${approved.length} approved · ${paid.length} paid`;
+            document.getElementById('otCountPending').textContent = pending.length;
+            document.getElementById('otTotalApproved').textContent = 'KSh ' + fmt(approvedValue);
+            document.getElementById('otTotalPaid').textContent = 'KSh ' + fmt(paidValue);
+
+            if (!filtered.length) {
+                body.innerHTML = `<tr><td colspan="8"><div class="empty-row"><i class="fas fa-clock"></i>No overtime entries for ${escapeHTML(period)}. Click "Log Overtime" to add one.</div></td></tr>`;
+                foot.innerHTML = '';
+                return;
+            }
+
+            body.innerHTML = filtered.map(e => {
+                const s = staff.find(x => x.id === e.staffId);
+                const name = s ? s.fullName : `Staff #${e.staffId}`;
+                const rowClass = e.status === 'rejected' ? 'recon-row-warning' : (e.status === 'pending' ? 'recon-row-caution' : '');
+
+                let actionsHtml = '';
+                if (e.status === 'pending') {
+                    actionsHtml = `
+                        <button class="edit-btn" onclick="openOvertimeModal(${e.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="approve-btn" onclick="approveOvertime(${e.id})" title="Approve"><i class="fas fa-check"></i></button>
+                        <button class="del-btn" onclick="rejectOvertime(${e.id})" title="Reject"><i class="fas fa-times"></i></button>
+                        <button class="del-btn" onclick="deleteOvertime(${e.id})" title="Delete"><i class="fas fa-trash"></i></button>`;
+                } else if (e.status === 'approved') {
+                    actionsHtml = `<button class="del-btn" onclick="revertOvertime(${e.id})" title="Revert to pending"><i class="fas fa-undo"></i></button>`;
+                } else if (e.status === 'paid') {
+                    actionsHtml = `<span style="font-size:0.72rem; color:#7ee0a2; font-family:'JetBrains Mono',monospace;">PAID</span>`;
+                } else {
+                    actionsHtml = `<button class="del-btn" onclick="deleteOvertime(${e.id})" title="Delete"><i class="fas fa-trash"></i></button>`;
+                }
+
+                return `<tr class="${rowClass}">
+                    <td><strong>${escapeHTML(name)}</strong></td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(e.period)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">${e.hours.toFixed(2)}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace;">KSh ${fmt(e.ratePerHour)}</td>
+                    <td class="amount-expense" style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(e.amount)}</td>
+                    <td style="font-size:0.8rem; color:#a8b8d4;">${escapeHTML(e.reason || '—')}</td>
+                    <td><span class="status-pill ${escapeHTML(e.status)}">${escapeHTML(e.status)}</span></td>
+                    <td>
+                        <div class="row-actions">${actionsHtml}</div>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            const sum = filtered.reduce((s, e) => s + e.amount, 0);
+            foot.innerHTML = `<tr class="payroll-total-row">
+                <td colspan="4">TOTAL (${filtered.length} entr${filtered.length === 1 ? 'y' : 'ies'})</td>
+                <td style="text-align:right;">KSh ${fmt(sum)}</td>
+                <td colspan="3"></td>
+            </tr>`;
+        }
+
+        function populateOvertimeStaffDropdown(selected = null) {
+            const sel = document.getElementById('otStaff');
+            const active = staff.filter(s => s.status === 'active').sort((a, b) => a.fullName.localeCompare(b.fullName));
+            sel.innerHTML = active.map(s =>
+                `<option value="${s.id}" ${s.id === selected ? 'selected' : ''}>${escapeHTML(s.fullName)}${s.employeeNumber ? ' (' + escapeHTML(s.employeeNumber) + ')' : ''}</option>`
+            ).join('');
+        }
+
+        function openOvertimeModal(id = null) {
+            editingOvertimeId = id;
+            const err = document.getElementById('overtimeError');
+            err.style.display = 'none';
+
+            const period = otPeriodFromPicker();
+            const defaultPeriod = period || (() => {
+                const n = new Date();
+                return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+            })();
+
+            if (id) {
+                const e = overtimeEntries.find(x => x.id === id);
+                if (!e) return;
+                document.getElementById('overtimeModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Overtime';
+                populateOvertimeStaffDropdown(e.staffId);
+                document.getElementById('otPeriod').value = e.period;
+                document.getElementById('otHours').value = e.hours;
+                document.getElementById('otRate').value = e.ratePerHour;
+                document.getElementById('otReason').value = e.reason || '';
+                document.getElementById('otNotes').value = e.notes || '';
+            } else {
+                document.getElementById('overtimeModalTitle').innerHTML = '<i class="fas fa-clock"></i> Log Overtime';
+                populateOvertimeStaffDropdown();
+                document.getElementById('otPeriod').value = defaultPeriod;
+                document.getElementById('otHours').value = '';
+                document.getElementById('otRate').value = '';
+                document.getElementById('otReason').value = '';
+                document.getElementById('otNotes').value = '';
+            }
+
+            wireOvertimePreview();
+            updateOvertimePreview();
+            document.getElementById('overtimeModal').classList.add('show');
+            setTimeout(() => document.getElementById('otHours').focus(), 100);
+        }
+
+        function wireOvertimePreview() {
+            const hours = document.getElementById('otHours');
+            const rate = document.getElementById('otRate');
+            if (hours && !hours._wired) {
+                hours.addEventListener('input', updateOvertimePreview);
+                hours._wired = true;
+            }
+            if (rate && !rate._wired) {
+                rate.addEventListener('input', updateOvertimePreview);
+                rate._wired = true;
+            }
+        }
+
+        function updateOvertimePreview() {
+            const hours = safeNum(document.getElementById('otHours').value);
+            const rate = safeNum(document.getElementById('otRate').value);
+            const box = document.getElementById('otAmountPreview');
+            const val = document.getElementById('otAmountPreviewValue');
+            if (hours > 0 && rate > 0) {
+                box.style.display = 'block';
+                val.textContent = 'KSh ' + fmt(hours * rate);
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        function closeOvertimeModal() {
+            document.getElementById('overtimeModal').classList.remove('show');
+            editingOvertimeId = null;
+        }
+
+        async function saveOvertime() {
+            const staffRaw = document.getElementById('otStaff').value;
+            const staffId = staffRaw ? parseInt(staffRaw, 10) : null;
+            const period = document.getElementById('otPeriod').value;
+            const hours = safeNum(document.getElementById('otHours').value);
+            const ratePerHour = safeNum(document.getElementById('otRate').value);
+            const reason = Validation.sanitize(document.getElementById('otReason').value, 200);
+            const notes = Validation.sanitize(document.getElementById('otNotes').value, 500);
+            const err = document.getElementById('overtimeError');
+            err.style.display = 'none';
+
+            const checks = [
+                [!staffId ? 'Please select a staff member.' : null, 'Staff'],
+                [!period || !/^\d{4}-\d{2}$/.test(period) ? 'Period must be in YYYY-MM format.' : null, 'Period'],
+                [hours <= 0 ? 'Hours must be greater than 0.' : null, 'Hours'],
+                [ratePerHour <= 0 ? 'Rate must be greater than 0.' : null, 'Rate']
+            ];
+            const firstErr = Validation.firstError(checks);
+            if (firstErr) {
+                err.textContent = '⚠️ ' + firstErr;
+                err.style.display = 'block';
+                return;
+            }
+
+            const row = {
+                staff_id: staffId,
+                period,
+                hours,
+                rate_per_hour: ratePerHour,
+                reason: reason || null,
+                notes: notes || null,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+
+            const wasEditing = !!editingOvertimeId;
+
+            if (wasEditing) {
+                const original = overtimeEntries.find(x => x.id === editingOvertimeId);
+                const expectedVersion = original ? (original.version || 1) : 1;
+                const result = await saveWithVersionCheck('overtime_entries', editingOvertimeId, row, expectedVersion);
+                if (!result.ok) {
+                    if (result.kind === 'conflict' || result.kind === 'deleted') {
+                        await fetchOvertime();
+                        err.textContent = '⚠️ This entry was changed by someone else. Latest version reloaded.';
+                        err.style.display = 'block';
+                        renderOvertime();
+                        return;
+                    }
+                    err.textContent = '⚠️ Save failed: ' + ((result.error && result.error.message) || 'unknown');
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('UPDATE', `Overtime #${editingOvertimeId}`, `Updated overtime: ${hours}h @ KSh ${fmt(ratePerHour)}`, '', '');
+                showToast('✅ Overtime updated', 'success');
+            } else {
+                row.status = 'pending';
+                row.created_by = CURRENT_USER;
+                const {
+                    error
+                } = await supabaseClient.from('overtime_entries').insert(row);
+                if (error) {
+                    err.textContent = '⚠️ Save failed: ' + error.message;
+                    err.style.display = 'block';
+                    return;
+                }
+                await logAudit('CREATE', 'Overtime', `Logged overtime: ${hours}h @ KSh ${fmt(ratePerHour)}`, '', '');
+                showToast('✅ Overtime logged', 'success');
+            }
+
+            await fetchOvertime();
+            closeOvertimeModal();
+            renderOvertime();
+        }
+
+        async function approveOvertime(id) {
+            const e = overtimeEntries.find(x => x.id === id);
+            if (!e) return;
+            if (!confirm(`Approve ${e.hours}h overtime for KSh ${fmt(e.amount)}?`)) return;
+
+            const {
+                error
+            } = await supabaseClient
+                .from('overtime_entries')
+                .update({
+                    status: 'approved',
+                    approved_at: new Date().toISOString(),
+                    approved_by: CURRENT_USER,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+
+            if (error) {
+                showToast('Approve failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('APPROVE', `Overtime #${id}`, `Approved ${e.hours}h — KSh ${fmt(e.amount)}`, 'pending', 'approved');
+            await fetchOvertime();
+            renderOvertime();
+            showToast('✅ Overtime approved', 'success');
+        }
+
+        async function rejectOvertime(id) {
+            const e = overtimeEntries.find(x => x.id === id);
+            if (!e) return;
+            const reason = prompt('Reason for rejection:', '');
+            if (reason === null) return;
+            const {
+                error
+            } = await supabaseClient
+                .from('overtime_entries')
+                .update({
+                    status: 'rejected',
+                    rejected_at: new Date().toISOString(),
+                    rejected_by: CURRENT_USER,
+                    rejection_reason: reason || 'No reason provided',
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+            if (error) {
+                showToast('Reject failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('UPDATE', `Overtime #${id}`, `Rejected: ${reason || 'no reason'}`, 'pending', 'rejected');
+            await fetchOvertime();
+            renderOvertime();
+            showToast('Overtime rejected', 'info');
+        }
+
+        async function revertOvertime(id) {
+            const e = overtimeEntries.find(x => x.id === id);
+            if (!e) return;
+            if (e.payrollRunId) {
+                showToast('⚠️ Cannot revert — this overtime is already linked to a payroll run.', 'error');
+                return;
+            }
+            if (!confirm('Revert this overtime back to pending?')) return;
+            const {
+                error
+            } = await supabaseClient
+                .from('overtime_entries')
+                .update({
+                    status: 'pending',
+                    approved_at: null,
+                    approved_by: null,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', id);
+            if (error) {
+                showToast('Revert failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('UPDATE', `Overtime #${id}`, 'Reverted to pending', 'approved', 'pending');
+            await fetchOvertime();
+            renderOvertime();
+            showToast('✅ Overtime reverted', 'success');
+        }
+
+        async function deleteOvertime(id) {
+            const e = overtimeEntries.find(x => x.id === id);
+            if (!e) return;
+            if (e.status === 'paid') {
+                showToast('⚠️ Cannot delete a paid overtime entry.', 'error');
+                return;
+            }
+            if (!confirm(`Delete this overtime entry (${e.hours}h — KSh ${fmt(e.amount)})?`)) return;
+            const {
+                error
+            } = await supabaseClient.from('overtime_entries').delete().eq('id', id);
+            if (error) {
+                showToast('Delete failed: ' + error.message, 'error');
+                return;
+            }
+            await logAudit('DELETE', `Overtime #${id}`, `Deleted ${e.hours}h — KSh ${fmt(e.amount)}`, e.amount, '');
+            await fetchOvertime();
+            renderOvertime();
+            showToast('✅ Overtime deleted', 'success');
+        }
+
+        function setupOvertimeFilters() {
+            const picker = document.getElementById('otPeriodPicker');
+            if (picker) picker.addEventListener('change', renderOvertime);
+
+            const refreshBtn = document.getElementById('otRefreshBtn');
+            if (refreshBtn) refreshBtn.addEventListener('click', renderOvertime);
+
+            ['otFilterStatus', 'otFilterStaff'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderOvertime);
+            });
+            const search = document.getElementById('otFilterSearch');
+            if (search) search.addEventListener('input', debounce(renderOvertime, 300));
+            const clear = document.getElementById('otFilterClear');
+            if (clear) clear.addEventListener('click', () => {
+                document.getElementById('otFilterStatus').value = '';
+                document.getElementById('otFilterStaff').value = '';
+                document.getElementById('otFilterSearch').value = '';
+                renderOvertime();
+            });
+
+            const newBtn = document.getElementById('newOvertimeBtn');
+            if (newBtn) newBtn.addEventListener('click', () => openOvertimeModal(null));
+            const saveBtn = document.getElementById('overtimeSave');
+            if (saveBtn) saveBtn.addEventListener('click', saveOvertime);
+            const cancelBtn = document.getElementById('overtimeCancel');
+            if (cancelBtn) cancelBtn.addEventListener('click', closeOvertimeModal);
+            const modal = document.getElementById('overtimeModal');
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === this) closeOvertimeModal();
+            });
+        }
+
+        window.openOvertimeModal = openOvertimeModal;
+        window.approveOvertime = approveOvertime;
+        window.rejectOvertime = rejectOvertime;
+        window.revertOvertime = revertOvertime;
+        window.deleteOvertime = deleteOvertime;
 
         function showToast(msg, type = 'info') {
             const existing = document.querySelector('.toast');
@@ -6653,17 +7297,33 @@
             document.getElementById('pwError2').style.display = 'none';
             document.getElementById('pwError3').style.display = 'none';
 
-            wizardLines = activeStaff.map(s => ({
-                staffId: s.id,
-                employeeNumber: s.employeeNumber || '',
-                fullName: s.fullName,
-                role: s.role || '',
-                locationId: s.locationId,
-                salary: safeNum(s.salary),
-                amount: safeNum(s.salary),
-                include: true,
-                hasSalary: safeNum(s.salary) > 0
-            }));
+                       const wizardPeriod = document.getElementById('pwPeriod').value || getDefaultPeriod();
+
+            wizardLines = activeStaff.map(s => {
+                const baseSalary = safeNum(s.salary);
+                const otEntries = overtimeEntries.filter(e =>
+                    e.staffId === s.id &&
+                    e.status === 'approved' &&
+                    e.period === wizardPeriod
+                );
+                const otAmount = otEntries.reduce((sum, e) => sum + e.amount, 0);
+                const otHours = otEntries.reduce((sum, e) => sum + e.hours, 0);
+
+                return {
+                    staffId: s.id,
+                    employeeNumber: s.employeeNumber || '',
+                    fullName: s.fullName,
+                    role: s.role || '',
+                    locationId: s.locationId,
+                    salary: baseSalary,
+                    overtime: otAmount,
+                    overtimeHours: otHours,
+                    overtimeEntryIds: otEntries.map(e => e.id),
+                    amount: baseSalary + otAmount,
+                    include: true,
+                    hasSalary: baseSalary > 0
+                };
+            });
 
             setWizardStep(1);
             document.getElementById('payrollWizardModal').classList.add('show');
@@ -6714,8 +7374,9 @@
                     </td>
                     <td>${escapeHTML(line.role || '—')}</td>
                     <td>${escapeHTML(getLocationName(line.locationId))}</td>
-                    <td style="text-align:right;">
+                                      <td style="text-align:right;">
                         <input type="number" class="payroll-line-input pw-line-amount" data-idx="${idx}" value="${line.amount}" min="0" step="1">
+                        ${line.overtime > 0 ? `<div style="font-size:0.68rem; color:#7fded1; margin-top:4px; font-family:'JetBrains Mono',monospace;">incl. OT: +KSh ${fmt(line.overtime)} (${line.overtimeHours.toFixed(2)}h)</div>` : ''}
                     </td>
                 </tr>`;
             }).join('');
@@ -6905,6 +7566,13 @@
                 nextBtn.innerHTML = '<i class="fas fa-check"></i> Save Draft';
                 return;
             }
+
+                        await loadPayrollFromCloud();
+            await loadAssetsFromCloud();
+            closePayrollWizard();
+            renderPayroll();
+            showToast('✅ Payroll draft saved', 'success');
+            openPayrollDetail(runId);
 
             await loadPayrollFromCloud();
             await loadAssetsFromCloud();
@@ -7143,6 +7811,7 @@
             if (view === 'assets')      renderAssets();
             if (view === 'tasks')       renderTasks();
             if (view === 'budgets')     renderBudgets();
+                        if (view === 'overtime')    renderOvertime();
             // Reports: only refresh the currently visible report section
             if (view === 'reports') {
                 const activeReport = document.querySelector('.report-section:not([style*="display: none"])');
@@ -8360,6 +9029,7 @@
                                         if (view === 'categories') { fetchCategories().then(renderCategories); }
                                                             if (view === 'recurring') { fetchRecurring().then(renderRecurring); }
                                                                                 if (view === 'budgets') { fetchBudgets().then(renderBudgets); }
+                                                                                                    if (view === 'overtime') { fetchOvertime().then(renderOvertime); }
                     if (view === 'attendance') { fetchAttendanceToday().then(renderAttendance); }
                     if (view === 'stock') { fetchStock().then(renderStock); }
                     if (view === 'reports') renderPnL();
@@ -9676,6 +10346,7 @@
             setupCategoryFilters();
                         setupRecurringFilters();
                                     setupBudgetFilters();
+                                                setupOvertimeFilters();
 
             // Wire task modal buttons
                         const newCustBtn = document.getElementById('newCustomerBtn');
