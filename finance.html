@@ -2499,7 +2499,7 @@
         <nav class="nav">
             <div class="brand"><i class="fas fa-coins"></i><span>STARLINK · FINANCE</span></div>
             <div class="nav-actions">
-                                <button class="btn btn-ghost" id="notifBellBtn" style="position:relative;">
+                <button class="btn btn-ghost" id="notifBellBtn" style="position:relative;">
                     <i class="fas fa-bell"></i><span>Notifications</span>
                     <span id="notifBellBadge" style="display:none; position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px; background:linear-gradient(135deg,#c04a3a,#e2685b); color:#fff; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.65rem; font-weight:700; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(226,104,91,0.5);">0</span>
                 </button>
@@ -3940,7 +3940,7 @@
 
         <!-- ============================================================ -->
         <!-- OVERTIME VIEW (§42)                                          -->
-        
+
 
         <!-- ============================================================ -->
         <!-- LEAVE VIEW (§43)                                             -->
@@ -4032,52 +4032,52 @@
                 </div>
             </div>
         </div>
-    <!-- BACKUP VIEW -->
-    <div class="view" data-view="backup">
-        <div class="headline">
-            <h1><i class="fas fa-database"></i> Backup & Restore</h1>
-        </div>
-        <div class="summary-row">
-            <div class="summary-card">
-                <div class="summary-label"><i class="fas fa-file-alt"></i> TOTAL TRANSACTIONS</div>
-                <div class="summary-value" id="backupCount">0</div>
-                <div class="summary-sub">Currently stored</div>
+        <!-- BACKUP VIEW -->
+        <div class="view" data-view="backup">
+            <div class="headline">
+                <h1><i class="fas fa-database"></i> Backup & Restore</h1>
             </div>
-            <div class="summary-card">
-                <div class="summary-label"><i class="fas fa-clock"></i> LAST UPDATED</div>
-                <div class="summary-value" id="backupUpdated" style="font-size:0.9rem;">—</div>
-                <div class="summary-sub">From cloud</div>
+            <div class="summary-row">
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-file-alt"></i> TOTAL TRANSACTIONS</div>
+                    <div class="summary-value" id="backupCount">0</div>
+                    <div class="summary-sub">Currently stored</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label"><i class="fas fa-clock"></i> LAST UPDATED</div>
+                    <div class="summary-value" id="backupUpdated" style="font-size:0.9rem;">—</div>
+                    <div class="summary-sub">From cloud</div>
+                </div>
             </div>
-        </div>
-        <div class="table-section">
-            <div class="table-section-header">
-                <h4><i class="fas fa-download" style="color:#5fc7bc; margin-right:0.4rem;"></i> Export / Import</h4>
-            </div>
-            <div style="padding:1.2rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
-                <button class="btn btn-primary" id="exportJsonBtn">
+            <div class="table-section">
+                <div class="table-section-header">
+                    <h4><i class="fas fa-download" style="color:#5fc7bc; margin-right:0.4rem;"></i> Export / Import</h4>
+                </div>
+                <div style="padding:1.2rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+                    <button class="btn btn-primary" id="exportJsonBtn">
                         <i class="fas fa-download"></i> Export Full Backup (JSON)
                     </button>
-                <button class="btn btn-ghost" id="importJsonBtn">
+                    <button class="btn btn-ghost" id="importJsonBtn">
                         <i class="fas fa-upload"></i> Import From JSON
                     </button>
-                <button class="btn btn-ghost" id="exportCsvAllBtn">
+                    <button class="btn btn-ghost" id="exportCsvAllBtn">
                         <i class="fas fa-file-csv"></i> Export All as CSV
                     </button>
+                </div>
+                <div style="padding:0 1.2rem 1.2rem; color:#7f9bb8; font-size:0.78rem; line-height:1.6;">
+                    <strong style="color:#e8b879;">Note:</strong> Backups are manual. Automated daily backups require Supabase Pro ($25/mo) — that's a Phase 1.5 task. Save your JSON exports somewhere safe (external drive, cloud storage).
+                </div>
             </div>
-            <div style="padding:0 1.2rem 1.2rem; color:#7f9bb8; font-size:0.78rem; line-height:1.6;">
-                <strong style="color:#e8b879;">Note:</strong> Backups are manual. Automated daily backups require Supabase Pro ($25/mo) — that's a Phase 1.5 task. Save your JSON exports somewhere safe (external drive, cloud storage).
-            </div>
+        </div>
+
+        <div class="footer-note">
+            <span><i class="fas fa-database"></i> <span id="syncStatus">Connected to Supabase</span></span>
+            <span><i class="fas fa-clock"></i> Last sync: <span id="lastSyncTime">—</span></span>
         </div>
     </div>
 
-    <div class="footer-note">
-        <span><i class="fas fa-database"></i> <span id="syncStatus">Connected to Supabase</span></span>
-        <span><i class="fas fa-clock"></i> Last sync: <span id="lastSyncTime">—</span></span>
-    </div>
-    </div>
 
-
-        <!-- ============================================================ -->
+    <!-- ============================================================ -->
     <!-- NOTIFICATIONS PANEL (§68)                                    -->
     <!-- ============================================================ -->
     <div class="notif-panel-overlay" id="notifPanelOverlay"></div>
@@ -4098,30 +4098,41 @@
             <button class="notif-filter-tab" data-notif-filter="unread">Unread <span id="notifCountUnread" class="notif-filter-count">0</span></button>
             <button class="notif-filter-tab" data-notif-filter="warning">Warnings <span id="notifCountWarning" class="notif-filter-count">0</span></button>
             <button class="notif-filter-tab" data-notif-filter="error">Errors <span id="notifCountError" class="notif-filter-count">0</span></button>
+            <button class="notif-filter-tab" data-notif-filter="escalated" style="border-color:rgba(226,104,91,0.4);">🚨 Escalated <span id="notifCountEscalated" class="notif-filter-count">0</span></button>
         </div>
         <div class="notif-panel-body" id="notifPanelBody">
             <div class="empty-row" style="padding:2.5rem 1rem;"><i class="fas fa-bell-slash"></i>Loading notifications…</div>
         </div>
-        <div class="notif-panel-footer">
+        <div class="notif-panel-footer" style="display:flex; flex-direction:column; gap:0.4rem;">
             <button class="btn btn-ghost" id="notifRefreshBtn" style="width:100%; font-size:0.75rem;"><i class="fas fa-sync"></i> Regenerate from current data</button>
+            <button class="btn btn-ghost" id="notifEscalationBtn" style="width:100%; font-size:0.75rem;"><i class="fas fa-sliders-h"></i> Escalation rules</button>
         </div>
     </aside>
 
     <style>
         /* §68 — Notification panel styling */
+        
         .notif-panel-overlay {
-            position: fixed; inset: 0;
+            position: fixed;
+            inset: 0;
             background: rgba(5, 10, 20, 0.55);
             backdrop-filter: blur(4px);
-            opacity: 0; pointer-events: none;
+            opacity: 0;
+            pointer-events: none;
             transition: opacity 0.3s ease;
             z-index: 9990;
         }
-        .notif-panel-overlay.show { opacity: 1; pointer-events: auto; }
-
+        
+        .notif-panel-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
         .notif-panel {
             position: fixed;
-            top: 0; right: 0; bottom: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
             width: 420px;
             max-width: 100vw;
             background: linear-gradient(135deg, rgba(24, 38, 60, 0.98) 0%, rgba(15, 26, 46, 0.99) 100%);
@@ -4133,8 +4144,11 @@
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 9991;
         }
-        .notif-panel.show { transform: translateX(0); }
-
+        
+        .notif-panel.show {
+            transform: translateX(0);
+        }
+        
         .notif-panel-header {
             display: flex;
             justify-content: space-between;
@@ -4142,6 +4156,7 @@
             padding: 1.1rem 1.2rem 0.9rem;
             border-bottom: 1px solid rgba(120, 200, 220, 0.12);
         }
+        
         .notif-panel-header h3 {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.05rem;
@@ -4151,7 +4166,7 @@
             gap: 0.5rem;
             margin: 0;
         }
-
+        
         .notif-filter-bar {
             display: flex;
             gap: 0.3rem;
@@ -4159,9 +4174,10 @@
             border-bottom: 1px solid rgba(120, 200, 220, 0.08);
             flex-wrap: wrap;
         }
+        
         .notif-filter-tab {
             border: 1px solid rgba(120, 200, 220, 0.15);
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             color: #7f9bb8;
             padding: 0.35rem 0.7rem;
             border-radius: 20px;
@@ -4174,12 +4190,18 @@
             align-items: center;
             gap: 0.35rem;
         }
-        .notif-filter-tab:hover { color: #c7d5e6; background: rgba(120,200,220,0.08); }
+        
+        .notif-filter-tab:hover {
+            color: #c7d5e6;
+            background: rgba(120, 200, 220, 0.08);
+        }
+        
         .notif-filter-tab.active {
             background: linear-gradient(135deg, rgba(95, 199, 188, 0.25), rgba(95, 199, 188, 0.08));
             color: #7fded1;
             border-color: rgba(95, 199, 188, 0.4);
         }
+        
         .notif-filter-count {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.65rem;
@@ -4188,17 +4210,18 @@
             border-radius: 20px;
             color: inherit;
         }
-
+        
         .notif-panel-body {
             flex: 1;
             overflow-y: auto;
             padding: 0.8rem;
         }
+        
         .notif-panel-footer {
             padding: 0.8rem 1rem;
             border-top: 1px solid rgba(120, 200, 220, 0.12);
         }
-
+        
         .notif-item {
             display: flex;
             gap: 0.7rem;
@@ -4211,27 +4234,60 @@
             transition: all 0.25s ease;
             position: relative;
         }
+        
         .notif-item:hover {
             background: rgba(15, 26, 46, 0.7);
             transform: translateX(-2px);
         }
-        .notif-item.unread { background: rgba(95, 199, 188, 0.06); border-left-color: #5fc7bc; }
-        .notif-item.severity-info    { border-left-color: #5fc7bc; }
-        .notif-item.severity-success { border-left-color: #7ee0a2; }
-        .notif-item.severity-warning { border-left-color: #e8b879; }
-        .notif-item.severity-error   { border-left-color: #f0a89f; }
-
+        
+        .notif-item.unread {
+            background: rgba(95, 199, 188, 0.06);
+            border-left-color: #5fc7bc;
+        }
+        
+        .notif-item.severity-info {
+            border-left-color: #5fc7bc;
+        }
+        
+        .notif-item.severity-success {
+            border-left-color: #7ee0a2;
+        }
+        
+        .notif-item.severity-warning {
+            border-left-color: #e8b879;
+        }
+        
+        .notif-item.severity-error {
+            border-left-color: #f0a89f;
+        }
+        
         .notif-item .notif-icon {
             font-size: 1rem;
             line-height: 1.2;
             margin-top: 2px;
         }
-        .notif-item .notif-icon.info    { color: #5fc7bc; }
-        .notif-item .notif-icon.success { color: #7ee0a2; }
-        .notif-item .notif-icon.warning { color: #e8b879; }
-        .notif-item .notif-icon.error   { color: #f0a89f; }
-
-        .notif-item .notif-content { flex: 1; min-width: 0; }
+        
+        .notif-item .notif-icon.info {
+            color: #5fc7bc;
+        }
+        
+        .notif-item .notif-icon.success {
+            color: #7ee0a2;
+        }
+        
+        .notif-item .notif-icon.warning {
+            color: #e8b879;
+        }
+        
+        .notif-item .notif-icon.error {
+            color: #f0a89f;
+        }
+        
+        .notif-item .notif-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
         .notif-item .notif-title {
             font-weight: 700;
             color: #f2f0eb;
@@ -4239,18 +4295,21 @@
             margin-bottom: 0.2rem;
             word-break: break-word;
         }
+        
         .notif-item .notif-body {
             color: #a8b8d4;
             font-size: 0.78rem;
             line-height: 1.4;
             word-break: break-word;
         }
+        
         .notif-item .notif-time {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.65rem;
             color: #7f9bb8;
             margin-top: 0.35rem;
         }
+        
         .notif-item .notif-dot {
             position: absolute;
             top: 0.8rem;
@@ -4261,12 +4320,51 @@
             background: #5fc7bc;
             box-shadow: 0 0 8px rgba(95, 199, 188, 0.7);
         }
-        .notif-item:not(.unread) .notif-dot { display: none; }
-
+        
+        .notif-item:not(.unread) .notif-dot {
+            display: none;
+        }
+        
         @media (max-width: 520px) {
-            .notif-panel { width: 100%; }
+            .notif-panel {
+                width: 100%;
+            }
         }
     </style>
+
+    <!-- ESCALATION RULES MODAL (§69) -->
+    <div class="modal-overlay" id="escalationModal">
+        <div class="modal-card" style="max-width:640px;">
+            <h3><i class="fas fa-sliders-h" style="color:#5fc7bc;"></i> Escalation Rules</h3>
+            <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1; margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    When a notification of the given kind stays unread for more than the threshold, it's automatically escalated to the target severity. Escalated items appear in the <strong>🚨 Escalated</strong> tab.
+                </div>
+            </div>
+
+            <div class="table-section" style="max-height:400px; overflow-y:auto;">
+                <table class="data-table" style="min-width:520px;">
+                    <thead>
+                        <tr>
+                            <th>Kind</th>
+                            <th>Label</th>
+                            <th style="text-align:right;">Hours</th>
+                            <th>Escalate to</th>
+                            <th>Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="escalationRulesBody"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-error" id="escalationError"></div>
+            <div class="modal-actions">
+                <button class="cancel" id="escalationCancel">Close</button>
+                <button class="save" id="escalationSave">Save Changes</button>
+            </div>
+        </div>
+    </div>
     <script>
         // ==================================================
         // CONFIG
@@ -5278,8 +5376,8 @@
                     if (result.kind === 'conflict' || result.kind === 'deleted') {
                         await fetchBudgets();
                         await fetchOvertime();
-            
-                        
+
+
                         err.textContent = '⚠️ This budget was changed by someone else. Latest version reloaded — review and try again.';
                         err.style.display = 'block';
                         renderBudgets();
@@ -6123,8 +6221,12 @@
                 if (!result.ok) {
                     if (result.kind === 'conflict' || result.kind === 'deleted') {
                         await fetchLeave();
-                                    await fetchNotifications();
-            notifUpdateBadge();
+                        await fetchNotifications();
+                        notifUpdateBadge();
+                        await fetchEscalationRules();
+                        await notifEscalate();
+                        await fetchNotifications();
+                        notifUpdateBadge();
                         err.textContent = '⚠️ This request was changed by someone else. Latest version reloaded.';
                         err.style.display = 'block';
                         renderLeave();
@@ -6309,7 +6411,7 @@
         window.deleteLeave = deleteLeave;
 
 
-                // ==================================================
+        // ==================================================
         // §68 — NOTIFICATION ENGINE
         // ==================================================
         let notifList = [];
@@ -6317,14 +6419,14 @@
 
         function notifIcon(kind) {
             const map = {
-                approval:    'fas fa-check-double',
-                task_overdue:'fas fa-tasks',
-                low_stock:   'fas fa-boxes',
-                dividend:    'fas fa-coins',
-                recon:       'fas fa-balance-scale',
-                leave:       'fas fa-plane-departure',
-                overtime:    'fas fa-clock',
-                system:      'fas fa-info-circle'
+                approval: 'fas fa-check-double',
+                task_overdue: 'fas fa-tasks',
+                low_stock: 'fas fa-boxes',
+                dividend: 'fas fa-coins',
+                recon: 'fas fa-balance-scale',
+                leave: 'fas fa-plane-departure',
+                overtime: 'fas fa-clock',
+                system: 'fas fa-info-circle'
             };
             return map[kind] || 'fas fa-bell';
         }
@@ -6332,10 +6434,15 @@
         async function fetchNotifications() {
             if (!supabaseClient) return;
             try {
-                const { data, error } = await supabaseClient
+                const {
+                    data,
+                    error
+                } = await supabaseClient
                     .from('notifications')
                     .select('*')
-                    .order('created_at', { ascending: false })
+                    .order('created_at', {
+                        ascending: false
+                    })
                     .limit(200);
                 if (error) throw error;
                 notifList = (data || []).map(r => ({
@@ -6350,7 +6457,9 @@
                     readAt: r.read_at,
                     createdAt: r.created_at,
                     createdBy: r.created_by,
-                    metadata: r.metadata || {}
+                    metadata: r.metadata || {},
+                    escalatedAt: r.escalated_at || null,
+                    escalatedFrom: r.escalated_from || null
                 }));
             } catch (e) {
                 console.warn('Notifications fetch failed:', e.message);
@@ -6382,11 +6491,14 @@
             document.getElementById('notifCountUnread').textContent = unread.length;
             document.getElementById('notifCountWarning').textContent = all.filter(n => n.severity === 'warning').length;
             document.getElementById('notifCountError').textContent = all.filter(n => n.severity === 'error').length;
+            const escEl = document.getElementById('notifCountEscalated');
+            if (escEl) escEl.textContent = all.filter(n => !!n.escalatedAt).length;
 
             let filtered = all;
             if (notifFilter === 'unread') filtered = unread;
             else if (notifFilter === 'warning') filtered = all.filter(n => n.severity === 'warning');
             else if (notifFilter === 'error') filtered = all.filter(n => n.severity === 'error');
+            else if (notifFilter === 'escalated') filtered = all.filter(n => !!n.escalatedAt);
 
             if (!filtered.length) {
                 body.innerHTML = `<div class="empty-row" style="padding:2.5rem 1rem;"><i class="fas fa-bell-slash"></i>No notifications${notifFilter !== 'all' ? ' for this filter' : ''}.</div>`;
@@ -6394,16 +6506,20 @@
             }
 
             body.innerHTML = filtered.map(n => {
-                const iconClass = notifIcon(n.kind);
-                const sevClass = n.severity || 'info';
-                const unreadClass = n.readAt ? '' : 'unread';
-                const ago = notifAgo(n.createdAt);
-                return `<div class="notif-item severity-${sevClass} ${unreadClass}" data-id="${n.id}" data-view="${escapeHTML(n.linkView || '')}">
+                        const iconClass = notifIcon(n.kind);
+                        const sevClass = n.severity || 'info';
+                        const unreadClass = n.readAt ? '' : 'unread';
+                        const ago = notifAgo(n.createdAt);
+                        return `<div class="notif-item severity-${sevClass} ${unreadClass}" data-id="${n.id}" data-view="${escapeHTML(n.linkView || '')}">
                     <div class="notif-icon ${sevClass}"><i class="${iconClass}"></i></div>
                     <div class="notif-content">
                         <div class="notif-title">${escapeHTML(n.title)}</div>
                         ${n.body ? `<div class="notif-body">${escapeHTML(n.body)}</div>` : ''}
-                        <div class="notif-time">${escapeHTML(ago)}${n.linkView ? ' · click to open ' + escapeHTML(n.linkView) : ''}</div>
+                                             <div class="notif-time">
+                            ${escapeHTML(ago)}
+                            ${n.escalatedAt ? ` · <span style="color:#f0a89f; font-weight:700;">🚨 ESCALATED</span>` : ''}
+                            ${n.linkView ? ' · click to open ' + escapeHTML(n.linkView) : ''}
+                        </div>
                     </div>
                     <span class="notif-dot"></span>
                 </div>`;
@@ -6608,6 +6724,11 @@
             document.getElementById('notifPanelOverlay').classList.remove('show');
         }
 
+
+
+
+
+
         function setupNotifications() {
             const bell = document.getElementById('notifBellBtn');
             if (bell) bell.addEventListener('click', async () => {
@@ -6647,6 +6768,222 @@
             });
         }
 
+        // ==================================================
+        // §69 — ESCALATION
+        // ==================================================
+        let escalationRules = [];
+        let escalationEditing = {};
+
+        async function fetchEscalationRules() {
+            if (!supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('escalation_rules')
+                    .select('*')
+                    .order('kind', { ascending: true });
+                if (error) throw error;
+                escalationRules = (data || []).map(r => ({
+                    id: r.id,
+                    kind: r.kind,
+                    label: r.label,
+                    hours: r.hours,
+                    targetSeverity: r.target_severity,
+                    active: r.active !== false,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    version: r.version || 1
+                }));
+            } catch (e) {
+                console.warn('Escalation rules fetch failed:', e.message);
+                escalationRules = [];
+            }
+        }
+
+        function openEscalationModal() {
+            escalationEditing = {};
+            escalationRules.forEach(r => {
+                escalationEditing[r.kind] = {
+                    hours: r.hours,
+                    targetSeverity: r.targetSeverity,
+                    active: r.active
+                };
+            });
+
+            const body = document.getElementById('escalationRulesBody');
+            if (!body) return;
+
+            if (!escalationRules.length) {
+                body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#7f9bb8; padding:1rem;">No escalation rules defined yet.</td></tr>`;
+            } else {
+                body.innerHTML = escalationRules.map(r => `
+                    <tr>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#7fded1;">${escapeHTML(r.kind)}</td>
+                        <td>${escapeHTML(r.label)}</td>
+                        <td style="text-align:right;">
+                            <input type="number" min="1" step="1" value="${r.hours}" data-kind="${escapeHTML(r.kind)}" data-field="hours" style="width:80px; padding:0.35rem 0.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(120,200,220,0.2); border-radius:8px; color:#f2f0eb; font-family:'JetBrains Mono',monospace; text-align:right;">
+                        </td>
+                        <td>
+                            <select data-kind="${escapeHTML(r.kind)}" data-field="targetSeverity" style="padding:0.35rem 0.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(120,200,220,0.2); border-radius:8px; color:#f2f0eb;">
+                                <option value="warning" ${r.targetSeverity === 'warning' ? 'selected' : ''}>⚠ Warning</option>
+                                <option value="error"   ${r.targetSeverity === 'error'   ? 'selected' : ''}>🔴 Error</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select data-kind="${escapeHTML(r.kind)}" data-field="active" style="padding:0.35rem 0.5rem; background:rgba(255,255,255,0.04); border:1px solid rgba(120,200,220,0.2); border-radius:8px; color:#f2f0eb;">
+                                <option value="true"  ${r.active ? 'selected' : ''}>On</option>
+                                <option value="false" ${!r.active ? 'selected' : ''}>Off</option>
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+
+                body.querySelectorAll('input, select').forEach(el => {
+                    el.addEventListener('change', () => {
+                        const kind = el.dataset.kind;
+                        const field = el.dataset.field;
+                        if (!escalationEditing[kind]) escalationEditing[kind] = {};
+                        if (field === 'hours') escalationEditing[kind].hours = parseInt(el.value, 10) || 1;
+                        else if (field === 'active') escalationEditing[kind].active = el.value === 'true';
+                        else escalationEditing[kind][field] = el.value;
+                    });
+                });
+            }
+
+            document.getElementById('escalationError').style.display = 'none';
+            document.getElementById('escalationModal').classList.add('show');
+        }
+
+        function closeEscalationModal() {
+            document.getElementById('escalationModal').classList.remove('show');
+            escalationEditing = {};
+        }
+
+        async function saveEscalationRules() {
+            const err = document.getElementById('escalationError');
+            err.style.display = 'none';
+
+            const updates = Object.entries(escalationEditing).map(([kind, v]) => ({
+                kind,
+                hours: v.hours,
+                target_severity: v.targetSeverity,
+                active: v.active
+            }));
+
+            if (!updates.length) {
+                showToast('Nothing changed.', 'info');
+                closeEscalationModal();
+                return;
+            }
+
+            let savedCount = 0;
+            let failedCount = 0;
+
+            for (const upd of updates) {
+                const { error } = await supabaseClient
+                    .from('escalation_rules')
+                    .update({
+                        hours: upd.hours,
+                        target_severity: upd.target_severity,
+                        active: upd.active,
+                        updated_at: new Date().toISOString(),
+                        updated_by: CURRENT_USER
+                    })
+                    .eq('kind', upd.kind);
+                if (error) {
+                    failedCount++;
+                } else {
+                    savedCount++;
+                }
+            }
+
+            await fetchEscalationRules();
+
+            if (failedCount === 0) {
+                showToast('✅ Saved ' + savedCount + ' rule' + (savedCount === 1 ? '' : 's'), 'success');
+                closeEscalationModal();
+                await notifEscalate();
+                await fetchNotifications();
+                notifUpdateBadge();
+                notifRenderPanel();
+            } else {
+                err.textContent = `⚠️ ${failedCount} rule(s) failed to save.`;
+                err.style.display = 'block';
+            }
+        }
+
+        async function notifEscalate() {
+            if (!supabaseClient) return 0;
+            if (!escalationRules.length) await fetchEscalationRules();
+            if (!escalationRules.length) return 0;
+
+            const now = Date.now();
+            const activeRules = escalationRules.filter(r => r.active);
+            const ruleByKind = {};
+            activeRules.forEach(r => { ruleByKind[r.kind] = r; });
+
+            const { data, error } = await supabaseClient
+                .from('notifications')
+                .select('*')
+                .is('read_at', null)
+                .is('escalated_at', null);
+            if (error) {
+                console.warn('Escalation fetch failed:', error.message);
+                return 0;
+            }
+
+            const toEscalate = [];
+            (data || []).forEach(n => {
+                const rule = ruleByKind[n.kind];
+                if (!rule) return;
+                const ageHours = (now - new Date(n.created_at).getTime()) / (1000 * 60 * 60);
+                if (ageHours >= rule.hours) {
+                    toEscalate.push({
+                        id: n.id,
+                        kind: n.kind,
+                        old_severity: n.severity,
+                        new_severity: rule.target_severity
+                    });
+                }
+            });
+
+            if (!toEscalate.length) return 0;
+
+            let count = 0;
+            for (const item of toEscalate) {
+                const { error: updErr } = await supabaseClient
+                    .from('notifications')
+                    .update({
+                        severity: item.new_severity,
+                        escalated_at: new Date().toISOString(),
+                        escalated_from: item.old_severity
+                    })
+                    .eq('id', item.id);
+                if (!updErr) count++;
+            }
+
+            return count;
+        }
+
+        function setupEscalation() {
+            const btn = document.getElementById('notifEscalationBtn');
+            if (btn) btn.addEventListener('click', () => {
+                openEscalationModal();
+            });
+
+            const cancel = document.getElementById('escalationCancel');
+            if (cancel) cancel.addEventListener('click', closeEscalationModal);
+
+            const save = document.getElementById('escalationSave');
+            if (save) save.addEventListener('click', saveEscalationRules);
+
+            const modal = document.getElementById('escalationModal');
+            if (modal) modal.addEventListener('click', function(e) {
+                if (e.target === this) closeEscalationModal();
+            });
+        }
+
+
+        
         function showToast(msg, type = 'info') {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -11516,6 +11853,7 @@
                                                 setupOvertimeFilters();
                                                             setupLeaveFilters();
                                                                         setupNotifications();
+                                                                                    setupEscalation();
 
             // Wire task modal buttons
                         const newCustBtn = document.getElementById('newCustomerBtn');
@@ -11701,7 +12039,15 @@
 
             // startPolling();  // Manual refresh only — disabled
             // Generate notifications on load
+                       // startPolling();  // Manual refresh only — disabled
+
+            // §68 — Notifications
+            await fetchEscalationRules();
+            await notifEscalate();
+            await fetchNotifications();
+            notifUpdateBadge();
             notifGenerate();
+
             showToast('✅ Finance engine ready', 'success');
         }
 
