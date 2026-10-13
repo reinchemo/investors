@@ -1586,7 +1586,7 @@
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(200,154,91,0.35); padding-top:0.35rem; margin-top:0.35rem;">
 
-                                   <span>Total Debited:</span><strong id="txnBreakNet" style="color:#7ee0a2;">KSh 0.00</strong>
+                    <span>Total Debited:</span><strong id="txnBreakNet" style="color:#7ee0a2;">KSh 0.00</strong>
                 </div>
             </div>
             <label>Payment Method</label>
@@ -1603,12 +1603,7 @@
                     — paste the full M-PESA SMS and the fields auto-fill
                 </span>
             </label>
-            <textarea id="txnRef"
-                      placeholder="Paste the full M-PESA message here"
-                      rows="4"
-                      maxlength="800"
-                      autocomplete="off"
-                      style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; line-height:1.5; min-height:88px; resize:vertical;"></textarea>
+            <textarea id="txnRef" placeholder="Paste the full M-PESA message here" rows="4" maxlength="800" autocomplete="off" style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; line-height:1.5; min-height:88px; resize:vertical;"></textarea>
 
             <div id="mpesaParseStatus" style="display:none; margin-top:0.4rem; padding:0.5rem 0.8rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.3); border-radius:10px; font-size:0.72rem; color:#7fded1; font-family:'JetBrains Mono',monospace; line-height:1.4;">
                 <i class="fas fa-magic"></i> <span id="mpesaParseText">Parsed</span>
@@ -2565,7 +2560,7 @@
             <button class="tab" data-view="budgets"><i class="fas fa-bullseye"></i> Budgets</button>
             <button class="tab" data-view="overtime"><i class="fas fa-clock"></i> Overtime</button>
             <button class="tab" data-view="leave"><i class="fas fa-plane-departure"></i> Leave</button>
-                        <button class="tab" data-view="health"><i class="fas fa-heartbeat"></i> Health</button>
+            <button class="tab" data-view="health"><i class="fas fa-heartbeat"></i> Health</button>
 
         </div>
 
@@ -2574,7 +2569,7 @@
             <div class="headline">
                 <h1><i class="fas fa-chart-pie"></i> Overview <small id="todayLabel">—</small></h1>
             </div>
-                 <div class="summary-row">
+            <div class="summary-row">
                 <div class="summary-card income">
                     <div class="summary-label"><i class="fas fa-arrow-down"></i> TOTAL INCOME</div>
                     <div class="summary-value" id="sumIncome">KSh 0</div>
@@ -4628,7 +4623,7 @@
                 return null;
             },
 
-                      reference: (v, opts = {}) => {
+            reference: (v, opts = {}) => {
                 if (!v) return opts.required === false ? null : null;
                 const s = String(v).trim();
                 if (s.length > 80) return 'Reference cannot exceed 80 characters.';
@@ -7424,71 +7419,69 @@
         // ==================================================
         // CLOUD SYNC
         // ==================================================
-        async function fetchFromCloud() {
-            if (!supabaseClient) return false;
-            try {
-                const {
-                    data,
-                    error
-                } = await supabaseClient
-                    .from('transactions')
-                    .select('*')
-                    .is('deleted_at', null)
-                    .order('created_at', {
-                        ascending: false
-                    });
+   async function fetchFromCloud() {
+    if (!supabaseClient) return false;
+    try {
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from('transactions')
+            .select('*')
+            .is('deleted_at', null)
+            .order('created_at', {
+                ascending: false
+            });
 
-                if (error) throw error;
+        if (error) throw error;
 
-                transactions = (data || []).map(row => ({
-                    id: row.id,
-                    date: row.date,
-                    type: row.type,
-                    category: row.category,
-                    description: row.description,
-                    amount: safeNum(row.amount),
-                    fee: safeNum(row.fee),
-                    netAmount: safeNum(row.net_amount),
-                    actualDate: row.actual_date || row.date,
-                    method: row.method,
-                    reversalOf: row.reversal_of || null,
-                    version: row.version || 1,
-                    reversedAt: row.reversed_at || null,
-                    reversalReason: row.reversal_reason || null,
-                    reference: row.reference || '',
-                    location: row.location || '',
-                    locationId: row.location_id || null,
-                    staffId: row.staff_id || null,
-                    payrollRunId: row.payroll_run_id || null,
-                    status: row.status,
-                    reconStatus: row.recon_status || 'na',
-                    notes: row.notes || '',
-                    createdAt: row.created_at,
-                    createdBy: row.created_by,
-                    updatedAt: row.updated_at,
-                    updatedBy: row.updated_by,
-                    approvedAt: row.approved_at,
-                    approvedBy: row.approved_by,
-                    rejectedAt: row.rejected_at,
-                    rejectedBy: row.rejected_by
-                }));
+        transactions = (data || []).map(row => ({
+            id: row.id,
+            date: row.date,
+            type: row.type,
+            category: row.category,
+            description: row.description,
+            amount: safeNum(row.amount),
+            fee: safeNum(row.fee),
+            netAmount: safeNum(row.net_amount),
+            actualDate: row.actual_date || row.date,
+            method: row.method,
+            reversalOf: row.reversal_of || null,
+            version: row.version || 1,
+            reversedAt: row.reversed_at || null,
+            reversalReason: row.reversal_reason || null,
+            reference: row.reference || '',
+            location: row.location || '',
+            locationId: row.location_id || null,
+            staffId: row.staff_id || null,
+            payrollRunId: row.payroll_run_id || null,
+            status: row.status,
+            reconStatus: row.recon_status || 'na',
+            notes: row.notes || '',
+            createdAt: row.created_at,
+            createdBy: row.created_by,
+            updatedAt: row.updated_at,
+            updatedBy: row.updated_by,
+            approvedAt: row.approved_at,
+            approvedBy: row.approved_by,
+            rejectedAt: row.rejected_at,
+            rejectedBy: row.rejected_by
+        }));
 
-                const maxSeq = transactions.reduce((m, t) => {
-                    const match = String(t.id || '').match(/(\d{6})$/);
-                    return match ? Math.max(m, parseInt(match[1], 10)) : m;
-                }, 0);
-                // Use timestamp-based suffix so we never collide with soft-deleted rows
-                // that aren't in the in-memory list.
-                const timeSuffix = Date.now() % 1000000;
-                sequence = Math.max(maxSeq + 1, timeSuffix);
+        const maxSeq = transactions.reduce((m, t) => {
+            const match = String(t.id || '').match(/(\d{6})$/);
+            return match ? Math.max(m, parseInt(match[1], 10)) : m;
+        }, 0);
+        const timeSuffix = Date.now() % 1000000;
+        sequence = Math.max(maxSeq + 1, timeSuffix);
 
-                lastSyncAt = new Date().toISOString();
-                return true;
-            } catch (e) {
-                console.warn('Fetch failed — using local state:', e.message);
-            }
-            return false;
-        }
+        lastSyncAt = new Date().toISOString();
+        return true;
+    } catch (e) {
+        console.warn('Fetch failed — using local state:', e.message);
+    }
+    return false;
+}
 
         let liveCategories = null;
 
