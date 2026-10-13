@@ -1566,19 +1566,27 @@
             <div class="modal-row-3">
                 <div>
                     <label>Amount (KSh)</label>
-                    <input type="number" id="txnAmount" placeholder="0" min="0" step="1">
+                    <input type="number" id="txnAmount" placeholder="0" min="0" step="0.01" autocomplete="off">
                 </div>
                 <div>
                     <label>Fee (KSh)</label>
-                    <input type="number" id="txnFee" placeholder="0" min="0" step="1" value="0">
+                    <input type="number" id="txnFee" placeholder="0" min="0" step="0.01" value="0" autocomplete="off">
                 </div>
                 <div>
                     <label>Date</label>
                     <input type="date" id="txnDate">
                 </div>
             </div>
-            <div id="txnNetPreview" style="display:none; padding:0.5rem 0.8rem; margin-top:0.5rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.25); border-radius:10px; font-size:0.78rem; color:#7fded1; font-family:'JetBrains Mono',monospace;">
-                Net after fee: <strong id="txnNetPreviewValue">0</strong>
+            <div id="txnFeeBreakdown" style="display:none; margin-top:0.5rem; padding:0.6rem 0.9rem; background:rgba(200,154,91,0.08); border:1px solid rgba(200,154,91,0.3); border-radius:10px; font-size:0.75rem; color:#e8b879; font-family:'JetBrains Mono',monospace; line-height:1.6;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Amount:</span><strong id="txnBreakAmount">KSh 0.00</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Transaction Fee:</span><strong id="txnBreakFee" style="color:#f4c98d;">KSh 0.00</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(200,154,91,0.35); padding-top:0.35rem; margin-top:0.35rem;">
+                    <span>Net:</span><strong id="txnBreakNet" style="color:#7ee0a2;">KSh 0.00</strong>
+                </div>
             </div>
             <label>Payment Method</label>
             <select id="txnMethod">
@@ -1588,8 +1596,22 @@
                 <option value="cheque">Cheque</option>
                 <option value="other">Other</option>
             </select>
-            <label>Reference (M-Pesa code, bank ref, cheque no.)</label>
-            <input type="text" id="txnRef" placeholder="e.g. QAB123456" maxlength="80">
+            <label>
+                M-PESA Message / Reference
+                <span style="font-size:0.65rem; color:#7f9bb8; font-weight:400; text-transform:none; letter-spacing:0; margin-left:0.4rem;">
+                    — paste the full M-PESA SMS and the fields auto-fill
+                </span>
+            </label>
+            <textarea id="txnRef"
+                      placeholder="Paste the full M-PESA message here"
+                      rows="4"
+                      maxlength="800"
+                      autocomplete="off"
+                      style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; line-height:1.5; min-height:88px; resize:vertical;"></textarea>
+
+            <div id="mpesaParseStatus" style="display:none; margin-top:0.4rem; padding:0.5rem 0.8rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.3); border-radius:10px; font-size:0.72rem; color:#7fded1; font-family:'JetBrains Mono',monospace; line-height:1.4;">
+                <i class="fas fa-magic"></i> <span id="mpesaParseText">Parsed</span>
+            </div>
             <div class="modal-row">
                 <div>
                     <label>Location</label>
@@ -2551,7 +2573,7 @@
             <div class="headline">
                 <h1><i class="fas fa-chart-pie"></i> Overview <small id="todayLabel">—</small></h1>
             </div>
-            <div class="summary-row">
+                 <div class="summary-row">
                 <div class="summary-card income">
                     <div class="summary-label"><i class="fas fa-arrow-down"></i> TOTAL INCOME</div>
                     <div class="summary-value" id="sumIncome">KSh 0</div>
@@ -2571,6 +2593,13 @@
                     <div class="summary-label"><i class="fas fa-balance-scale"></i> NET POSITION</div>
                     <div class="summary-value" id="sumNet">KSh 0</div>
                     <div class="summary-sub">Income − Expenditure</div>
+                </div>
+
+                <!-- 🆕 TRANSACTION FEES CARD -->
+                <div class="summary-card" id="sumFeesCard" title="Sum of transaction fees across all records (M-PESA, bank, etc.)">
+                    <div class="summary-label"><i class="fas fa-receipt"></i> TRANSACTION FEES</div>
+                    <div class="summary-value" id="sumFees" style="color:#f4c98d;">KSh 0</div>
+                    <div class="summary-sub" id="sumFeesCount">0 transactions with fees</div>
                 </div>
             </div>
             <div class="table-section">
@@ -7716,7 +7745,7 @@
             return '';
         }
 
-        function renderDashboard() {
+            function renderDashboard() {
             const incomes = transactions.filter(t => t.type === 'income');
             const expenses = transactions.filter(t => t.type === 'expense');
             const capitals = transactions.filter(t => t.type === 'capital');
@@ -7726,6 +7755,10 @@
             const totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
             const net = totalIncome - totalExpense;
 
+            // 🆕 Sum of all transaction fees (M-PESA, bank, etc.)
+            const feesTotal = transactions.reduce((s, t) => s + safeNum(t.fee), 0);
+            const feesCount = transactions.filter(t => safeNum(t.fee) > 0).length;
+
             document.getElementById('sumIncome').textContent = 'KSh ' + fmt(totalIncome);
             document.getElementById('sumIncomeCount').textContent = incomes.length + ' transaction' + (incomes.length !== 1 ? 's' : '');
             document.getElementById('sumExpense').textContent = 'KSh ' + fmt(totalExpense);
@@ -7733,6 +7766,27 @@
             document.getElementById('sumCapital').textContent = 'KSh ' + fmt(totalCapital);
             document.getElementById('sumCapitalCount').textContent = capitals.length + ' transaction' + (capitals.length !== 1 ? 's' : '');
             document.getElementById('sumNet').textContent = (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net));
+
+            // 🆕 Update fee card
+            const feesEl = document.getElementById('sumFees');
+            if (feesEl) {
+                feesEl.textContent = 'KSh ' + fmt(feesTotal);
+                const countEl = document.getElementById('sumFeesCount');
+                if (countEl) {
+                    countEl.textContent = feesCount + ' transaction' + (feesCount !== 1 ? 's' : '') + ' with fees';
+                }
+                // Visual emphasis when fees exist
+                const card = document.getElementById('sumFeesCard');
+                if (card) {
+                    if (feesTotal > 0) {
+                        card.style.background = 'linear-gradient(135deg, rgba(200,154,91,0.16) 0%, rgba(60,40,20,0.55) 100%)';
+                        card.style.borderColor = 'rgba(200,154,91,0.35)';
+                    } else {
+                        card.style.background = '';
+                        card.style.borderColor = '';
+                    }
+                }
+            }
 
             document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-GB', {
                 day: '2-digit',
@@ -10001,61 +10055,224 @@
             ).join('');
         }
 
-        function openTxnModal(txn = null) {
-            editingTxnId = txn ? txn.id : null;
-            const title = document.getElementById('txnModalTitle');
-            const err = document.getElementById('txnError');
-            err.style.display = 'none';
+        // ==================================================
+// M-PESA MESSAGE PARSER
+// Paste a full M-PESA SMS into #txnRef → modal auto-fills.
+// Amount only fills on PASTE (never on typing).
+// ==================================================
+function parseMpesaMessage(raw) {
+    if (!raw) return null;
+    const text = String(raw).replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!/Ksh/i.test(text) && !/Confirmed/i.test(text)) return null;
 
-            if (txn) {
-                title.innerHTML = '<i class="fas fa-edit"></i> Edit Transaction';
-                document.getElementById('txnType').value = txn.type || 'income';
-                populateCategoryDropdown(txn.type || 'income', txn.category);
-                document.getElementById('txnDesc').value = txn.description || '';
-                document.getElementById('txnAmount').value = txn.amount || '';
-                                document.getElementById('txnFee').value = txn.fee || 0;
-                document.getElementById('txnDate').value = txn.date || todayISO();
-                document.getElementById('txnMethod').value = txn.method || 'cash';
-                document.getElementById('txnRef').value = txn.reference || '';
-                populateLocationDropdown(txn.location);
-                document.getElementById('txnStatus').value = txn.status || 'draft';
-                document.getElementById('txnNotes').value = txn.notes || '';
-            } else {
-                title.innerHTML = '<i class="fas fa-plus-circle"></i> New Transaction';
-                document.getElementById('txnType').value = 'income';
-                populateCategoryDropdown('income');
-                document.getElementById('txnDesc').value = '';
-                document.getElementById('txnAmount').value = '';
-                document.getElementById('txnDate').value = todayISO();
-                                document.getElementById('txnFee').value = '0';
-                document.getElementById('txnMethod').value = 'cash';
-                document.getElementById('txnRef').value = '';
-                populateLocationDropdown('Head Office');
-                document.getElementById('txnStatus').value = 'draft';
-                document.getElementById('txnNotes').value = '';
-            }
+    const result = {
+        mpesaCode: null, amount: null, fee: null,
+        recipient: null, account: null,
+        date: null, time: null, balance: null,
+        direction: null, raw: text
+    };
 
-            document.getElementById('txnModal').classList.add('show');
-            setTimeout(() => document.getElementById('txnDesc').focus(), 100);
-                        // Live net preview
-            const amountInput = document.getElementById('txnAmount');
-            const feeInput = document.getElementById('txnFee');
-            const previewBox = document.getElementById('txnNetPreview');
-            const previewVal = document.getElementById('txnNetPreviewValue');
-            const recompute = () => {
-                const a = safeNum(amountInput.value);
-                const f = safeNum(feeInput.value);
-                if (f > 0) {
-                    previewBox.style.display = 'block';
-                    previewVal.textContent = 'KSh ' + fmt(a - f);
-                } else {
-                    previewBox.style.display = 'none';
-                }
-            };
-            amountInput.addEventListener('input', recompute);
-            feeInput.addEventListener('input', recompute);
-            recompute();
+    const codeMatch = text.match(/\b([A-Z]{2,4}\d[A-Z0-9]{5,9})\b/);
+    if (codeMatch) result.mpesaCode = codeMatch[1].toUpperCase();
+
+    const sentMatch = text.match(/sent to\s+(.+?)\s+(?:for account|on\s+\d)/i);
+    if (sentMatch) { result.direction = 'out'; result.recipient = sentMatch[1].trim(); }
+    const recvMatch = text.match(/received from\s+(.+?)\s+(?:for account|on\s+\d)/i);
+    if (recvMatch) { result.direction = 'in'; result.recipient = recvMatch[1].trim(); }
+
+    const amountMatch = text.match(/Ksh\s*([\d,]+(?:\.\d{1,2})?)\s+(?:sent|received)/i);
+    if (amountMatch) result.amount = parseFloat(amountMatch[1].replace(/,/g, ''));
+
+    const feeMatch = text.match(/Transaction cost[,\s]*Ksh\s*([\d,]+(?:\.\d{1,2})?)/i);
+    if (feeMatch) result.fee = parseFloat(feeMatch[1].replace(/,/g, ''));
+
+    const acctMatch = text.match(/for account\s+([A-Z0-9\-]+)/i);
+    if (acctMatch) result.account = acctMatch[1].trim();
+
+    const dtMatch = text.match(/on\s+(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+at\s+(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (dtMatch) {
+        let [, d, m, y, hh, mm, ampm] = dtMatch;
+        d = parseInt(d, 10); m = parseInt(m, 10); y = parseInt(y, 10);
+        if (y < 100) y += 2000;
+        hh = parseInt(hh, 10);
+        if (ampm) {
+            const isPM = ampm.toUpperCase() === 'PM';
+            if (isPM && hh !== 12) hh += 12;
+            if (!isPM && hh === 12) hh = 0;
         }
+        result.date = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        result.time = `${String(hh).padStart(2,'0')}:${mm}`;
+    }
+
+    const balMatch = text.match(/M-?PESA balance is\s+Ksh\s*([\d,]+(?:\.\d{1,2})?)/i);
+    if (balMatch) result.balance = parseFloat(balMatch[1].replace(/,/g, ''));
+
+    if (result.amount === null && result.mpesaCode === null) return null;
+    return result;
+}
+
+function handleMpesaPaste(rawValue) {
+    const parsed = parseMpesaMessage(rawValue);
+    if (!parsed) return false;
+
+    const statusBox = document.getElementById('mpesaParseStatus');
+    const statusTxt = document.getElementById('mpesaParseText');
+    const filled = [];
+
+    if (parsed.amount !== null) {
+        document.getElementById('txnAmount').value = parsed.amount;
+        filled.push('amount KSh ' + parsed.amount.toFixed(2));
+    }
+    if (parsed.fee !== null) {
+        document.getElementById('txnFee').value = parsed.fee;
+        filled.push('fee KSh ' + parsed.fee.toFixed(2));
+    }
+    const dateField = document.getElementById('txnDate');
+    if (parsed.date && (!dateField.value || dateField.value === todayISO())) {
+        dateField.value = parsed.date;
+        filled.push('date ' + parsed.date);
+    }
+    document.getElementById('txnMethod').value = 'mpesa';
+
+    if (parsed.direction === 'out') {
+        const t = document.getElementById('txnType');
+        if (t.value !== 'expense') { t.value = 'expense'; populateCategoryDropdown('expense'); }
+    } else if (parsed.direction === 'in') {
+        const t = document.getElementById('txnType');
+        if (t.value !== 'income') { t.value = 'income'; populateCategoryDropdown('income'); }
+    }
+
+    const descField = document.getElementById('txnDesc');
+    if (!descField.value.trim() && parsed.recipient) {
+        descField.value = parsed.recipient + (parsed.account ? ' — ' + parsed.account : '');
+        filled.push('description');
+    }
+
+    if (parsed.recipient) {
+        const catSel = document.getElementById('txnCategory');
+        const r = parsed.recipient.toUpperCase();
+        const hints = [
+            { pattern: /KPLC/i,              match: /kplc|electricity/i },
+            { pattern: /SAFARICOM|AIRTIME/i, match: /safaricom|airtime/i },
+            { pattern: /STARLINK/i,          match: /starlink|internet/i },
+            { pattern: /MPESA|M-PESA/i,      match: /mpesa charges/i },
+        ];
+        for (const h of hints) {
+            if (h.pattern.test(r)) {
+                const opt = Array.from(catSel.options).find(o => h.match.test(o.value));
+                if (opt && catSel.value !== opt.value) {
+                    catSel.value = opt.value;
+                    filled.push('category ' + opt.value);
+                }
+                break;
+            }
+        }
+    }
+
+    const refField = document.getElementById('txnRef');
+    if (parsed.mpesaCode) {
+        refField.dataset.mpesaCode = parsed.mpesaCode;
+        filled.push('ref ' + parsed.mpesaCode);
+    }
+
+    if (filled.length) {
+        statusTxt.textContent = 'Auto-filled: ' + filled.join(' · ');
+        statusBox.style.display = 'block';
+        clearTimeout(statusBox._hideTimer);
+        statusBox._hideTimer = setTimeout(() => { statusBox.style.display = 'none'; }, 7000);
+    }
+
+    if (typeof window._recomputeTxnNet === 'function') window._recomputeTxnNet();
+    return true;
+}
+
+// Fee breakdown — attached ONCE, no per-open listener leaks
+window._recomputeTxnNet = function () {
+    const a = safeNum(document.getElementById('txnAmount').value);
+    const f = safeNum(document.getElementById('txnFee').value);
+    const breakdown = document.getElementById('txnFeeBreakdown');
+    if (!breakdown) return;
+    if (a > 0 || f > 0) {
+        breakdown.style.display = 'block';
+        document.getElementById('txnBreakAmount').textContent = 'KSh ' + a.toFixed(2);
+        document.getElementById('txnBreakFee').textContent = 'KSh ' + f.toFixed(2);
+        document.getElementById('txnBreakNet').textContent = 'KSh ' + (a - f).toFixed(2);
+    } else {
+        breakdown.style.display = 'none';
+    }
+};
+
+function openTxnModal(txn = null) {
+    editingTxnId = txn ? txn.id : null;
+    const title = document.getElementById('txnModalTitle');
+    const err = document.getElementById('txnError');
+    err.style.display = 'none';
+
+    if (txn) {
+        title.innerHTML = '<i class="fas fa-edit"></i> Edit Transaction';
+        document.getElementById('txnType').value = txn.type || 'income';
+        populateCategoryDropdown(txn.type || 'income', txn.category);
+        document.getElementById('txnDesc').value = txn.description || '';
+        document.getElementById('txnAmount').value = txn.amount || '';
+        document.getElementById('txnFee').value = txn.fee || 0;
+        document.getElementById('txnDate').value = txn.date || todayISO();
+        document.getElementById('txnMethod').value = txn.method || 'cash';
+
+        // Show full M-PESA SMS if it was stored in notes, else show short reference
+        const refFieldEdit = document.getElementById('txnRef');
+        const notesVal = txn.notes || '';
+        if (notesVal.length > 40 && /Confirmed/i.test(notesVal) && /Ksh/i.test(notesVal)) {
+            refFieldEdit.value = notesVal;
+            refFieldEdit.dataset.mpesaCode = txn.reference || '';
+        } else {
+            refFieldEdit.value = txn.reference || '';
+        }
+
+        populateLocationDropdown(txn.location);
+        document.getElementById('txnStatus').value = txn.status || 'draft';
+        document.getElementById('txnNotes').value = txn.notes || '';
+    } else {
+        title.innerHTML = '<i class="fas fa-plus-circle"></i> New Transaction';
+        document.getElementById('txnType').value = 'income';
+        populateCategoryDropdown('income');
+        document.getElementById('txnDesc').value = '';
+        document.getElementById('txnAmount').value = '';
+        document.getElementById('txnFee').value = '0';
+        document.getElementById('txnDate').value = todayISO();
+        document.getElementById('txnMethod').value = 'cash';
+
+        const refFieldNew = document.getElementById('txnRef');
+        refFieldNew.value = '';
+        delete refFieldNew.dataset.mpesaCode;
+
+        populateLocationDropdown('Head Office');
+        document.getElementById('txnStatus').value = 'draft';
+        document.getElementById('txnNotes').value = '';
+    }
+
+    document.getElementById('txnModal').classList.add('show');
+    setTimeout(() => document.getElementById('txnDesc').focus(), 100);
+
+    // Wire M-PESA paste handler ONCE per element
+    const refField = document.getElementById('txnRef');
+    if (refField && !refField._mpesaWired) {
+        refField.addEventListener('paste', () => {
+            setTimeout(() => handleMpesaPaste(refField.value), 20);
+        });
+        refField.addEventListener('input', () => {
+            const v = refField.value.trim();
+            if (v.length > 40 && /Confirmed/i.test(v) && /Ksh/i.test(v)) {
+                handleMpesaPaste(v);
+            }
+        });
+        refField._mpesaWired = true;
+    }
+
+    // Hide stale parse chip + refresh fee breakdown
+    const chip = document.getElementById('mpesaParseStatus');
+    if (chip) chip.style.display = 'none';
+    if (typeof window._recomputeTxnNet === 'function') window._recomputeTxnNet();
+}
 
         function closeTxnModal() {
             document.getElementById('txnModal').classList.remove('show');
@@ -10068,11 +10285,28 @@
             const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);            const amount = safeNum(document.getElementById('txnAmount').value);
                         const fee = safeNum(document.getElementById('txnFee').value);
             const date = document.getElementById('txnDate').value || todayISO();
-            const method = document.getElementById('txnMethod').value;
-            const reference = document.getElementById('txnRef').value.trim();
+                        const method = document.getElementById('txnMethod').value;
+
+            // If user pasted a full M-PESA SMS, extract just the short code
+            const refField = document.getElementById('txnRef');
+            const refRaw = refField.value.trim();
+            let reference = refRaw;
+            if (refRaw.length > 40 && /Confirmed/i.test(refRaw)) {
+                const parsed = parseMpesaMessage(refRaw);
+                if (parsed && parsed.mpesaCode) {
+                    reference = parsed.mpesaCode;
+                    // Preserve the full SMS in notes for audit (only if notes empty)
+                    const notesField = document.getElementById('txnNotes');
+                    if (!notesField.value.trim()) {
+                        notesField.value = refRaw.slice(0, 1000);
+                    }
+                } else {
+                    reference = refRaw.slice(0, 80);
+                }
+            }
+
             const location = document.getElementById('txnLocation').value;
             const status = document.getElementById('txnStatus').value;
-
             const notes = Validation.sanitize(document.getElementById('txnNotes').value, 1000);            const err = document.getElementById('txnError');
             err.style.display = 'none';
 
@@ -10093,17 +10327,20 @@
                 return;
             }
 
-            // Reference duplicate check (existing)
+                        // Reference duplicate check — matches on the short M-PESA code
             if (reference) {
                 const ref = reference.toUpperCase();
-                const dup = transactions.find(t => t.id !== editingTxnId && (t.reference || '').toUpperCase() === ref);
+                const dup = transactions.find(t =>
+                    t.id !== editingTxnId &&
+                    (t.reference || '').toUpperCase() === ref &&
+                    !t.reversedAt
+                );
                 if (dup) {
-                    err.textContent = `⚠️ Reference "${reference}" is already used by ${dup.id}.`;
+                    err.textContent = `⚠️ M-PESA code "${reference}" is already used by ${dup.id} (${dup.date}).`;
                     err.style.display = 'block';
                     return;
                 }
             }
-
             const matchedLocation = locations.find(l => l.name === location);
 
             const row = {
@@ -12321,7 +12558,12 @@
             document.getElementById('txnModal').addEventListener('click', function(e) {
                 if (e.target === this) closeTxnModal();
             });
-            document.getElementById('txnType').addEventListener('change', (e) => populateCategoryDropdown(e.target.value));
+          
+                        document.getElementById('txnType').addEventListener('change', (e) => populateCategoryDropdown(e.target.value));
+
+            // Attach amount/fee recompute listeners ONCE — fixes listener leak
+            document.getElementById('txnAmount').addEventListener('input', window._recomputeTxnNet);
+            document.getElementById('txnFee').addEventListener('input', window._recomputeTxnNet);
 
             document.getElementById('confirmNo').addEventListener('click', closeConfirm);
             document.getElementById('confirmYes').addEventListener('click', () => {
