@@ -1585,7 +1585,8 @@
                     <span>Transaction Fee:</span><strong id="txnBreakFee" style="color:#f4c98d;">KSh 0.00</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(200,154,91,0.35); padding-top:0.35rem; margin-top:0.35rem;">
-                    <span>Net:</span><strong id="txnBreakNet" style="color:#7ee0a2;">KSh 0.00</strong>
+
+                                   <span>Total Debited:</span><strong id="txnBreakNet" style="color:#7ee0a2;">KSh 0.00</strong>
                 </div>
             </div>
             <label>Payment Method</label>
@@ -4627,11 +4628,13 @@
                 return null;
             },
 
-            reference: (v, opts = {}) => {
-                if (!v) return opts.required === false ? null : null; // references usually optional
+                      reference: (v, opts = {}) => {
+                if (!v) return opts.required === false ? null : null;
                 const s = String(v).trim();
                 if (s.length > 80) return 'Reference cannot exceed 80 characters.';
-                if (!/^[A-Za-z0-9._\-\/]+$/.test(s)) return 'Reference contains invalid characters (letters, digits, . _ - / only).';
+                // Allow any printable characters — real references vary widely
+                // (bank refs, cheque numbers, M-PESA codes, etc.)
+                if (!/^[\x20-\x7E]+$/.test(s)) return 'Reference contains invalid characters.';
                 return null;
             },
 
@@ -10192,14 +10195,14 @@ window._recomputeTxnNet = function () {
     const f = safeNum(document.getElementById('txnFee').value);
     const breakdown = document.getElementById('txnFeeBreakdown');
     if (!breakdown) return;
-    if (a > 0 || f > 0) {
-        breakdown.style.display = 'block';
-        document.getElementById('txnBreakAmount').textContent = 'KSh ' + a.toFixed(2);
-        document.getElementById('txnBreakFee').textContent = 'KSh ' + f.toFixed(2);
-        document.getElementById('txnBreakNet').textContent = 'KSh ' + (a - f).toFixed(2);
-    } else {
-        breakdown.style.display = 'none';
-    }
+           if (a > 0 || f > 0) {
+            breakdown.style.display = 'block';
+            document.getElementById('txnBreakAmount').textContent = 'KSh ' + a.toFixed(2);
+            document.getElementById('txnBreakFee').textContent = 'KSh ' + f.toFixed(2);
+            document.getElementById('txnBreakNet').textContent = 'KSh ' + (a + f).toFixed(2);
+        } else {
+            breakdown.style.display = 'none';
+        }
 };
 
 function openTxnModal(txn = null) {
@@ -10287,15 +10290,16 @@ function openTxnModal(txn = null) {
             const date = document.getElementById('txnDate').value || todayISO();
                         const method = document.getElementById('txnMethod').value;
 
-            // If user pasted a full M-PESA SMS, extract just the short code
+            // ---- Extract short M-PESA code FIRST (before validation) ----
             const refField = document.getElementById('txnRef');
             const refRaw = refField.value.trim();
             let reference = refRaw;
+
             if (refRaw.length > 40 && /Confirmed/i.test(refRaw)) {
                 const parsed = parseMpesaMessage(refRaw);
                 if (parsed && parsed.mpesaCode) {
                     reference = parsed.mpesaCode;
-                    // Preserve the full SMS in notes for audit (only if notes empty)
+                    // Preserve full SMS in notes for audit (only if notes empty)
                     const notesField = document.getElementById('txnNotes');
                     if (!notesField.value.trim()) {
                         notesField.value = refRaw.slice(0, 1000);
@@ -10307,19 +10311,20 @@ function openTxnModal(txn = null) {
 
             const location = document.getElementById('txnLocation').value;
             const status = document.getElementById('txnStatus').value;
-            const notes = Validation.sanitize(document.getElementById('txnNotes').value, 1000);            const err = document.getElementById('txnError');
+            const notes = Validation.sanitize(document.getElementById('txnNotes').value, 1000);
+            const err = document.getElementById('txnError');
             err.style.display = 'none';
 
-                     // §82 — full validation
+            // §82 — full validation (fee > amount check removed)
             const checks = [
                 [Validation.text(description, { label: 'Description', min: 3, max: 200 }), 'Description'],
                 [Validation.amount(amount, { min: 0.01 }), 'Amount'],
                 [Validation.date(date, { required: true }), 'Date'],
                 [Validation.reference(reference, { required: false }), 'Reference'],
-                [fee > amount ? 'Fee cannot be greater than the amount.' : null, 'Fee'],
                 [fee < 0 ? 'Fee cannot be negative.' : null, 'Fee'],
                 [Validation.text(notes, { label: 'Notes', min: 0, max: 1000, required: false }), 'Notes']
             ];
+
             const firstErr = Validation.firstError(checks);
             if (firstErr) {
                 err.textContent = '⚠️ ' + firstErr;
