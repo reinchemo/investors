@@ -3390,7 +3390,7 @@
                 } = await supabaseClient
                     .from('expenditure_data')
                     .select('data, last_updated')
-                    .eq('id', 1)
+                    .eq('id', 2)
                     .single();
 
                 if (blobErr && blobErr.code !== 'PGRST116') throw blobErr;
