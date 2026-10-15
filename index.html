@@ -2953,71 +2953,71 @@
         </div>
     </div>
     <!-- ============================================================ -->
-<!-- COMPANY RESERVE DASHBOARD MODAL                              -->
-<!-- ============================================================ -->
-<div class="modal-overlay" id="reserveModal">
-    <div class="modal-card" style="max-width: 900px;">
-        <div class="payments-modal-header">
-            <h3><i class="fas fa-piggy-bank" style="color:#c89a5b;"></i> Company Reserve</h3>
-            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                <button class="btn btn-ghost add-employee-btn" id="printReserveBtn"><i class="fas fa-print"></i> Print</button>
-                <button class="btn btn-primary add-employee-btn" id="newReserveMovementBtn"><i class="fas fa-plus"></i> Record Movement</button>
+    <!-- COMPANY RESERVE DASHBOARD MODAL                              -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="reserveModal">
+        <div class="modal-card" style="max-width: 900px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-piggy-bank" style="color:#c89a5b;"></i> Company Reserve</h3>
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <button class="btn btn-ghost add-employee-btn" id="printReserveBtn"><i class="fas fa-print"></i> Print</button>
+                    <button class="btn btn-primary add-employee-btn" id="newReserveMovementBtn"><i class="fas fa-plus"></i> Record Movement</button>
+                </div>
+            </div>
+
+            <div class="reconcile-note" style="margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <span>Virtual Stage 2 amounts flow into Reserve automatically when a dividend is paid. Manual inflows and outflows (expenditures, transfers, corrections) are recorded below with reason and audit trail.</span>
+            </div>
+
+            <div id="reserveSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+            <div class="employee-table-wrap">
+                <table class="employee-table" style="min-width:800px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Source / Reference</th>
+                            <th>Category</th>
+                            <th style="text-align:right;">In (KSh)</th>
+                            <th style="text-align:right;">Out (KSh)</th>
+                            <th style="text-align:right;">Running Balance</th>
+                            <th>Recorded By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reserveLedgerBody"></tbody>
+                </table>
+            </div>
+
+            <div class="reconcile-note" id="reserveReconcile" style="margin-top:1rem;">
+                <i class="fas fa-check-circle"></i>
+                <span id="reserveReconcileText">Reserve ledger reconciles.</span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="reserveClose">Close</button>
             </div>
         </div>
-
-        <div class="reconcile-note" style="margin-bottom:1rem;">
-            <i class="fas fa-info-circle"></i>
-            <span>Virtual Stage 2 amounts flow into Reserve automatically when a dividend is paid. Manual inflows and outflows (expenditures, transfers, corrections) are recorded below with reason and audit trail.</span>
-        </div>
-
-        <div id="reserveSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
-
-        <div class="employee-table-wrap">
-            <table class="employee-table" style="min-width:800px;">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Source / Reference</th>
-                        <th>Category</th>
-                        <th style="text-align:right;">In (KSh)</th>
-                        <th style="text-align:right;">Out (KSh)</th>
-                        <th style="text-align:right;">Running Balance</th>
-                        <th>Recorded By</th>
-                    </tr>
-                </thead>
-                <tbody id="reserveLedgerBody"></tbody>
-            </table>
-        </div>
-
-        <div class="reconcile-note" id="reserveReconcile" style="margin-top:1rem;">
-            <i class="fas fa-check-circle"></i>
-            <span id="reserveReconcileText">Reserve ledger reconciles.</span>
-        </div>
-
-        <div class="modal-actions">
-            <button class="cancel" id="reserveClose">Close</button>
-        </div>
     </div>
-</div>
 
-<!-- ============================================================ -->
-<!-- RESERVE MOVEMENT MODAL (add in/out)                          -->
-<!-- ============================================================ -->
-<div class="modal-overlay" id="reserveMovementModal">
-    <div class="modal-card" style="max-width: 480px;">
-        <h3 id="reserveMovementTitle"><i class="fas fa-piggy-bank"></i> Record Reserve Movement</h3>
+    <!-- ============================================================ -->
+    <!-- RESERVE MOVEMENT MODAL (add in/out)                          -->
+    <!-- ============================================================ -->
+    <div class="modal-overlay" id="reserveMovementModal">
+        <div class="modal-card" style="max-width: 480px;">
+            <h3 id="reserveMovementTitle"><i class="fas fa-piggy-bank"></i> Record Reserve Movement</h3>
 
-        <label>Direction <span style="color:#e8837a;">*</span></label>
-        <select id="rmDirection">
+            <label>Direction <span style="color:#e8837a;">*</span></label>
+            <select id="rmDirection">
             <option value="in">Inflow (money into reserve)</option>
             <option value="out">Outflow (money out of reserve)</option>
         </select>
 
-        <label>Amount (KSh) <span style="color:#e8837a;">*</span></label>
-        <input type="number" id="rmAmount" placeholder="0" min="0.01" step="0.01" autocomplete="off">
+            <label>Amount (KSh) <span style="color:#e8837a;">*</span></label>
+            <input type="number" id="rmAmount" placeholder="0" min="0.01" step="0.01" autocomplete="off">
 
-        <label>Category <span style="color:#e8837a;">*</span></label>
-        <select id="rmCategory">
+            <label>Category <span style="color:#e8837a;">*</span></label>
+            <select id="rmCategory">
             <option value="virtual_stage2">Virtual Stage 2 (auto)</option>
             <option value="manual_inflow">Manual inflow / contribution</option>
             <option value="retained_earnings">Retained earnings</option>
@@ -3027,20 +3027,20 @@
             <option value="other">Other</option>
         </select>
 
-        <label>Date</label>
-        <input type="date" id="rmDate">
+            <label>Date</label>
+            <input type="date" id="rmDate">
 
-        <label>Reason / Notes <span style="color:#e8837a;">*</span></label>
-        <textarea id="rmReason" placeholder="e.g. Withdrawal to fund Ruiru expansion — approved 12 Oct 2026" maxlength="500"></textarea>
+            <label>Reason / Notes <span style="color:#e8837a;">*</span></label>
+            <textarea id="rmReason" placeholder="e.g. Withdrawal to fund Ruiru expansion — approved 12 Oct 2026" maxlength="500"></textarea>
 
-        <div class="modal-error" id="reserveMovementError"></div>
+            <div class="modal-error" id="reserveMovementError"></div>
 
-        <div class="modal-actions">
-            <button class="cancel" id="rmCancel">Cancel</button>
-            <button class="save" id="rmSave">Record Movement</button>
+            <div class="modal-actions">
+                <button class="cancel" id="rmCancel">Cancel</button>
+                <button class="save" id="rmSave">Record Movement</button>
+            </div>
         </div>
     </div>
-</div>
 
     <div class="dashboard">
         <nav class="nav">
@@ -7003,17 +7003,19 @@
                 body.innerHTML = `<tr><td colspan="7"><div class="empty-row"><i class="fas fa-coins"></i>No dividend distributions yet. Create one to get started.</div></td></tr>`;
             } else {
                 const sorted = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-                body.innerHTML = sorted.map(d => {
+                               body.innerHTML = sorted.map(d => {
                     const isLocked = d.status === 'approved' || d.status === 'processing' || d.status === 'paid';
                     const editClass = isLocked ? 'div-edit-btn warn' : 'div-edit-btn';
                     const deleteClass = isLocked ? 'div-delete-btn warn' : 'div-delete-btn';
+                    const paidAmt = safeNum(d.totalDistributable) - safeNum(d.reserveAmount);
                     return `<tr>
                         <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer;"><span class="div-ref">${escapeHTML(d.id)}</span></td>
                         <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer;"><strong>${escapeHTML(d.periodLabel)}</strong></td>
                         <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer;"><span class="status-pill ${escapeHTML(d.status)}">${escapeHTML(d.status)}</span></td>
-                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer; font-family:'JetBrains Mono',monospace; color:#f4c98d;">KSh ${fmt(d.totalDistributable)}</td>
-                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer;">${d.allocations ? d.allocations.length : 0}</td>
-                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(new Date(d.createdAt).toLocaleDateString())}</td>
+                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer; font-family:'JetBrains Mono',monospace; text-align:right;">KSh ${fmt(d.totalDistributable)}</td>
+                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer; font-family:'JetBrains Mono',monospace; text-align:right; color:#7ee0a2;">KSh ${fmt(paidAmt)}</td>
+                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer; font-family:'JetBrains Mono',monospace; text-align:right; color:#f4c98d;">${safeNum(d.reserveAmount) > 0 ? 'KSh ' + fmt(d.reserveAmount) : '—'}</td>
+                        <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer; font-family:'JetBrains Mono',monospace; text-align:right; color:#b8a0ff;">${safeNum(d.runningReserveBalance) > 0 ? 'KSh ' + fmt(d.runningReserveBalance) : '—'}</td>
                         <td>
                             <div class="div-actions-cell">
                                 <button class="${editClass}" onclick="event.stopPropagation(); requestEdit('${d.id}')" title="${isLocked ? '⚠️ Edit locked — will warn' : 'Edit draft'}"><i class="fas fa-edit"></i></button>
@@ -7054,39 +7056,94 @@
             return `<div class="print-header"><h1>STARLINK LLC</h1><h2>${escapeHTML(title)}</h2><p>Generated: ${escapeHTML(new Date().toLocaleString())}</p></div>`;
         }
 
-        function printAllDividends() {
+           function printAllDividends() {
             if (!dividends.length) {
                 showError('No dividends to print.');
                 return;
             }
-            const sorted = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+            // Sort chronologically (oldest first)
+            const sorted = [...dividends].sort((a, b) => {
+                const da = a.snapshotDate || a.createdAt || '';
+                const db = b.snapshotDate || b.createdAt || '';
+                return da.localeCompare(db);
+            });
             const grandTotal = sorted.reduce((s, d) => s + safeNum(d.totalDistributable), 0);
-            const totalPaid = sorted.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
-            const totalUnpaid = grandTotal - totalPaid;
+            const totalPaid = sorted.reduce((s, d) => s + (safeNum(d.totalDistributable) - safeNum(d.reserveAmount)), 0);
+            const totalReserve = sorted.reduce((s, d) => s + safeNum(d.reserveAmount), 0);
+            const runningReserve = sorted.length ? safeNum(sorted[sorted.length - 1].runningReserveBalance) : 0;
 
             let html = `<div class="employee-print-report">`;
             html += printHeader('All Dividend Distributions — Full Report');
             html += `<div class="print-cover-summary">
                 <h3>Summary Overview</h3>
                 <table class="print-list">
-                    <thead><tr><th>Reference</th><th>Period</th><th>Status</th><th style="text-align:right;">Amount (KSh)</th><th style="text-align:right;">Shareholders</th><th>Created</th></tr></thead>
+                    <thead><tr><th>Period</th><th>Pay Date</th><th style="text-align:right;">Total Pool</th><th style="text-align:right;">Paid to Shareholders</th><th style="text-align:right;">Reserve</th><th style="text-align:right;">Running Reserve</th></tr></thead>
                     <tbody>
-                        ${sorted.map(d => `<tr><td>${escapeHTML(d.id)}</td><td>${escapeHTML(d.periodLabel)}</td><td>${escapeHTML(d.status.toUpperCase())}</td><td style="text-align:right; font-weight:700;">KSh ${fmt(d.totalDistributable)}</td><td style="text-align:right;">${d.allocations ? d.allocations.length : 0}</td><td>${escapeHTML(new Date(d.createdAt).toLocaleDateString())}</td></tr>`).join('')}
-                        <tr style="font-weight:800; background:#f0f5fb;"><td colspan="3">GRAND TOTAL</td><td style="text-align:right;">KSh ${fmt(grandTotal)}</td><td colspan="2"></td></tr>
+                        ${sorted.map(d => `<tr><td>${escapeHTML(d.periodLabel)}</td><td>${escapeHTML(d.paidAt ? new Date(d.paidAt).toLocaleDateString() : '—')}</td><td style="text-align:right;">${fmt(d.totalDistributable)}</td><td style="text-align:right;">${fmt(safeNum(d.totalDistributable) - safeNum(d.reserveAmount))}</td><td style="text-align:right; color:#a67a3a; font-weight:700;">${fmt(d.reserveAmount)}</td><td style="text-align:right;">${fmt(d.runningReserveBalance)}</td></tr>`).join('')}
+                        <tr style="font-weight:800; background:#f0f5fb;"><td colspan="2">GRAND TOTAL</td><td style="text-align:right;">${fmt(grandTotal)}</td><td style="text-align:right;">${fmt(totalPaid)}</td><td style="text-align:right;">${fmt(totalReserve)}</td><td style="text-align:right;">${fmt(runningReserve)}</td></tr>
                     </tbody>
                 </table>
-                <table class="print-payment-table" style="margin-top:24px;">
-                    <tr><td>Total Distributions</td><td>${sorted.length}</td></tr>
-                    <tr><td>Total Amount</td><td><strong>KSh ${fmt(grandTotal)}</strong></td></tr>
-                    <tr><td>Paid Out</td><td><strong>KSh ${fmt(totalPaid)}</strong></td></tr>
-                    <tr><td>Still Outstanding</td><td><strong>KSh ${fmt(totalUnpaid)}</strong></td></tr>
-                </table>
+                <div style="margin-top:20px; padding:14px; background:#f7f9fb; border-left:4px solid #1a5a9c;">
+                    <h3 style="color:#0b2b4a; font-size:14px; margin:0 0 8px;">Method (Two-Stage Formula)</h3>
+                    <ol style="margin:0; padding-left:20px; font-size:12px; line-height:1.7; color:#162d44;">
+                        <li>Ratio = holder equity ÷ total equity (business value) at the snapshot.</li>
+                        <li>1st Division = Dividend × Ratio (everyone, incl. Virtual).</li>
+                        <li>2nd Division = Virtual's 1st Division × Ratio (everyone, incl. Virtual).</li>
+                        <li>Final payout (each real shareholder) = 1st + 2nd, rounded to whole KSh.</li>
+                        <li>STARLINK LLC VIRTUAL is not paid; its 2nd Division = Company Reserve.</li>
+                        <li>Reserve = Dividend − sum of the five rounded payouts. Paid + Reserve = Dividend.</li>
+                        <li>Virtual was a shareholder from June 2026 only. No Virtual = no 2nd Division, no reserve.</li>
+                    </ol>
+                </div>
             </div>`;
             html += `<div style="page-break-before: always;"></div>`;
 
             sorted.forEach((d, idx) => {
-                const total = d.allocations.reduce((s, a) => s + a.amount, 0);
-                const rows = d.allocations.map(a => `<tr><td>${escapeHTML(a.name)}</td><td style="text-align:right;">${a.percentage.toFixed(2)}%</td><td style="text-align:right; font-weight:700;">KSh ${fmt(a.amount)}</td><td style="text-align:right; color:#5b6b7a;">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td></tr>`).join('');
+                const allocs = d.allocations || [];
+                let rowsHtml = '';
+                let paidTotal = 0;
+                let reserveRow = null;
+
+                allocs.forEach(a => {
+                    const isVirtual = a.isVirtual === true || /VIRTUAL/i.test(a.name || '');
+                    if (isVirtual) { reserveRow = a; return; }
+                    const stage1 = safeNum(a.stage1 !== undefined ? a.stage1 : a.amount);
+                    const stage2 = safeNum(a.stage2 || 0);
+                    const final = safeNum(a.final !== undefined ? a.final : (stage1 + stage2));
+                    paidTotal += final;
+                    rowsHtml += `<tr>
+                        <td>${escapeHTML(a.name)}</td>
+                        <td style="text-align:right;">${safeNum(a.percentage).toFixed(2)}%</td>
+                        <td style="text-align:right;">${fmt(stage1)}</td>
+                        <td style="text-align:right;">${fmt(stage2)}</td>
+                        <td style="text-align:right; font-weight:700;">${fmt(final)}</td>
+                    </tr>`;
+                });
+
+                if (reserveRow) {
+                    const vStage1 = safeNum(reserveRow.stage1 || reserveRow.amount);
+                    const vStage2 = safeNum(reserveRow.stage2 || 0);
+                    rowsHtml += `<tr style="background:#fff8e8; font-style:italic;">
+                        <td>${escapeHTML(reserveRow.name)}</td>
+                        <td style="text-align:right;">${safeNum(reserveRow.percentage).toFixed(2)}%</td>
+                        <td style="text-align:right;">${fmt(vStage1)}</td>
+                        <td style="text-align:right;">${fmt(vStage2)}</td>
+                        <td style="text-align:right; color:#a67a3a; font-weight:700;">→ RESERVE</td>
+                    </tr>`;
+                }
+
+                rowsHtml += `<tr style="font-weight:800; background:#f0f5fb;">
+                    <td colspan="4">TOTAL PAID TO SHAREHOLDERS</td>
+                    <td style="text-align:right;">KSh ${fmt(paidTotal)}</td>
+                </tr>`;
+                rowsHtml += `<tr style="background:#fff8e8;">
+                    <td colspan="4">COMPANY RESERVE (this period)</td>
+                    <td style="text-align:right; color:#a67a3a; font-weight:700;">KSh ${fmt(safeNum(d.reserveAmount))}</td>
+                </tr>`;
+                rowsHtml += `<tr style="background:#f0f5fb;">
+                    <td colspan="4">RUNNING RESERVE BALANCE</td>
+                    <td style="text-align:right; color:#5b6b7a; font-weight:700;">KSh ${fmt(safeNum(d.runningReserveBalance))}</td>
+                </tr>`;
 
                 html += `<div class="print-div-page">
                     <div class="print-page-label">Distribution ${idx + 1} of ${sorted.length}</div>
@@ -7100,17 +7157,17 @@
                         <tr><td>Period</td><td><strong>${escapeHTML(d.periodLabel)}</strong></td></tr>
                         <tr><td>Status</td><td><strong style="text-transform:uppercase;">${escapeHTML(d.status)}</strong></td></tr>
                         <tr><td>Total Distributable</td><td><strong>KSh ${fmt(d.totalDistributable)}</strong></td></tr>
-                        <tr><td>Shareholders</td><td>${d.allocations.length}</td></tr>
+                        <tr><td>Snapshot Equity</td><td>KSh ${fmt(d.snapshotTotalEquity)}</td></tr>
+                        <tr><td>Shareholders</td><td>${allocs.length}</td></tr>
+                        <tr><td>Formula Version</td><td>${escapeHTML(d.formulaVersion || 'two-stage-v1')}</td></tr>
                         <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy || '—')}</td></tr>
                         ${d.approvedAt ? `<tr><td>Approved</td><td>${escapeHTML(new Date(d.approvedAt).toLocaleString())} by ${escapeHTML(d.approvedBy)}</td></tr>` : ''}
                         ${d.paidAt ? `<tr><td>Paid</td><td>${escapeHTML(new Date(d.paidAt).toLocaleString())}</td></tr>` : ''}
-                        ${d.lastEditedAt ? `<tr style="background:#fff8e8;"><td>⚠️ Last Edited</td><td>${escapeHTML(new Date(d.lastEditedAt).toLocaleString())} by ${escapeHTML(d.lastEditedBy || '—')}<br>Reason: ${escapeHTML(d.lastEditReason || 'not provided')}</td></tr>` : ''}
                     </table>
                     <h3 style="color:#0b2b4a; font-size:16px; margin-bottom:10px;">Shareholder Allocations</h3>
                     <table class="print-list">
-                        
-                        <tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr></thead>
-                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="2">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td><td></td></tr></tbody>
+                        <thead><tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">1st Division</th><th style="text-align:right;">2nd Division</th><th style="text-align:right;">Final Payout</th></tr></thead>
+                        <tbody>${rowsHtml}</tbody>
                     </table>
                     <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p></div>
                 </div>`;
@@ -7120,11 +7177,47 @@
             doPrint(html);
         }
 
-        function printDividendReport(id) {
+               function printDividendReport(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
-            const rows = d.allocations.map(a => `<tr><td>${escapeHTML(a.name)}</td><td style="text-align:right;">${a.percentage.toFixed(2)}%</td><td style="text-align:right; font-weight:700;">KSh ${fmt(a.amount)}</td><td style="text-align:right; color:#5b6b7a;">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td></tr>`).join('');
-            const total = d.allocations.reduce((s, a) => s + a.amount, 0);
+
+            const allocs = d.allocations || [];
+            let rowsHtml = '';
+            let paidTotal = 0;
+            let reserveRow = null;
+
+            allocs.forEach(a => {
+                const isVirtual = a.isVirtual === true || /VIRTUAL/i.test(a.name || '');
+                if (isVirtual) { reserveRow = a; return; }
+                const stage1 = safeNum(a.stage1 !== undefined ? a.stage1 : a.amount);
+                const stage2 = safeNum(a.stage2 || 0);
+                const final = safeNum(a.final !== undefined ? a.final : (stage1 + stage2));
+                paidTotal += final;
+                rowsHtml += `<tr>
+                    <td>${escapeHTML(a.name)}</td>
+                    <td style="text-align:right;">${safeNum(a.percentage).toFixed(2)}%</td>
+                    <td style="text-align:right;">${fmt(stage1)}</td>
+                    <td style="text-align:right;">${fmt(stage2)}</td>
+                    <td style="text-align:right; font-weight:700;">${fmt(final)}</td>
+                </tr>`;
+            });
+
+            if (reserveRow) {
+                const vStage1 = safeNum(reserveRow.stage1 || reserveRow.amount);
+                const vStage2 = safeNum(reserveRow.stage2 || 0);
+                rowsHtml += `<tr style="background:#fff8e8; font-style:italic;">
+                    <td>${escapeHTML(reserveRow.name)}</td>
+                    <td style="text-align:right;">${safeNum(reserveRow.percentage).toFixed(2)}%</td>
+                    <td style="text-align:right;">${fmt(vStage1)}</td>
+                    <td style="text-align:right;">${fmt(vStage2)}</td>
+                    <td style="text-align:right; color:#a67a3a; font-weight:700;">→ RESERVE</td>
+                </tr>`;
+            }
+
+            rowsHtml += `<tr style="font-weight:800; background:#f0f5fb;"><td colspan="4">TOTAL PAID TO SHAREHOLDERS</td><td style="text-align:right;">KSh ${fmt(paidTotal)}</td></tr>`;
+            rowsHtml += `<tr style="background:#fff8e8;"><td colspan="4">COMPANY RESERVE (this period)</td><td style="text-align:right; color:#a67a3a; font-weight:700;">KSh ${fmt(safeNum(d.reserveAmount))}</td></tr>`;
+            rowsHtml += `<tr style="background:#f0f5fb;"><td colspan="4">RUNNING RESERVE BALANCE</td><td style="text-align:right; color:#5b6b7a; font-weight:700;">KSh ${fmt(safeNum(d.runningReserveBalance))}</td></tr>`;
+
             doPrint(`
                 <div class="employee-print-report">
                     ${printHeader('Dividend Distribution Report')}
@@ -7133,14 +7226,17 @@
                         <tr><td>Period</td><td><strong>${escapeHTML(d.periodLabel)}</strong></td></tr>
                         <tr><td>Status</td><td>${escapeHTML(d.status.toUpperCase())}</td></tr>
                         <tr><td>Total Distributable</td><td><strong>KSh ${fmt(d.totalDistributable)}</strong></td></tr>
+                        <tr><td>Snapshot Equity</td><td>KSh ${fmt(d.snapshotTotalEquity)}</td></tr>
+                        <tr><td>Formula Version</td><td>${escapeHTML(d.formulaVersion || 'two-stage-v1')}</td></tr>
                         <tr><td>Created</td><td>${escapeHTML(new Date(d.createdAt).toLocaleString())} by ${escapeHTML(d.createdBy || '—')}</td></tr>
                         ${d.approvedAt ? `<tr><td>Approved</td><td>${escapeHTML(new Date(d.approvedAt).toLocaleString())} by ${escapeHTML(d.approvedBy)}</td></tr>` : ''}
                         ${d.paidAt ? `<tr><td>Paid</td><td>${escapeHTML(new Date(d.paidAt).toLocaleString())}</td></tr>` : ''}
                         ${d.notes ? `<tr><td>Notes</td><td>${escapeHTML(d.notes)}</td></tr>` : ''}
                     </table>
+                    <h3 style="color:#0b2b4a; font-size:16px; margin-bottom:10px;">Shareholder Allocations</h3>
                     <table class="print-list">
-                        <thead><tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr></thead>
-                        <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="2">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td><td></td></tr></tbody>
+                        <thead><tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">1st Division</th><th style="text-align:right;">2nd Division</th><th style="text-align:right;">Final Payout</th></tr></thead>
+                        <tbody>${rowsHtml}</tbody>
                     </table>
                     <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p></div>
                     <div class="print-footer"><span>Starlink LLC · Dividend Distribution</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
@@ -7577,12 +7673,16 @@
                         <i class="fas fa-info-circle"></i>
                         <div>Edit and Delete work on <strong>any status</strong>. Actions on Approved / Processing / Paid distributions trigger a warning, require a reason, and are flagged prominently in the audit log.</div>
                     </div>
-                    <div class="employee-table-wrap">
-                        <table class="employee-table">
-                            <thead><tr><th>Ref</th><th>Period</th><th>Status</th><th>Amount</th><th>Shareholders</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
+
+
+                                     <div class="employee-table-wrap">
+                        <table class="employee-table" style="min-width:900px;">
+                            <thead><tr><th>Ref</th><th>Period</th><th>Status</th><th style="text-align:right;">Total Pool</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Reserve</th><th style="text-align:right;">Running</th><th style="text-align:right;">Actions</th></tr></thead>
                             <tbody id="dividendHistoryBody"></tbody>
                         </table>
                     </div>
+
+
                     <div class="modal-actions"><button class="cancel" id="dividendsHistoryClose">Close</button></div>
                 </div>
             `;
