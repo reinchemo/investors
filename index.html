@@ -2770,10 +2770,10 @@
                     <thead>
                         <tr>
                             <th>Shareholder</th>
-                            <th>Equity %</th>
-                            <th style="text-align:right;">Raw</th>
-                            <th style="text-align:right;">Rounding</th>
-                            <th style="text-align:right;">Final</th>
+                            <th style="text-align:right;">Equity %</th>
+                            <th style="text-align:right;">1st Division</th>
+                            <th style="text-align:right;">2nd Division</th>
+                            <th style="text-align:right;">Final Payout</th>
                         </tr>
                     </thead>
                     <tbody id="previewBody"></tbody>
@@ -2952,6 +2952,95 @@
             </div>
         </div>
     </div>
+    <!-- ============================================================ -->
+<!-- COMPANY RESERVE DASHBOARD MODAL                              -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="reserveModal">
+    <div class="modal-card" style="max-width: 900px;">
+        <div class="payments-modal-header">
+            <h3><i class="fas fa-piggy-bank" style="color:#c89a5b;"></i> Company Reserve</h3>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <button class="btn btn-ghost add-employee-btn" id="printReserveBtn"><i class="fas fa-print"></i> Print</button>
+                <button class="btn btn-primary add-employee-btn" id="newReserveMovementBtn"><i class="fas fa-plus"></i> Record Movement</button>
+            </div>
+        </div>
+
+        <div class="reconcile-note" style="margin-bottom:1rem;">
+            <i class="fas fa-info-circle"></i>
+            <span>Virtual Stage 2 amounts flow into Reserve automatically when a dividend is paid. Manual inflows and outflows (expenditures, transfers, corrections) are recorded below with reason and audit trail.</span>
+        </div>
+
+        <div id="reserveSummary" class="recon-stats" style="margin-bottom:1rem;"></div>
+
+        <div class="employee-table-wrap">
+            <table class="employee-table" style="min-width:800px;">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Source / Reference</th>
+                        <th>Category</th>
+                        <th style="text-align:right;">In (KSh)</th>
+                        <th style="text-align:right;">Out (KSh)</th>
+                        <th style="text-align:right;">Running Balance</th>
+                        <th>Recorded By</th>
+                    </tr>
+                </thead>
+                <tbody id="reserveLedgerBody"></tbody>
+            </table>
+        </div>
+
+        <div class="reconcile-note" id="reserveReconcile" style="margin-top:1rem;">
+            <i class="fas fa-check-circle"></i>
+            <span id="reserveReconcileText">Reserve ledger reconciles.</span>
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel" id="reserveClose">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- RESERVE MOVEMENT MODAL (add in/out)                          -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="reserveMovementModal">
+    <div class="modal-card" style="max-width: 480px;">
+        <h3 id="reserveMovementTitle"><i class="fas fa-piggy-bank"></i> Record Reserve Movement</h3>
+
+        <label>Direction <span style="color:#e8837a;">*</span></label>
+        <select id="rmDirection">
+            <option value="in">Inflow (money into reserve)</option>
+            <option value="out">Outflow (money out of reserve)</option>
+        </select>
+
+        <label>Amount (KSh) <span style="color:#e8837a;">*</span></label>
+        <input type="number" id="rmAmount" placeholder="0" min="0.01" step="0.01" autocomplete="off">
+
+        <label>Category <span style="color:#e8837a;">*</span></label>
+        <select id="rmCategory">
+            <option value="virtual_stage2">Virtual Stage 2 (auto)</option>
+            <option value="manual_inflow">Manual inflow / contribution</option>
+            <option value="retained_earnings">Retained earnings</option>
+            <option value="expenditure">Approved expenditure</option>
+            <option value="transfer">Internal transfer</option>
+            <option value="correction">Correction / restatement</option>
+            <option value="other">Other</option>
+        </select>
+
+        <label>Date</label>
+        <input type="date" id="rmDate">
+
+        <label>Reason / Notes <span style="color:#e8837a;">*</span></label>
+        <textarea id="rmReason" placeholder="e.g. Withdrawal to fund Ruiru expansion — approved 12 Oct 2026" maxlength="500"></textarea>
+
+        <div class="modal-error" id="reserveMovementError"></div>
+
+        <div class="modal-actions">
+            <button class="cancel" id="rmCancel">Cancel</button>
+            <button class="save" id="rmSave">Record Movement</button>
+        </div>
+    </div>
+</div>
 
     <div class="dashboard">
         <nav class="nav">
@@ -2975,6 +3064,7 @@
                 <button class="btn btn-ghost" id="paymentsBtn"><i class="fas fa-money-check-alt"></i> Payments</button>
                 <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
                 <button class="btn btn-ghost" id="reconBtn"><i class="fas fa-balance-scale"></i> Reconcile <span id="reconCountNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(226,104,91,0.3); color:#f0a89f; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
+                <button class="btn btn-ghost" id="reserveBtn"><i class="fas fa-piggy-bank"></i> Reserve <span id="reserveBalanceNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(200,154,91,0.3); color:#f4c98d; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
                 <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
@@ -3034,8 +3124,28 @@
 
         <div class="dividend-card" id="dividendOverviewCard">
             <h3><i class="fas fa-hand-holding-usd"></i> Dividend Overview</h3>
-            <div class="dividend-amount" id="dividendTotalPaid">KSh 0</div>
-            <p>Total paid out across <strong id="dividendCount">0</strong> distributions · Latest: <strong id="dividendLatest">—</strong></p>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.8rem; margin-top:0.8rem;">
+                <div style="background:rgba(111,203,147,0.08); border:1px solid rgba(111,203,147,0.3); border-radius:12px; padding:0.7rem 0.9rem;">
+                    <div style="font-size:0.62rem; font-weight:700; color:#7ee0a2; text-transform:uppercase; letter-spacing:0.08em;">Paid to Shareholders</div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#7ee0a2; margin-top:0.25rem;" id="dividendTotalPaid">KSh 0</div>
+                </div>
+                <div style="background:rgba(200,154,91,0.08); border:1px solid rgba(200,154,91,0.3); border-radius:12px; padding:0.7rem 0.9rem;">
+                    <div style="font-size:0.62rem; font-weight:700; color:#f4c98d; text-transform:uppercase; letter-spacing:0.08em;">Total Reserve</div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#f4c98d; margin-top:0.25rem;" id="dividendTotalReserve">KSh 0</div>
+                </div>
+                <div style="background:rgba(122,90,248,0.08); border:1px solid rgba(122,90,248,0.3); border-radius:12px; padding:0.7rem 0.9rem;">
+                    <div style="font-size:0.62rem; font-weight:700; color:#b8a0ff; text-transform:uppercase; letter-spacing:0.08em;">Running Balance</div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#b8a0ff; margin-top:0.25rem;" id="dividendRunningReserve">KSh 0</div>
+                </div>
+                <div style="background:rgba(120,200,220,0.06); border:1px solid rgba(120,200,220,0.2); border-radius:12px; padding:0.7rem 0.9rem;">
+                    <div style="font-size:0.62rem; font-weight:700; color:#c7d5e6; text-transform:uppercase; letter-spacing:0.08em;">Distributions</div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#c7d5e6; margin-top:0.25rem;"><span id="dividendCount">0</span></div>
+                </div>
+            </div>
+
+            <p style="margin-top:0.8rem; color:#b8a578; font-size:0.82rem;">Latest: <strong id="dividendLatest">—</strong></p>
+
             <div class="div-actions-row" style="margin-top:0.8rem;">
                 <button class="div-action-btn approve" id="newDividendBtn"><i class="fas fa-plus"></i> New Distribution</button>
                 <button class="div-action-btn expand" id="viewDividendsBtn"><i class="fas fa-list"></i> View All Distributions</button>
@@ -3472,27 +3582,34 @@
                         ascending: false
                     });
                 if (divErr) throw divErr;
-                dividends = (divRows || []).map(r => ({
-                    id: r.id,
-                    periodLabel: r.period_label,
-                    totalDistributable: safeNum(r.total_distributable),
-                    notes: r.notes || '',
-                    status: r.status,
-                    allocations: Array.isArray(r.allocations) ? r.allocations : [],
-                    createdAt: r.created_at,
-                    createdBy: r.created_by,
-                    updatedAt: r.updated_at,
-                    updatedBy: r.updated_by,
-                    approvedAt: r.approved_at,
-                    approvedBy: r.approved_by,
-                    paidAt: r.paid_at,
-                    cancelledAt: r.cancelled_at,
-                    cancelReason: r.cancel_reason,
-                    lastEditedAt: r.last_edited_at,
-                    lastEditedBy: r.last_edited_by,
-                    lastEditReason: r.last_edit_reason
-                }));
-
+               dividends = (divRows || []).map(r => ({
+    id: r.id,
+    periodLabel: r.period_label,
+    totalDistributable: safeNum(r.total_distributable),
+    notes: r.notes || '',
+    status: r.status,
+    allocations: Array.isArray(r.allocations) ? r.allocations : [],
+    snapshotHolders: r.snapshot_holders || null,
+    snapshotTotalEquity: safeNum(r.snapshot_total_equity),
+    snapshotDate: r.snapshot_date || null,
+    stage1Total: safeNum(r.stage1_total),
+    stage2Total: safeNum(r.stage2_total),
+    reserveAmount: safeNum(r.reserve_amount),
+    runningReserveBalance: safeNum(r.running_reserve_balance),
+    formulaVersion: r.formula_version || 'two-stage-v1',
+    createdAt: r.created_at,
+    createdBy: r.created_by,
+    updatedAt: r.updated_at,
+    updatedBy: r.updated_by,
+    approvedAt: r.approved_at,
+    approvedBy: r.approved_by,
+    paidAt: r.paid_at,
+    cancelledAt: r.cancelled_at,
+    cancelReason: r.cancel_reason,
+    lastEditedAt: r.last_edited_at,
+    lastEditedBy: r.last_edited_by,
+    lastEditReason: r.last_edit_reason
+}));
                 // 5. Read audit logs from table
                 const {
                     data: auditRows,
@@ -3747,14 +3864,29 @@
             document.getElementById('lastUpdatedValue').textContent = formatTimestamp(summary.lastUpdated);
         }
 
-        function renderDividendOverview() {
-            const totalPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
-            const latest = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
-            document.getElementById('dividendTotalPaid').textContent = 'KSh ' + fmt(totalPaid);
-            document.getElementById('dividendCount').textContent = dividends.length;
-            document.getElementById('dividendLatest').textContent = latest ? (latest.periodLabel || '—') : '—';
-        }
+       function renderDividendOverview() {
+    // Aggregate: Declared (all), Paid (status=paid only), Reserve, Running Balance
+    const totalDeclared = dividends.reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+    const totalPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+    const totalReserve = dividends.reduce((s, d) => s + safeNum(d.reserveAmount), 0);
 
+    // Latest running reserve = the highest running_reserve_balance in the dataset
+    const latestRunningReserve = dividends.reduce((m, d) => Math.max(m, safeNum(d.runningReserveBalance)), 0);
+
+    const latest = [...dividends].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+
+    document.getElementById('dividendTotalPaid').textContent = 'KSh ' + fmt(totalPaid);
+    document.getElementById('dividendCount').textContent = dividends.length;
+    document.getElementById('dividendLatest').textContent = latest ? (latest.periodLabel || '—') : '—';
+
+    // Populate the new aggregate chips if the elements exist
+    const declEl = document.getElementById('dividendTotalDeclared');
+    if (declEl) declEl.textContent = 'KSh ' + fmt(totalDeclared);
+    const resEl = document.getElementById('dividendTotalReserve');
+    if (resEl) resEl.textContent = 'KSh ' + fmt(totalReserve);
+    const runEl = document.getElementById('dividendRunningReserve');
+    if (runEl) runEl.textContent = 'KSh ' + fmt(latestRunningReserve);
+}
         // ==================================================
         // RECONCILIATION
         // ==================================================
@@ -6658,64 +6790,117 @@
         }
 
         function openDividendDetail(id) {
-            const d = dividends.find(x => x.id === id);
-            if (!d) return;
-            document.getElementById('detailTitle').textContent = d.periodLabel;
-            document.getElementById('detailTotal').textContent = 'KSh ' + fmt(d.totalDistributable);
-            document.getElementById('detailMeta').innerHTML = `<span class="div-ref">${escapeHTML(d.id)}</span> · Created ${escapeHTML(new Date(d.createdAt).toLocaleString())}`;
+    const d = dividends.find(x => x.id === id);
+    if (!d) return;
 
-            const steps = ['draft', 'approved', 'processing', 'paid'];
-            const flow = document.getElementById('detailFlow');
-            const order = {
-                draft: 0,
-                approved: 1,
-                processing: 2,
-                paid: 3,
-                cancelled: -1
-            };
-            const current = order[d.status] !== undefined ? order[d.status] : 0;
-            flow.innerHTML = steps.map(s => {
-                let cls = 'status-step';
-                if (d.status === 'cancelled') {
-                    if (s === 'draft') cls += ' done';
-                } else {
-                    if (order[s] < current) cls += ' done';
-                    else if (order[s] === current) cls += ' active';
-                }
-                return `<span class="${cls}">${s}</span>`;
-            }).join('') + (d.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
+    document.getElementById('detailTitle').textContent = d.periodLabel;
+    document.getElementById('detailTotal').textContent = 'KSh ' + fmt(d.totalDistributable);
+    document.getElementById('detailMeta').innerHTML = `<span class="div-ref">${escapeHTML(d.id)}</span> · Created ${escapeHTML(new Date(d.createdAt).toLocaleString())}`;
 
-            document.getElementById('detailBody').innerHTML = d.allocations.map(a => `<tr><td>${escapeHTML(a.name)}</td><td class="alloc-pct">${a.percentage.toFixed(2)}%</td><td class="alloc-amount">${fmt(a.amount)}</td><td class="alloc-amount" style="color:${a.roundingAdj >= 0 ? '#7ee0a2' : '#f0a89f'};">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td></tr>`).join('') + `<tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td colspan="2" style="text-align:right;"><strong>${fmt(d.allocations.reduce((s, a) => s + a.amount, 0))}</strong></td></tr>`;
-
-            document.getElementById('detailCreated').textContent = `${d.createdBy || '—'} · ${new Date(d.createdAt).toLocaleString()}`;
-            document.getElementById('detailApproved').textContent = d.approvedAt ? `${d.approvedBy} · ${new Date(d.approvedAt).toLocaleString()}` : '—';
-            document.getElementById('detailPaid').textContent = d.paidAt ? new Date(d.paidAt).toLocaleString() : '—';
-            document.getElementById('detailNotes').textContent = d.notes || '—';
-
-            const editedRow = document.getElementById('detailEditedRow');
-            if (d.lastEditedAt) {
-                editedRow.hidden = false;
-                document.getElementById('detailEdited').innerHTML = `${escapeHTML(d.lastEditedBy || '—')} · ${escapeHTML(new Date(d.lastEditedAt).toLocaleString())}<br><span style="color:#e8b879; font-size:0.7rem;">Reason: ${escapeHTML(d.lastEditReason || 'not provided')}</span>`;
-            } else {
-                editedRow.hidden = true;
-            }
-
-            const actions = document.getElementById('detailActions');
-            let html = '';
-            if (d.status === 'draft') {
-                html += `<button class="div-action-btn approve" onclick="approveDividend('${d.id}')"><i class="fas fa-check"></i> Approve</button>`;
-                html += `<button class="div-action-btn cancel" onclick="cancelDividend('${d.id}')"><i class="fas fa-ban"></i> Cancel</button>`;
-            } else if (d.status === 'approved') {
-                html += `<button class="div-action-btn paid" onclick="markPaid('${d.id}')"><i class="fas fa-check-double"></i> Mark as Paid</button>`;
-                html += `<button class="div-action-btn cancel" onclick="cancelDividend('${d.id}')"><i class="fas fa-ban"></i> Cancel</button>`;
-            } else if (d.status === 'processing') {
-                html += `<button class="div-action-btn paid" onclick="markPaid('${d.id}')"><i class="fas fa-check-double"></i> Mark as Paid</button>`;
-            }
-            html += `<button class="div-action-btn expand" onclick="printDividendReport('${d.id}')"><i class="fas fa-print"></i> Print Report</button>`;
-            actions.innerHTML = html;
-
-            document.getElementById('dividendDetailModal').classList.add('show');
+    // Status flow (unchanged)
+    const steps = ['draft', 'approved', 'processing', 'paid'];
+    const flow = document.getElementById('detailFlow');
+    const order = { draft: 0, approved: 1, processing: 2, paid: 3, cancelled: -1 };
+    const current = order[d.status] !== undefined ? order[d.status] : 0;
+    flow.innerHTML = steps.map(s => {
+        let cls = 'status-step';
+        if (d.status === 'cancelled') {
+            if (s === 'draft') cls += ' done';
+        } else {
+            if (order[s] < current) cls += ' done';
+            else if (order[s] === current) cls += ' active';
         }
+        return `<span class="${cls}">${s}</span>`;
+    }).join('') + (d.status === 'cancelled' ? `<span class="status-step active" style="background:rgba(226,104,91,0.2); color:#f0a89f; border-color:rgba(226,104,91,0.5);">cancelled</span>` : '');
+
+    // NEW: Build the two-stage table from the new allocation structure
+    const allocs = d.allocations || [];
+    let rowsHtml = '';
+    let paidTotal = 0;
+    let reserveRow = null;
+
+    allocs.forEach(a => {
+        const isVirtual = a.isVirtual === true || /VIRTUAL/i.test(a.name || '');
+        if (isVirtual) {
+            reserveRow = a;
+            return;
+        }
+        const stage1 = safeNum(a.stage1 !== undefined ? a.stage1 : a.amount);
+        const stage2 = safeNum(a.stage2 || 0);
+        const final = safeNum(a.final !== undefined ? a.final : (stage1 + stage2));
+        paidTotal += final;
+
+        rowsHtml += `<tr>
+            <td>${escapeHTML(a.name)}</td>
+            <td class="alloc-pct">${safeNum(a.percentage).toFixed(2)}%</td>
+            <td class="alloc-amount" style="text-align:right;">${fmt(stage1)}</td>
+            <td class="alloc-amount" style="text-align:right;">${fmt(stage2)}</td>
+            <td class="alloc-amount" style="text-align:right; font-weight:700; color:#f4c98d;">${fmt(final)}</td>
+        </tr>`;
+    });
+
+    // Virtual row shows RESERVE instead of cash
+    if (reserveRow) {
+        const vStage1 = safeNum(reserveRow.stage1 || reserveRow.amount);
+        const vStage2 = safeNum(reserveRow.stage2 || 0);
+        rowsHtml += `<tr class="recon-row-caution" style="font-style:italic;">
+            <td><strong>${escapeHTML(reserveRow.name)}</strong> <span class="starlink-tag">virtual</span></td>
+            <td class="alloc-pct">${safeNum(reserveRow.percentage).toFixed(2)}%</td>
+            <td class="alloc-amount" style="text-align:right;">${fmt(vStage1)}</td>
+            <td class="alloc-amount" style="text-align:right;">${fmt(vStage2)}</td>
+            <td class="alloc-amount" style="text-align:right; color:#e8b879; font-weight:700;">→ RESERVE</td>
+        </tr>`;
+    }
+
+    // Footer rows
+    const reserveAmount = safeNum(d.reserveAmount);
+    const runningReserve = safeNum(d.runningReserveBalance);
+    rowsHtml += `<tr class="total-row">
+        <td colspan="3"><strong>TOTAL PAID TO SHAREHOLDERS</strong></td>
+        <td colspan="2" style="text-align:right;"><strong>KSh ${fmt(paidTotal)}</strong></td>
+    </tr>`;
+    rowsHtml += `<tr class="total-row" style="background:rgba(200,154,91,0.1);">
+        <td colspan="3"><strong>COMPANY RESERVE (this period)</strong></td>
+        <td colspan="2" style="text-align:right; color:#f4c98d;"><strong>KSh ${fmt(reserveAmount)}</strong></td>
+    </tr>`;
+    rowsHtml += `<tr class="total-row" style="background:rgba(122,90,248,0.1);">
+        <td colspan="3"><strong>RUNNING RESERVE BALANCE</strong></td>
+        <td colspan="2" style="text-align:right; color:#b8a0ff;"><strong>KSh ${fmt(runningReserve)}</strong></td>
+    </tr>`;
+
+    document.getElementById('detailBody').innerHTML = rowsHtml;
+
+    // Update header table columns if needed — see the next step for the HTML change
+
+    document.getElementById('detailCreated').textContent = `${d.createdBy || '—'} · ${new Date(d.createdAt).toLocaleString()}`;
+    document.getElementById('detailApproved').textContent = d.approvedAt ? `${d.approvedBy} · ${new Date(d.approvedAt).toLocaleString()}` : '—';
+    document.getElementById('detailPaid').textContent = d.paidAt ? new Date(d.paidAt).toLocaleString() : '—';
+    document.getElementById('detailNotes').textContent = d.notes || '—';
+
+    const editedRow = document.getElementById('detailEditedRow');
+    if (d.lastEditedAt) {
+        editedRow.hidden = false;
+        document.getElementById('detailEdited').innerHTML = `${escapeHTML(d.lastEditedBy || '—')} · ${escapeHTML(new Date(d.lastEditedAt).toLocaleString())}<br><span style="color:#e8b879; font-size:0.7rem;">Reason: ${escapeHTML(d.lastEditReason || 'not provided')}</span>`;
+    } else {
+        editedRow.hidden = true;
+    }
+
+    const actions = document.getElementById('detailActions');
+    let html = '';
+    if (d.status === 'draft') {
+        html += `<button class="div-action-btn approve" onclick="approveDividend('${d.id}')"><i class="fas fa-check"></i> Approve</button>`;
+        html += `<button class="div-action-btn cancel" onclick="cancelDividend('${d.id}')"><i class="fas fa-ban"></i> Cancel</button>`;
+    } else if (d.status === 'approved') {
+        html += `<button class="div-action-btn paid" onclick="markPaid('${d.id}')"><i class="fas fa-check-double"></i> Mark as Paid</button>`;
+        html += `<button class="div-action-btn cancel" onclick="cancelDividend('${d.id}')"><i class="fas fa-ban"></i> Cancel</button>`;
+    } else if (d.status === 'processing') {
+        html += `<button class="div-action-btn paid" onclick="markPaid('${d.id}')"><i class="fas fa-check-double"></i> Mark as Paid</button>`;
+    }
+    html += `<button class="div-action-btn expand" onclick="printDividendReport('${d.id}')"><i class="fas fa-print"></i> Print Report</button>`;
+    actions.innerHTML = html;
+
+    document.getElementById('dividendDetailModal').classList.add('show');
+}
 
         function closeDividendDetail() {
             document.getElementById('dividendDetailModal').classList.remove('show');
@@ -6923,7 +7108,8 @@
                     </table>
                     <h3 style="color:#0b2b4a; font-size:16px; margin-bottom:10px;">Shareholder Allocations</h3>
                     <table class="print-list">
-                        <thead><tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr></thead>
+                        
+                        <tr><th>Shareholder</th><th style="text-align:right;">Equity %</th><th style="text-align:right;">Allocation (KSh)</th><th style="text-align:right;">Rounding Adj</th></tr></thead>
                         <tbody>${rows}<tr style="font-weight:800; background:#f0f5fb;"><td colspan="2">TOTAL</td><td style="text-align:right;">KSh ${fmt(total)}</td><td></td></tr></tbody>
                     </table>
                     <div class="print-signatures"><p>Prepared By: ______________________________</p><p>Approved By: ______________________________</p></div>
@@ -7322,6 +7508,20 @@
 
             // Reconciliation
             document.getElementById('reconBtn').addEventListener('click', openReconModal);
+
+                        // Reserve dashboard
+            document.getElementById('reserveBtn').addEventListener('click', openReserveModal);
+            document.getElementById('reserveClose').addEventListener('click', closeReserveModal);
+            document.getElementById('reserveModal').addEventListener('click', function(e) {
+                if (e.target === this) closeReserveModal();
+            });
+            document.getElementById('printReserveBtn').addEventListener('click', printReserveReport);
+            document.getElementById('newReserveMovementBtn').addEventListener('click', openReserveMovementModal);
+            document.getElementById('rmCancel').addEventListener('click', closeReserveMovementModal);
+            document.getElementById('rmSave').addEventListener('click', saveReserveMovement);
+            document.getElementById('reserveMovementModal').addEventListener('click', function(e) {
+                if (e.target === this) closeReserveMovementModal();
+            });
             document.getElementById('reconClose').addEventListener('click', closeReconModal);
             document.getElementById('reconModal').addEventListener('click', function(e) {
                 if (e.target === this) closeReconModal();
@@ -7400,6 +7600,262 @@
             await logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
         }
+                // ==================================================
+        // COMPANY RESERVE DASHBOARD
+        // ==================================================
+        let reserveLedger = [];
+
+        async function fetchReserveLedger() {
+            if (!supabaseClient) return false;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('reserve_ledger')
+                    .select('*')
+                    .order('entry_date', { ascending: true })
+                    .order('created_at', { ascending: true });
+                if (error) throw error;
+                reserveLedger = (data || []).map(r => ({
+                    id: r.id,
+                    entryDate: r.entry_date,
+                    direction: r.direction,
+                    amount: safeNum(r.amount),
+                    sourceDividendId: r.source_dividend_id,
+                    category: r.category,
+                    reason: r.reason || '',
+                    runningBalance: safeNum(r.running_balance),
+                    approvedBy: r.approved_by || '',
+                    createdBy: r.created_by || '',
+                    createdAt: r.created_at
+                }));
+                return true;
+            } catch (e) {
+                console.warn('Reserve ledger fetch failed:', e.message);
+                reserveLedger = [];
+            }
+            return false;
+        }
+
+        function reserveCurrentBalance() {
+            // Latest running_balance from the ledger
+            if (!reserveLedger.length) return 0;
+            const sorted = [...reserveLedger].sort((a, b) => {
+                const da = (a.entryDate || '') + (a.createdAt || '');
+                const db = (b.entryDate || '') + (b.createdAt || '');
+                return da.localeCompare(db);
+            });
+            return safeNum(sorted[sorted.length - 1].runningBalance);
+        }
+
+        function reserveTotalInflow() {
+            return reserveLedger.filter(r => r.direction === 'in').reduce((s, r) => s + r.amount, 0);
+        }
+
+        function reserveTotalOutflow() {
+            return reserveLedger.filter(r => r.direction === 'out').reduce((s, r) => s + r.amount, 0);
+        }
+
+        function renderReserveDashboard() {
+            const body = document.getElementById('reserveLedgerBody');
+            if (!body) return;
+
+            const balance = reserveCurrentBalance();
+            const totalIn = reserveTotalInflow();
+            const totalOut = reserveTotalOutflow();
+            const movementCount = reserveLedger.length;
+
+            // Update nav badge
+            const navBadge = document.getElementById('reserveBalanceNav');
+            if (navBadge) {
+                navBadge.textContent = fmt(balance);
+                navBadge.style.display = balance > 0 ? 'inline-flex' : 'none';
+            }
+
+            // Summary cards
+            document.getElementById('reserveSummary').innerHTML = `
+                <div class="recon-stat good">
+                    <div class="recon-stat-label"><i class="fas fa-piggy-bank"></i> CURRENT BALANCE</div>
+                    <div class="recon-stat-value" style="color:#f4c98d;">KSh ${fmt(balance)}</div>
+                </div>
+                <div class="recon-stat good">
+                    <div class="recon-stat-label"><i class="fas fa-arrow-down"></i> TOTAL INFLOW</div>
+                    <div class="recon-stat-value" style="color:#7ee0a2;">KSh ${fmt(totalIn)}</div>
+                </div>
+                <div class="recon-stat ${totalOut > 0 ? 'warn' : ''}">
+                    <div class="recon-stat-label"><i class="fas fa-arrow-up"></i> TOTAL OUTFLOW</div>
+                    <div class="recon-stat-value" style="color:${totalOut > 0 ? '#f0a89f' : '#7f9bb8'};">KSh ${fmt(totalOut)}</div>
+                </div>
+                <div class="recon-stat">
+                    <div class="recon-stat-label"><i class="fas fa-list"></i> MOVEMENTS</div>
+                    <div class="recon-stat-value">${movementCount}</div>
+                </div>
+            `;
+
+            // Ledger rows
+            if (!reserveLedger.length) {
+                body.innerHTML = `<tr><td colspan="7"><div class="empty-row"><i class="fas fa-piggy-bank"></i>No reserve movements recorded yet.</div></td></tr>`;
+                return;
+            }
+
+            const sorted = [...reserveLedger].sort((a, b) => {
+                const da = (a.entryDate || '') + (a.createdAt || '');
+                const db = (b.entryDate || '') + (b.createdAt || '');
+                return da.localeCompare(db);
+            });
+
+            body.innerHTML = sorted.map(r => {
+                const inAmt = r.direction === 'in' ? r.amount : 0;
+                const outAmt = r.direction === 'out' ? r.amount : 0;
+                const catLabel = (r.category || '').replace(/_/g, ' ');
+                const src = r.sourceDividendId
+                    ? `<span class="div-ref">${escapeHTML(r.sourceDividendId)}</span>`
+                    : '—';
+                return `<tr>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem;">${escapeHTML(r.entryDate || '—')}</td>
+                    <td>${src}</td>
+                    <td><span class="info-chip" style="background:rgba(95,199,188,0.15); color:#7fded1; border-color:rgba(95,199,188,0.3);">${escapeHTML(catLabel)}</span></td>
+                    <td class="amount-income" style="text-align:right; font-family:'JetBrains Mono',monospace;">${inAmt > 0 ? '+ ' + fmt(inAmt) : '—'}</td>
+                    <td class="amount-expense" style="text-align:right; font-family:'JetBrains Mono',monospace;">${outAmt > 0 ? '− ' + fmt(outAmt) : '—'}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700; color:#f4c98d;">KSh ${fmt(r.runningBalance)}</td>
+                    <td style="font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.createdBy || r.approvedBy || '—')}</td>
+                </tr>`;
+            }).join('');
+
+            // Reconciliation note
+            const reconcileEl = document.getElementById('reserveReconcile');
+            const reconcileTxt = document.getElementById('reserveReconcileText');
+            const expected = totalIn - totalOut;
+            if (Math.abs(expected - balance) < 0.01) {
+                reconcileEl.classList.remove('warning');
+                reconcileTxt.textContent = `Reserve reconciles: KSh ${fmt(totalIn)} in − KSh ${fmt(totalOut)} out = KSh ${fmt(balance)}.`;
+            } else {
+                reconcileEl.classList.add('warning');
+                reconcileTxt.textContent = `⚠️ Reconciliation mismatch: computed ${fmt(expected)} vs. running balance ${fmt(balance)}.`;
+            }
+        }
+
+        async function openReserveModal() {
+            await fetchReserveLedger();
+            renderReserveDashboard();
+            document.getElementById('reserveModal').classList.add('show');
+        }
+
+        function closeReserveModal() {
+            document.getElementById('reserveModal').classList.remove('show');
+        }
+
+        function openReserveMovementModal() {
+            document.getElementById('reserveMovementTitle').innerHTML = '<i class="fas fa-piggy-bank"></i> Record Reserve Movement';
+            document.getElementById('rmDirection').value = 'in';
+            document.getElementById('rmAmount').value = '';
+            document.getElementById('rmCategory').value = 'manual_inflow';
+            document.getElementById('rmDate').value = todayISO();
+            document.getElementById('rmReason').value = '';
+            document.getElementById('reserveMovementError').style.display = 'none';
+            document.getElementById('reserveMovementModal').classList.add('show');
+            setTimeout(() => document.getElementById('rmAmount').focus(), 100);
+        }
+
+        function closeReserveMovementModal() {
+            document.getElementById('reserveMovementModal').classList.remove('show');
+        }
+
+        async function saveReserveMovement() {
+            const direction = document.getElementById('rmDirection').value;
+            const amount = safeNum(document.getElementById('rmAmount').value);
+            const category = document.getElementById('rmCategory').value;
+            const entryDate = document.getElementById('rmDate').value || todayISO();
+            const reason = document.getElementById('rmReason').value.trim();
+            const errEl = document.getElementById('reserveMovementError');
+            errEl.style.display = 'none';
+
+            if (amount <= 0) {
+                errEl.textContent = '⚠️ Enter an amount greater than 0.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (!reason) {
+                errEl.textContent = '⚠️ Please provide a reason for this movement.';
+                errEl.style.display = 'block';
+                return;
+            }
+            if (direction === 'out' && amount > reserveCurrentBalance()) {
+                errEl.textContent = `⚠️ Cannot withdraw more than the current reserve balance (KSh ${fmt(reserveCurrentBalance())}).`;
+                errEl.style.display = 'block';
+                return;
+            }
+
+            // Compute new running balance
+            const currentBalance = reserveCurrentBalance();
+            const newBalance = direction === 'in' ? currentBalance + amount : currentBalance - amount;
+
+            const row = {
+                entry_date: entryDate,
+                direction: direction,
+                amount: amount,
+                source_dividend_id: null,
+                category: category,
+                reason: reason,
+                running_balance: newBalance,
+                approved_by: CURRENT_USER,
+                created_by: CURRENT_USER
+            };
+
+            const { error } = await supabaseClient
+                .from('reserve_ledger')
+                .insert(row);
+
+            if (error) {
+                errEl.textContent = '⚠️ Save failed: ' + error.message;
+                errEl.style.display = 'block';
+                return;
+            }
+
+            await logAudit('CREATE', 'Reserve movement',
+                `${direction === 'in' ? 'Inflow' : 'Outflow'} — KSh ${fmt(amount)} (${category}): ${reason}`,
+                currentBalance, newBalance);
+
+            await fetchReserveLedger();
+            renderReserveDashboard();
+            closeReserveMovementModal();
+            showToast(`✅ Reserve ${direction === 'in' ? 'inflow' : 'outflow'} recorded`, 'success');
+        }
+
+        function printReserveReport() {
+            const balance = reserveCurrentBalance();
+            const totalIn = reserveTotalInflow();
+            const totalOut = reserveTotalOutflow();
+
+            const rows = reserveLedger.map(r => {
+                const inAmt = r.direction === 'in' ? r.amount : 0;
+                const outAmt = r.direction === 'out' ? r.amount : 0;
+                return `<tr>
+                    <td>${escapeHTML(r.entryDate || '—')}</td>
+                    <td>${escapeHTML(r.sourceDividendId || '—')}</td>
+                    <td>${escapeHTML((r.category || '').replace(/_/g,' '))}</td>
+                    <td style="text-align:right;">${inAmt ? '+ ' + fmt(inAmt) : '—'}</td>
+                    <td style="text-align:right;">${outAmt ? '− ' + fmt(outAmt) : '—'}</td>
+                    <td style="text-align:right; font-weight:700;">KSh ${fmt(r.runningBalance)}</td>
+                </tr>`;
+            }).join('');
+
+            doPrint(`
+                <div class="employee-print-report">
+                    ${printHeader('Company Reserve Report')}
+                    <table class="print-payment-table" style="margin-bottom:20px;">
+                        <tr><td>Current Balance</td><td><strong>KSh ${fmt(balance)}</strong></td></tr>
+                        <tr><td>Total Inflow</td><td>KSh ${fmt(totalIn)}</td></tr>
+                        <tr><td>Total Outflow</td><td>KSh ${fmt(totalOut)}</td></tr>
+                        <tr><td>Movements</td><td>${reserveLedger.length}</td></tr>
+                    </table>
+                    <table class="print-list">
+                        <thead><tr><th>Date</th><th>Source</th><th>Category</th><th style="text-align:right;">In</th><th style="text-align:right;">Out</th><th style="text-align:right;">Running</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="print-footer"><span>Starlink LLC · Company Reserve</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+                </div>
+            `);
+        }
+
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
