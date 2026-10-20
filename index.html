@@ -4989,6 +4989,22 @@
                 err.style.display = 'block';
                 return;
             }
+                        // Check for duplicate reference/amount for the same investor
+            if (investorId) {
+                const dup = proposals.find(p => 
+                    p.investorId === investorId && 
+                    p.proposedAmount === amount && 
+                    p.status !== 'funded' && 
+                    p.status !== 'rejected' && 
+                    p.status !== 'cancelled' &&
+                    p.id !== editingProposalId
+                );
+                if (dup) {
+                    err.textContent = `⚠️ Duplicate blocked: There is already an active proposal for this investor for KSh ${fmt(amount)} (Status: ${dup.status}).`;
+                    err.style.display = 'block';
+                    return;
+                }
+            }
 
             const row = {
                 investor_id: investorId,
@@ -5051,10 +5067,23 @@
         // ============================================
         // PROPOSAL DETAIL + WORKFLOW
         // ============================================
-        function openProposalDetail(id) {
+               async function openProposalDetail(id) {
             const p = proposals.find(x => x.id === id);
             if (!p) return;
             currentDetailProposalId = id;
+
+            // Fetch history
+            let historyList = [];
+            try {
+                const { data, error } = await supabaseClient
+                    .from('proposal_status_history')
+                    .select('*')
+                    .eq('proposal_id', id)
+                    .order('created_at', { ascending: true });
+                if (!error && data) historyList = data;
+            } catch (e) {
+                console.warn('History fetch failed', e);
+            }
 
             document.getElementById('propDetailTitle').textContent = `PROP-${String(p.id).padStart(4,'0')}`;
 
@@ -5235,8 +5264,13 @@
                 showError('Cannot fund a prospect proposal — convert to investor first.');
                 return;
             }
-            if (!confirm(`Fund proposal PROP-${String(id).padStart(4,'0')} for KSh ${fmt(p.proposedAmount)}? This will create a real investment and update ${proposalInvestorLabel(p)}'s equity.`)) return;
-
+            // Prompt for Funding Evidence
+            const fundingRef = prompt(`Fund proposal PROP-${String(id).padStart(4,'0')} for KSh ${fmt(p.proposedAmount)}?\n\nThis will create a real investment and update ${proposalInvestorLabel(p)}'s equity.\n\nPlease enter the Funding Evidence / Payment Reference (e.g. M-PESA code, Bank Ref):`, '');
+            if (fundingRef === null) return; // User cancelled
+            if (!fundingRef.trim()) {
+                showError('⚠️ A funding evidence reference is required to fund a proposal.');
+                return;
+            }
             const inv = investors.find(i => i.id === p.investorId);
             if (!inv) {
                 showError('Investor not found.');
@@ -8220,4 +8254,14 @@
 
 </body>
 
+</html>
+</table>
+<div class="print-footer"><span>Starlink LLC · Company Reserve</span><span>${escapeHTML(new Date().toLocaleString())}</span></div>
+</div>
+`); } document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+
+</html>
 </html>
