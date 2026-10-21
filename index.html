@@ -556,9 +556,22 @@
         
         .summary-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
             margin: 0.8rem 0 1.6rem;
+            width: 100%;
+        }
+        
+        @media (max-width: 900px) {
+            .summary-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .summary-row {
+                grid-template-columns: 1fr;
+            }
         }
         
         .summary-card {
@@ -619,6 +632,55 @@
             font-weight: 700;
             color: #f2f0eb;
             letter-spacing: -0.02em;
+        }
+        /* 🆕 NEW STYLES FOR INDEX.HTML DASHBOARD CARDS */
+        
+        .summary-card.income {
+            background: linear-gradient(135deg, rgba(111, 203, 147, 0.12) 0%, rgba(20, 40, 30, 0.6) 100%);
+            border: 1px solid rgba(111, 203, 147, 0.25);
+        }
+        
+        .summary-card.income::after {
+            background: linear-gradient(90deg, transparent, #6fcb93, transparent);
+        }
+        
+        .summary-card.income .summary-value {
+            color: #7ee0a2;
+            text-shadow: 0 0 15px rgba(111, 203, 147, 0.2);
+        }
+        
+        .summary-card.expense {
+            background: linear-gradient(135deg, rgba(226, 104, 91, 0.12) 0%, rgba(45, 20, 20, 0.6) 100%);
+            border: 1px solid rgba(226, 104, 91, 0.25);
+        }
+        
+        .summary-card.expense::after {
+            background: linear-gradient(90deg, transparent, #e8837a, transparent);
+        }
+        
+        .summary-card.expense .summary-value {
+            color: #f0a89f;
+            text-shadow: 0 0 15px rgba(226, 104, 91, 0.2);
+        }
+        
+        .summary-card.capital {
+            background: linear-gradient(135deg, rgba(122, 90, 248, 0.12) 0%, rgba(30, 20, 60, 0.6) 100%);
+            border: 1px solid rgba(122, 90, 248, 0.25);
+        }
+        
+        .summary-card.capital::after {
+            background: linear-gradient(90deg, transparent, #b8a0ff, transparent);
+        }
+        
+        .summary-card.capital .summary-value {
+            color: #b8a0ff;
+            text-shadow: 0 0 15px rgba(122, 90, 248, 0.2);
+        }
+        /* 🆕 END OF NEW STYLES */
+        
+        .summary-card.virtual {
+            background: linear-gradient(135deg, rgba(200, 154, 91, 0.16) 0%, rgba(60, 40, 20, 0.55) 100%);
+            border-color: rgba(200, 154, 91, 0.28);
         }
         
         .summary-card.virtual {
@@ -3097,22 +3159,31 @@
         </div>
 
         <div class="summary-row">
-            <div class="summary-card virtual" title="Reads from the retired expenditure app's frozen data snapshot. Will be replaced by the new transaction-based formula in a future update.">
-                <div class="summary-label"><i class="fas fa-landmark"></i> STARLINK VIRTUAL <i class="fas fa-lock" style="font-size:0.7rem; opacity:0.5; margin-left:4px;"></i></div>
-                <div class="summary-value" id="virtualInvestmentValue">0.00</div>
+            <div class="summary-card income" style="cursor:pointer;" onclick="viewMonthlyRecords('income')" title="Click to view this month's income">
+                <div class="summary-label"><i class="fas fa-arrow-down"></i> TOTAL INCOME <small style="color:#7ee0a2; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
+                <div class="summary-value" id="sumIncome">KSh 0</div>
+                <div class="summary-sub" id="sumIncomeCount">0 transactions this month</div>
             </div>
-            <div class="summary-card investment">
-                <div class="summary-label"><i class="fas fa-chart-line"></i> STARLINK INVESTMENT</div>
-                <div class="summary-value" id="starlinkInvestmentValue">0.00</div>
+            <div class="summary-card expense" style="cursor:pointer;" onclick="viewMonthlyRecords('expense')" title="Click to view this month's expenditure">
+                <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE <small style="color:#f0a89f; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
+                <div class="summary-value" id="sumExpense">KSh 0</div>
+                <div class="summary-sub" id="sumExpenseCount">0 transactions this month</div>
             </div>
-            <div class="summary-card">
-                <div class="summary-label"><i class="fas fa-coins"></i> COMMON INVESTMENT</div>
-                <div class="summary-value" id="commonInvestmentValue">0.00</div>
+            <div class="summary-card capital" style="cursor:pointer;" onclick="viewMonthlyRecords('capital')" title="Click to view this month's capital">
+                <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL INJECTED <small style="color:#b8a0ff; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
+                <div class="summary-value" id="sumCapital">KSh 0</div>
+                <div class="summary-sub" id="sumCapitalCount">0 transactions this month</div>
             </div>
-            <div class="summary-card">
-                <div class="summary-label"><i class="fas fa-wifi"></i> ROUTERS − KAIRO</div>
-                <div class="summary-value" id="routersDeltaValue">0.00</div>
+            <div class="summary-card" style="cursor:pointer; transition: transform 0.2s;" onclick="viewMonthlyRecords('all')" title="Click to view all transactions for this month">
+                <div class="summary-label">
+                    <span><i class="fas fa-balance-scale"></i> NET POSITION</span>
+                </div>
+                <div class="summary-value" id="sumNet">KSh 0</div>
+                <div class="summary-sub">Income − Expenditure</div>
             </div>
+
+            <!-- TRANSACTION FEES CARD -->
+
         </div>
 
         <div class="chart-grid">
@@ -3912,13 +3983,48 @@
 
             return totalEquity;
         }
+                    function renderSummaryCards() {
+            // 1. Get current month (YYYY-MM)
+            const now = new Date();
+            const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
-        function renderSummaryCards() {
-            document.getElementById('virtualInvestmentValue').textContent = fmtDec(summary.starlinkVirtualInvestment);
-            document.getElementById('starlinkInvestmentValue').textContent = fmtDec(summary.starlinkInvestmentTotal);
-            document.getElementById('commonInvestmentValue').textContent = fmtDec(summary.commonInvestmentTotal);
-            document.getElementById('routersDeltaValue').textContent = fmtDec(safeNum(summary.routersTotal) - safeNum(summary.kairoRoutersTotal));
-            document.getElementById('lastUpdatedValue').textContent = formatTimestamp(summary.lastUpdated);
+            // 2. Filter transactions for this month only
+            const monthTxns = investorTxns.filter(t => t.date && t.date.startsWith(currentMonthStr));
+
+            const incomes = monthTxns.filter(t => t.type === 'income');
+            const expenses = monthTxns.filter(t => t.type === 'expense');
+            const capitals = monthTxns.filter(t => t.type === 'capital'); // Note: Capital might not be here, but good to include
+
+            const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
+            const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
+            const totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
+            const net = totalIncome - totalExpense;
+            const feesTotal = monthTxns.reduce((s, t) => s + safeNum(t.fee), 0);
+            const feesCount = monthTxns.filter(t => safeNum(t.fee) > 0).length;
+
+            // Safe setter
+            const setTxt = (id, txt) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = txt;
+            };
+
+            // Update the summary cards
+            setTxt('sumIncome', 'KSh ' + fmt(totalIncome));
+            setTxt('sumIncomeCount', incomes.length + ' transactions this month');
+            setTxt('sumExpense', 'KSh ' + fmt(totalExpense));
+            setTxt('sumExpenseCount', expenses.length + ' transactions this month');
+            setTxt('sumCapital', 'KSh ' + fmt(totalCapital));
+            setTxt('sumCapitalCount', capitals.length + ' transactions this month');
+            setTxt('sumNet', (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net)));
+            setTxt('sumFees', 'KSh ' + fmt(feesTotal));
+            setTxt('sumFeesCount', feesCount + ' with fees');
+            
+            // The other equity cards (Virtual, Starlink Investment, etc.)
+            setTxt('virtualInvestmentValue', fmtDec(summary.starlinkVirtualInvestment));
+            setTxt('starlinkInvestmentValue', fmtDec(summary.starlinkInvestmentTotal));
+            setTxt('commonInvestmentValue', fmtDec(summary.commonInvestmentTotal));
+            setTxt('routersDeltaValue', fmtDec(safeNum(summary.routersTotal) - safeNum(summary.kairoRoutersTotal)));
+            setTxt('lastUpdatedValue', formatTimestamp(summary.lastUpdated));
         }
 
                let miniReserveChartInstance = null;
@@ -8092,6 +8198,30 @@
                 reserveLedger = [];
             }
             return false;
+        }
+        function viewMonthlyRecords(type) {
+            // 1. Open the Transactions modal
+            const txnModal = document.getElementById('investorTxnModal');
+            if (txnModal) txnModal.classList.add('show');
+
+            // 2. Set the date filters to the current month
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+            document.getElementById('invTxnFilterFrom').value = firstDay;
+            document.getElementById('invTxnFilterTo').value = lastDay;
+
+            // 3. Set the Type filter (if 'all', clear it, otherwise set it)
+            if (type === 'all') {
+                document.getElementById('invTxnFilterType').value = '';
+            } else {
+                document.getElementById('invTxnFilterType').value = type;
+            }
+
+            // 4. Clear search and render
+            document.getElementById('invTxnFilterSearch').value = '';
+            renderInvestorTxns();
         }
 
         function reserveCurrentBalance() {
