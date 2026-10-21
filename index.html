@@ -2221,7 +2221,8 @@
         @media print {
             @page {
                 size: A4;
-                margin: 12mm;
+                margin: 20mm 15mm 25mm 15mm;
+                /* Top, Right, Bottom, Left */
             }
             html,
             body {
@@ -2251,8 +2252,33 @@
                 width: 100%;
                 max-width: none;
                 margin: 0;
-                padding: 10mm;
+                padding: 0;
                 background: #fff !important;
+            }
+            /* THE MANDATORY STAMP (Fixed on every page) */
+            .stamp-overlay {
+                position: fixed;
+                bottom: 15mm;
+                right: 15mm;
+                width: 120px;
+                opacity: 0.85;
+                z-index: 9999;
+            }
+            /* THE FOOTER (Fixed on every page) */
+            .page-footer {
+                position: fixed;
+                bottom: 5mm;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                font-size: 10px;
+                color: #667788;
+                border-top: 1px solid #d8e0e8;
+                padding-top: 5px;
+                font-family: Arial, sans-serif;
+            }
+            .page-footer::after {
+                content: "Page " counter(page);
             }
         }
     </style>
@@ -7362,8 +7388,35 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             }, 60000);
         }
 
-        function printHeader(title) {
-            return `<div class="print-header"><h1>STARLINK LLC</h1><h2>${escapeHTML(title)}</h2><p>Generated: ${escapeHTML(new Date().toLocaleString())}</p></div>`;
+               function printHeader(title) {
+            return `
+                <!-- OFFICIAL LETTERHEAD -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0b2b4a; padding-bottom: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="logo.jpg" alt="Starlink Ultranet" style="height: 55px;">
+                        <div>
+                            <h1 style="margin: 0; color: #0b2b4a; font-size: 24px; font-family: Arial, sans-serif;">STARLINK ULTRANET LLC</h1>
+                            <p style="margin: 4px 0 0 0; color: #162d44; font-size: 11px; font-family: Arial, sans-serif;">
+                                starlinkultranet.co.ke | info@starlinkultranet.co.ke
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOCUMENT TITLE & INFO -->
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <h2 style="margin: 0; color: #1a5a9c; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif;">${escapeHTML(title)}</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #5b6b7a; font-family: Arial, sans-serif;">
+                        Generated: ${new Date().toLocaleString()} | Ref: ${Math.random().toString(36).substring(2, 8).toUpperCase()}
+                    </p>
+                </div>
+
+                <!-- MANDATORY STAMP & FOOTER -->
+                <img src="stamp.jpg" class="stamp-overlay" alt="Official Stamp">
+                <div class="page-footer">
+                    Confidential • Approved by: Brian Nyongesa
+                </div>
+            `;
         }
 
            function printAllDividends() {
