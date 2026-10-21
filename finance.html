@@ -2617,6 +2617,19 @@
         <div class="view active" data-view="dashboard">
             <div class="headline">
                 <h1><i class="fas fa-chart-pie"></i> Overview <small id="todayLabel">—</small></h1>
+                <div class="filter-bar" style="margin-bottom: 1rem; margin-top: 0.5rem; background: rgba(15,26,46,0.7);">
+                    <select id="dashPeriodSelect" style="min-width: 200px;">
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="this_week">This Week</option>
+                    <option value="this_month" selected>This Month</option>
+                    <option value="prev_month">Previous Month</option>
+                    <option value="custom">Custom Range</option>
+                    <option value="all">All Time</option>
+                </select>
+                    <input type="date" id="dashCustomFrom" style="display: none;">
+                    <input type="date" id="dashCustomTo" style="display: none;">
+                </div>
             </div>
             <div class="summary-row">
                 <div class="summary-card income" style="cursor:pointer;" onclick="viewMonthlyRecords('income')" title="Click to view this month's income">
@@ -7863,25 +7876,56 @@
             return '';
         }
 
-               function renderDashboard() {
-            // 1. Get current month (YYYY-MM)
-            const now = new Date();
-            const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+                     async function renderDashboard() {
+            const period = document.getElementById('dashPeriodSelect').value;
+            const fromInput = document.getElementById('dashCustomFrom').value;
+            const toInput = document.getElementById('dashCustomTo').value;
 
-            // 2. Filter transactions for this month only
-            const monthTxns = transactions.filter(t => t.date && t.date.startsWith(currentMonthStr));
+            // Show/hide custom date inputs
+            const isCustom = period === 'custom';
+            document.getElementById('dashCustomFrom').style.display = isCustom ? 'block' : 'none';
+            document.getElementById('dashCustomTo').style.display = isCustom ? 'block' : 'none';
 
-            const incomes = monthTxns.filter(t => t.type === 'income');
-            const expenses = monthTxns.filter(t => t.type === 'expense');
-            const capitals = monthTxns.filter(t => t.type === 'capital');
+            // 1. Get the date range from our SQL function
+            let fromDate = '';
+            let toDate = '';
+            
+            if (isCustom && fromInput && toInput) {
+                fromDate = fromInput;
+                toDate = toInput;
+            } else {
+                const { data, error } = await supabaseClient.rpc('period_range', {
+                    p_period: period,
+                    p_from: null,
+                    p_to: null
+                });
+                if (!error && data && data.length > 0) {
+                    fromDate = data[0].range_from;
+                    toDate = data[0].range_to;
+                }
+            }
+
+            // 2. Filter transactions using ACTUAL business dates (Item 16)
+            const periodTxns = transactions.filter(t => {
+                const d = t.txn_date || t.date || t.actualDate; // Use actual date
+                if (!d) return false;
+                if (fromDate && d < fromDate) return false;
+                if (toDate && d > toDate) return false;
+                return true;
+            });
+
+            const incomes = periodTxns.filter(t => t.type === 'income');
+            const expenses = periodTxns.filter(t => t.type === 'expense');
+            const capitals = periodTxns.filter(t => t.type === 'capital');
 
             const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
             const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
             const totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
             const net = totalIncome - totalExpense;
-            const feesTotal = monthTxns.reduce((s, t) => s + safeNum(t.fee), 0);
-            const feesCount = monthTxns.filter(t => safeNum(t.fee) > 0).length;
+            const feesTotal = periodTxns.reduce((s, t) => s + safeNum(t.fee), 0);
+            const feesCount = periodTxns.filter(t => safeNum(t.fee) > 0).length;
 
+            // 3. Update the cards
             document.getElementById('sumIncome').textContent = 'KSh ' + fmt(totalIncome);
             document.getElementById('sumIncomeCount').textContent = incomes.length + ' transaction' + (incomes.length !== 1 ? 's' : '');
             
@@ -7900,15 +7944,19 @@
                 if (countEl) countEl.textContent = feesCount + ' with fees';
             }
 
-            document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            });
+            // Update the label (e.g., showing the date range)
+            let labelText = '';
+            if (period === 'today') labelText = 'Today, ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            else if (period === 'all') labelText = 'All Time';
+            else if (fromDate && toDate) labelText = fromDate + ' → ' + toDate;
+            
+            document.getElementById('todayLabel').textContent = labelText;
 
+            // 4. Recent Activity
             const recent = [...transactions]
                 .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
                 .slice(0, 10);
+            
             const feed = document.getElementById('activityFeed');
             if (!recent.length) {
                 feed.innerHTML = `<div class="empty-row"><i class="fas fa-inbox"></i>No transactions yet. Click "New Transaction" to begin.</div>`;
@@ -7925,12 +7973,12 @@
                         </div>
                         <div style="text-align:right;">
                             <div class="${txnAmountClass(t.type)}">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</div>
-                            <div class="time">${new Date(t.createdAt || t.date).toLocaleDateString()}</div>
+                            <div class="time">${new Date(t.txn_date || t.date).toLocaleDateString()}</div>
                         </div>
                     </div>`;
                 }).join('');
             }
-        }
+        } 
                 function viewMonthlyRecords(type) {
             // 1. Switch to the Ledger tab
             const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
@@ -11315,6 +11363,15 @@ function openTxnModal(txn = null) {
             document.getElementById('incFilterClear').addEventListener('click', () => {
                 ['incFilterFrom', 'incFilterTo', 'incFilterStatus', 'incFilterSearch'].forEach(id => document.getElementById(id).value = '');
                 renderIncome();
+            });
+
+                        // Dashboard Period Selector
+            document.getElementById('dashPeriodSelect').addEventListener('change', renderDashboard);
+            document.getElementById('dashCustomFrom').addEventListener('change', () => {
+                if (document.getElementById('dashPeriodSelect').value === 'custom') renderDashboard();
+            });
+            document.getElementById('dashCustomTo').addEventListener('change', () => {
+                if (document.getElementById('dashPeriodSelect').value === 'custom') renderDashboard();
             });
 
             ['expFilterFrom', 'expFilterTo', 'expFilterStatus'].forEach(id =>
