@@ -3303,6 +3303,10 @@
         const STARLINK_VIRTUAL_BASE = 377259;
         const CURRENT_USER = 'admin';
 
+        if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
+
         const DEFAULT_INVESTORS = [{
             id: 1,
             name: 'Toly Brian',
@@ -3516,8 +3520,7 @@
                 const query = supabaseClient
                     .from('transactions')
                     .select('*')
-                    .in('type', ['income', 'expense'])
-                    .is('payroll_run_id', null)
+                    .in('type', ['income', 'expense', 'capital']).is('payroll_run_id', null)
                     .order('date', {
                         ascending: false
                     })
@@ -3723,6 +3726,47 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     date: r.txn_date || ''
 }));
 // ✅ END OF NEW BLOCK ✅
+
+                // 4. Read dividends from table
+                const {
+                    data: divRows,
+                    error: divErr
+                } = await supabaseClient
+                    .from('dividends')
+                    .select('*')
+                    .order('created_at', {
+                        ascending: false
+                    });
+                if (divErr) throw divErr;
+                dividends = (divRows || []).map(r => ({
+                    id: r.id,
+                    periodLabel: r.period_label,
+                    totalDistributable: safeNum(r.total_distributable),
+                    notes: r.notes || '',
+                    status: r.status,
+                    allocations: Array.isArray(r.allocations) ? r.allocations : [],
+                    snapshotHolders: r.snapshot_holders || null,
+                    snapshotTotalEquity: safeNum(r.snapshot_total_equity),
+                    snapshotDate: r.snapshot_date || null,
+                    stage1Total: safeNum(r.stage1_total),
+                    stage2Total: safeNum(r.stage2_total),
+                    reserveAmount: safeNum(r.reserve_amount),
+                    runningReserveBalance: safeNum(r.running_reserve_balance),
+                    formulaVersion: r.formula_version || 'two-stage-v1',
+                    createdAt: r.created_at,
+                    createdBy: r.created_by,
+                    updatedAt: r.updated_at,
+                    updatedBy: r.updated_by,
+                    approvedAt: r.approved_at,
+                    approvedBy: r.approved_by,
+                    paidAt: r.paid_at,
+                    cancelledAt: r.cancelled_at,
+                    cancelReason: r.cancel_reason,
+                    lastEditedAt: r.last_edited_at,
+                    lastEditedBy: r.last_edited_by,
+                    lastEditReason: r.last_edit_reason
+                }));
+
                 // 5. Read audit logs from table
                 const {
                     data: auditRows,
@@ -4043,21 +4087,19 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const runEl = document.getElementById('dividendRunningReserve');
             if (runEl) runEl.textContent = 'KSh ' + fmt(latestRunningReserve);
 
-            // Render the Mini Chart
-            const chartCanvas = document.getElementById('miniReserveChart');
+                        const chartCanvas = document.getElementById('miniReserveChart');
             if (!chartCanvas) return;
 
             if (miniReserveChartInstance) miniReserveChartInstance.destroy();
 
-            // Sort dividends chronologically for the chart
             const sortedForChart = [...dividends]
-                .filter(d => safeNum(d.runningReserveBalance) > 0 || safeNum(d.reserveAmount) > 0) // Only show months with reserve
+                .filter(d => safeNum(d.runningReserveBalance) > 0 || safeNum(d.reserveAmount) > 0) 
                 .sort((a, b) => (a.snapshotDate || a.createdAt || '').localeCompare(b.snapshotDate || b.createdAt || ''));
 
-                    miniReserveChartInstance = new Chart(chartCanvas.getContext('2d'), {
+            miniReserveChartInstance = new Chart(chartCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: sortedForChart.map(d => d.periodLabel),
+                    labels: sortedForChart.map(d => d.periodLabel || 'Unknown'),
                     datasets: [{
                         data: sortedForChart.map(d => safeNum(d.runningReserveBalance)),
                         borderColor: '#c89a5b',
@@ -4080,14 +4122,15 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                             }
                         },
                         datalabels: {
+                            display: true,
                             align: 'top',
                             anchor: 'end',
                             offset: 4,
-                            color: '#ffffff',
+                            color: '#f4c98d',
                             font: {
-                                size: 13,
-                                weight: '800',
-                                family: 'Space Grotesk'
+                                size: 12,
+                                weight: 'bold',
+                                family: 'JetBrains Mono'
                             },
                             formatter: (value) => fmt(value)
                         }
@@ -4100,8 +4143,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                             grace: '15%'
                         }
                     },
-                    layout: { padding: { top: 20, bottom: 0, right: 30 } }
-                }
+                    layout: { padding: { top: 25, bottom: 0, right: 30, left: 35 } }                }
             });
         }
         // ==================================================
@@ -4552,7 +4594,6 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const hasLabels = typeof ChartDataLabels !== 'undefined';
             if (hasLabels) {
                 try {
-                    Chart.register(ChartDataLabels);
                 } catch (e) {}
             }
 
@@ -5765,7 +5806,6 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const hasLabels = typeof ChartDataLabels !== 'undefined';
             if (hasLabels) {
                 try {
-                    Chart.register(ChartDataLabels);
                 } catch (e) {}
             }
 
@@ -8466,4 +8506,5 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     <script src="mpesa-parser.js"></script>
 </body>
 
+</html>
 </html>
