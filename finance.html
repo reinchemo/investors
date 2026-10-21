@@ -1537,10 +1537,79 @@
             color: #7fded1;
             border-color: rgba(95, 199, 188, 0.3);
         }
+        /* PRINT BRANDING & STAMP */
+        
+        #employeePrintArea {
+            display: none;
+        }
+        
+        @media print {
+            @page {
+                size: A4;
+                margin: 20mm 15mm 25mm 15mm;
+            }
+            html,
+            body {
+                background: #fff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            #employeePrintArea,
+            #employeePrintArea * {
+                visibility: visible !important;
+            }
+            #employeePrintArea {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                min-height: 100vh !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #fff !important;
+            }
+            .employee-print-report {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: 0;
+                background: #fff !important;
+            }
+            /* MANDATORY STAMP */
+            .stamp-overlay {
+                position: fixed;
+                bottom: 15mm;
+                right: 15mm;
+                width: 120px;
+                opacity: 0.85;
+                z-index: 9999;
+            }
+            /* FOOTER & PAGE NUMBERS */
+            .page-footer {
+                position: fixed;
+                bottom: 5mm;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                font-size: 10px;
+                color: #667788;
+                border-top: 1px solid #d8e0e8;
+                padding-top: 5px;
+                font-family: Arial, sans-serif;
+            }
+            .page-footer::after {
+                content: "Page " counter(page);
+            }
+        }
     </style>
 </head>
 
 <body>
+    <div id="employeePrintArea" style="display:none;"></div>
 
     <div class="bg-layer"></div>
     <div class="bg-orbs">
@@ -4579,6 +4648,57 @@
         </div>
     </div>
     <script>
+        // ==================================================
+        // PRINT BRANDING FUNCTIONS
+        // ==================================================
+        function printHeader(title) {
+            return `
+                <!-- OFFICIAL LETTERHEAD -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0b2b4a; padding-bottom: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="logo.jpg" alt="Starlink Ultranet" style="height: 55px;">
+                        <div>
+                            <h1 style="margin: 0; color: #0b2b4a; font-size: 24px; font-family: Arial, sans-serif;">STARLINK ULTRANET LLC</h1>
+                            <p style="margin: 4px 0 0 0; color: #162d44; font-size: 11px; font-family: Arial, sans-serif;">
+                                starlinkultranet.co.ke | info@starlinkultranet.co.ke
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DOCUMENT TITLE & INFO -->
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <h2 style="margin: 0; color: #1a5a9c; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif;">${escapeHTML(title)}</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #5b6b7a; font-family: Arial, sans-serif;">
+                        Generated: ${new Date().toLocaleString()} | Ref: ${Math.random().toString(36).substring(2, 8).toUpperCase()}
+                    </p>
+                </div>
+
+                <!-- MANDATORY STAMP & FOOTER -->
+                <img src="stamp.jpg" class="stamp-overlay" alt="Official Stamp">
+                <div class="page-footer">
+                    Confidential • Approved by: Brian Nyongesa
+                </div>
+            `;
+        }
+
+        function doPrint(html) {
+            const printArea = document.getElementById('employeePrintArea');
+            if (!printArea) return;
+            printArea.innerHTML = html;
+            printArea.style.display = 'block';
+            requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+
+            const cleanup = () => {
+                printArea.style.display = 'none';
+                printArea.innerHTML = '';
+                window.removeEventListener('afterprint', cleanup);
+            };
+            window.addEventListener('afterprint', cleanup);
+            setTimeout(() => {
+                if (printArea.style.display !== 'none') cleanup();
+            }, 60000);
+        }
         // ==================================================
         // CONFIG
         // ==================================================
