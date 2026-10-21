@@ -2744,6 +2744,7 @@
                 <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
                     <button class="btn btn-ghost" id="exportCsvLedger"><i class="fas fa-file-csv"></i> Export CSV</button>
                     <button class="btn btn-primary" id="newTxnBtn2"><i class="fas fa-plus"></i> New Transaction</button>
+                    <button class="btn btn-ghost" id="printLedgerBtn"><i class="fas fa-print"></i> Print Ledger</button>
                 </div>
             </div>
             <div class="filter-bar">
@@ -3115,6 +3116,7 @@
             <div class="headline">
                 <h1><i class="fas fa-money-check-alt" style="color:#5fc7bc;"></i> Payroll</h1>
                 <button class="btn btn-primary" id="runPayrollBtn"><i class="fas fa-plus"></i> Run Payroll</button>
+                <button class="btn btn-ghost" id="printPayrollRunsBtn"><i class="fas fa-print"></i> Print History</button>
             </div>
 
             <div class="summary-row">
@@ -8120,6 +8122,63 @@
             renderLedger();
         }
 
+                function printLedger() {
+            const from = document.getElementById('ldgFilterFrom').value || 'All time';
+            const to = document.getElementById('ldgFilterTo').value || '';
+            const type = document.getElementById('ldgFilterType').value || 'All Types';
+            const status = document.getElementById('ldgFilterStatus').value || 'All Statuses';
+            
+            // Grab the currently filtered rows from the table body
+            const rows = document.querySelectorAll('#ledgerBody tr');
+            let rowsHtml = '';
+            let totalIn = 0;
+            let totalOut = 0;
+
+            rows.forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length < 8) return; // Skip empty rows
+                
+                const rowType = cells[2].textContent.toLowerCase();
+                const amountText = cells[8].textContent.replace(/[^0-9.-]+/g, "");
+                const amount = parseFloat(amountText) || 0;
+
+                if (rowType.includes('income') || rowType.includes('capital')) totalIn += amount;
+                if (rowType.includes('expense')) totalOut += amount;
+
+                rowsHtml += `<tr>`;
+                // Skip the Actions column (last one)
+                for (let i = 0; i < cells.length - 1; i++) {
+                    rowsHtml += `<td>${escapeHTML(cells[i].textContent.trim())}</td>`;
+                }
+                rowsHtml += `</tr>`;
+            });
+
+            const html = `
+                <div class="employee-print-report">
+                    ${printHeader('Central Ledger Report')}
+                    
+                    <table class="print-payment-table" style="margin-bottom:20px; width: 100%;">
+                        <tr><td style="width: 30%;">Date Range</td><td>${escapeHTML(from)} ${to ? '→ ' + escapeHTML(to) : ''}</td></tr>
+                        <tr><td>Transaction Type</td><td>${escapeHTML(type)}</td></tr>
+                        <tr><td>Status Filter</td><td>${escapeHTML(status)}</td></tr>
+                        <tr><td>Total Income / Capital</td><td><strong>KSh ${fmt(totalIn)}</strong></td></tr>
+                        <tr><td>Total Expenditure</td><td><strong>KSh ${fmt(totalOut)}</strong></td></tr>
+                        <tr><td>Net Position</td><td><strong>KSh ${fmt(totalIn - totalOut)}</strong></td></tr>
+                    </table>
+
+                    <table class="print-list" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Date</th><th>Type</th><th>Category</th><th>Description</th><th>Location</th><th>Status</th><th style="text-align:right;">Amount</th><th style="text-align:right;">Fee</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                    </table>
+                </div>
+            `;
+            doPrint(html);
+        }
+
         function renderLedger() {
             const body = document.getElementById('ledgerBody');
             const from = document.getElementById('ldgFilterFrom').value || '';
@@ -8485,6 +8544,52 @@
         function payrollStaffCount(runId) {
             return payrollItems.filter(i => i.runId === runId).length;
         }
+                function printPayrollRuns() {
+            const rows = document.querySelectorAll('#payrollBody tr');
+            let rowsHtml = '';
+            let totalNet = 0;
+
+            rows.forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length < 4) return;
+                
+                const amountText = cells[3].textContent.replace(/[^0-9.-]+/g, "");
+                const amount = parseFloat(amountText) || 0;
+                if (cells[4].textContent.toLowerCase().includes('posted')) {
+                    totalNet += amount;
+                }
+
+                rowsHtml += `<tr>
+                    <td>${escapeHTML(cells[0].textContent.trim())}</td>
+                    <td>${escapeHTML(cells[1].textContent.trim())}</td>
+                    <td style="text-align:center;">${escapeHTML(cells[2].textContent.trim())}</td>
+                    <td style="text-align:right;">${escapeHTML(cells[3].textContent.trim())}</td>
+                    <td>${escapeHTML(cells[4].textContent.trim())}</td>
+                    <td>${escapeHTML(cells[5].textContent.trim())}</td>
+                </tr>`;
+            });
+
+            const html = `
+                <div class="employee-print-report">
+                    ${printHeader('Payroll Runs History')}
+                    
+                    <table class="print-payment-table" style="margin-bottom:20px; width: 100%;">
+                        <tr><td style="width: 30%;">Total Posted Payroll</td><td><strong>KSh ${fmt(totalNet)}</strong></td></tr>
+                        <tr><td>Total Runs Printed</td><td>${rows.length}</td></tr>
+                    </table>
+
+                    <table class="print-list" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Period</th><th>Run Date</th><th>Staff Count</th><th style="text-align:right;">Total Net</th><th>Status</th><th>Posted Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml || '<tr><td colspan="6">No payroll runs found.</td></tr>'}</tbody>
+                    </table>
+                </div>
+            `;
+            doPrint(html);
+        }
 
         function renderPayroll() {
             const body = document.getElementById('payrollBody');
@@ -8805,7 +8910,60 @@
                 </tr>`;
             }
         }
+        function printPnLReport() {
+            const from = document.getElementById('pnlFrom').value || 'All time';
+            const to = document.getElementById('pnlTo').value || '';
+            const revenue = document.getElementById('pnlRevenue').textContent;
+            const expenses = document.getElementById('pnlExpenses').textContent;
+            const net = document.getElementById('pnlNet').textContent;
+            const margin = document.getElementById('pnlMargin').textContent;
 
+            // Grab the Revenue table
+            let revHtml = '';
+            document.querySelectorAll('#pnlRevenueBody tr').forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length >= 3) revHtml += `<tr><td>${escapeHTML(cells[0].textContent)}</td><td style="text-align:right;">${escapeHTML(cells[1].textContent)}</td><td style="text-align:right;">${escapeHTML(cells[2].textContent)}</td></tr>`;
+            });
+
+            // Grab the Expense table
+            let expHtml = '';
+            document.querySelectorAll('#pnlExpenseBody tr').forEach(tr => {
+                const cells = tr.querySelectorAll('td');
+                if (cells.length >= 3) expHtml += `<tr><td>${escapeHTML(cells[0].textContent)}</td><td style="text-align:right;">${escapeHTML(cells[1].textContent)}</td><td style="text-align:right;">${escapeHTML(cells[2].textContent)}</td></tr>`;
+            });
+
+            const html = `
+                <div class="employee-print-report">
+                    ${printHeader('Profit & Loss Statement')}
+                    
+                    <table class="print-payment-table" style="margin-bottom:20px; width: 100%;">
+                        <tr><td style="width: 30%;">Period</td><td>${escapeHTML(from)} ${to ? '→ ' + escapeHTML(to) : ''}</td></tr>
+                        <tr><td>Total Revenue</td><td><strong style="color:#2a8a4a;">${escapeHTML(revenue)}</strong></td></tr>
+                        <tr><td>Total Expenses</td><td><strong style="color:#c04a3a;">${escapeHTML(expenses)}</strong></td></tr>
+                        <tr><td>Net Profit</td><td><strong>${escapeHTML(net)}</strong></td></tr>
+                        <tr><td>Margin</td><td>${escapeHTML(margin)}</td></tr>
+                    </table>
+
+                    <div style="display:flex; gap:20px; margin-bottom: 20px;">
+                        <div style="flex:1;">
+                            <h3 style="font-size:14px; margin-bottom:8px; color:#1a5a9c;">Revenue Breakdown</h3>
+                            <table class="print-list" style="width:100%;">
+                                <thead><tr><th>Category</th><th style="text-align:right;">Count</th><th style="text-align:right;">Amount</th></tr></thead>
+                                <tbody>${revHtml || '<tr><td colspan="3">No data</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                        <div style="flex:1;">
+                            <h3 style="font-size:14px; margin-bottom:8px; color:#1a5a9c;">Expense Breakdown</h3>
+                            <table class="print-list" style="width:100%;">
+                                <thead><tr><th>Category</th><th style="text-align:right;">Count</th><th style="text-align:right;">Amount</th></tr></thead>
+                                <tbody>${expHtml || '<tr><td colspan="3">No data</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            doPrint(html);
+        }
         // ==================================================
         // CASH FLOW REPORT (Phase 4b)
         // ==================================================
@@ -11565,8 +11723,7 @@ function openTxnModal(txn = null) {
                 renderPnL();
             });
             document.getElementById('pnlRefreshBtn').addEventListener('click', renderPnL);
-            document.getElementById('pnlPrintBtn').addEventListener('click', () => window.print());
-
+            document.getElementById('pnlPrintBtn').addEventListener('click', printPnLReport);
             document.getElementById('cfFrom').addEventListener('change', renderCashFlow);
             document.getElementById('cfTo').addEventListener('change', renderCashFlow);
             document.getElementById('cfClearBtn').addEventListener('click', () => {
@@ -13109,6 +13266,7 @@ function openTxnModal(txn = null) {
 
             document.getElementById('runPayrollBtn').addEventListener('click', openPayrollWizard);
                         document.getElementById('newCasualBtn').addEventListener('click', openCasualModal);
+                                    document.getElementById('printPayrollRunsBtn').addEventListener('click', printPayrollRuns);
             document.getElementById('cajCancel').addEventListener('click', () => document.getElementById('casualModal').classList.remove('show'));
             document.getElementById('cajSave').addEventListener('click', saveCasualPayment);
             document.getElementById('casualModal').addEventListener('click', function(e) {
@@ -13158,6 +13316,7 @@ function openTxnModal(txn = null) {
             document.getElementById('exportCsvLedger').addEventListener('click', () => exportCsv(transactions, 'ledger'));
             document.getElementById('exportCsvIncome').addEventListener('click', () => exportCsv(transactions.filter(t => t.type === 'income'), 'income'));
             document.getElementById('exportCsvExpense').addEventListener('click', () => exportCsv(transactions.filter(t => t.type === 'expense'), 'expense'));
+                        document.getElementById('printLedgerBtn').addEventListener('click', printLedger);
 
             // startPolling();  // Manual refresh only — disabled
             // Generate notifications on load
