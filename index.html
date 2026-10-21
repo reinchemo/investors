@@ -2390,7 +2390,7 @@
     <div class="modal-overlay" id="paymentsModal">
         <div class="modal-card payments-modal-card">
             <div class="payments-modal-header">
-                <h3><i class="fas fa-money-check-alt"></i> Employee Payments</h3>
+                <h3><i class="fas fa-money-check-alt"></i> Unified Payments & Payroll</h3>
                 <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
                     <button class="btn btn-ghost add-employee-btn" id="printAllEmployeesBtn"><i class="fas fa-print"></i> Print All</button>
                     <button class="btn btn-primary add-employee-btn" id="addEmployeeBtn"><i class="fas fa-user-plus"></i> Add Employee</button>
@@ -3676,64 +3676,27 @@
                 }));
 
                 // 3. Read employees from table
-                const {
-                    data: empRows,
-                    error: empErr
-                } = await supabaseClient
-                    .from('employees')
-                    .select('*')
-                    .order('date', {
-                        ascending: false
-                    });
-                if (empErr) throw empErr;
-                EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
-                    id: r.id,
-                    name: r.name,
-                    amount: safeNum(r.amount),
-                    reference: r.reference || '',
-                    status: r.status || 'paid',
-                    date: r.date || ''
-                }));
-
-                // 4. Read dividends from table
-                const {
-                    data: divRows,
-                    error: divErr
-                } = await supabaseClient
-                    .from('dividends')
-                    .select('*')
-                    .order('created_at', {
-                        ascending: false
-                    });
-                if (divErr) throw divErr;
-               dividends = (divRows || []).map(r => ({
+     // ✅ PASTE THIS NEW BLOCK ✅
+const {
+    data: empRows,
+    error: empErr
+} = await supabaseClient
+    .from('payroll_payments')
+    .select('*')
+    .order('txn_date', {
+        ascending: false
+    });
+if (empErr) throw empErr;
+EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     id: r.id,
-    periodLabel: r.period_label,
-    totalDistributable: safeNum(r.total_distributable),
-    notes: r.notes || '',
-    status: r.status,
-    allocations: Array.isArray(r.allocations) ? r.allocations : [],
-    snapshotHolders: r.snapshot_holders || null,
-    snapshotTotalEquity: safeNum(r.snapshot_total_equity),
-    snapshotDate: r.snapshot_date || null,
-    stage1Total: safeNum(r.stage1_total),
-    stage2Total: safeNum(r.stage2_total),
-    reserveAmount: safeNum(r.reserve_amount),
-    runningReserveBalance: safeNum(r.running_reserve_balance),
-    formulaVersion: r.formula_version || 'two-stage-v1',
-    createdAt: r.created_at,
-    createdBy: r.created_by,
-    updatedAt: r.updated_at,
-    updatedBy: r.updated_by,
-    approvedAt: r.approved_at,
-    approvedBy: r.approved_by,
-    paidAt: r.paid_at,
-    cancelledAt: r.cancelled_at,
-    cancelReason: r.cancel_reason,
-    lastEditedAt: r.last_edited_at,
-    lastEditedBy: r.last_edited_by,
-    lastEditReason: r.last_edit_reason
+    legacyId: r.legacy_employee_id,
+    name: r.employee_name,
+    amount: safeNum(r.gross_amount),
+    reference: r.reference || '',
+    status: r.status || 'pending',
+    date: r.txn_date || ''
 }));
+// ✅ END OF NEW BLOCK ✅
                 // 5. Read audit logs from table
                 const {
                     data: auditRows,
@@ -6644,98 +6607,98 @@
             editingEmployeeId = null;
         }
 
-        async function saveEmployee() {
-            const name = document.getElementById('employeeName').value.trim();
-            const amount = safeNum(document.getElementById('employeeAmount').value);
-            const reference = document.getElementById('employeeRef').value.trim();
-            const status = document.getElementById('employeeStatus').value;
-            const date = document.getElementById('employeeDate').value || todayISO();
-            const error = document.getElementById('employeeError');
-            error.textContent = '';
-            error.style.display = 'none';
-            if (!name) {
-                error.textContent = 'Please enter the employee name.';
-                error.style.display = 'block';
-                return;
-            }
-            if (amount <= 0) {
-                error.textContent = 'Please enter a payment amount greater than 0.';
-                error.style.display = 'block';
-                return;
-            }
-            if (reference) {
-                const dup = EMPLOYEE_PAYMENTS.find(e => e.id !== editingEmployeeId && (e.reference || '').toLowerCase() === reference.toLowerCase());
-                if (dup) {
-                    error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`;
-                    error.style.display = 'block';
-                    return;
-                }
-            }
+      async function saveEmployee() {
+    const name = document.getElementById('employeeName').value.trim();
+    const amount = safeNum(document.getElementById('employeeAmount').value);
+    const reference = document.getElementById('employeeRef').value.trim();
+    const status = document.getElementById('employeeStatus').value;
+    const date = document.getElementById('employeeDate').value || todayISO();
+    const error = document.getElementById('employeeError');
+    error.textContent = '';
+    error.style.display = 'none';
 
-            const row = {
-                name,
-                amount,
-                reference: reference || null,
-                status,
-                date
-            };
-            let ok = false;
-
-            if (editingEmployeeId === null) {
-                const newId = nextEmployeeId();
-                row.id = newId;
-                row.created_at = new Date().toISOString();
-                const {
-                    error: err
-                } = await supabaseClient.from('employees').insert(row);
-                if (err) {
-                    error.textContent = '⚠️ Save failed: ' + err.message;
-                    error.style.display = 'block';
-                    return;
-                }
-                await logAudit('CREATE', `Employee #${newId}`, `Added payment for ${name} (${reference || 'no ref'})`, '', amount);
-                ok = true;
-            } else {
-                const old = EMPLOYEE_PAYMENTS.find(e => e.id === editingEmployeeId);
-                row.updated_at = new Date().toISOString();
-                const {
-                    error: err
-                } = await supabaseClient.from('employees').update(row).eq('id', editingEmployeeId);
-                if (err) {
-                    error.textContent = '⚠️ Save failed: ' + err.message;
-                    error.style.display = 'block';
-                    return;
-                }
-                await logAudit('UPDATE', `Employee #${editingEmployeeId}`, `Updated payment for ${name}`, `${old ? old.amount : ''}/${old ? old.status : ''}`, `${amount}/${status}`);
-                ok = true;
-            }
-
-            if (ok) {
-                await fetchSummary();
-                renderEmployeePayments();
-                renderReconciliationBanner();
-                closeEmployeeModal();
-            }
+    if (!name) {
+        error.textContent = 'Please enter the employee name.';
+        error.style.display = 'block';
+        return;
+    }
+    if (amount <= 0) {
+        error.textContent = 'Please enter a payment amount greater than 0.';
+        error.style.display = 'block';
+        return;
+    }
+    
+    if (reference) {
+        const dup = EMPLOYEE_PAYMENTS.find(e => e.id !== editingEmployeeId && (e.reference || '').toLowerCase() === reference.toLowerCase());
+        if (dup) {
+            error.textContent = `⚠️ Reference "${reference}" already used for ${dup.name}.`;
+            error.style.display = 'block';
+            return;
         }
+    }
 
-        async function deleteEmployee(employeeId) {
-            const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
-            if (!employee) return;
-            if (!confirm(`Delete employee "${employee.name}" from the payment list?`)) return;
+    const row = {
+        employee_name: name,
+        gross_amount: amount,
+        reference: reference || null,
+        status: status,
+        txn_date: date
+    };
+    
+    let ok = false;
 
-            const {
-                error
-            } = await supabaseClient.from('employees').delete().eq('id', employeeId);
-            if (error) {
-                showError('Delete failed: ' + error.message);
-                return;
-            }
-
-            await logAudit('DELETE', `Employee #${employeeId}`, `Deleted payment for ${employee.name}`, employee.amount, '');
-            await fetchSummary();
-            renderEmployeePayments();
-            renderReconciliationBanner();
+    if (editingEmployeeId === null) {
+        row.created_by = CURRENT_USER;
+        row.status = 'pending';
+        
+        const { error: err } = await supabaseClient.from('payroll_payments').insert(row);
+        if (err) {
+            error.textContent = '⚠️ Save failed: ' + err.message;
+            error.style.display = 'block';
+            return;
         }
+        await logAudit('CREATE', `Payment`, `Added payment for ${name} (${reference || 'no ref'})`, '', amount);
+        ok = true;
+    } else {
+        row.updated_at = new Date().toISOString();
+        row.updated_by = CURRENT_USER;
+        
+        const { error: err } = await supabaseClient.from('payroll_payments').update(row).eq('id', editingEmployeeId);
+        if (err) {
+            error.textContent = '⚠️ Save failed: ' + err.message;
+            error.style.display = 'block';
+            return;
+        }
+        await logAudit('UPDATE', `Payment`, `Updated payment for ${name}`, '', `${amount}/${status}`);
+        ok = true;
+    }
+
+    if (ok) {
+        await fetchSummary();
+        renderEmployeePayments();
+        renderReconciliationBanner();
+        closeEmployeeModal();
+        showToast('✅ Payment saved to unified ledger', 'success');
+    }
+}
+
+       async function deleteEmployee(employeeId) {
+    const employee = EMPLOYEE_PAYMENTS.find(e => e.id === employeeId);
+    if (!employee) return;
+    if (!confirm(`Delete payment for "${employee.name}"?`)) return;
+
+    const { error } = await supabaseClient.from('payroll_payments').delete().eq('id', employeeId);
+    if (error) {
+        showError('Delete failed: ' + error.message);
+        return;
+    }
+
+    await logAudit('DELETE', `Payment`, `Deleted payment for ${employee.name}`, employee.amount, '');
+    await fetchSummary();
+    renderEmployeePayments();
+    renderReconciliationBanner();
+    showToast('✅ Payment deleted', 'success');
+}
 
         function renderEmployeePayments() {
             const body = document.getElementById('employeePaymentBody');
@@ -6762,8 +6725,7 @@
                 <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(emp.reference || '-')}</td>
                 <td><span class="status-pill ${escapeHTML(emp.status || 'paid')}">${escapeHTML(emp.status || 'paid')}</span></td>
                 <td class="employee-amount" style="text-align:right;">KSh ${fmt(emp.amount)}</td>
-                <td><div class="employee-actions"><button class="employee-edit-btn" onclick="openEmployeeModal(${emp.id})" title="Edit"><i class="fas fa-edit"></i></button><button class="employee-delete-btn" onclick="deleteEmployee(${emp.id})" title="Delete"><i class="fas fa-trash"></i></button><button class="print-employee-btn" onclick="printEmployeeReport(${emp.id})" title="Print"><i class="fas fa-print"></i> Print</button></div></td>
-            </tr>`).join('');
+<td><div class="employee-actions"><button class="employee-edit-btn" onclick="openEmployeeModal('${emp.id}')" title="Edit"><i class="fas fa-edit"></i></button><button class="employee-delete-btn" onclick="deleteEmployee('${emp.id}')" title="Delete"><i class="fas fa-trash"></i></button><button class="print-employee-btn" onclick="printEmployeeReport('${emp.id}')" title="Print"><i class="fas fa-print"></i> Print</button></div></td>            </tr>`).join('');
             const total = list.reduce((sum, emp) => sum + safeNum(emp.amount), 0);
             totalEl.textContent = 'KSh ' + fmt(total);
         }
@@ -8448,7 +8410,7 @@
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
-
+    <script src="mpesa-parser.js"></script>
 </body>
 
 </html>
