@@ -4016,43 +4016,45 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
             return totalEquity;
         }
-                    function renderSummaryCards() {
-            // 1. Get current month (YYYY-MM)
+                           async function renderSummaryCards() {
             const now = new Date();
             const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
-            // 2. Filter transactions for this month only
-            const monthTxns = investorTxns.filter(t => t.date && t.date.startsWith(currentMonthStr));
+            const monthTxns = investorTxns.filter(t => {
+                const d = t.date || t.txn_date;
+                return d && d.startsWith(currentMonthStr);
+            });
 
             const incomes = monthTxns.filter(t => t.type === 'income');
             const expenses = monthTxns.filter(t => t.type === 'expense');
-            const capitals = monthTxns.filter(t => t.type === 'capital'); // Note: Capital might not be here, but good to include
-
+            
             const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
             const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
-            const totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
             const net = totalIncome - totalExpense;
             const feesTotal = monthTxns.reduce((s, t) => s + safeNum(t.fee), 0);
             const feesCount = monthTxns.filter(t => safeNum(t.fee) > 0).length;
 
-            // Safe setter
+            // 🆕 FETCH CAPITAL DIRECTLY FROM DB
+            const totalCapital = await fetchCapitalInjectedThisMonth();
+            const capitalCount = totalCapital > 0 ? 1 : 0; // Dummy count for display
+
             const setTxt = (id, txt) => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = txt;
             };
 
-            // Update the summary cards
             setTxt('sumIncome', 'KSh ' + fmt(totalIncome));
             setTxt('sumIncomeCount', incomes.length + ' transactions this month');
             setTxt('sumExpense', 'KSh ' + fmt(totalExpense));
             setTxt('sumExpenseCount', expenses.length + ' transactions this month');
+            
             setTxt('sumCapital', 'KSh ' + fmt(totalCapital));
-            setTxt('sumCapitalCount', capitals.length + ' transactions this month');
+            setTxt('sumCapitalCount', capitalCount + ' transactions this month');
+            
             setTxt('sumNet', (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net)));
             setTxt('sumFees', 'KSh ' + fmt(feesTotal));
             setTxt('sumFeesCount', feesCount + ' with fees');
             
-            // The other equity cards (Virtual, Starlink Investment, etc.)
             setTxt('virtualInvestmentValue', fmtDec(summary.starlinkVirtualInvestment));
             setTxt('starlinkInvestmentValue', fmtDec(summary.starlinkInvestmentTotal));
             setTxt('commonInvestmentValue', fmtDec(summary.commonInvestmentTotal));
@@ -4777,7 +4779,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             });
         }
 
-        function renderAll(pulse = true) {
+                async function renderAll(pulse = true)  {
             const totalEquity = renderTable();
             document.getElementById('totalSharesValue').textContent = fmt(totalEquity);
             renderSummaryCards();
@@ -7871,6 +7873,29 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             });
         }
 
+        async function fetchCapitalInjectedThisMonth() {
+            if (!supabaseClient) return 0;
+            try {
+                const now = new Date();
+                const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+                
+                // We ask the database directly for the sum of capital this month
+                const { data, error } = await supabaseClient
+                    .from('transactions')
+                    .select('amount')
+                    .eq('type', 'capital')
+                    .gte('date', currentMonthStr + '-01')
+                    .lte('date', currentMonthStr + '-31');
+
+                if (error) throw error;
+                
+                const total = (data || []).reduce((s, t) => s + safeNum(t.amount), 0);
+                return total;
+            } catch (e) {
+                console.warn('Capital fetch failed:', e.message);
+                return 0;
+            }
+        }
         // ==================================================
         // INIT
         // ==================================================
@@ -8506,5 +8531,5 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     <script src="mpesa-parser.js"></script>
 </body>
 
-</html>
+
 </html>
