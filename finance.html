@@ -2706,12 +2706,14 @@
                     <div class="summary-value" id="sumIncome">KSh 0</div>
                     <div class="summary-sub" id="sumIncomeCount">0 transactions</div>
                 </div>
-                <div class="summary-card expense" style="cursor:pointer;" onclick="viewMonthlyRecords('expense')" title="Click to view this month's expenditure">
-                    <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE <small style="color:#f0a89f; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
+
+<div class="summary-card capital" style="cursor:pointer;" onclick="document.getElementById('proposalsBtn').click()" title="Click to view capital contributors">
+                <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE <small style="color:#f0a89f; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                     <div class="summary-value" id="sumExpense">KSh 0</div>
                     <div class="summary-sub" id="sumExpenseCount">0 transactions</div>
                 </div>
-                <div class="summary-card capital" style="cursor:pointer;" onclick="viewMonthlyRecords('capital')" title="Click to view this month's capital">
+
+                <div class="summary-card capital" style="cursor:pointer;" onclick="viewMonthlyRecords('all')" title="Click to view all ledger activity for this period">
                     <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL INJECTED <small style="color:#b8a0ff; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                     <div class="summary-value" id="sumCapital">KSh 0</div>
                     <div class="summary-sub" id="sumCapitalCount">0 transactions</div>
@@ -7998,7 +8000,7 @@
             return '';
         }
 
-                     async function renderDashboard() {
+                             async function renderDashboard() {
             const period = document.getElementById('dashPeriodSelect').value;
             const fromInput = document.getElementById('dashCustomFrom').value;
             const toInput = document.getElementById('dashCustomTo').value;
@@ -8029,7 +8031,7 @@
 
             // 2. Filter transactions using ACTUAL business dates (Item 16)
             const periodTxns = transactions.filter(t => {
-                const d = t.txn_date || t.date || t.actualDate; // Use actual date
+                const d = t.txn_date || t.date || t.actualDate;
                 if (!d) return false;
                 if (fromDate && d < fromDate) return false;
                 if (toDate && d > toDate) return false;
@@ -8037,17 +8039,59 @@
             });
 
             const incomes = periodTxns.filter(t => t.type === 'income');
-            const expenses = periodTxns.filter(t => t.type === 'expense');
             const capitals = periodTxns.filter(t => t.type === 'capital');
+
+            // 🆕 3. FILTER OUT MASSIVE ASSETS FROM EXPENSES (Matches Equity App exactly)
+            const expenses = periodTxns.filter(t => {
+                if (t.type !== 'expense') return false;
+                
+                const desc = (t.description || '').toLowerCase();
+                const cat = (t.category || '').toLowerCase();
+                const amt = safeNum(t.amount);
+                
+                // 1. Ignore the Virtual Base
+                if (t.id === 'TXN-MIGRATION-STARLINK-VIRTUAL-BASE-001') return false;
+                
+                // 2. Ignore massive equipment (Routers, Fiber, Cables over 5k)
+                if (amt > 5000 && (
+                    desc.includes('router') || 
+                    desc.includes('fiber') || 
+                    desc.includes('cable') || 
+                    desc.includes('battery') || 
+                    cat.includes('common investment')
+                )) return false;
+
+                return true;
+            });
 
             const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
             const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
-            const totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
+            
+            let totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
+            let capitalCount = capitals.length;
+
+            // 🆕 4. FETCH REAL CAPITAL FROM PROPOSALS (Matches Equity App exactly)
+            if (totalCapital < 500000) {
+                try {
+                    const { data: propData } = await supabaseClient
+                        .from('proposals')
+                        .select('proposed_amount')
+                        .eq('status', 'funded');
+                    
+                    if (propData && propData.length > 0) {
+                        totalCapital = propData.reduce((s, t) => s + safeNum(t.proposed_amount), 0);
+                        capitalCount = propData.length;
+                    }
+                } catch (e) {
+                    console.warn('Proposal fallback failed:', e);
+                }
+            }
+
             const net = totalIncome - totalExpense;
             const feesTotal = periodTxns.reduce((s, t) => s + safeNum(t.fee), 0);
             const feesCount = periodTxns.filter(t => safeNum(t.fee) > 0).length;
 
-            // 3. Update the cards
+            // 5. Update the cards
             document.getElementById('sumIncome').textContent = 'KSh ' + fmt(totalIncome);
             document.getElementById('sumIncomeCount').textContent = incomes.length + ' transaction' + (incomes.length !== 1 ? 's' : '');
             
@@ -8055,7 +8099,7 @@
             document.getElementById('sumExpenseCount').textContent = expenses.length + ' transaction' + (expenses.length !== 1 ? 's' : '');
             
             document.getElementById('sumCapital').textContent = 'KSh ' + fmt(totalCapital);
-            document.getElementById('sumCapitalCount').textContent = capitals.length + ' transaction' + (capitals.length !== 1 ? 's' : '');
+                       document.getElementById('sumCapitalCount').textContent = capitalCount + ' funded proposal' + (capitalCount !== 1 ? 's' : '');
             
             document.getElementById('sumNet').textContent = (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net));
 
@@ -8074,7 +8118,7 @@
             
             document.getElementById('todayLabel').textContent = labelText;
 
-            // 4. Recent Activity
+            // 6. Recent Activity
             const recent = [...transactions]
                 .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
                 .slice(0, 10);
@@ -8100,7 +8144,7 @@
                     </div>`;
                 }).join('');
             }
-        } 
+        }
                 function viewMonthlyRecords(type) {
             // 1. Switch to the Ledger tab
             const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
