@@ -3195,7 +3195,7 @@
                 <div class="summary-value" id="sumExpense">KSh 0</div>
                 <div class="summary-sub" id="sumExpenseCount">0 transactions this month</div>
             </div>
-            <div class="summary-card capital" style="cursor:pointer;" onclick="viewMonthlyRecords('capital')" title="Click to view this month's capital">
+            <div class="summary-card capital" style="cursor:pointer;" onclick="openProposalsModal()" title="Click to view this month's capital contributors">
                 <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL INJECTED <small style="color:#b8a0ff; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                 <div class="summary-value" id="sumCapital">KSh 0</div>
                 <div class="summary-sub" id="sumCapitalCount">0 transactions this month</div>
@@ -3913,7 +3913,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             }
         }
 
-        function computeSummaryFromRaw(rawData) {
+             function computeSummaryFromRaw(rawData) {
             function sumAny(keys) {
                 let total = 0;
                 rawData.forEach(g => (g.rows || []).forEach(r => {
@@ -3932,7 +3932,6 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const kairoRoutersTotal = sumAny(['saved_6_kairo_routers', 'saved_5_kairo_routers', 'saved_4_kairo_routers', 'saved_3_kairo_routers', 'saved_2_kairo_routers', 'kairoRouters']);
             const starlinkInvestmentTotal = sumAny(['saved_4_starlink_investment', 'saved_5_starlink_investment', 'saved_6_starlink_investment', 'saved_3_starlink_investment', 'saved_2_starlink_investment', 'starlinkInvestment']);
 
-            // Phase 1a: base now comes from the transactions view, not a hardcoded constant
             const starlinkVirtualInvestment = Math.round((starlinkInvestmentTotalFromView + (5 / 6) * commonInvestmentTotal + (routersTotal - kairoRoutersTotal)) * 100) / 100;
             return {
                 commonInvestmentTotal,
@@ -4017,7 +4016,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
             return totalEquity;
         }
-                          async function renderSummaryCards() {
+                async function renderSummaryCards() {
             const now = new Date();
             const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
@@ -4028,7 +4027,29 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             });
 
             const incomes = monthTxns.filter(t => t.type === 'income');
-            const expenses = monthTxns.filter(t => t.type === 'expense');
+            
+            // 🆕 EXCLUDE massive equipment from Equity Expenditure to match Finance exactly
+            const expenses = monthTxns.filter(t => {
+                if (t.type !== 'expense') return false;
+                
+                const desc = (t.description || '').toLowerCase();
+                const cat = (t.category || '').toLowerCase();
+                const amt = safeNum(t.amount);
+                
+                // 1. Ignore the 377k Virtual Base
+                if (t.id === 'TXN-MIGRATION-STARLINK-VIRTUAL-BASE-001') return false;
+                
+                // 2. Ignore massive equipment (Routers, Fiber, Cables over 5k)
+                if (amt > 5000 && (
+                    desc.includes('router') || 
+                    desc.includes('fiber') || 
+                    desc.includes('cable') || 
+                    desc.includes('battery') || 
+                    cat.includes('common investment')
+                )) return false;
+
+                return true;
+            });
             
             const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
             const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
@@ -7875,27 +7896,19 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             });
         }
 
-          async function fetchCapitalInjectedThisMonth() {
+                                   async function fetchCapitalInjectedThisMonth() {
             if (!supabaseClient) return { total: 0, count: 0 };
             try {
-                const now = new Date();
-                const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-                
-                // Fetch directly from transactions table (matching Finance App exactly)
                 const { data, error } = await supabaseClient
-                    .from('transactions')
-                    .select('amount')
-                    .eq('type', 'capital')
-                    .is('deleted_at', null) // Ignore deleted
-                    .gte('txn_date', currentMonthStr + '-01')
-                    .lte('txn_date', currentMonthStr + '-31');
+                    .from('proposals')
+                    .select('proposed_amount')
+                    .eq('status', 'funded');
 
                 if (error) throw error;
                 
-                const total = (data || []).reduce((s, t) => s + safeNum(t.amount), 0);
+                const total = (data || []).reduce((s, t) => s + safeNum(t.proposed_amount), 0);
                 return { total: total, count: (data || []).length };
             } catch (e) {
-                console.warn('Capital fetch failed:', e.message);
                 return { total: 0, count: 0 };
             }
         }
