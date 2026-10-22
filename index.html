@@ -3830,15 +3830,16 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                     updatedBy: r.updated_by
                 }));
 
-                // 7. Read transactions (income + expense only, exclude payroll rows)
+                               // 7. Read transactions (income + expense only, exclude payroll rows)
                 const {
                     data: invTxnRows,
                     error: invTxnErr
                 } = await supabaseClient
                     .from('transactions')
                     .select('*')
-                    .in('type', ['income', 'expense'])
+                    .in('type', ['income', 'expense', 'capital'])
                     .is('payroll_run_id', null)
+                    .is('deleted_at', null) // 👈 ADD THIS LINE
                     .order('date', {
                         ascending: false
                     })
@@ -4016,13 +4017,14 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
             return totalEquity;
         }
-                           async function renderSummaryCards() {
+                          async function renderSummaryCards() {
             const now = new Date();
             const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
 
+            // Ensure we match Finance App's date filtering perfectly
             const monthTxns = investorTxns.filter(t => {
                 const d = t.date || t.txn_date;
-                return d && d.startsWith(currentMonthStr);
+                return d && d.startsWith(currentMonthStr) && !t.deletedAt;
             });
 
             const incomes = monthTxns.filter(t => t.type === 'income');
@@ -4034,9 +4036,8 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const feesTotal = monthTxns.reduce((s, t) => s + safeNum(t.fee), 0);
             const feesCount = monthTxns.filter(t => safeNum(t.fee) > 0).length;
 
-            // 🆕 FETCH CAPITAL DIRECTLY FROM DB
-            const totalCapital = await fetchCapitalInjectedThisMonth();
-            const capitalCount = totalCapital > 0 ? 1 : 0; // Dummy count for display
+            // FETCH CAPITAL DIRECTLY FROM DB (Matches Finance exactly)
+            const capitalData = await fetchCapitalInjectedThisMonth();
 
             const setTxt = (id, txt) => {
                 const el = document.getElementById(id);
@@ -4045,11 +4046,12 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
             setTxt('sumIncome', 'KSh ' + fmt(totalIncome));
             setTxt('sumIncomeCount', incomes.length + ' transactions this month');
+            
             setTxt('sumExpense', 'KSh ' + fmt(totalExpense));
             setTxt('sumExpenseCount', expenses.length + ' transactions this month');
             
-            setTxt('sumCapital', 'KSh ' + fmt(totalCapital));
-            setTxt('sumCapitalCount', capitalCount + ' transactions this month');
+            setTxt('sumCapital', 'KSh ' + fmt(capitalData.total));
+            setTxt('sumCapitalCount', capitalData.count + ' transactions this month');
             
             setTxt('sumNet', (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net)));
             setTxt('sumFees', 'KSh ' + fmt(feesTotal));
@@ -7873,27 +7875,28 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             });
         }
 
-        async function fetchCapitalInjectedThisMonth() {
-            if (!supabaseClient) return 0;
+          async function fetchCapitalInjectedThisMonth() {
+            if (!supabaseClient) return { total: 0, count: 0 };
             try {
                 const now = new Date();
                 const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
                 
-                // We ask the database directly for the sum of capital this month
+                // Fetch directly from transactions table (matching Finance App exactly)
                 const { data, error } = await supabaseClient
                     .from('transactions')
                     .select('amount')
                     .eq('type', 'capital')
-                    .gte('date', currentMonthStr + '-01')
-                    .lte('date', currentMonthStr + '-31');
+                    .is('deleted_at', null) // Ignore deleted
+                    .gte('txn_date', currentMonthStr + '-01')
+                    .lte('txn_date', currentMonthStr + '-31');
 
                 if (error) throw error;
                 
                 const total = (data || []).reduce((s, t) => s + safeNum(t.amount), 0);
-                return total;
+                return { total: total, count: (data || []).length };
             } catch (e) {
                 console.warn('Capital fetch failed:', e.message);
-                return 0;
+                return { total: 0, count: 0 };
             }
         }
         // ==================================================
