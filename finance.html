@@ -2706,8 +2706,7 @@
                     <div class="summary-value" id="sumIncome">KSh 0</div>
                     <div class="summary-sub" id="sumIncomeCount">0 transactions</div>
                 </div>
-
-                <div class="summary-card capital" style="cursor:pointer;" onclick="document.getElementById('proposalsBtn').click()" title="Click to view capital contributors">
+                <div class="summary-card expense" style="cursor:pointer;" onclick="viewMonthlyRecords('expense')" title="Click to view this month's expenditure">
                     <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE <small style="color:#f0a89f; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                     <div class="summary-value" id="sumExpense">KSh 0</div>
                     <div class="summary-sub" id="sumExpenseCount">0 transactions</div>
@@ -2718,7 +2717,7 @@
                     <div class="summary-value" id="sumCapital">KSh 0</div>
                     <div class="summary-sub" id="sumCapitalCount">0 transactions</div>
                 </div>
-                <div class="summary-card">
+                <div class="summary-card" style="cursor:pointer;" onclick="viewMonthlyRecords('all')" title="Click to view all ledger activity for this period">
                     <div class="summary-label"><i class="fas fa-balance-scale"></i> NET POSITION</div>
                     <div class="summary-value" id="sumNet">KSh 0</div>
                     <div class="summary-sub">Income − Expenditure</div>
@@ -13367,6 +13366,9 @@ function openTxnModal(txn = null) {
     </script>
     <script src="mpesa-parser.js"></script>
 </body>
+
+
+</html>
 
 
 </html>
