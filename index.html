@@ -3135,11 +3135,12 @@
     </div>
 
     <div class="dashboard">
+
         <nav class="nav">
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
             <button class="nav-toggle" id="navToggle" aria-label="Menu">
-            <i class="fas fa-bars"></i>
-        </button>
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="nav-actions" id="navActions">
                 <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-arrow-left"></i><span>Back Home</span>
@@ -3147,7 +3148,6 @@
                 <a href="finance.html" class="btn btn-primary">
                     <i class="fas fa-coins"></i><span>Finance</span>
                 </a>
-
 
                 <button class="btn btn-ghost" id="capTableBtn"><i class="fas fa-layer-group"></i> Cap Table</button>
                 <button class="btn btn-ghost" id="proposalsBtn"><i class="fas fa-file-signature"></i> Proposals <span id="proposalsCountNav" style="display:none; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(122,90,248,0.35); color:#b8a0ff; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
@@ -3159,13 +3159,21 @@
                 <button class="btn btn-ghost" id="reserveBtn"><i class="fas fa-piggy-bank"></i> Reserve <span id="reserveBalanceNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(200,154,91,0.3); color:#f4c98d; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
+
                 <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
-                    <i class="fas fa-external-link-alt"></i>
-                    <span>Login Expenditures</span>
+                    <i class="fas fa-external-link-alt"></i><span>Login Expenditures</span>
+                </a>
+
+                <!-- FIXED LOGOUT & ADMIN BUTTONS -->
+                <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1); padding: 0.55rem 1.1rem; border-radius: 60px; font-weight: 600; font-size: 0.85rem;">
+                    <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                </button>
+                <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15); padding: 0.55rem 1.1rem; border-radius: 60px; font-weight: 600; font-size: 0.85rem;">
+                    <i class="fas fa-shield-alt"></i><span>Admin Roles</span>
                 </a>
             </div>
+            <!-- THIS CLOSES THE NAV-ACTIONS PROPERLY NOW -->
         </nav>
-
         <div id="errorBanner" class="error-banner"></div>
 
         <div class="recon-banner" id="reconBanner">
@@ -8541,11 +8549,65 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             `);
         }
 
+        // --- NEW SECURE STARTUP GATE ---
+        async function startApp() {
+            try {
+                // 1. Initialize Supabase first so we can check the session
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.addEventListener('DOMContentLoaded', init);
+                // 2. Check if user is logged in
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return; // Stop execution
+                }
+
+                // 3. Verify the user has a role assigned
+                const { data: ur } = await supabaseClient
+                    .from('user_roles')
+                    .select('role_id')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                if (!ur || !ur.role_id) {
+                    await supabaseClient.auth.signOut();
+                    alert('Your account has no role assigned. Please contact an administrator.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // 4. User is valid! Run the normal init logic
+                // (We use setTimeout to let the DOM finish loading just in case)
+                setTimeout(() => init(), 0);
+
+            } catch (err) {
+                console.error("Auth initialization failed:", err);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // --- BULLETPROOF LOGOUT LISTENER ---
+        document.addEventListener('click', async (e) => {
+            const logoutBtn = e.target.closest('#navLogoutBtn');
+            if (logoutBtn) {
+                e.preventDefault();
+                try {
+                    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                        await supabaseClient.auth.signOut();
+                    }
+                } catch (err) {
+                    console.error("Logout error:", err);
+                }
+                // Force redirect no matter what
+                window.location.href = 'login.html'; 
+            }
+        });
+
+        // Boot the app when the DOM is ready
+        document.addEventListener('DOMContentLoaded', startApp);
     </script>
     <script src="mpesa-parser.js"></script>
 </body>
-
 
 </html>
