@@ -2707,14 +2707,14 @@
                     <div class="summary-sub" id="sumIncomeCount">0 transactions</div>
                 </div>
 
-<div class="summary-card capital" style="cursor:pointer;" onclick="document.getElementById('proposalsBtn').click()" title="Click to view capital contributors">
-                <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE <small style="color:#f0a89f; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
+                <div class="summary-card capital" style="cursor:pointer;" onclick="document.getElementById('proposalsBtn').click()" title="Click to view capital contributors">
+                    <div class="summary-label"><i class="fas fa-arrow-up"></i> TOTAL EXPENDITURE <small style="color:#f0a89f; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                     <div class="summary-value" id="sumExpense">KSh 0</div>
                     <div class="summary-sub" id="sumExpenseCount">0 transactions</div>
                 </div>
 
-                <div class="summary-card capital" style="cursor:pointer;" onclick="viewMonthlyRecords('all')" title="Click to view all ledger activity for this period">
-                    <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL INJECTED <small style="color:#b8a0ff; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
+                <div class="summary-card capital" style="cursor:pointer;" onclick="viewMonthlyRecords('capital')" title="Click to view capital transactions in the ledger">
+                    <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL INJECTED EXPENDITURE <small style="color:#b8a0ff; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                     <div class="summary-value" id="sumCapital">KSh 0</div>
                     <div class="summary-sub" id="sumCapitalCount">0 transactions</div>
                 </div>
@@ -8000,152 +8000,139 @@
             return '';
         }
 
-                             async function renderDashboard() {
-            const period = document.getElementById('dashPeriodSelect').value;
-            const fromInput = document.getElementById('dashCustomFrom').value;
-            const toInput = document.getElementById('dashCustomTo').value;
+                    async function renderDashboard() {
+    const period = document.getElementById('dashPeriodSelect').value;
+    const fromInput = document.getElementById('dashCustomFrom').value;
+    const toInput = document.getElementById('dashCustomTo').value;
 
-            // Show/hide custom date inputs
-            const isCustom = period === 'custom';
-            document.getElementById('dashCustomFrom').style.display = isCustom ? 'block' : 'none';
-            document.getElementById('dashCustomTo').style.display = isCustom ? 'block' : 'none';
+    // Show/hide custom date inputs
+    const isCustom = period === 'custom';
+    document.getElementById('dashCustomFrom').style.display = isCustom ? 'block' : 'none';
+    document.getElementById('dashCustomTo').style.display = isCustom ? 'block' : 'none';
 
-            // 1. Get the date range from our SQL function
-            let fromDate = '';
-            let toDate = '';
-            
-            if (isCustom && fromInput && toInput) {
-                fromDate = fromInput;
-                toDate = toInput;
-            } else {
-                const { data, error } = await supabaseClient.rpc('period_range', {
-                    p_period: period,
-                    p_from: null,
-                    p_to: null
-                });
-                if (!error && data && data.length > 0) {
-                    fromDate = data[0].range_from;
-                    toDate = data[0].range_to;
-                }
-            }
+    // 1. Get the date range from our SQL function
+    let fromDate = '';
+    let toDate = '';
 
-            // 2. Filter transactions using ACTUAL business dates (Item 16)
-            const periodTxns = transactions.filter(t => {
-                const d = t.txn_date || t.date || t.actualDate;
-                if (!d) return false;
-                if (fromDate && d < fromDate) return false;
-                if (toDate && d > toDate) return false;
-                return true;
-            });
-
-            const incomes = periodTxns.filter(t => t.type === 'income');
-            const capitals = periodTxns.filter(t => t.type === 'capital');
-
-            // 🆕 3. FILTER OUT MASSIVE ASSETS FROM EXPENSES (Matches Equity App exactly)
-            const expenses = periodTxns.filter(t => {
-                if (t.type !== 'expense') return false;
-                
-                const desc = (t.description || '').toLowerCase();
-                const cat = (t.category || '').toLowerCase();
-                const amt = safeNum(t.amount);
-                
-                // 1. Ignore the Virtual Base
-                if (t.id === 'TXN-MIGRATION-STARLINK-VIRTUAL-BASE-001') return false;
-                
-                // 2. Ignore massive equipment (Routers, Fiber, Cables over 5k)
-                if (amt > 5000 && (
-                    desc.includes('router') || 
-                    desc.includes('fiber') || 
-                    desc.includes('cable') || 
-                    desc.includes('battery') || 
-                    cat.includes('common investment')
-                )) return false;
-
-                return true;
-            });
-
-            const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
-            const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
-            
-            let totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
-            let capitalCount = capitals.length;
-
-            // 🆕 4. FETCH REAL CAPITAL FROM PROPOSALS (Matches Equity App exactly)
-            if (totalCapital < 500000) {
-                try {
-                    const { data: propData } = await supabaseClient
-                        .from('proposals')
-                        .select('proposed_amount')
-                        .eq('status', 'funded');
-                    
-                    if (propData && propData.length > 0) {
-                        totalCapital = propData.reduce((s, t) => s + safeNum(t.proposed_amount), 0);
-                        capitalCount = propData.length;
-                    }
-                } catch (e) {
-                    console.warn('Proposal fallback failed:', e);
-                }
-            }
-
-            const net = totalIncome - totalExpense;
-            const feesTotal = periodTxns.reduce((s, t) => s + safeNum(t.fee), 0);
-            const feesCount = periodTxns.filter(t => safeNum(t.fee) > 0).length;
-
-            // 5. Update the cards
-            document.getElementById('sumIncome').textContent = 'KSh ' + fmt(totalIncome);
-            document.getElementById('sumIncomeCount').textContent = incomes.length + ' transaction' + (incomes.length !== 1 ? 's' : '');
-            
-            document.getElementById('sumExpense').textContent = 'KSh ' + fmt(totalExpense);
-            document.getElementById('sumExpenseCount').textContent = expenses.length + ' transaction' + (expenses.length !== 1 ? 's' : '');
-            
-            document.getElementById('sumCapital').textContent = 'KSh ' + fmt(totalCapital);
-                       document.getElementById('sumCapitalCount').textContent = capitalCount + ' funded proposal' + (capitalCount !== 1 ? 's' : '');
-            
-            document.getElementById('sumNet').textContent = (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net));
-
-            const feesEl = document.getElementById('sumFees');
-            if (feesEl) {
-                feesEl.textContent = 'KSh ' + fmt(feesTotal);
-                const countEl = document.getElementById('sumFeesCount');
-                if (countEl) countEl.textContent = feesCount + ' with fees';
-            }
-
-            // Update the label (e.g., showing the date range)
-            let labelText = '';
-            if (period === 'today') labelText = 'Today, ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            else if (period === 'all') labelText = 'All Time';
-            else if (fromDate && toDate) labelText = fromDate + ' → ' + toDate;
-            
-            document.getElementById('todayLabel').textContent = labelText;
-
-            // 6. Recent Activity
-            const recent = [...transactions]
-                .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
-                .slice(0, 10);
-            
-            const feed = document.getElementById('activityFeed');
-            if (!recent.length) {
-                feed.innerHTML = `<div class="empty-row"><i class="fas fa-inbox"></i>No transactions yet. Click "New Transaction" to begin.</div>`;
-            } else {
-                feed.innerHTML = recent.map(t => {
-                    const icon = t.type === 'income' ? '💰' : t.type === 'expense' ? '💸' : '🏛️';
-                    return `<div class="activity-item ${t.type}">
-                        <span class="icon">${icon}</span>
-                        <div style="flex:1;">
-                            <div><strong>${escapeHTML(t.description || 'No description')}</strong></div>
-                            <div style="font-size:0.72rem; color:#7f9bb8; margin-top:2px;">
-                                ${escapeHTML(t.category || '—')} · ${escapeHTML(t.location || '—')} · <span class="status-pill ${escapeHTML(t.status)}" style="font-size:0.55rem;">${escapeHTML(t.status)}</span>
-                            </div>
-                        </div>
-                        <div style="text-align:right;">
-                            <div class="${txnAmountClass(t.type)}">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</div>
-                            <div class="time">${new Date(t.txn_date || t.date).toLocaleDateString()}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
+    if (isCustom && fromInput && toInput) {
+        fromDate = fromInput;
+        toDate = toInput;
+    } else {
+        const { data, error } = await supabaseClient.rpc('period_range', {
+            p_period: period,
+            p_from: null,
+            p_to: null
+        });
+        if (!error && data && data.length > 0) {
+            fromDate = data[0].range_from;
+            toDate = data[0].range_to;
         }
-                function viewMonthlyRecords(type) {
+    }
+
+    // 2. Filter transactions using ACTUAL business dates (Item 16)
+    const periodTxns = transactions.filter(t => {
+        const d = t.txn_date || t.date || t.actualDate;
+        if (!d) return false;
+        if (fromDate && d < fromDate) return false;
+        if (toDate && d > toDate) return false;
+        return true;
+    });
+
+    const incomes = periodTxns.filter(t => t.type === 'income');
+    const capitals = periodTxns.filter(t => t.type === 'capital');
+
+    // 🆕 3. FILTER OUT MASSIVE ASSETS FROM EXPENSES (Matches Equity App exactly)
+    const expenses = periodTxns.filter(t => {
+        if (t.type !== 'expense') return false;
+
+        const desc = (t.description || '').toLowerCase();
+        const cat = (t.category || '').toLowerCase();
+        const amt = safeNum(t.amount);
+
+        // 1. Ignore the Virtual Base
+        if (t.id === 'TXN-MIGRATION-STARLINK-VIRTUAL-BASE-001') return false;
+
+        // 2. Ignore massive equipment (Routers, Fiber, Cables over 5k)
+        if (amt > 5000 && (
+            desc.includes('router') ||
+            desc.includes('fiber') ||
+            desc.includes('cable') ||
+            desc.includes('battery') ||
+            cat.includes('common investment')
+        )) return false;
+
+        return true;
+    });
+
+    const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
+    const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
+
+    // 🆕 4. CAPITAL — read straight from the ledger, no proposals fallback.
+    const totalCapital = capitals.reduce((s, t) => s + safeNum(t.amount), 0);
+    const capitalCount = capitals.length;
+
+    const net = totalIncome - totalExpense;
+    const feesTotal = periodTxns.reduce((s, t) => s + safeNum(t.fee), 0);
+    const feesCount = periodTxns.filter(t => safeNum(t.fee) > 0).length;
+
+    // 5. Update the cards
+    document.getElementById('sumIncome').textContent = 'KSh ' + fmt(totalIncome);
+    document.getElementById('sumIncomeCount').textContent = incomes.length + ' transaction' + (incomes.length !== 1 ? 's' : '');
+
+    document.getElementById('sumExpense').textContent = 'KSh ' + fmt(totalExpense);
+    document.getElementById('sumExpenseCount').textContent = expenses.length + ' transaction' + (expenses.length !== 1 ? 's' : '');
+
+    document.getElementById('sumCapital').textContent = 'KSh ' + fmt(totalCapital);
+
+
+document.getElementById('sumCapitalCount').textContent = capitalCount + ' transaction' + (capitalCount !== 1 ? 's' : '');
+
+    document.getElementById('sumNet').textContent = (net >= 0 ? 'KSh ' : '−KSh ') + fmt(Math.abs(net));
+
+    const feesEl = document.getElementById('sumFees');
+    if (feesEl) {
+        feesEl.textContent = 'KSh ' + fmt(feesTotal);
+        const countEl = document.getElementById('sumFeesCount');
+        if (countEl) countEl.textContent = feesCount + ' with fees';
+    }
+
+    // Update the label (e.g., showing the date range)
+    let labelText = '';
+    if (period === 'today') labelText = 'Today, ' + new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    else if (period === 'all') labelText = 'All Time';
+    else if (fromDate && toDate) labelText = fromDate + ' → ' + toDate;
+
+    document.getElementById('todayLabel').textContent = labelText;
+
+    // 6. Recent Activity
+    const recent = [...transactions]
+        .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+        .slice(0, 10);
+
+    const feed = document.getElementById('activityFeed');
+    if (!recent.length) {
+        feed.innerHTML = `<div class="empty-row"><i class="fas fa-inbox"></i>No transactions yet. Click "New Transaction" to begin.</div>`;
+    } else {
+        feed.innerHTML = recent.map(t => {
+            const icon = t.type === 'income' ? '💰' : t.type === 'expense' ? '💸' : '🏛️';
+            return `<div class="activity-item ${t.type}">
+                <span class="icon">${icon}</span>
+                <div style="flex:1;">
+                    <div><strong>${escapeHTML(t.description || 'No description')}</strong></div>
+                    <div style="font-size:0.72rem; color:#7f9bb8; margin-top:2px;">
+                        ${escapeHTML(t.category || '—')} · ${escapeHTML(t.location || '—')} · <span class="status-pill ${escapeHTML(t.status)}" style="font-size:0.55rem;">${escapeHTML(t.status)}</span>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="${txnAmountClass(t.type)}">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</div>
+                    <div class="time">${new Date(t.txn_date || t.date).toLocaleDateString()}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+}
+
+function viewMonthlyRecords(type) {
             // 1. Switch to the Ledger tab
             const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
             if (ledgerTab) ledgerTab.click();
@@ -13375,7 +13362,6 @@ function openTxnModal(txn = null) {
 
             showToast('✅ Finance engine ready', 'success');
         }
-
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
