@@ -1,1 +1,509 @@
 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARLINK · Admin Roles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+         :root {
+            --bg-dark: #0a0e1a;
+            --panel-bg: rgba(24, 38, 60, 0.6);
+            --border: rgba(120, 200, 220, 0.15);
+            --teal: #5fc7bc;
+            --text-main: #f2f0eb;
+            --text-muted: #7f9bb8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            padding: 2rem;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 0% 0%, rgba(95, 199, 188, 0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(122, 90, 248, 0.1) 0%, transparent 50%);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .header h1 i {
+            color: var(--teal);
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--panel-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            border-color: var(--teal);
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(95, 199, 188, 0.2), rgba(95, 199, 188, 0.05));
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+        
+        .table-container {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        
+        th {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: rgba(15, 26, 46, 0.5);
+        }
+        
+        tr:hover td {
+            background: rgba(95, 199, 188, 0.05);
+        }
+        
+        .status-chip {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        
+        .chip-full {
+            background: rgba(200, 154, 91, 0.2);
+            color: #f4c98d;
+        }
+        
+        .chip-custom {
+            background: rgba(95, 199, 188, 0.2);
+            color: var(--teal);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 10, 20, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal {
+            background: #121a2a;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 92vh;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .modal-content {
+            flex: 1 1 600px;
+            padding: 2rem;
+        }
+        
+        .help-guide {
+            flex: 1 1 280px;
+            max-width: 320px;
+            background: rgba(95, 199, 188, 0.05);
+            border-left: 1px solid var(--border);
+            padding: 2rem;
+        }
+        
+        .help-guide h4 {
+            color: var(--teal);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .help-guide p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.7rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+        }
+        
+        .matrix-table th,
+        .matrix-table td {
+            text-align: center;
+            padding: 0.6rem;
+        }
+        
+        .matrix-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .matrix-table input[type="checkbox"] {
+            accent-color: var(--teal);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1><i class="fas fa-shield-alt"></i> Administrative Roles</h1>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Equity</a>
+            <a href="finance.html" class="btn"><i class="fas fa-coins"></i> Finance</a>
+            <button class="btn btn-primary" id="btnAddRole"><i class="fas fa-plus"></i> Create Role</button>
+            <button class="btn" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Role Name</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rolesTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="roleModal">
+        <div class="modal">
+            <div class="modal-content">
+                <h2 style="margin-bottom: 1.5rem; font-family: 'Space Grotesk';" id="modalTitle">Role Details</h2>
+                <div class="form-group">
+                    <label>Role Name</label>
+                    <input type="text" id="roleName" placeholder="e.g. Accountant">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="roleDesc" placeholder="Short description">
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem;">
+                    <h3 style="font-family: 'Space Grotesk';">Permissions Matrix</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;" onclick="selectAllMatrix(true)">Select All</button>
+                        <button class="btn" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;" onclick="selectAllMatrix(false)">Deselect All</button>
+                    </div>
+                </div>
+
+                <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>Module</th>
+                                <th>View</th>
+                                <th>Create</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                                <th>Approve</th>
+                                <th>Export</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn" onclick="closeModal('roleModal')">Cancel</button>
+                    <button class="btn btn-primary" onclick="saveRole()" id="saveRoleBtn">Save Role</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const MODULES = [
+            "Capitalization Table", "Share Ledger", "Dividend Declaration", "Distributions",
+            "Reserve", "Audit Log", "Dashboard", "Central Ledger", "Income", "Expenditure",
+            "M-PESA", "Approvals", "Locations", "Staff", "Payroll", "Assets", "Reports",
+            "Tasks", "Attendance", "Stock", "Customers", "Projects", "Categories",
+            "Recurring", "Budgets", "Overtime", "Leave", "System Health"
+        ];
+
+        let allRoles = [];
+        let currentRoleId = null;
+
+        async function checkAuth() {
+            const {
+                data: {
+                    session
+                }
+            } = await supabaseClient.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const {
+                data: ur
+            } = await supabaseClient
+                .from('user_roles')
+                .select('role_id, roles(is_full_admin)')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+
+            if (!ur || !ur.roles || !ur.roles.is_full_admin) {
+                document.body.innerHTML = '<h1 style="text-align:center; margin-top:20vh; color:#f0a89f;">Access Denied</h1><p style="text-align:center; color:#7f9bb8;">You must be a Full Administrator to view this page.</p>';
+                return false;
+            }
+            return true;
+        }
+
+        async function loadRoles() {
+            const {
+                data,
+                error
+            } = await supabaseClient.from('roles').select('*').order('is_full_admin', {
+                ascending: false
+            }).order('name');
+            if (!error) {
+                allRoles = data || [];
+                renderRoles();
+            }
+        }
+
+        function renderRoles() {
+            const body = document.getElementById('rolesTableBody');
+            if (!allRoles.length) {
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center;">No roles found.</td></tr>';
+                return;
+            }
+            body.innerHTML = allRoles.map(r => `
+                <tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.description || '—'}</td>
+                    <td><span class="status-chip ${r.is_full_admin ? 'chip-full' : 'chip-custom'}">${r.is_full_admin ? 'Full Admin' : 'Custom'}</span></td>
+                    <td><button class="btn" style="padding:0.35rem 0.7rem; font-size:0.75rem;" onclick="editRole('${r.id}')"><i class="fas fa-edit"></i> Edit</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function buildMatrix() {
+            const body = document.getElementById('matrixBody');
+            body.innerHTML = MODULES.map(m => `
+                <tr>
+                    <td>${m}</td>
+                    <td><input type="checkbox" data-module="${m}" data-action="can_view"></td>
+                    <td><input type="checkbox" data-module="${m}" data-action="can_create"></td>
+                    <td><input type="checkbox" data-module="${m}" data-action="can_edit"></td>
+                    <td><input type="checkbox" data-module="${m}" data-action="can_delete"></td>
+                    <td><input type="checkbox" data-module="${m}" data-action="can_approve"></td>
+                    <td><input type="checkbox" data-module="${m}" data-action="can_export"></td>
+                </tr>
+            `).join('');
+        }
+
+        function selectAllMatrix(state) {
+            document.querySelectorAll('#matrixBody input[type="checkbox"]').forEach(cb => cb.checked = state);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        document.getElementById('btnAddRole').addEventListener('click', () => {
+            currentRoleId = null;
+            document.getElementById('modalTitle').textContent = 'Create Role';
+            document.getElementById('roleName').value = '';
+            document.getElementById('roleDesc').value = '';
+            document.getElementById('roleName').disabled = false;
+            buildMatrix();
+            document.getElementById('roleModal').classList.add('show');
+        });
+
+        async function editRole(id) {
+            const r = allRoles.find(x => x.id === id);
+            if (!r) return;
+            currentRoleId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Role — ' + r.name;
+            document.getElementById('roleName').value = r.name;
+            document.getElementById('roleDesc').value = r.description || '';
+            document.getElementById('roleName').disabled = r.is_full_admin;
+            buildMatrix();
+
+            const {
+                data
+            } = await supabaseClient.from('role_permissions').select('*').eq('role_id', id);
+            (data || []).forEach(p => {
+                ['can_view', 'can_create', 'can_edit', 'can_delete', 'can_approve', 'can_export'].forEach(action => {
+                    if (p[action]) {
+                        const cb = document.querySelector(`#matrixBody input[data-module="${p.module}"][data-action="${action}"]`);
+                        if (cb) cb.checked = true;
+                    }
+                });
+            });
+            document.getElementById('roleModal').classList.add('show');
+        }
+
+        async function saveRole() {
+            const name = document.getElementById('roleName').value.trim();
+            const desc = document.getElementById('roleDesc').value.trim();
+            if (!name) return alert('Role name is required.');
+
+            const btn = document.getElementById('saveRoleBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            let roleId = currentRoleId;
+            if (!roleId) {
+                const {
+                    data,
+                    error
+                } = await supabaseClient.from('roles').insert({
+                    name,
+                    description: desc
+                }).select('id').single();
+                if (error) {
+                    alert(error.message);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Save Role';
+                    return;
+                }
+                roleId = data.id;
+            } else {
+                await supabaseClient.from('roles').update({
+                    name,
+                    description: desc
+                }).eq('id', roleId);
+            }
+
+            // Build permissions array
+            const permsByModule = {};
+            document.querySelectorAll('#matrixBody input[type="checkbox"]:checked').forEach(cb => {
+                const mod = cb.dataset.module;
+                if (!permsByModule[mod]) permsByModule[mod] = {
+                    role_id: roleId,
+                    module: mod
+                };
+                permsByModule[mod][cb.dataset.action] = true;
+            });
+
+            // Clear old perms and insert new ones
+            await supabaseClient.from('role_permissions').delete().eq('role_id', roleId);
+            const permRows = Object.values(permsByModule);
+            if (permRows.length > 0) {
+                await supabaseClient.from('role_permissions').insert(permRows);
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = 'Save Role';
+            closeModal('roleModal');
+            loadRoles();
+        }
+
+        document.getElementById('btnLogout').addEventListener('click', async() => {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'login.html';
+        });
+
+        (async() => {
+            if (await checkAuth()) loadRoles();
+        })();
+    </script>
+</body>
+
+</html>
