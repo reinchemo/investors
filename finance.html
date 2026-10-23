@@ -2644,7 +2644,16 @@
                 <button class="btn btn-primary" id="newTxnBtn">
                     <i class="fas fa-plus"></i><span>New Transaction</span>
                 </button>
+
+                <!-- FIXED LOGOUT & ADMIN BUTTONS -->
+                <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1); padding: 0.55rem 1.1rem; border-radius: 60px; font-weight: 600; font-size: 0.85rem;">
+                    <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                </button>
+                <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15); padding: 0.55rem 1.1rem; border-radius: 60px; font-weight: 600; font-size: 0.85rem;">
+                    <i class="fas fa-shield-alt"></i><span>Admin Roles</span>
+                </a>
             </div>
+        </nav>
         </nav>
 
         <div class="info-banner">
@@ -13361,14 +13370,68 @@ function openTxnModal(txn = null) {
 
             showToast('✅ Finance engine ready', 'success');
         }
+          // --- NEW SECURE STARTUP GATE ---
+                // --- SECURE STARTUP GATE ---
+       // --- SECURE STARTUP GATE ---
+        async function startApp() {
+            try {
+                // 1. Initialize Supabase first so we can check the session
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        document.addEventListener('DOMContentLoaded', init);
+                // 2. Check if user is logged in
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (!session) {
+                    window.location.href = 'login.html';
+                    return; // Stop execution
+                }
+
+                // 3. Verify the user has a role assigned
+                const { data: ur } = await supabaseClient
+                    .from('user_roles')
+                    .select('role_id')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle();
+
+                if (!ur || !ur.role_id) {
+                    await supabaseClient.auth.signOut();
+                    alert('Your account has no role assigned. Please contact an administrator.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // 4. User is valid! Run the normal init logic
+                setTimeout(() => init(), 0);
+
+            } catch (err) {
+                console.error("Auth initialization failed:", err);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // --- BULLETPROOF LOGOUT LISTENER ---
+        document.addEventListener('click', async (e) => {
+            const logoutBtn = e.target.closest('#navLogoutBtn');
+            if (logoutBtn) {
+                e.preventDefault();
+                try {
+                    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                        await supabaseClient.auth.signOut();
+                    }
+                } catch (err) {
+                    console.error("Logout error:", err);
+                }
+                // Force redirect no matter what
+                window.location.href = 'login.html'; 
+            }
+        });
+
+        // Boot the app when the DOM is ready
+        document.addEventListener('DOMContentLoaded', startApp);
     </script>
     <script src="mpesa-parser.js"></script>
 </body>
 
-
 </html>
-
 
 </html>
