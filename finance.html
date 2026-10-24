@@ -2240,71 +2240,117 @@
     <!-- TASK CREATE / EDIT MODAL (Phase 3a) -->
     <!-- ============================================================ -->
     <div class="modal-overlay" id="taskModal">
-        <div class="modal-card wide">
-            <h3 id="taskModalTitle"><i class="fas fa-plus-circle"></i> New Task</h3>
+        <div class="modal-card wide" style="max-width: 800px;">
+            <h3 id="taskModalTitle"><i class="fas fa-ticket-alt"></i> New Ticket</h3>
 
-            <label>Title <span style="color:#e8837a;">*</span></label>
-            <input type="text" id="tskTitle" placeholder="e.g. Install router at Kimbo site" maxlength="200">
-
-            <label>Description</label>
-            <textarea id="tskDescription" placeholder="What needs to be done..." maxlength="1000"></textarea>
-
-            <div class="modal-row">
-                <div>
-                    <label>Category</label>
-                    <select id="tskCategory"></select>
-                </div>
-                <div>
-                    <label>Priority</label>
-                    <select id="tskPriority">
-                    <option value="low">Low</option>
-                    <option value="normal" selected>Normal</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                </select>
-                </div>
-            </div>
-
-            <div class="modal-row">
-                <div>
-                    <label>Assignee</label>
-                    <select id="tskAssignee"></select>
-                </div>
-                <div>
-                    <label>Location</label>
-                    <select id="tskLocation"></select>
+            <!-- STEP 1: Choose Template -->
+            <div id="tskWizardStep1">
+                <p style="color:#7f9bb8; font-size:0.85rem; margin-bottom:1rem;">Select a template to get started. We'll pre-fill the category and priority based on your choice.</p>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem;">
+                    <div class="template-card" data-template="installation" onclick="selectTaskTemplate('installation')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
+                        <div style="font-size:1.5rem; color:#7ab8ff; margin-bottom:0.5rem;"><i class="fas fa-wrench"></i></div>
+                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">Installation</div>
+                        <div style="font-size:0.7rem; color:#7f9bb8;">New service install</div>
+                    </div>
+                    <div class="template-card" data-template="los" onclick="selectTaskTemplate('los')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
+                        <div style="font-size:1.5rem; color:#e8b879; margin-bottom:0.5rem;"><i class="fas fa-wifi"></i></div>
+                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">Line of Sight (LOS)</div>
+                        <div style="font-size:0.7rem; color:#7f9bb8;">Signal / connectivity</div>
+                    </div>
+                    <div class="template-card" data-template="support" onclick="selectTaskTemplate('support')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
+                        <div style="font-size:1.5rem; color:#7fded1; margin-bottom:0.5rem;"><i class="fas fa-headset"></i></div>
+                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">General Support</div>
+                        <div style="font-size:0.7rem; color:#7f9bb8;">Customer help</div>
+                    </div>
+                    <div class="template-card" data-template="custom" onclick="selectTaskTemplate('custom')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
+                        <div style="font-size:1.5rem; color:#c7d5e6; margin-bottom:0.5rem;"><i class="fas fa-edit"></i></div>
+                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">Custom Ticket</div>
+                        <div style="font-size:0.7rem; color:#7f9bb8;">Blank form</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="modal-row">
-                <div>
-                    <label>Start Date</label>
-                    <input type="date" id="tskStartDate">
+            <!-- STEP 2: The Form -->
+            <div id="tskWizardStep2" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(120,200,220,0.1);">
+                    <div style="font-size:0.8rem; color:#7fded1; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Template: <span id="tskSelectedTemplateName">—</span></div>
+                    <button class="btn btn-ghost" onclick="resetTaskWizard()" style="padding:0.2rem 0.6rem; min-height:28px; font-size:0.7rem;"><i class="fas fa-arrow-left"></i> Change</button>
                 </div>
-                <div>
-                    <label>Deadline</label>
-                    <input type="date" id="tskDeadline">
+
+                <!-- Hidden inputs to store new DB fields -->
+                <input type="hidden" id="tskTemplateKey">
+
+                <label>Title <span style="color:#e8837a;">*</span></label>
+                <input type="text" id="tskTitle" placeholder="e.g. Install router at Kimbo site" maxlength="200">
+
+                <label>Description</label>
+                <textarea id="tskDescription" placeholder="What needs to be done..." maxlength="1000"></textarea>
+
+                <div class="modal-row">
+                    <div>
+                        <label>Customer</label>
+                        <select id="tskCustomer"></select>
+                    </div>
+                    <div>
+                        <label>Site Landmark</label>
+                        <input type="text" id="tskLandmark" placeholder="e.g. Kimbo stage" maxlength="100">
+                    </div>
                 </div>
-            </div>
 
-            <label>Instructions</label>
-            <textarea id="tskInstructions" placeholder="Detailed steps or notes for the assignee..." maxlength="1000"></textarea>
+                <div class="modal-row-3">
+                    <div>
+                        <label>Category</label>
+                        <select id="tskCategory"></select>
+                    </div>
+                    <div>
+                        <label>Priority</label>
+                        <select id="tskPriority">
+                            <option value="low">Low</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Deadline</label>
+                        <input type="date" id="tskDeadline">
+                    </div>
+                </div>
 
-            <label>Expected Result</label>
-            <textarea id="tskExpectedResult" placeholder="What does 'done' look like?" maxlength="500"></textarea>
+                <div class="modal-row">
+                    <div>
+                        <label>Assignee (Staff)</label>
+                        <select id="tskAssignee"></select>
+                    </div>
+                    <div>
+                        <label>Location</label>
+                        <select id="tskLocation"></select>
+                    </div>
+                </div>
 
-            <label>Notes (internal)</label>
-            <textarea id="tskNotes" placeholder="Internal notes..." maxlength="500"></textarea>
+                <div class="modal-row">
+                    <div>
+                        <label>GPS Coordinates (Optional)</label>
+                        <input type="text" id="tskGps" placeholder="e.g. -1.2921, 36.8219" maxlength="50">
+                    </div>
+                    <div>
+                        <label>Start Date</label>
+                        <input type="date" id="tskStartDate">
+                    </div>
+                </div>
 
-            <div class="modal-error" id="taskError"></div>
+                <label>Instructions / Expected Result</label>
+                <textarea id="tskInstructions" placeholder="Steps or expected outcome..." maxlength="1000"></textarea>
 
-            <div class="modal-actions">
-                <button class="cancel" id="taskCancel">Cancel</button>
-                <button class="save" id="taskSave">Save Task</button>
+                <div class="modal-error" id="taskError"></div>
+
+                <div class="modal-actions">
+                    <button class="cancel" id="taskCancel">Cancel</button>
+                    <button class="save" id="taskSave">Create Ticket</button>
+                </div>
             </div>
         </div>
     </div>
-
     <!-- ============================================================ -->
     <!-- TASK DETAIL MODAL (Phase 3a) -->
     <!-- ============================================================ -->
@@ -4716,7 +4762,93 @@
         // ==================================================
         const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
-        const CURRENT_USER = 'admin';
+
+        let CURRENT_USER = 'admin';
+        let USER_PERMISSIONS = [];
+        window.IS_FULL_ADMIN = false;
+
+        // --- PERMISSIONS HELPER ---
+        function can(action, moduleName) {
+            // Full admins bypass everything
+            if (window.IS_FULL_ADMIN) return true;
+
+            // Check the permission matrix for this specific role
+            const perm = USER_PERMISSIONS.find(p => p.module === moduleName);
+            if (!perm) return false;
+
+            if (action === 'view') return perm.can_view;
+            if (action === 'create') return perm.can_create;
+            if (action === 'edit') return perm.can_edit;
+            if (action === 'delete') return perm.can_delete;
+            if (action === 'approve') return perm.can_approve;
+            if (action === 'export') return perm.can_export;
+
+            return false;
+        }
+
+        // --- APPLY PERMISSIONS TO UI ---
+        function applyPermissionsToUI() {
+            console.log("Running Permissions Check. Admin:", window.IS_FULL_ADMIN);
+
+            if (window.IS_FULL_ADMIN) {
+                console.log("User is Admin. Skipping hide.");
+                return;
+            }
+
+            // 1. Hide all restricted Tabs (Using the exact data-view IDs)
+            const restrictedTabs = ['payroll', 'staff', 'categories', 'backup', 'budgets', 'assets', 'reports', 'health'];
+            restrictedTabs.forEach(tabView => {
+                const tab = document.querySelector(`.tab[data-view="${tabView}"]`);
+                if (tab) {
+                    tab.style.display = 'none';
+                    console.log("Hid tab:", tabView);
+                }
+            });
+
+            // 2. Hide the "New Transaction" buttons
+            const newTxnBtn = document.getElementById('newTxnBtn');
+            if (newTxnBtn) {
+                newTxnBtn.style.display = 'none';
+                console.log("Hid New Transaction button");
+            }
+            const newTxnBtn2 = document.getElementById('newTxnBtn2');
+            if (newTxnBtn2) {
+                newTxnBtn2.style.display = 'none';
+            }
+
+            // 3. Hide the "Admin Roles" button by searching for the link
+            const adminLinks = document.querySelectorAll('a[href="admin.html"]');
+            adminLinks.forEach(link => {
+                link.style.display = 'none';
+                console.log("Hid Admin Roles link");
+            });
+
+            // 4. Hide "Run Payroll" button
+            const runPayrollBtn = document.getElementById('runPayrollBtn');
+            if (runPayrollBtn) {
+                runPayrollBtn.style.display = 'none';
+                console.log("Hid Run Payroll button");
+            }
+
+            console.log("✅ Permission hiding complete.");
+        }
+
+        function can(action, moduleName) {
+            if (window.IS_FULL_ADMIN) return true;
+
+            // Check the matrix
+            const perm = USER_PERMISSIONS.find(p => p.module === moduleName);
+            if (!perm) return false;
+
+            if (action === 'view') return perm.can_view;
+            if (action === 'create') return perm.can_create;
+            if (action === 'edit') return perm.can_edit;
+            if (action === 'delete') return perm.can_delete;
+            if (action === 'approve') return perm.can_approve;
+            if (action === 'export') return perm.can_export;
+
+            return false;
+        }
 
         const CATEGORIES = {
             income: ['Customer Payments', 'Installation Fees', 'Equipment Sales', 'Other Income'],
@@ -13105,25 +13237,30 @@ function openTxnModal(txn = null) {
         // ==================================================
         // INIT
         // ==================================================
-        async function init() {
+           async function init() {
             if (typeof supabase === 'undefined') {
                 showToast('Supabase library not loaded. Please refresh.', 'error');
                 return;
             }
 
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            // --- HIDE BUTTONS IMMEDIATELY BEFORE DATA LOADS ---
+            applyPermissionsToUI();
+
             await fetchCasualPayments();
             await fetchFromCloud();
             await fetchCategoriesFromCloud();
-                        await fetchCategories();
+            await fetchCategories();
             await fetchTaskCategories();
             await fetchTasksFromCloud();
-                        await fetchAttendanceToday();
-                                    await fetchStock();
+            await fetchAttendanceToday();
+            await fetchStock();
             await loadLocationsFromCloud();
             await loadStaffFromCloud();
             await loadPayrollFromCloud();
             await loadAssetsFromCloud();
+            
             renderAll();
             refreshLocationDropdownOptions();
 
@@ -13151,19 +13288,20 @@ function openTxnModal(txn = null) {
                 document.getElementById('locRepTo').value = y + '-12-31';
             })();
 
-                        setupTabs();
+            setupTabs();
             setupFilters();
             setupTaskFilters();
             setupCategoryFilters();
-                        setupRecurringFilters();
-                                    setupBudgetFilters();
-                                                setupOvertimeFilters();
-                                                            setupLeaveFilters();
-                                                                        setupNotifications();
-                                                                                    setupEscalation();
+            setupRecurringFilters();
+            setupBudgetFilters();
+            setupOvertimeFilters();
+            setupLeaveFilters();
+            setupNotifications();
+            setupEscalation();
             setupHealth();
+
             // Wire task modal buttons
-                        const newCustBtn = document.getElementById('newCustomerBtn');
+            const newCustBtn = document.getElementById('newCustomerBtn');
             if (newCustBtn) newCustBtn.addEventListener('click', () => openCustomerModal(null));
             const custSaveBtn = document.getElementById('customerSave');
             if (custSaveBtn) custSaveBtn.addEventListener('click', saveCustomer);
@@ -13201,7 +13339,7 @@ function openTxnModal(txn = null) {
                 renderProjects();
             });
 
-                        const newStockBtn = document.getElementById('newStockBtn');
+            const newStockBtn = document.getElementById('newStockBtn');
             if (newStockBtn) newStockBtn.addEventListener('click', () => openStockModal(null));
             const stockSaveBtn = document.getElementById('stockSave');
             if (stockSaveBtn) stockSaveBtn.addEventListener('click', saveStock);
@@ -13221,7 +13359,7 @@ function openTxnModal(txn = null) {
                 renderStock();
             });
 
-                        const attInBtn = document.getElementById('attCheckInBtn');
+            const attInBtn = document.getElementById('attCheckInBtn');
             if (attInBtn) attInBtn.addEventListener('click', checkInStaff);
             const attOutBtn = document.getElementById('attCheckOutBtn');
             if (attOutBtn) attOutBtn.addEventListener('click', checkOutStaff);
@@ -13269,7 +13407,7 @@ function openTxnModal(txn = null) {
                 if (e.target === this) closeTxnModal();
             });
           
-                        document.getElementById('txnType').addEventListener('change', (e) => populateCategoryDropdown(e.target.value));
+            document.getElementById('txnType').addEventListener('change', (e) => populateCategoryDropdown(e.target.value));
 
             // Attach amount/fee recompute listeners ONCE — fixes listener leak
             document.getElementById('txnAmount').addEventListener('input', window._recomputeTxnNet);
@@ -13304,8 +13442,8 @@ function openTxnModal(txn = null) {
             });
 
             document.getElementById('runPayrollBtn').addEventListener('click', openPayrollWizard);
-                        document.getElementById('newCasualBtn').addEventListener('click', openCasualModal);
-                                    document.getElementById('printPayrollRunsBtn').addEventListener('click', printPayrollRuns);
+            document.getElementById('newCasualBtn').addEventListener('click', openCasualModal);
+            document.getElementById('printPayrollRunsBtn').addEventListener('click', printPayrollRuns);
             document.getElementById('cajCancel').addEventListener('click', () => document.getElementById('casualModal').classList.remove('show'));
             document.getElementById('cajSave').addEventListener('click', saveCasualPayment);
             document.getElementById('casualModal').addEventListener('click', function(e) {
@@ -13355,11 +13493,7 @@ function openTxnModal(txn = null) {
             document.getElementById('exportCsvLedger').addEventListener('click', () => exportCsv(transactions, 'ledger'));
             document.getElementById('exportCsvIncome').addEventListener('click', () => exportCsv(transactions.filter(t => t.type === 'income'), 'income'));
             document.getElementById('exportCsvExpense').addEventListener('click', () => exportCsv(transactions.filter(t => t.type === 'expense'), 'expense'));
-                        document.getElementById('printLedgerBtn').addEventListener('click', printLedger);
-
-            // startPolling();  // Manual refresh only — disabled
-            // Generate notifications on load
-                       // startPolling();  // Manual refresh only — disabled
+            document.getElementById('printLedgerBtn').addEventListener('click', printLedger);
 
             // §68 — Notifications
             await fetchEscalationRules();
@@ -13370,26 +13504,20 @@ function openTxnModal(txn = null) {
 
             showToast('✅ Finance engine ready', 'success');
         }
-          // --- NEW SECURE STARTUP GATE ---
-                // --- SECURE STARTUP GATE ---
-       // --- SECURE STARTUP GATE ---
+                  // --- SECURE STARTUP GATE ---
         async function startApp() {
             try {
-                // 1. Initialize Supabase first so we can check the session
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-                // 2. Check if user is logged in
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
                     window.location.href = 'login.html';
-                    return; // Stop execution
+                    return;
                 }
 
-                // 3. Verify the user has a role assigned
                 const { data: ur } = await supabaseClient
                     .from('user_roles')
-                    .select('role_id')
+                    .select('role_id, roles(is_full_admin)')
                     .eq('user_id', session.user.id)
                     .maybeSingle();
 
@@ -13400,7 +13528,17 @@ function openTxnModal(txn = null) {
                     return;
                 }
 
-                // 4. User is valid! Run the normal init logic
+                if (ur.roles && ur.roles.is_full_admin) {
+                    window.IS_FULL_ADMIN = true;
+                } else {
+                    window.IS_FULL_ADMIN = false;
+                    const { data: perms } = await supabaseClient
+                        .from('role_permissions')
+                        .select('*')
+                        .eq('role_id', ur.role_id);
+                    USER_PERMISSIONS = perms || [];
+                }
+
                 setTimeout(() => init(), 0);
 
             } catch (err) {
@@ -13421,17 +13559,13 @@ function openTxnModal(txn = null) {
                 } catch (err) {
                     console.error("Logout error:", err);
                 }
-                // Force redirect no matter what
                 window.location.href = 'login.html'; 
             }
         });
 
-        // Boot the app when the DOM is ready
         document.addEventListener('DOMContentLoaded', startApp);
     </script>
     <script src="mpesa-parser.js"></script>
 </body>
-
-</html>
 
 </html>
