@@ -3309,8 +3309,89 @@
         const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
         const STARLINK_VIRTUAL_BASE = 377259;
-        const CURRENT_USER = 'admin';
+        let CURRENT_USER = 'admin';
+        let USER_PERMISSIONS = [];
+        window.IS_FULL_ADMIN = false;
 
+        // --- PERMISSIONS HELPER ---
+        function can(action, moduleName) {
+            if (window.IS_FULL_ADMIN) return true;
+            const perm = USER_PERMISSIONS.find(p => p.module === moduleName);
+            if (!perm) return false;
+            if (action === 'view') return perm.can_view;
+            if (action === 'create') return perm.can_create;
+            if (action === 'edit') return perm.can_edit;
+            if (action === 'delete') return perm.can_delete;
+            if (action === 'approve') return perm.can_approve;
+            if (action === 'export') return perm.can_export;
+            return false;
+        }
+
+        function applyEquityPermissions() {
+            console.log("Running applyEquityPermissions. Admin status:", window.IS_FULL_ADMIN);
+
+            // If they are a full admin, do nothing. Show everything.
+            if (window.IS_FULL_ADMIN) return;
+
+            // Hide top navigation buttons based on the EXACT names in your Admin Matrix
+            if (!can('view', 'Dividend Declaration')) {
+                const el = document.getElementById('dividendsBtn');
+                if (el) {
+                    el.style.display = 'none';
+                    console.log("Hid Dividends");
+                }
+            }
+            if (!can('view', 'Capitalization Table')) {
+                const el = document.getElementById('capTableBtn');
+                if (el) {
+                    el.style.display = 'none';
+                    console.log("Hid Cap Table");
+                }
+            }
+            if (!can('view', 'Share Ledger')) {
+                const el = document.getElementById('investorTxnBtn');
+                if (el) {
+                    el.style.display = 'none';
+                    console.log("Hid Transactions");
+                }
+            }
+            if (!can('view', 'Reserve')) {
+                const el = document.getElementById('reserveBtn');
+                if (el) {
+                    el.style.display = 'none';
+                    console.log("Hid Reserve");
+                }
+            }
+            if (!can('view', 'Audit Log')) {
+                const el = document.getElementById('auditBtn');
+                if (el) {
+                    el.style.display = 'none';
+                    console.log("Hid Audit Log");
+                }
+            }
+
+            // For things like Proposals and Payments that don't have a direct module name in the matrix, 
+            // we can hide them based on whether they have access to the core equity modules.
+            // For now, let's just force them to hide if they aren't full admin.
+            const proposalsBtn = document.getElementById('proposalsBtn');
+            if (proposalsBtn) proposalsBtn.style.display = 'none';
+            const dilutionBtn = document.getElementById('dilutionBtn');
+            if (dilutionBtn) dilutionBtn.style.display = 'none';
+            const paymentsBtn = document.getElementById('paymentsBtn');
+            if (paymentsBtn) paymentsBtn.style.display = 'none';
+            const reconBtn = document.getElementById('reconBtn');
+            if (reconBtn) reconBtn.style.display = 'none';
+            const addInvestorBtn = document.getElementById('addInvestorBtn');
+            if (addInvestorBtn) addInvestorBtn.style.display = 'none';
+            const addInvestorBtn2 = document.getElementById('addInvestorBtn2');
+            if (addInvestorBtn2) addInvestorBtn2.style.display = 'none';
+
+            // Hide Admin Roles link
+            const adminLinks = document.querySelectorAll('a[href="admin.html"]');
+            adminLinks.forEach(a => a.style.display = 'none');
+
+            console.log("Finished hiding buttons.");
+        }
         if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
             Chart.register(ChartDataLabels);
         }
@@ -7944,7 +8025,8 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 }));
             }
 
-            renderAll(false);
+                      renderAll(false);
+            applyEquityPermissions(); // <--- Add this line
             subscribeRealtime();
             startPolling();
             attachRipple();
@@ -8550,23 +8632,20 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         }
 
         // --- NEW SECURE STARTUP GATE ---
+                // --- SECURE STARTUP GATE ---
         async function startApp() {
             try {
-                // 1. Initialize Supabase first so we can check the session
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-                // 2. Check if user is logged in
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
                     window.location.href = 'login.html';
-                    return; // Stop execution
+                    return;
                 }
 
-                // 3. Verify the user has a role assigned
                 const { data: ur } = await supabaseClient
                     .from('user_roles')
-                    .select('role_id')
+                    .select('role_id, roles(is_full_admin)')
                     .eq('user_id', session.user.id)
                     .maybeSingle();
 
@@ -8577,8 +8656,18 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                     return;
                 }
 
-                // 4. User is valid! Run the normal init logic
-                // (We use setTimeout to let the DOM finish loading just in case)
+                // Set permissions BEFORE running init
+                if (ur.roles && ur.roles.is_full_admin) {
+                    window.IS_FULL_ADMIN = true;
+                } else {
+                    window.IS_FULL_ADMIN = false;
+                    const { data: perms } = await supabaseClient
+                        .from('role_permissions')
+                        .select('*')
+                        .eq('role_id', ur.role_id);
+                    USER_PERMISSIONS = perms || [];
+                }
+
                 setTimeout(() => init(), 0);
 
             } catch (err) {
@@ -8609,5 +8698,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     </script>
     <script src="mpesa-parser.js"></script>
 </body>
+
+</html>
 
 </html>
