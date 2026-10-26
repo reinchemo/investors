@@ -2951,12 +2951,23 @@
     <div class="modal-overlay" id="dividendModal">
         <div class="modal-card" style="max-width: 560px;">
             <h3 id="dividendModalTitle"><i class="fas fa-calculator"></i> New Dividend Distribution</h3>
+
             <label>Total Distributable Amount (KSh)</label>
             <input type="number" id="divTotal" placeholder="e.g. 500000" min="1" step="1">
+
+            <!-- NEW: Snapshot Cutoff Date -->
+            <label>Snapshot Cutoff Date <span style="color:#e8837a;">*</span></label>
+            <input type="date" id="divSnapshotDate" style="font-family:'JetBrains Mono',monospace;">
+            <div style="font-size:0.68rem; color:#7f9bb8; margin-top:0.25rem; margin-bottom:0.8rem;">
+                Ownership for this dividend will be frozen using the cap table as of this date.
+            </div>
+
             <label>Period Label</label>
             <input type="text" id="divPeriod" placeholder="e.g. September 2026" maxlength="40">
+
             <label>Notes (optional)</label>
             <textarea id="divNotes" placeholder="e.g. Q3 distribution after reserve"></textarea>
+
             <div class="modal-error" id="divError"></div>
             <div class="modal-actions">
                 <button class="cancel" id="divCancel">Cancel</button>
@@ -3104,10 +3115,20 @@
     </div>
 
     <!-- INVESTOR DETAIL MODAL -->
+    <!-- INVESTOR DETAIL MODAL -->
     <div class="modal-overlay" id="investorDetailModal">
         <div class="modal-card" style="max-width:800px;">
             <h3><i class="fas fa-user-circle" style="color:#5fc7bc;"></i> <span id="invDetailName">Investor</span></h3>
             <div id="invDetailBody"></div>
+
+            <!-- NEW: Ownership Trend Chart -->
+            <div style="margin-top:1.5rem; border-top:1px solid rgba(120,200,220,0.1); padding-top:1rem;">
+                <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.9rem; color:#c7d5e6; margin-bottom:0.5rem;">Ownership History</h4>
+                <div style="height:150px; width:100%;">
+                    <canvas id="investorHistoryChart"></canvas>
+                </div>
+            </div>
+
             <div class="modal-actions">
                 <button class="cancel" id="invDetailClose">Close</button>
             </div>
@@ -3297,7 +3318,6 @@
             </div>
             <div class="recon-summary-list" id="reconSummaryList"></div>
         </div>
-
         <div class="headline">
             <h1>
                 <i class="fas fa-chart-pie"></i> equity overview <small>investors</small>
@@ -3305,6 +3325,30 @@
             </h1>
             <div class="total-badge" id="totalBadge"><span>💰</span> KSh <span id="totalSharesValue">0</span></div>
         </div>
+
+        <!-- NEW: Forex Ticker Strip -->
+        <div style="display:flex; gap:1.5rem; overflow-x:auto; padding:0.8rem 1.2rem; background:rgba(15,26,46,0.6); border:1px solid rgba(120,200,220,0.12); border-radius:16px; margin-bottom:1.5rem; align-items:center;">
+            <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                <span style="font-size:0.6rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.05em;">Virtual Value</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:0.95rem; font-weight:700; color:#f4c98d;">KSh <span id="tickerVirtual">0</span></span>
+            </div>
+            <div style="width:1px; height:30px; background:rgba(120,200,220,0.15);"></div>
+            <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                <span style="font-size:0.6rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.05em;">Real Equity</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:0.95rem; font-weight:700; color:#7fded1;">KSh <span id="tickerReal">0</span></span>
+            </div>
+            <div style="width:1px; height:30px; background:rgba(120,200,220,0.15);"></div>
+            <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                <span style="font-size:0.6rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.05em;">Dividends Paid</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:0.95rem; font-weight:700; color:#7ee0a2;">KSh <span id="tickerDividends">0</span></span>
+            </div>
+            <div style="width:1px; height:30px; background:rgba(120,200,220,0.15);"></div>
+            <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                <span style="font-size:0.6rem; color:#7f9bb8; text-transform:uppercase; letter-spacing:0.05em;">Reserve</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:0.95rem; font-weight:700; color:#b8a0ff;">KSh <span id="tickerReserve">0</span></span>
+            </div>
+        </div>
+
 
         <div class="summary-row">
 
@@ -5014,6 +5058,18 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 async function renderAll(pulse = true)  {
             const totalEquity = renderTable();
             document.getElementById('totalSharesValue').textContent = fmt(totalEquity);
+
+                        // Populate the Forex Ticker Strip
+            const realTotal = investors.reduce((s, i) => s + safeNum(i.equity), 0);
+            const virtualTotal = safeNum(summary.starlinkVirtualInvestment);
+            const divsPaid = dividends.filter(d => d.status === 'paid').reduce((s, d) => s + safeNum(d.totalDistributable), 0);
+            const reserveTotal = dividends.reduce((m, d) => Math.max(m, safeNum(d.runningReserveBalance)), 0);
+
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmt(val); };
+            setTxt('tickerVirtual', virtualTotal);
+            setTxt('tickerReal', realTotal);
+            setTxt('tickerDividends', divsPaid);
+            setTxt('tickerReserve', reserveTotal);
             renderSummaryCards();
             renderCharts();
             renderDividendOverview();
@@ -6480,89 +6536,117 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             return balances;
         }
 
-        async function openCapTable() {
+                  async function openCapTable() {
             const modal = document.getElementById('capTableModal');
             modal.classList.add('show');
             // Default: show today
-            document.getElementById('capTableDate').value = todayISO();
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0];
+            
+            document.getElementById('capTableDate').value = dateStr;
+            
+            // Add a time input dynamically if it doesn't exist
+            if (!document.getElementById('capTableTime')) {
+                const timeInput = document.createElement('input');
+                timeInput.type = 'time';
+                timeInput.id = 'capTableTime';
+                timeInput.value = timeStr;
+                timeInput.style.marginLeft = '0.5rem';
+                timeInput.style.padding = '0.55rem';
+                timeInput.style.borderRadius = '10px';
+                timeInput.style.background = 'rgba(255,255,255,0.04)';
+                timeInput.style.color = '#f2f0eb';
+                timeInput.style.border = '1px solid rgba(120,200,220,0.2)';
+                document.getElementById('capTableDate').parentNode.appendChild(timeInput);
+                
+                // Re-render when time changes
+                timeInput.addEventListener('change', renderCapTable);
+            } else {
+                document.getElementById('capTableTime').value = timeStr;
+            }
+
             await renderCapTable();
         }
 
         function closeCapTable() {
             document.getElementById('capTableModal').classList.remove('show');
         }
-
         async function renderCapTable() {
-            const asOf = document.getElementById('capTableDate').value || null;
-            const balances = await computeCapTableAsOf(asOf);
+            const dateVal = document.getElementById('capTableDate').value || todayISO();
+            const timeVal = document.getElementById('capTableTime') ? document.getElementById('capTableTime').value : '23:59:59';
+            const asOfTimestamp = `${dateVal}T${timeVal}+03:00`; // EAT timezone
 
-            // Build list of investors with balance
-            const rows = investors.map(inv => {
-                const b = balances[inv.id] || {
-                    equity: 0,
-                    lastChange: null,
-                    lastRef: '',
-                    date: null
-                };
+            // Call the new RPC function we created in Supabase
+            const { data, error } = await supabaseClient.rpc('get_ownership_as_of', { 
+                p_timestamp: asOfTimestamp 
+            });
+
+            if (error) {
+                console.error("Failed to fetch snapshot:", error);
+                showError("Could not load historical cap table: " + error.message);
+                return;
+            }
+
+            // Format data for the table
+            // The RPC returns: holder_name, equity_ksh, ownership_pct, is_virtual
+            const rows = (data || []).map(r => {
+                const inv = investors.find(i => i.name === r.holder_name);
                 return {
-                    id: inv.id,
-                    name: inv.name,
-                    number: inv.investorNumber || '',
-                    equity: b.equity,
-                    lastChange: b.lastChange,
-                    lastRef: b.lastRef,
-                    date: b.date
+                    id: r.is_virtual ? null : (inv ? inv.id : null),
+                    name: r.holder_name,
+                    number: r.is_virtual ? '—' : (inv ? inv.investorNumber : ''),
+                    equity: safeNum(r.equity_ksh),
+                    pct: safeNum(r.ownership_pct),
+                    lastChange: r.is_virtual ? 'snapshot' : 'ledger',
+                    lastRef: r.is_virtual ? 'imported_history' : 'share_ledger',
+                    date: dateVal,
+                    isStarlink: r.is_virtual
                 };
             });
 
-            // Add the synthetic Starlink Virtual row
-            rows.push({
-                id: null,
-                name: 'STARLINK LLC VIRTUAL',
-                number: '—',
-                equity: Math.round(safeNum(summary.starlinkVirtualInvestment)),
-                lastChange: 'live',
-                lastRef: 'derived',
-                date: null,
-                isStarlink: true
-            });
+            // Sort by equity descending
+            rows.sort((a, b) => b.equity - a.equity);
 
             const grandTotal = rows.reduce((s, r) => s + r.equity, 0);
 
             // Summary stats
             document.getElementById('capTableSummary').innerHTML = `
                 <div class="recon-stat good">
-                    <div class="recon-stat-label"><i class="fas fa-users"></i> INVESTORS</div>
-                    <div class="recon-stat-value">${investors.length}</div>
+                    <div class="recon-stat-label"><i class="fas fa-users"></i> HOLDERS</div>
+                    <div class="recon-stat-value">${rows.length}</div>
                 </div>
                 <div class="recon-stat good">
                     <div class="recon-stat-label"><i class="fas fa-coins"></i> TOTAL EQUITY</div>
                     <div class="recon-stat-value">KSh ${fmt(grandTotal)}</div>
                 </div>
-                <div class="recon-stat ${asOf ? 'warn' : 'good'}">
+                <div class="recon-stat warn">
                     <div class="recon-stat-label"><i class="fas fa-calendar"></i> AS OF</div>
-                    <div class="recon-stat-value" style="font-size:1rem;">${asOf ? escapeHTML(asOf) : 'ALL-TIME'}</div>
+                    <div class="recon-stat-value" style="font-size:0.9rem;">${dateVal} ${timeVal}</div>
                 </div>
             `;
 
             // Table rows
             const body = document.getElementById('capTableBody');
             if (!rows.length) {
-                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-users"></i>No investors yet.</div></td></tr>`;
+                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-users"></i>No ownership found for this timestamp.</div></td></tr>`;
                 return;
             }
 
             body.innerHTML = rows.map(r => {
-                const pct = grandTotal > 0 ? ((r.equity / grandTotal) * 100).toFixed(2) : '0.00';
+                const pctDisplay = grandTotal > 0 ? ((r.equity / grandTotal) * 100).toFixed(2) : '0.00';
                 const rowClass = r.isStarlink ? 'recon-row-caution' : '';
-                const changeLabel = r.lastChange && r.lastChange !== 'live' ? `<span class="status-pill ${r.lastChange === 'initial' ? 'approved' : 'paid'}" style="text-transform:capitalize;">${escapeHTML(r.lastChange)}</span>` : '—';
+                const changeLabel = r.isStarlink 
+                    ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
+                    : `<span class="status-pill active" style="font-size:0.6rem;">ledger</span>`;
+                
                 return `<tr class="${rowClass}">
-                    <td><strong>${escapeHTML(r.name)}</strong>${r.isStarlink ? ' <span class="starlink-tag">live</span>' : ''}</td>
+<td><a href="#" onclick="event.preventDefault(); if('${r.name}' !== 'STARLINK LLC VIRTUAL') { const inv = investors.find(i => i.name === '${r.name}'); if(inv) { closeCapTable(); openInvestorDetail(inv.id); } }" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(r.name)}</a>${r.isStarlink ? ' <span class="starlink-tag">snapshot</span>' : ''}</td>
                     <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.number)}</span></td>
                     <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(r.equity)}</td>
-                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">${pct}%</td>
-                    <td>${changeLabel}${r.date ? ` <span style="font-size:0.7rem; color:#7f9bb8;">${escapeHTML(r.date)}</span>` : ''}</td>
-                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.lastRef || '—')}</td>
+                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">${pctDisplay}%</td>
+                    <td>${changeLabel}</td>
+                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.lastRef)}</td>
                 </tr>`;
             }).join('') + `
                 <tr class="total-row">
@@ -6580,10 +6664,10 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const reconcileTxt = document.getElementById('capTableReconcileText');
             if (grandTotal > 0) {
                 reconcileEl.classList.remove('warning');
-                reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders.`;
+                reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders at the specified timestamp.`;
             } else {
                 reconcileEl.classList.add('warning');
-                reconcileTxt.textContent = 'No equity recorded — cap table is empty.';
+                reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
             }
         }
 
@@ -6635,7 +6719,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         // ==================================================
         let currentDetailInvestorId = null;
 
-        async function openInvestorDetail(investorId) {
+               async function openInvestorDetail(investorId) {
             const inv = investors.find(i => i.id === investorId);
             if (!inv) return;
             currentDetailInvestorId = investorId;
@@ -6645,16 +6729,11 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             // Fetch investments for this investor
             let invList = [];
             try {
-                const {
-                    data,
-                    error
-                } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('investments')
                     .select('*')
                     .eq('investor_id', investorId)
-                    .order('date', {
-                        ascending: false
-                    });
+                    .order('date', { ascending: false });
                 if (!error && Array.isArray(data)) invList = data;
             } catch (e) {
                 console.warn('Investments fetch failed:', e);
@@ -6670,6 +6749,17 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
             const statusPill = (inv.status === 'inactive') ? 'cancelled' :
                 (inv.status === 'prospect') ? 'pending' : 'paid';
+
+            // --- CALCULATE DIVIDENDS RECEIVED ---
+            let divTotal = 0;
+            dividends.forEach(d => {
+                if (Array.isArray(d.allocations)) {
+                    const alloc = d.allocations.find(a => a.name === inv.name);
+                    if (alloc && d.status === 'paid') {
+                        divTotal += safeNum(alloc.amount || alloc.final || 0);
+                    }
+                }
+            });
 
             // Build detail body
             let html = `
@@ -6702,12 +6792,26 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                     </div>
                 </div>
 
+                <!-- NEW: DIVIDENDS & RETURN CARDS -->
+                <div class="summary-row" style="margin-bottom:1rem;">
+                    <div class="summary-card income">
+                        <div class="summary-label"><i class="fas fa-hand-holding-usd"></i> DIVIDENDS RECEIVED</div>
+                        <div class="summary-value">KSh ${fmt(divTotal)}</div>
+                        <div class="summary-sub">All-time paid</div>
+                    </div>
+                    <div class="summary-card capital">
+                        <div class="summary-label"><i class="fas fa-chart-line"></i> RETURN ON CAPITAL</div>
+                        <div class="summary-value">${totalInvested > 0 ? ((divTotal / totalInvested) * 100).toFixed(1) : 0}%</div>
+                        <div class="summary-sub">Dividends ÷ Invested</div>
+                    </div>
+                </div>
+
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem; gap:0.5rem; flex-wrap:wrap;">
                     <h4 style="font-family:'Space Grotesk',sans-serif; font-size:0.9rem; color:#c7d5e6;">Investment History</h4>
                     <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
                         <button class="btn btn-primary" id="printStatementBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px; background:linear-gradient(135deg, #1a5a9c, #2a7ac4);">
-    <i class="fas fa-file-invoice"></i> Print Official Statement
-</button>
+                            <i class="fas fa-file-invoice"></i> Print Official Statement
+                        </button>
                         <button class="btn btn-primary" id="addInvestmentBtn" style="padding:0.4rem 0.9rem; font-size:0.75rem; min-height:34px;">
                             <i class="fas fa-plus"></i> Add Investment
                         </button>
@@ -6753,6 +6857,73 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             // Wire add investment button
             document.getElementById('addInvestmentBtn').addEventListener('click', () => openInvestmentModal(investorId));
             document.getElementById('printStatementBtn').addEventListener('click', () => printInvestorStatement(investorId));
+
+            // --- DRAW THE OWNERSHIP TREND CHART ---
+            const chartCanvas = document.getElementById('investorHistoryChart');
+            if (!chartCanvas) return;
+            if (window.investorChartInstance) window.investorChartInstance.destroy();
+
+            const { data: snaps } = await supabaseClient
+                .from('virtual_equity_snapshots')
+                .select('as_of_timestamp, total_equity_ksh')
+                .order('as_of_timestamp', { ascending: true });
+
+            if (snaps && snaps.length > 0) {
+                chartCanvas.parentElement.style.display = 'block';
+                const labels = [];
+                const dataPoints = [];
+
+                for (const snap of snaps) {
+                    const realEquity = inv.equity; 
+                    const pct = (realEquity / snap.total_equity_ksh) * 100;
+                    labels.push(new Date(snap.as_of_timestamp).toLocaleDateString('en-GB', {month: 'short', year: '2-digit'}));
+                    dataPoints.push(pct);
+                }
+
+                const totalEquityNow = investors.reduce((s,i)=>s+safeNum(i.equity),0) + safeNum(summary.starlinkVirtualInvestment);
+                labels.push('Today');
+                dataPoints.push((inv.equity / totalEquityNow) * 100);
+
+                window.investorChartInstance = new Chart(chartCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Ownership %',
+                            data: dataPoints,
+                            borderColor: '#5fc7bc',
+                            backgroundColor: 'rgba(95, 199, 188, 0.15)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#f4c98d',
+                            pointRadius: 4,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y.toFixed(2)}%` } }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(120, 200, 220, 0.06)' },
+                                ticks: { color: '#7f9bb8', callback: v => v.toFixed(1) + '%' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#c7d5e6', font: { size: 10 } }
+                            }
+                        },
+                        layout: { padding: { top: 10, bottom: 0, left: 0, right: 10 } }
+                    }
+                });
+            } else {
+                chartCanvas.parentElement.style.display = 'none';
+            }
         }
 
         function closeInvestorDetail() {
