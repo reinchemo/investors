@@ -3365,7 +3365,7 @@
             </div>
 
             <!-- CAPITAL INJECTED CARD -->
-                      <!-- CAPITAL INJECTED CARD -->
+            <!-- CAPITAL INJECTED CARD -->
             <div class="summary-card capital" style="cursor:pointer;" onclick="openProposalsModal()" title="Click to view this month's capital contributors">
                 <div class="summary-label"><i class="fas fa-landmark"></i> CAPITAL INJECTED <small style="color:#b8a0ff; font-size:0.55rem; margin-left:auto;">THIS MONTH</small></div>
                 <div class="summary-value" id="sumCapital">KSh 0</div>
@@ -8254,7 +8254,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 }
             });
         }
-        async function fetchCapitalInjectedThisMonth() {
+              async function fetchCapitalInjectedThisMonth() {
             if (!supabaseClient) return { total: 0, count: 0 };
             try {
                 // 1. Get the start and end of the current month
@@ -8262,18 +8262,17 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
                 const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-                // 2. Fetch transactions from the `transactions` table (not proposals)
+                // 2. Fetch ONLY funded proposals for this month
                 const { data, error } = await supabaseClient
-                    .from('transactions')
-                    .select('amount')
-                    .eq('type', 'capital')
-                    .gte('date', firstDay)
-                    .lte('date', lastDay)
-                    .is('deleted_at', null); // ignore soft-deleted
+                    .from('proposals')
+                    .select('proposed_amount')
+                    .eq('status', 'funded')
+                    .gte('funded_at', `${firstDay}T00:00:00`)
+                    .lte('funded_at', `${lastDay}T23:59:59`);
 
                 if (error) throw error;
                 
-                const total = (data || []).reduce((s, t) => s + safeNum(t.amount), 0);
+                const total = (data || []).reduce((s, p) => s + safeNum(p.proposed_amount), 0);
                 return { total: total, count: (data || []).length };
             } catch (e) {
                 console.warn('Capital fetch failed:', e.message);
