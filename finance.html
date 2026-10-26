@@ -8224,28 +8224,8 @@
     const incomes = periodTxns.filter(t => t.type === 'income');
     const capitals = periodTxns.filter(t => t.type === 'capital');
 
-    // 🆕 3. FILTER OUT MASSIVE ASSETS FROM EXPENSES (Matches Equity App exactly)
-    const expenses = periodTxns.filter(t => {
-        if (t.type !== 'expense') return false;
-
-        const desc = (t.description || '').toLowerCase();
-        const cat = (t.category || '').toLowerCase();
-        const amt = safeNum(t.amount);
-
-        // 1. Ignore the Virtual Base
-        if (t.id === 'TXN-MIGRATION-STARLINK-VIRTUAL-BASE-001') return false;
-
-        // 2. Ignore massive equipment (Routers, Fiber, Cables over 5k)
-        if (amt > 5000 && (
-            desc.includes('router') ||
-            desc.includes('fiber') ||
-            desc.includes('cable') ||
-            desc.includes('battery') ||
-            cat.includes('common investment')
-        )) return false;
-
-        return true;
-    });
+       // Count ALL expenses for this period (matches the Ledger exactly)
+    const expenses = periodTxns.filter(t => t.type === 'expense');
 
     const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
     const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
@@ -8393,7 +8373,7 @@ function viewMonthlyRecords(type) {
             doPrint(html);
         }
 
-        function renderLedger() {
+          function renderLedger() {
             const body = document.getElementById('ledgerBody');
             const from = document.getElementById('ldgFilterFrom').value || '';
             const to = document.getElementById('ldgFilterTo').value || '';
@@ -8409,10 +8389,9 @@ function viewMonthlyRecords(type) {
             if (q) filtered = filtered.filter(t => ((t.id || '') + ' ' + (t.description || '') + ' ' + (t.reference || '')).toLowerCase().includes(q));
             filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-            document.getElementById('ledgerBadge').textContent = filtered.length;
-
             if (!filtered.length) {
                 body.innerHTML = `<tr><td colspan="12"><div class="empty-row"><i class="fas fa-book"></i>No transactions match your filters.</div></td></tr>`;
+                document.getElementById('ledgerBadge').textContent = '0';
                 return;
             }
 
@@ -8426,10 +8405,10 @@ function viewMonthlyRecords(type) {
                     <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(t.reference || '—')}</td>
                     <td>${escapeHTML(t.location || '—')}</td>
                     <td><span class="status-pill ${escapeHTML(t.status)}">${escapeHTML(t.status)}</span></td>
-                                      <td class="${txnAmountClass(t.type)}" style="text-align:right;">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</td>
+                    <td class="${txnAmountClass(t.type)}" style="text-align:right;">${txnAmountSign(t.type)} KSh ${fmt(t.amount)}</td>
                     <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:${t.fee > 0 ? '#e8b879' : '#5a6f88'};">${t.fee > 0 ? 'KSh ' + fmt(t.fee) : '—'}</td>
                     <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:#c7d5e6;">${t.netAmount !== null && t.netAmount !== undefined ? 'KSh ' + fmt(t.netAmount) : '—'}</td>
-                                       <td>
+                    <td>
                         <div class="row-actions">
                             ${t.reversedAt
                                 ? `<span title="Reversed on ${escapeHTML(new Date(t.reversedAt).toLocaleString())}" style="display:inline-flex; align-items:center; gap:0.3rem; padding:0.35rem 0.55rem; border-radius:8px; background:rgba(226,104,91,0.12); border:1px solid rgba(226,104,91,0.35); color:#f0a89f; font-size:0.72rem; font-family:'JetBrains Mono',monospace;">
@@ -8442,6 +8421,9 @@ function viewMonthlyRecords(type) {
                     </td>
                 </tr>
             `).join('');
+
+            // UPDATE BADGE LAST — counts actual rendered rows
+            document.getElementById('ledgerBadge').textContent = filtered.length;
         }
 
         function renderIncome() {
@@ -11893,9 +11875,17 @@ function openTxnModal(txn = null) {
         // FILTER LISTENERS — search boxes debounced
         // ==================================================
         function setupFilters() {
-            ['ldgFilterFrom', 'ldgFilterTo', 'ldgFilterType', 'ldgFilterStatus'].forEach(id =>
-                document.getElementById(id).addEventListener('change', renderLedger)
-            );
+                        ['ldgFilterFrom', 'ldgFilterTo', 'ldgFilterType', 'ldgFilterStatus'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    renderLedger();
+                    // Force the badge to update immediately to match the table
+                    setTimeout(() => {
+                        const rows = document.querySelectorAll('#ledgerBody tr');
+                        const isEmpty = document.querySelector('#ledgerBody .empty-row') !== null;
+                        document.getElementById('ledgerBadge').textContent = isEmpty ? '0' : rows.length;
+                    }, 50);
+                });
+            });
             document.getElementById('ldgFilterSearch').addEventListener('input', debounce(renderLedger, 300));
             document.getElementById('ldgFilterClear').addEventListener('click', () => {
                 ['ldgFilterFrom', 'ldgFilterTo', 'ldgFilterType', 'ldgFilterStatus', 'ldgFilterSearch'].forEach(id => document.getElementById(id).value = '');
@@ -13602,8 +13592,8 @@ function openTxnModal(txn = null) {
             // --- DEEP LINK ROUTER INIT ---
             Router.initBackButton('navBackBtn');
             
-            const route = Router.parseHash();
-            if (route && route.module === 'txn') { // 👈 Matches the updated URL
+                     const route = Router.parseHash();
+            if (route && route.module === 'txn') {
                 // Switch to ledger view
                 const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
                 if (ledgerTab) ledgerTab.click();
@@ -13686,10 +13676,7 @@ function openTxnModal(txn = null) {
     </script>
     <script src="mpesa-parser.js"></script>
     <script src="router.js"></script>
-
-    </script>
-    <script src="mpesa-parser.js"></script>
-    <script src="router.js"></script>
 </body>
+
 
 </html>
