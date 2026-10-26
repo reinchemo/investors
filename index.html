@@ -4281,28 +4281,8 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
             const incomes = monthTxns.filter(t => t.type === 'income');
             
-            // 🆕 EXCLUDE massive equipment from Equity Expenditure to match Finance exactly
-            const expenses = monthTxns.filter(t => {
-                if (t.type !== 'expense') return false;
-                
-                const desc = (t.description || '').toLowerCase();
-                const cat = (t.category || '').toLowerCase();
-                const amt = safeNum(t.amount);
-                
-                // 1. Ignore the 377k Virtual Base
-                if (t.id === 'TXN-MIGRATION-STARLINK-VIRTUAL-BASE-001') return false;
-                
-                // 2. Ignore massive equipment (Routers, Fiber, Cables over 5k)
-                if (amt > 5000 && (
-                    desc.includes('router') || 
-                    desc.includes('fiber') || 
-                    desc.includes('cable') || 
-                    desc.includes('battery') || 
-                    cat.includes('common investment')
-                )) return false;
-
-                return true;
-            });
+                    // Count ALL expenses (matches the Finance Ledger exactly)
+            const expenses = monthTxns.filter(t => t.type === 'expense');
             
             const totalIncome = incomes.reduce((s, t) => s + safeNum(t.amount), 0);
             const totalExpense = expenses.reduce((s, t) => s + safeNum(t.amount), 0);
