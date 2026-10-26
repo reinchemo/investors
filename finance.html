@@ -5246,7 +5246,8 @@
                     <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${t.lastTxnId ? escapeHTML(t.lastTxnId) : '—'}</td>
                     <td><span class="status-pill ${statusPill}">${statusLabel}</span></td>
                     <td>
-                        <div class="row-actions">
+                                               <div class="row-actions">
+                            <button class="approve-btn" onclick="markRecurringAsPaid(${t.id})" title="Mark as Paid"><i class="fas fa-check-double"></i></button>
                             <button class="edit-btn" onclick="openRecurringModal(${t.id})" title="Edit"><i class="fas fa-edit"></i></button>
                             <button class="edit-btn" onclick="toggleRecurringActive(${t.id})" title="${t.active ? 'Pause' : 'Resume'}"><i class="fas fa-${t.active ? 'pause' : 'play'}"></i></button>
                             <button class="del-btn" onclick="deleteRecurring(${t.id})" title="Delete"><i class="fas fa-trash"></i></button>
@@ -5589,6 +5590,32 @@
         window.openRecurringModal = openRecurringModal;
         window.toggleRecurringActive = toggleRecurringActive;
         window.deleteRecurring = deleteRecurring;
+
+        window.markRecurringAsPaid = function(id) {
+            const t = recurringTemplates.find(x => x.id === id);
+            if (!t) return;
+
+            // Open the transaction modal pre-filled
+            openTxnModal(null);
+
+            // Pre-fill the fields
+            document.getElementById('txnType').value = t.type;
+            populateCategoryDropdown(t.type, t.category);
+            document.getElementById('txnDesc').value = t.description;
+            document.getElementById('txnAmount').value = t.amount;
+            document.getElementById('txnFee').value = t.fee;
+            document.getElementById('txnDate').value = todayISO();
+            document.getElementById('txnMethod').value = t.method;
+            populateLocationDropdown(t.location);
+            document.getElementById('txnStatus').value = 'posted';
+
+            // Store the recurring ID so we can resolve it on save
+            window._resolvingRecurringId = t.id;
+
+            // Show a note in the modal
+            const title = document.getElementById('txnModalTitle');
+            title.innerHTML = `<i class="fas fa-check-double"></i> Pay Recurring: ${escapeHTML(t.description)}`;
+        };
 
         // ==================================================
         // §28 — BUDGET VS ACTUAL
@@ -10968,13 +10995,14 @@ function openTxnModal(txn = null) {
             editingTxnId = null;
         }
 
-        async function saveTxn() {
+              async function saveTxn() {
             const type = document.getElementById('txnType').value;
             const category = document.getElementById('txnCategory').value;
-            const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);            const amount = safeNum(document.getElementById('txnAmount').value);
-                        const fee = safeNum(document.getElementById('txnFee').value);
+            const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);
+            const amount = safeNum(document.getElementById('txnAmount').value);
+            const fee = safeNum(document.getElementById('txnFee').value);
             const date = document.getElementById('txnDate').value || todayISO();
-                        const method = document.getElementById('txnMethod').value;
+            const method = document.getElementById('txnMethod').value;
 
             // ---- Extract short M-PESA code FIRST (before validation) ----
             const refField = document.getElementById('txnRef');
@@ -11018,7 +11046,7 @@ function openTxnModal(txn = null) {
                 return;
             }
 
-                        // Reference duplicate check — matches on the short M-PESA code
+            // Reference duplicate check — matches on the short M-PESA code
             if (reference) {
                 const ref = reference.toUpperCase();
                 const dup = transactions.find(t =>
@@ -11040,7 +11068,7 @@ function openTxnModal(txn = null) {
                 category: category,
                 description: description,
                 amount: amount,
-                  fee: fee,
+                fee: fee,
                 method: method,
                 reference: reference || null,
                 location: location || null,
@@ -11054,10 +11082,7 @@ function openTxnModal(txn = null) {
 
             if (wasEditing) {
                 // ---------- EDIT: direct update ----------
-                // post_transaction() is for NEW postings only. Editing an existing
-                // transaction must not go through the idempotency path, because the
-                // key would collide with the original insert.
-                              row.updated_at = new Date().toISOString();
+                row.updated_at = new Date().toISOString();
                 row.updated_by = CURRENT_USER;
 
                 const original = transactions.find(t => t.id === editingTxnId);
@@ -11084,7 +11109,6 @@ function openTxnModal(txn = null) {
                 }
             } else {
                 // ---------- NEW: go through post_transaction() ----------
-                // Idempotency key: same inputs -> same key -> same row returned on retry.
                 const idemKey = reference
                     ? `TXN-${type}-${amount}-${date}-${reference.toUpperCase()}`
                     : `TXN-${type}-${amount}-${date}-${Date.now()}`;
@@ -11114,35 +11138,86 @@ function openTxnModal(txn = null) {
                     p_created_by:      CURRENT_USER
                 });
 
-         if (error) {
-    const errCode = String(error.code || '');
-    const errMsg  = String(error.message || '').toLowerCase();
-    if (errCode === '23505') {
-        if (errMsg.includes('duplicate') || errMsg.includes('reference')) {
-            err.textContent = '⚠️ A transaction with this reference already exists.';
-        } else if (errMsg.includes('transactions_pkey') || errMsg.includes('primary key')) {
-            err.textContent = '⚠️ ID collision — refreshing IDs. Please try saving again.';
-            await fetchFromCloud();
-        } else {
-            err.textContent = '⚠️ Duplicate detected: ' + (error.message || 'unknown');
-        }
-    } else {
-        err.textContent = '⚠️ Save failed: ' + (error.message || 'unknown error');
-    }
-    err.style.display = 'block';
-    return;
-}
+                if (error) {
+                    const errCode = String(error.code || '');
+                    const errMsg  = String(error.message || '').toLowerCase();
+                    if (errCode === '23505') {
+                        if (errMsg.includes('duplicate') || errMsg.includes('reference')) {
+                            err.textContent = '⚠️ A transaction with this reference already exists.';
+                        } else if (errMsg.includes('transactions_pkey') || errMsg.includes('primary key')) {
+                            err.textContent = '⚠️ ID collision — refreshing IDs. Please try saving again.';
+                            await fetchFromCloud();
+                        } else {
+                            err.textContent = '⚠️ Duplicate detected: ' + (error.message || 'unknown');
+                        }
+                    } else {
+                        err.textContent = '⚠️ Save failed: ' + (error.message || 'unknown error');
+                    }
+                    err.style.display = 'block';
+                    return;
+                }
 
-                // rpcId is the transaction ID (either the new one, or the existing
-                // one if the same idempotency key was already posted).
                 console.log('✅ Posted transaction:', rpcId);
                 sequence++;
+
+                // --- RECURRING LOGIC: SAVE NEW TEMPLATE ---
+                const isRecurring = document.getElementById('txnIsRecurring') && document.getElementById('txnIsRecurring').checked;
+                if (isRecurring) {
+                    const nextRunDate = document.getElementById('txnNextRunDate').value || addOneMonth(date);
+                    const matchedLoc = locations.find(l => l.name === location);
+                    
+                    await supabaseClient.from('recurring_templates').insert({
+                        description: description,
+                        type: type,
+                        category: category,
+                        amount: amount,
+                        fee: fee,
+                        day_of_month: new Date(nextRunDate).getDate(),
+                        method: method,
+                        location: location || null,
+                        location_id: matchedLoc ? matchedLoc.id : null,
+                        next_run_date: nextRunDate,
+                        last_run_date: date,
+                        last_txn_id: rpcId,
+                        active: true,
+                        notes: 'Created from transaction: ' + reference,
+                        created_by: CURRENT_USER
+                    });
+                    console.log('✅ Recurring template created');
+                }
             }
-                        await fetchFromCloud();
+            
+            // --- RECURRING LOGIC: RESOLVE EXISTING BILL ---
+            if (window._resolvingRecurringId) {
+                const t = recurringTemplates.find(x => x.id === window._resolvingRecurringId);
+                if (t) {
+                    const nextDate = addOneMonth(t.nextRunDate);
+                    await supabaseClient.from('recurring_templates').update({
+                        last_run_date: todayISO(),
+                        last_txn_id: reference || 'MANUAL',
+                        next_run_date: nextDate,
+                        updated_at: new Date().toISOString(),
+                        updated_by: CURRENT_USER
+                    }).eq('id', t.id);
+                    
+                    await fetchRecurring(); // Reload templates
+                    
+                    // Resolve any unread notifications for this bill
+                    await supabaseClient.from('notifications')
+                        .update({ read_at: new Date().toISOString() })
+                        .eq('link_ref', String(t.id))
+                        .is('read_at', null);
+                        
+                    await fetchNotifications();
+                    notifUpdateBadge();
+                }
+                window._resolvingRecurringId = null;
+            }
+
+            await fetchFromCloud();
             renderAll();
             closeTxnModal();
             showToast(wasEditing ? '✅ Transaction updated' : '✅ Transaction posted', 'success');
-            
         }
 
         // ==================================================
