@@ -1618,16 +1618,15 @@
         <div class="orb orb-3"></div>
     </div>
 
-    <!-- TRANSACTION MODAL -->
     <div class="modal-overlay" id="txnModal">
         <div class="modal-card">
             <h3 id="txnModalTitle"><i class="fas fa-plus-circle"></i> New Transaction</h3>
             <label>Type</label>
             <select id="txnType">
-                <option value="income">Income</option>
-                <option value="expense">Expenditure</option>
-                <option value="capital">Capital Injection</option>
-            </select>
+            <option value="income">Income</option>
+            <option value="expense">Expenditure</option>
+            <option value="capital">Capital Injection</option>
+        </select>
             <label>Category</label>
             <select id="txnCategory"></select>
             <label>Description</label>
@@ -1654,24 +1653,23 @@
                     <span>Transaction Fee:</span><strong id="txnBreakFee" style="color:#f4c98d;">KSh 0.00</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(200,154,91,0.35); padding-top:0.35rem; margin-top:0.35rem;">
-
                     <span>Total Debited:</span><strong id="txnBreakNet" style="color:#7ee0a2;">KSh 0.00</strong>
                 </div>
             </div>
             <label>Payment Method</label>
             <select id="txnMethod">
-                <option value="cash">Cash</option>
-                <option value="mpesa">M-Pesa</option>
-                <option value="bank">Bank Transfer</option>
-                <option value="cheque">Cheque</option>
-                <option value="other">Other</option>
-            </select>
+            <option value="cash">Cash</option>
+            <option value="mpesa">M-Pesa</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="cheque">Cheque</option>
+            <option value="other">Other</option>
+        </select>
             <label>
-                M-PESA Message / Reference
-                <span style="font-size:0.65rem; color:#7f9bb8; font-weight:400; text-transform:none; letter-spacing:0; margin-left:0.4rem;">
-                    — paste the full M-PESA SMS and the fields auto-fill
-                </span>
-            </label>
+            M-PESA Message / Reference
+            <span style="font-size:0.65rem; color:#7f9bb8; font-weight:400; text-transform:none; letter-spacing:0; margin-left:0.4rem;">
+                — paste the full M-PESA SMS and the fields auto-fill
+            </span>
+        </label>
             <textarea id="txnRef" placeholder="Paste the full M-PESA message here" rows="4" maxlength="800" autocomplete="off" style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; line-height:1.5; min-height:88px; resize:vertical;"></textarea>
 
             <div id="mpesaParseStatus" style="display:none; margin-top:0.4rem; padding:0.5rem 0.8rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.3); border-radius:10px; font-size:0.72rem; color:#7fded1; font-family:'JetBrains Mono',monospace; line-height:1.4;">
@@ -1685,13 +1683,31 @@
                 <div>
                     <label>Status</label>
                     <select id="txnStatus">
-                        <option value="draft">Draft</option>
-                        <option value="pending">Pending Approval</option>
-                        <option value="approved">Approved</option>
-                        <option value="posted">Posted</option>
-                    </select>
+                    <option value="draft">Draft</option>
+                    <option value="pending">Pending Approval</option>
+                    <option value="approved">Approved</option>
+                    <option value="posted">Posted</option>
+                </select>
                 </div>
             </div>
+
+            <!-- RECURRING SECTION -->
+            <div style="margin-top:1rem; padding:0.8rem; background:rgba(95,199,188,0.05); border:1px solid rgba(95,199,188,0.2); border-radius:12px;">
+                <label style="display:flex; align-items:center; gap:0.5rem; margin:0; text-transform:none; letter-spacing:0; font-size:0.85rem; cursor:pointer;">
+                <input type="checkbox" id="txnIsRecurring" style="width:auto; min-height:auto;">
+                <span>This is a recurring bill/expense</span>
+            </label>
+
+                <div id="recurringOptions" style="display:none; margin-top:0.8rem;">
+                    <label>Next Payment Date</label>
+                    <input type="date" id="txnNextRunDate" style="font-family:'JetBrains Mono',monospace;">
+                    <div style="font-size:0.68rem; color:#7f9bb8; margin-top:0.25rem;">
+                        Auto-calculated to 1 month from the transaction date. You can override it.
+                    </div>
+                </div>
+            </div>
+            <!-- END RECURRING SECTION -->
+
             <label>Notes (optional)</label>
             <textarea id="txnNotes" placeholder="Additional details..."></textarea>
             <div class="modal-error" id="txnError"></div>
@@ -10850,6 +10866,12 @@ function handleMpesaPaste(rawValue) {
     }
 
     if (typeof window._recomputeTxnNet === 'function') window._recomputeTxnNet();
+
+    // Auto-fill next run date if recurring is checked
+    if (document.getElementById('txnIsRecurring') && document.getElementById('txnIsRecurring').checked && parsed.date) {
+        document.getElementById('txnNextRunDate').value = addOneMonth(parsed.date);
+    }
+
     return true;
 }
 
@@ -13567,7 +13589,6 @@ function openTxnModal(txn = null) {
                 window.location.href = 'login.html';
             }
         }
-              
             // -----------------------------
 
         // --- BULLETPROOF LOGOUT LISTENER ---
@@ -13587,6 +13608,10 @@ function openTxnModal(txn = null) {
         });
 
         document.addEventListener('DOMContentLoaded', startApp);
+    </script>
+    <script src="mpesa-parser.js"></script>
+    <script src="router.js"></script>
+
     </script>
     <script src="mpesa-parser.js"></script>
     <script src="router.js"></script>
