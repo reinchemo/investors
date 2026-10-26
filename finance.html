@@ -2684,7 +2684,7 @@
                     <i class="fas fa-bell"></i><span>Notifications</span>
                     <span id="notifBellBadge" style="display:none; position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px; background:linear-gradient(135deg,#c04a3a,#e2685b); color:#fff; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.65rem; font-weight:700; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(226,104,91,0.5);">0</span>
                 </button>
-                <a href="index.html" class="btn btn-home">
+                <a href="index.html" id="navBackBtn" class="btn btn-home">
                     <i class="fas fa-arrow-left"></i><span>Back</span>
                 </a>
                 <button class="btn btn-primary" id="newTxnBtn">
@@ -13410,7 +13410,7 @@ function openTxnModal(txn = null) {
             document.getElementById('txnType').addEventListener('change', (e) => populateCategoryDropdown(e.target.value));
 
             // Attach amount/fee recompute listeners ONCE — fixes listener leak
-            document.getElementById('txnAmount').addEventListener('input', window._recomputeTxnNet);
+                      document.getElementById('txnAmount').addEventListener('input', window._recomputeTxnNet);
             document.getElementById('txnFee').addEventListener('input', window._recomputeTxnNet);
 
             document.getElementById('confirmNo').addEventListener('click', closeConfirm);
@@ -13502,6 +13502,27 @@ function openTxnModal(txn = null) {
             notifUpdateBadge();
             notifGenerate();
 
+            // --- DEEP LINK ROUTER INIT ---
+            Router.initBackButton('navBackBtn');
+            
+            const route = Router.parseHash();
+            if (route && route.module === 'txn') { // 👈 Matches the updated URL
+                // Switch to ledger view
+                const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
+                if (ledgerTab) ledgerTab.click();
+
+                // Apply filters
+                if (route.filters) {
+                    if (route.filters.type) document.getElementById('ldgFilterType').value = route.filters.type;
+                    if (route.filters.status) document.getElementById('ldgFilterStatus').value = route.filters.status;
+                    if (route.filters.search) document.getElementById('ldgFilterSearch').value = route.filters.search;
+                }
+
+                // Re-render the table with the new filters
+                renderLedger();
+            }
+            // -----------------------------
+
             showToast('✅ Finance engine ready', 'success');
         }
                   // --- SECURE STARTUP GATE ---
@@ -13546,6 +13567,8 @@ function openTxnModal(txn = null) {
                 window.location.href = 'login.html';
             }
         }
+              
+            // -----------------------------
 
         // --- BULLETPROOF LOGOUT LISTENER ---
         document.addEventListener('click', async (e) => {
@@ -13566,6 +13589,7 @@ function openTxnModal(txn = null) {
         document.addEventListener('DOMContentLoaded', startApp);
     </script>
     <script src="mpesa-parser.js"></script>
+    <script src="router.js"></script>
 </body>
 
 </html>
