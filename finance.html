@@ -13590,7 +13590,14 @@ function openTxnModal(txn = null) {
             notifGenerate();
 
             // --- DEEP LINK ROUTER INIT ---
-            Router.initBackButton('navBackBtn');
+                       // Force the Back button to always show and go to index.html
+            const backBtn = document.getElementById('navBackBtn');
+            if (backBtn) {
+                backBtn.style.display = 'inline-flex';
+                if (!backBtn.getAttribute('href') || backBtn.getAttribute('href') === '#') {
+                    backBtn.setAttribute('href', 'index.html');
+                }
+            }
             
                      const route = Router.parseHash();
             if (route && route.module === 'txn') {
