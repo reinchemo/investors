@@ -2257,113 +2257,66 @@
     <!-- ============================================================ -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal-card wide" style="max-width: 800px;">
-            <h3 id="taskModalTitle"><i class="fas fa-ticket-alt"></i> New Ticket</h3>
+            <h3 id="taskModalTitle"><i class="fas fa-plus-circle"></i> New Task</h3>
 
-            <!-- STEP 1: Choose Template -->
-            <div id="tskWizardStep1">
-                <p style="color:#7f9bb8; font-size:0.85rem; margin-bottom:1rem;">Select a template to get started. We'll pre-fill the category and priority based on your choice.</p>
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem;">
-                    <div class="template-card" data-template="installation" onclick="selectTaskTemplate('installation')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
-                        <div style="font-size:1.5rem; color:#7ab8ff; margin-bottom:0.5rem;"><i class="fas fa-wrench"></i></div>
-                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">Installation</div>
-                        <div style="font-size:0.7rem; color:#7f9bb8;">New service install</div>
-                    </div>
-                    <div class="template-card" data-template="los" onclick="selectTaskTemplate('los')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
-                        <div style="font-size:1.5rem; color:#e8b879; margin-bottom:0.5rem;"><i class="fas fa-wifi"></i></div>
-                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">Line of Sight (LOS)</div>
-                        <div style="font-size:0.7rem; color:#7f9bb8;">Signal / connectivity</div>
-                    </div>
-                    <div class="template-card" data-template="support" onclick="selectTaskTemplate('support')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
-                        <div style="font-size:1.5rem; color:#7fded1; margin-bottom:0.5rem;"><i class="fas fa-headset"></i></div>
-                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">General Support</div>
-                        <div style="font-size:0.7rem; color:#7f9bb8;">Customer help</div>
-                    </div>
-                    <div class="template-card" data-template="custom" onclick="selectTaskTemplate('custom')" style="cursor:pointer; padding:1rem; border:1px solid rgba(120,200,220,0.2); border-radius:12px; background:rgba(255,255,255,0.03);">
-                        <div style="font-size:1.5rem; color:#c7d5e6; margin-bottom:0.5rem;"><i class="fas fa-edit"></i></div>
-                        <div style="font-weight:700; color:#f2f0eb; margin-bottom:0.2rem;">Custom Ticket</div>
-                        <div style="font-size:0.7rem; color:#7f9bb8;">Blank form</div>
-                    </div>
+            <label>Title <span style="color:#e8837a;">*</span></label>
+            <input type="text" id="tskTitle" placeholder="e.g. Install router at Kimbo site" maxlength="200">
+
+            <label>Description</label>
+            <textarea id="tskDescription" placeholder="What needs to be done..." maxlength="1000"></textarea>
+
+            <div class="modal-row">
+                <div>
+                    <label>Category</label>
+                    <select id="tskCategory"></select>
+                </div>
+                <div>
+                    <label>Priority</label>
+                    <select id="tskPriority">
+                        <option value="low">Low</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
                 </div>
             </div>
 
-            <!-- STEP 2: The Form -->
-            <div id="tskWizardStep2" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(120,200,220,0.1);">
-                    <div style="font-size:0.8rem; color:#7fded1; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Template: <span id="tskSelectedTemplateName">—</span></div>
-                    <button class="btn btn-ghost" onclick="resetTaskWizard()" style="padding:0.2rem 0.6rem; min-height:28px; font-size:0.7rem;"><i class="fas fa-arrow-left"></i> Change</button>
+            <div class="modal-row">
+                <div>
+                    <label>Assignee (Staff)</label>
+                    <select id="tskAssignee"></select>
                 </div>
-
-                <!-- Hidden inputs to store new DB fields -->
-                <input type="hidden" id="tskTemplateKey">
-
-                <label>Title <span style="color:#e8837a;">*</span></label>
-                <input type="text" id="tskTitle" placeholder="e.g. Install router at Kimbo site" maxlength="200">
-
-                <label>Description</label>
-                <textarea id="tskDescription" placeholder="What needs to be done..." maxlength="1000"></textarea>
-
-                <div class="modal-row">
-                    <div>
-                        <label>Customer</label>
-                        <select id="tskCustomer"></select>
-                    </div>
-                    <div>
-                        <label>Site Landmark</label>
-                        <input type="text" id="tskLandmark" placeholder="e.g. Kimbo stage" maxlength="100">
-                    </div>
+                <div>
+                    <label>Location</label>
+                    <select id="tskLocation"></select>
                 </div>
+            </div>
 
-                <div class="modal-row-3">
-                    <div>
-                        <label>Category</label>
-                        <select id="tskCategory"></select>
-                    </div>
-                    <div>
-                        <label>Priority</label>
-                        <select id="tskPriority">
-                            <option value="low">Low</option>
-                            <option value="normal" selected>Normal</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Deadline</label>
-                        <input type="date" id="tskDeadline">
-                    </div>
+            <div class="modal-row">
+                <div>
+                    <label>Start Date</label>
+                    <input type="date" id="tskStartDate">
                 </div>
-
-                <div class="modal-row">
-                    <div>
-                        <label>Assignee (Staff)</label>
-                        <select id="tskAssignee"></select>
-                    </div>
-                    <div>
-                        <label>Location</label>
-                        <select id="tskLocation"></select>
-                    </div>
+                <div>
+                    <label>Deadline</label>
+                    <input type="date" id="tskDeadline">
                 </div>
+            </div>
 
-                <div class="modal-row">
-                    <div>
-                        <label>GPS Coordinates (Optional)</label>
-                        <input type="text" id="tskGps" placeholder="e.g. -1.2921, 36.8219" maxlength="50">
-                    </div>
-                    <div>
-                        <label>Start Date</label>
-                        <input type="date" id="tskStartDate">
-                    </div>
-                </div>
+            <label>Instructions</label>
+            <textarea id="tskInstructions" placeholder="Steps or expected outcome..." maxlength="1000"></textarea>
 
-                <label>Instructions / Expected Result</label>
-                <textarea id="tskInstructions" placeholder="Steps or expected outcome..." maxlength="1000"></textarea>
+            <label>Expected Result</label>
+            <textarea id="tskExpectedResult" placeholder="What defines success..." maxlength="500"></textarea>
 
-                <div class="modal-error" id="taskError"></div>
+            <label>Notes</label>
+            <textarea id="tskNotes" placeholder="Internal notes..." maxlength="500"></textarea>
 
-                <div class="modal-actions">
-                    <button class="cancel" id="taskCancel">Cancel</button>
-                    <button class="save" id="taskSave">Create Ticket</button>
-                </div>
+            <div class="modal-error" id="taskError"></div>
+
+            <div class="modal-actions">
+                <button class="cancel" id="taskCancel">Cancel</button>
+                <button class="save" id="taskSave">Create Task</button>
             </div>
         </div>
     </div>
@@ -12144,7 +12097,7 @@ function openTxnModal(txn = null) {
             return c ? c.name : code;
         }
 
-        function renderTasks() {
+               function renderTasks() {
             const body = document.getElementById('tasksBody');
             if (!body) return;
 
@@ -12237,57 +12190,74 @@ function openTxnModal(txn = null) {
             });
         }
 
-        function populateTaskDropdowns() {
+             function populateTaskDropdowns() {
             const catSel = document.getElementById('tskCategory');
-            catSel.innerHTML = '<option value="">— Select category —</option>' +
-                taskCategories.map(c => `<option value="${escapeHTML(c.code)}">${escapeHTML(c.name)}</option>`).join('');
+            if (catSel) {
+                catSel.innerHTML = '<option value="">— Select category —</option>' +
+                    taskCategories.map(c => `<option value="${escapeHTML(c.code)}">${escapeHTML(c.name)}</option>`).join('');
+            }
 
             const asgSel = document.getElementById('tskAssignee');
-            asgSel.innerHTML = '<option value="">— Unassigned —</option>' +
-                staff.filter(s => s.status === 'active').map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
+            if (asgSel) {
+                asgSel.innerHTML = '<option value="">— Unassigned —</option>' +
+                    staff.filter(s => s.status === 'active').map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
+            }
 
             const locSel = document.getElementById('tskLocation');
-            const active = locations.filter(l => l.active);
-            locSel.innerHTML = '<option value="">— No location —</option>' +
-                active.map(l => `<option value="${l.id}">${escapeHTML(l.name)}</option>`).join('');
+            if (locSel) {
+                const active = locations.filter(l => l.active);
+                locSel.innerHTML = '<option value="">— No location —</option>' +
+                    active.map(l => `<option value="${l.id}">${escapeHTML(l.name)}</option>`).join('');
+            }
         }
 
-        async function openTaskModal(taskId = null) {
+
+                async function openTaskModal(taskId = null) {
             editingTaskId = taskId;
             const err = document.getElementById('taskError');
-            err.style.display = 'none';
-            document.getElementById('taskModalTitle').innerHTML = taskId
-                ? '<i class="fas fa-edit"></i> Edit Task'
-                : '<i class="fas fa-plus-circle"></i> New Task';
+            if (err) err.style.display = 'none';
+            
+            const title = document.getElementById('taskModalTitle');
+            if (title) {
+                title.innerHTML = taskId
+                    ? '<i class="fas fa-edit"></i> Edit Task'
+                    : '<i class="fas fa-plus-circle"></i> New Task';
+            }
 
             populateTaskDropdowns();
+
+            // Safety helper to set value only if the element exists
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val || '';
+            };
 
             if (taskId) {
                 const t = tasks.find(x => x.id === taskId);
                 if (!t) return;
-                document.getElementById('tskTitle').value = t.title || '';
-                document.getElementById('tskDescription').value = t.description || '';
-                document.getElementById('tskCategory').value = t.categoryCode || '';
-                document.getElementById('tskPriority').value = t.priority || 'normal';
-                document.getElementById('tskAssignee').value = t.assigneeStaffId || '';
-                document.getElementById('tskLocation').value = t.locationId || '';
-                document.getElementById('tskStartDate').value = t.startDate || '';
-                document.getElementById('tskDeadline').value = t.deadline || '';
-                document.getElementById('tskInstructions').value = t.instructions || '';
-                document.getElementById('tskExpectedResult').value = t.expectedResult || '';
-                document.getElementById('tskNotes').value = t.notes || '';
+                setVal('tskTitle', t.title);
+                setVal('tskDescription', t.description);
+                setVal('tskCategory', t.categoryCode);
+                setVal('tskPriority', t.priority || 'normal');
+                setVal('tskAssignee', t.assigneeStaffId);
+                setVal('tskLocation', t.locationId);
+                setVal('tskStartDate', t.startDate);
+                setVal('tskDeadline', t.deadline);
+                setVal('tskInstructions', t.instructions);
+                setVal('tskExpectedResult', t.expectedResult);
+                setVal('tskNotes', t.notes);
             } else {
-                document.getElementById('tskTitle').value = '';
-                document.getElementById('tskDescription').value = '';
-                document.getElementById('tskCategory').value = '';
-                document.getElementById('tskPriority').value = 'normal';
-                document.getElementById('tskAssignee').value = '';
-                document.getElementById('tskLocation').value = '';
-                document.getElementById('tskStartDate').value = todayISO();
-                document.getElementById('tskDeadline').value = '';
-                document.getElementById('tskInstructions').value = '';
-                document.getElementById('tskExpectedResult').value = '';
-                document.getElementById('tskNotes').value = '';
+                setVal('tskTitle', '');
+                setVal('tskDescription', '');
+                setVal('tskCategory', '');
+                setVal('tskPriority', 'normal');
+                setVal('tskAssignee', '');
+                setVal('tskLocation', '');
+                setVal('tskStartDate', todayISO());
+                setVal('tskDeadline', '');
+                setVal('tskInstructions', '');
+                setVal('tskExpectedResult', '');
+                setVal('tskNotes', '');
             }
 
             document.getElementById('taskModal').classList.add('show');
@@ -13685,5 +13655,6 @@ function openTxnModal(txn = null) {
     <script src="router.js"></script>
 </body>
 
+</html>
 
 </html>
