@@ -7667,42 +7667,56 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             renderReconciliationBanner();
             openDividendDetail(id);
         }
-
-        async function markPaid(id) {
+                                   async function markPaid(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
-            if (!confirm(`Mark ${d.id} as PAID?\n\nThis will create ${d.allocations ? d.allocations.length : 0} ledger transactions totalling KSh ${fmt(d.totalDistributable)}.`)) return;
+            if (!confirm(`Mark ${d.id} as PAID?\n\nThis will lock the distribution and update the reserve.`)) return;
 
-            const oldStatus = d.status;
-            const {
-                data,
-                error
-            } = await supabaseClient.rpc('mark_dividend_paid', {
-                p_dividend_id: id,
-                p_actor: CURRENT_USER
-            });
+            const btn = event.target.closest('button');
+            const oldHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-            if (error) {
-                showError('Mark paid failed: ' + error.message);
-                return;
+            try {
+                // 1. Calculate the Reserve from the Virtual holder's allocation
+                let reserveAmt = 0;
+                if (Array.isArray(d.allocations)) {
+                    const virtualAlloc = d.allocations.find(a => a.isVirtual || /VIRTUAL/i.test(a.name || ''));
+                    if (virtualAlloc) {
+                        // Try stage2 first, then fallback to amount
+                        reserveAmt = safeNum(virtualAlloc.stage2) || safeNum(virtualAlloc.amount);
+                    }
+                }
+
+                // 2. Update both Status AND Reserve Amount
+                const { error } = await supabaseClient
+                    .from('dividends')
+                    .update({
+                        status: 'paid',
+                        paid_at: new Date().toISOString(),
+                        reserve_amount: reserveAmt
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                // 3. Log the audit
+                await logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}. Reserve: KSh ${fmt(reserveAmt)}`, d.status, 'paid');
+
+                // 4. Refresh the UI
+                await fetchSummary();
+                renderDividendOverview();
+                renderReconciliationBanner();
+                openDividendDetail(id);
+                showToast('✅ Dividend marked as paid', 'success');
+
+            } catch (e) {
+                showError('Mark paid failed: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = oldHtml;
             }
-
-            if (data && data.status === 'already_paid') {
-                showToast('ℹ️ This dividend is already paid.', 'info');
-                return;
-            }
-
-            await logAudit('PAID', `Dividend ${id}`,
-                `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}. Created ${data?.transactions_created || 0} ledger entries.`,
-                oldStatus, 'paid');
-
-            await fetchSummary();
-            renderDividendOverview();
-            renderReconciliationBanner();
-            openDividendDetail(id);
-            showToast(`✅ Paid. ${data?.transactions_created || 0} ledger entries created.`, 'success');
         }
-
         async function cancelDividend(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
