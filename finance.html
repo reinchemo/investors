@@ -1675,7 +1675,7 @@
             <div id="mpesaParseStatus" style="display:none; margin-top:0.4rem; padding:0.5rem 0.8rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.3); border-radius:10px; font-size:0.72rem; color:#7fded1; font-family:'JetBrains Mono',monospace; line-height:1.4;">
                 <i class="fas fa-magic"></i> <span id="mpesaParseText">Parsed</span>
             </div>
-            <div class="modal-row">
+                   <div class="modal-row">
                 <div>
                     <label>Location</label>
                     <select id="txnLocation"></select>
@@ -1683,11 +1683,11 @@
                 <div>
                     <label>Status</label>
                     <select id="txnStatus">
-                    <option value="draft">Draft</option>
-                    <option value="pending">Pending Approval</option>
-                    <option value="approved">Approved</option>
-                    <option value="posted">Posted</option>
-                </select>
+                        <option value="draft">Draft</option>
+                        <option value="pending">Pending Approval</option>
+                        <option value="approved">Approved</option>
+                        <option value="posted" selected>Posted</option>
+                    </select>
                 </div>
             </div>
 
@@ -11092,7 +11092,7 @@ function openTxnModal(txn = null) {
                     return;
                 }
 
-                console.log('✅ Posted transaction:', rpcId);
+                            console.log('✅ Posted transaction:', rpcId);
                 sequence++;
 
                 // --- RECURRING LOGIC: SAVE NEW TEMPLATE ---
@@ -11101,7 +11101,7 @@ function openTxnModal(txn = null) {
                     const nextRunDate = document.getElementById('txnNextRunDate').value || addOneMonth(date);
                     const matchedLoc = locations.find(l => l.name === location);
                     
-                    await supabaseClient.from('recurring_templates').insert({
+                    const { error: recError } = await supabaseClient.from('recurring_templates').insert({
                         description: description,
                         type: type,
                         category: category,
@@ -11118,7 +11118,14 @@ function openTxnModal(txn = null) {
                         notes: 'Created from transaction: ' + reference,
                         created_by: CURRENT_USER
                     });
-                    console.log('✅ Recurring template created');
+
+                    if (recError) {
+                        console.error('❌ Failed to create recurring template:', recError);
+                        showToast('Transaction saved, but recurring template failed: ' + recError.message, 'error');
+                    } else {
+                        console.log('✅ Recurring template created successfully');
+                        showToast('✅ Transaction posted & recurring template created!', 'success');
+                    }
                 }
             }
             
