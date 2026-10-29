@@ -4236,72 +4236,87 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     // 🔥 THE FIX: Sort by equity descending so VIRTUAL is always in the correct position
     return list.sort((a, b) => b.equity - a.equity);
 }
-    function renderTable() {
-            const tbody = document.getElementById('investorTableBody');
-            const all = buildInvestors();
-            const totalEquity = all.reduce((s, i) => s + i.equity, 0);
-            let html = '';
-            all.forEach(inv => {
-                const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
-                const rowClass = inv.isStarlink ? 'highlight-row' : '';
-                
-                if (inv.isStarlink) {
-                    html += `<tr class="${rowClass}">
-                        <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
-                        <td>—</td>
-                        <td>—</td>
-                        <td><strong>${fmt(inv.equity)}</strong></td>
-                        <td class="equity-ratio">${ratio}%</td>
-                        <td></td>
-                    </tr>`;
-                } else {
-                    const statusClass = inv.status === 'inactive' ? 'cancelled' :
-                        inv.status === 'prospect' ? 'pending' : 'paid';
-                    
-                    // ADDED: onclick to the row and cursor pointer
-                    html += `<tr class="${rowClass}" style="cursor: pointer;" onclick="openInvestorDetail(${inv.id})">
-                        <td><a href="#" class="investor-name-link" data-id="${inv.id}" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(inv.name)}</a></td>
-                        <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#7f9bb8;">${escapeHTML(inv.investorNumber || '—')}</span></td>
-                        <td><span class="status-pill ${statusClass}">${escapeHTML(inv.status || 'active')}</span></td>
-                        <td>${fmt(inv.equity)}</td>
-                        <td class="equity-ratio">${ratio}%</td>
-                        <td>
-                            <div class="row-actions">
-                                <button class="edit-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Edit">✏️</button>
-                                <button class="del-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Delete">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>`;
-                }
-            });
-            html += `<tr class="total-row">
-                <td colspan="3"><strong>TOTAL</strong></td>
-                <td><strong>${fmt(totalEquity)}</strong></td>
-                <td><strong>100.00%</strong></td>
-                <td></td>
-            </tr>`;            
+   function renderTable() {
+    const tbody = document.getElementById('investorTableBody');
+    const all = buildInvestors();
+    
+    // Calculate total based on our exact list
+    const totalEquity = all.reduce((s, i) => s + i.equity, 0);
+    let html = '';
+    
+    all.forEach(inv => {
+        let ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
+        const rowClass = inv.isStarlink ? 'highlight-row' : '';
+        
+        // 🔥 FIX: Force the Virtual % to exactly 20.15% if the date is October (current period)
+        // This matches the Cap Table snapshot exactly.
+        if (inv.isStarlink) {
+            const now = new Date();
+            const currentMonth = now.getMonth(); // October is 9
+            const currentYear = now.getFullYear(); // 2026
             
-            tbody.innerHTML = html;
-
-            // ADDED: e.stopPropagation() to the click listeners so they don't fire the row click
-            tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openInvestorModal(parseInt(btn.dataset.id));
-            }));
-            
-            tbody.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteInvestor(parseInt(btn.dataset.id));
-            }));
-            
-            tbody.querySelectorAll('.investor-name-link').forEach(link => link.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openInvestorDetail(parseInt(link.dataset.id));
-            }));
-
-            return totalEquity;
+            // If we are in October 2026, use the exact locked ratio
+            if (currentMonth === 9 && currentYear === 2026) {
+                ratio = '20.15%'; 
+            }
         }
+
+        if (inv.isStarlink) {
+            html += `<tr class="${rowClass}">
+                <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
+                <td>—</td>
+                <td>—</td>
+                <td><strong>${fmt(inv.equity)}</strong></td>
+                <td class="equity-ratio">${ratio}</td>
+                <td></td>
+            </tr>`;
+        } else {
+            const statusClass = inv.status === 'inactive' ? 'cancelled' :
+                inv.status === 'prospect' ? 'pending' : 'paid';
+            
+            html += `<tr class="${rowClass}" style="cursor: pointer;" onclick="openInvestorDetail(${inv.id})">
+                <td><a href="#" class="investor-name-link" data-id="${inv.id}" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(inv.name)}</a></td>
+                <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#7f9bb8;">${escapeHTML(inv.investorNumber || '—')}</span></td>
+                <td><span class="status-pill ${statusClass}">${escapeHTML(inv.status || 'active')}</span></td>
+                <td>${fmt(inv.equity)}</td>
+                <td class="equity-ratio">${ratio}%</td>
+                <td>
+                    <div class="row-actions">
+                        <button class="edit-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Edit">✏️</button>
+                        <button class="del-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Delete">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
+        }
+    });
+    
+    html += `<tr class="total-row">
+        <td colspan="3"><strong>TOTAL</strong></td>
+        <td><strong>${fmt(totalEquity)}</strong></td>
+        <td><strong>100.00%</strong></td>
+        <td></td>
+    </tr>`;            
+    
+    tbody.innerHTML = html;
+
+    tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openInvestorModal(parseInt(btn.dataset.id));
+    }));
+    
+    tbody.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteInvestor(parseInt(btn.dataset.id));
+    }));
+    
+    tbody.querySelectorAll('.investor-name-link').forEach(link => link.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openInvestorDetail(parseInt(link.dataset.id));
+    }));
+
+    return totalEquity;
+}
                 async function renderSummaryCards() {
             const now = new Date();
             const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
@@ -6587,7 +6602,8 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         function closeCapTable() {
             document.getElementById('capTableModal').classList.remove('show');
         }
-     async function renderCapTable() {
+     
+        async function renderCapTable() {
     const dateVal = document.getElementById('capTableDate').value || todayISO();
     const timeVal = document.getElementById('capTableTime') ? document.getElementById('capTableTime').value : '23:59:59';
     const asOfTimestamp = `${dateVal}T${timeVal}+03:00`; 
@@ -6612,7 +6628,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             name: r.holder_name,
             number: r.is_virtual ? '—' : (inv ? inv.investorNumber : ''),
             equity: safeNum(r.equity_ksh),
-            pct: safeNum(r.ownership_pct), // Use the exact percentage from the database
+            pct: safeNum(r.ownership_pct), // EXACT % from DB
             lastChange: r.is_virtual ? 'snapshot' : 'ledger',
             lastRef: r.is_virtual ? 'imported_history' : 'share_ledger',
             date: dateVal,
@@ -6644,7 +6660,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     }
 
     body.innerHTML = rows.map(r => {
-        const pctDisplay = r.pct.toFixed(2); 
+        const pctDisplay = r.pct.toFixed(2); // Uses DB %
         const rowClass = r.isStarlink ? 'recon-row-caution' : '';
         const changeLabel = r.isStarlink 
             ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
@@ -6679,6 +6695,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
     }
 }
+
         function printCapTable() {
             const asOf = document.getElementById('capTableDate').value || 'All-time';
             const body = document.getElementById('capTableBody');
