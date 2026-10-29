@@ -10941,230 +10941,222 @@ function openTxnModal(txn = null) {
             editingTxnId = null;
         }
 
-                     async function saveTxn() {
-            const type = document.getElementById('txnType').value;
-            const category = document.getElementById('txnCategory').value;
-            const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);
-            const amount = safeNum(document.getElementById('txnAmount').value);
-            const fee = safeNum(document.getElementById('txnFee').value);
-            const date = document.getElementById('txnDate').value || todayISO();
-            const method = document.getElementById('txnMethod').value;
+                    async function saveTxn() {
+    const type = document.getElementById('txnType').value;
+    const category = document.getElementById('txnCategory').value;
+    const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);
+    const amount = safeNum(document.getElementById('txnAmount').value);
+    const fee = safeNum(document.getElementById('txnFee').value);
+    const date = document.getElementById('txnDate').value || todayISO();
+    const method = document.getElementById('txnMethod').value;
 
-            // ---- Extract short M-PESA code FIRST (before validation) ----
-            const refField = document.getElementById('txnRef');
-            const refRaw = refField.value.trim();
-            let reference = refRaw;
+    // ---- Extract short M-PESA code FIRST (before validation) ----
+    const refField = document.getElementById('txnRef');
+    const refRaw = refField.value.trim();
+    let reference = refRaw;
 
-            if (refRaw.length > 40 && /Confirmed/i.test(refRaw)) {
-                const parsed = parseMpesaMessage(refRaw);
-                if (parsed && parsed.mpesaCode) {
-                    reference = parsed.mpesaCode;
-                    // Preserve full SMS in notes for audit (only if notes empty)
-                    const notesField = document.getElementById('txnNotes');
-                    if (!notesField.value.trim()) {
-                        notesField.value = refRaw.slice(0, 1000);
-                    }
-                } else {
-                    reference = refRaw.slice(0, 80);
-                }
+    if (refRaw.length > 40 && /Confirmed/i.test(refRaw)) {
+        const parsed = parseMpesaMessage(refRaw);
+        if (parsed && parsed.mpesaCode) {
+            reference = parsed.mpesaCode;
+            // Preserve full SMS in notes for audit (only if notes empty)
+            const notesField = document.getElementById('txnNotes');
+            if (!notesField.value.trim()) {
+                notesField.value = refRaw.slice(0, 1000);
             }
+        } else {
+            reference = refRaw.slice(0, 80);
+        }
+    }
 
-            const location = document.getElementById('txnLocation').value;
-            const status = document.getElementById('txnStatus').value;
-            const notes = Validation.sanitize(document.getElementById('txnNotes').value, 1000);
-            const err = document.getElementById('txnError');
-            err.style.display = 'none';
+    const location = document.getElementById('txnLocation').value;
+    const status = document.getElementById('txnStatus').value;
+    const notes = Validation.sanitize(document.getElementById('txnNotes').value, 1000);
+    const err = document.getElementById('txnError');
+    err.style.display = 'none';
 
-            // §82 — full validation (fee > amount check removed)
-            const checks = [
-                [Validation.text(description, { label: 'Description', min: 3, max: 200 }), 'Description'],
-                [Validation.amount(amount, { min: 0.01 }), 'Amount'],
-                [Validation.date(date, { required: true }), 'Date'],
-                [Validation.reference(reference, { required: false }), 'Reference'],
-                [fee < 0 ? 'Fee cannot be negative.' : null, 'Fee'],
-                [Validation.text(notes, { label: 'Notes', min: 0, max: 1000, required: false }), 'Notes']
-            ];
+    // §82 — full validation (fee > amount check removed)
+    const checks = [
+        [Validation.text(description, { label: 'Description', min: 3, max: 200 }), 'Description'],
+        [Validation.amount(amount, { min: 0.01 }), 'Amount'],
+        [Validation.date(date, { required: true }), 'Date'],
+        [Validation.reference(reference, { required: false }), 'Reference'],
+        [fee < 0 ? 'Fee cannot be negative.' : null, 'Fee'],
+        [Validation.text(notes, { label: 'Notes', min: 0, max: 1000, required: false }), 'Notes']
+    ];
 
-            const firstErr = Validation.firstError(checks);
-            if (firstErr) {
-                err.textContent = '⚠️ ' + firstErr;
+    const firstErr = Validation.firstError(checks);
+    if (firstErr) {
+        err.textContent = '⚠️ ' + firstErr;
+        err.style.display = 'block';
+        return;
+    }
+
+    const matchedLocation = locations.find(l => l.name === location);
+
+    const row = {
+        date: date,
+        type: type,
+        category: category,
+        description: description,
+        amount: amount,
+        fee: fee,
+        method: method,
+        reference: reference || null,
+        location: location || null,
+        location_id: matchedLocation ? matchedLocation.id : null,
+        status: status,
+        recon_status: method === 'mpesa' ? 'unmatched' : 'na',
+        notes: notes || null
+    };
+
+    const wasEditing = !!editingTxnId;
+
+    if (wasEditing) {
+        row.updated_at = new Date().toISOString();
+        row.updated_by = CURRENT_USER;
+
+        const original = transactions.find(t => t.id === editingTxnId);
+        if (!original) {
+            err.textContent = '⚠️ Original transaction not found in local cache.';
+            err.style.display = 'block';
+            return;
+        }
+        const expectedVersion = original.version || 1;
+
+        const result = await saveWithVersionCheck('transactions', editingTxnId, row, expectedVersion);
+
+        if (!result.ok) {
+            if (result.kind === 'conflict' || result.kind === 'deleted') {
+                await handleConflict('transactions', editingTxnId, err);
+            } else if (result.kind === 'duplicate') {
+                err.textContent = '⚠️ A transaction with this reference already exists.';
                 err.style.display = 'block';
-                return;
+            } else {
+                err.textContent = '⚠️ Save failed: ' + (result.error?.message || 'unknown error');
+                err.style.display = 'block';
             }
+            return;
+        }
+    } else {
+        const idemKey = reference
+            ? `TXN-${type}-${amount}-${date}-${reference.toUpperCase()}`
+            : `TXN-${type}-${amount}-${date}-${Date.now()}`;
 
-            // Reference duplicate check — IGNORES DELETED AND REVERSED RECORDS
-            if (reference) {
-                const ref = reference.toUpperCase().trim();
-                const dup = transactions.find(t => {
-                    const existingRef = (t.reference || '').toUpperCase().trim();
-                    return t.id !== editingTxnId && 
-                           existingRef === ref && 
-                           !t.deletedAt && 
-                           !t.reversedAt;
-                });
-                if (dup) {
-                    err.textContent = `⚠️ M-PESA code "${reference}" is already used by ${dup.id} (${dup.date}).`;
-                    err.style.display = 'block';
-                    return;
-                }
-            }
-            const matchedLocation = locations.find(l => l.name === location);
+        // ✅ FIXED: Generate a guaranteed unique ID based on the current millisecond
+        const newId = `TXN-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+        
+        const matchedLocationRow = locations.find(l => l.name === location);
 
-            const row = {
-                date: date,
-                type: type,
-                category: category,
-                description: description,
-                amount: amount,
-                fee: fee,
-                method: method,
-                reference: reference || null,
-                location: location || null,
-                location_id: matchedLocation ? matchedLocation.id : null,
-                status: status,
-                recon_status: method === 'mpesa' ? 'unmatched' : 'na',
-                notes: notes || null
-            };
+        const { data: rpcId, error } = await supabaseClient.rpc('post_transaction', {
+            p_id:              newId,
+            p_date:            date,
+            p_actual_date:     date,
+            p_actual_time:     null,
+            p_type:            type,
+            p_category:        category,
+            p_description:     description,
+            p_amount:          amount,
+            p_fee:             fee,
+            p_method:          method,
+            p_reference:       reference || null,
+            p_location:        location || null,
+            p_location_id:     matchedLocationRow ? matchedLocationRow.id : null,
+            p_staff_id:        null,
+            p_payroll_run_id:  null,
+            p_notes:           notes || null,
+            p_source:          'manual',
+            p_idempotency_key: idemKey,
+            p_created_by:      CURRENT_USER
+        });
 
-            const wasEditing = !!editingTxnId;
+        if (error) {
+            const errCode = String(error.code || '');
+            const errMsg = String(error.message || '').toLowerCase();
+            const errDetails = String(error.details || '').toLowerCase();
 
-            if (wasEditing) {
-                row.updated_at = new Date().toISOString();
-                row.updated_by = CURRENT_USER;
-
-                const original = transactions.find(t => t.id === editingTxnId);
-                if (!original) {
-                    err.textContent = '⚠️ Original transaction not found in local cache.';
-                    err.style.display = 'block';
-                    return;
-                }
-                const expectedVersion = original.version || 1;
-
-                const result = await saveWithVersionCheck('transactions', editingTxnId, row, expectedVersion);
-
-                if (!result.ok) {
-                    if (result.kind === 'conflict' || result.kind === 'deleted') {
-                        await handleConflict('transactions', editingTxnId, err);
-                    } else if (result.kind === 'duplicate') {
-                        err.textContent = '⚠️ A transaction with this reference already exists.';
-                        err.style.display = 'block';
-                    } else {
-                        err.textContent = '⚠️ Save failed: ' + (result.error?.message || 'unknown error');
-                        err.style.display = 'block';
-                    }
-                    return;
+            if (errCode === '23505') {
+                // Check specifically for the reference constraint
+                if (errDetails.includes('reference') || errMsg.includes('reference')) {
+                    err.textContent = `⚠️ The M-PESA Code (${reference}) already exists. It may belong to a deleted transaction. Add a suffix (e.g., -A) to the reference or check the Ledger.`;
+                } 
+                // Check specifically for the primary key (ID collision)
+                else if (errDetails.includes('transactions_pkey') || errMsg.includes('transactions_pkey')) {
+                    err.textContent = '⚠️ ID collision — refreshing IDs. Please try saving again.';
+                    await fetchFromCloud();
+                } 
+                // Fallback for any other duplicate constraint
+                else {
+                    err.textContent = '⚠️ Duplicate detected: ' + (error.details || error.message || 'unknown');
                 }
             } else {
-                const idemKey = reference
-                    ? `TXN-${type}-${amount}-${date}-${reference.toUpperCase()}`
-                    : `TXN-${type}-${amount}-${date}-${Date.now()}`;
-
-                const newId = nextTxnId();
-                const matchedLocationRow = locations.find(l => l.name === location);
-
-                const { data: rpcId, error } = await supabaseClient.rpc('post_transaction', {
-                    p_id:              newId,
-                    p_date:            date,
-                    p_actual_date:     date,
-                    p_actual_time:     null,
-                    p_type:            type,
-                    p_category:        category,
-                    p_description:     description,
-                    p_amount:          amount,
-                    p_fee:             fee,
-                    p_method:          method,
-                    p_reference:       reference || null,
-                    p_location:        location || null,
-                    p_location_id:     matchedLocationRow ? matchedLocationRow.id : null,
-                    p_staff_id:        null,
-                    p_payroll_run_id:  null,
-                    p_notes:           notes || null,
-                    p_source:          'manual',
-                    p_idempotency_key: idemKey,
-                    p_created_by:      CURRENT_USER
-                });
-
-                if (error) {
-                    const errCode = String(error.code || '');
-                    const errMsg  = String(error.message || '').toLowerCase();
-                    if (errCode === '23505') {
-                        if (errMsg.includes('duplicate') || errMsg.includes('reference')) {
-                            err.textContent = '⚠️ A transaction with this reference already exists.';
-                        } else if (errMsg.includes('transactions_pkey') || errMsg.includes('primary key')) {
-                            err.textContent = '⚠️ ID collision — refreshing IDs. Please try saving again.';
-                            await fetchFromCloud();
-                        } else {
-                            err.textContent = '⚠️ Duplicate detected: ' + (error.message || 'unknown');
-                        }
-                    } else {
-                        err.textContent = '⚠️ Save failed: ' + (error.message || 'unknown error');
-                    }
-                    err.style.display = 'block';
-                    return;
-                }
-
-                console.log('✅ Posted transaction:', rpcId);
-                sequence++;
-
-                // --- RECURRING LOGIC: SAVE NEW TEMPLATE ---
-                const isRecurring = document.getElementById('txnIsRecurring') && document.getElementById('txnIsRecurring').checked;
-                if (isRecurring) {
-                    const nextRunDate = document.getElementById('txnNextRunDate').value || addOneMonth(date);
-                    const matchedLoc = locations.find(l => l.name === location);
-                    
-                    await supabaseClient.from('recurring_templates').insert({
-                        description: description,
-                        type: type,
-                        category: category,
-                        amount: amount,
-                        fee: fee,
-                        day_of_month: new Date(nextRunDate).getDate(),
-                        method: method,
-                        location: location || null,
-                        location_id: matchedLoc ? matchedLoc.id : null,
-                        next_run_date: nextRunDate,
-                        last_run_date: date,
-                        last_txn_id: rpcId,
-                        active: true,
-                        notes: 'Created from transaction: ' + reference,
-                        created_by: CURRENT_USER
-                    });
-                    console.log('✅ Recurring template created');
-                }
+                err.textContent = '⚠️ Save failed: ' + (error.message || 'unknown error');
             }
-            
-            // --- RECURRING LOGIC: RESOLVE EXISTING BILL ---
-            if (window._resolvingRecurringId) {
-                const t = recurringTemplates.find(x => x.id === window._resolvingRecurringId);
-                if (t) {
-                    const nextDate = addOneMonth(t.nextRunDate);
-                    await supabaseClient.from('recurring_templates').update({
-                        last_run_date: todayISO(),
-                        last_txn_id: reference || 'MANUAL',
-                        next_run_date: nextDate,
-                        updated_at: new Date().toISOString(),
-                        updated_by: CURRENT_USER
-                    }).eq('id', t.id);
-                    
-                    await fetchRecurring();
-                    
-                    await supabaseClient.from('notifications')
-                        .update({ read_at: new Date().toISOString() })
-                        .eq('link_ref', String(t.id))
-                        .is('read_at', null);
-                        
-                    await fetchNotifications();
-                    notifUpdateBadge();
-                }
-                window._resolvingRecurringId = null;
-            }
-
-            await fetchFromCloud();
-            renderAll();
-            closeTxnModal();
-            showToast(wasEditing ? '✅ Transaction updated' : '✅ Transaction posted', 'success');
+            err.style.display = 'block';
+            return;
         }
+        
+        console.log('✅ Posted transaction:', rpcId);
+        sequence++;
 
+        // --- RECURRING LOGIC: SAVE NEW TEMPLATE ---
+        const isRecurring = document.getElementById('txnIsRecurring') && document.getElementById('txnIsRecurring').checked;
+        if (isRecurring) {
+            const nextRunDate = document.getElementById('txnNextRunDate').value || addOneMonth(date);
+            const matchedLoc = locations.find(l => l.name === location);
+            
+            await supabaseClient.from('recurring_templates').insert({
+                description: description,
+                type: type,
+                category: category,
+                amount: amount,
+                fee: fee,
+                day_of_month: new Date(nextRunDate).getDate(),
+                method: method,
+                location: location || null,
+                location_id: matchedLoc ? matchedLoc.id : null,
+                next_run_date: nextRunDate,
+                last_run_date: date,
+                last_txn_id: rpcId,
+                active: true,
+                notes: 'Created from transaction: ' + reference,
+                created_by: CURRENT_USER
+            });
+            console.log('✅ Recurring template created');
+        }
+    }
+    
+    // --- RECURRING LOGIC: RESOLVE EXISTING BILL ---
+    if (window._resolvingRecurringId) {
+        const t = recurringTemplates.find(x => x.id === window._resolvingRecurringId);
+        if (t) {
+            const nextDate = addOneMonth(t.nextRunDate);
+            await supabaseClient.from('recurring_templates').update({
+                last_run_date: todayISO(),
+                last_txn_id: reference || 'MANUAL',
+                next_run_date: nextDate,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            }).eq('id', t.id);
+            
+            await fetchRecurring();
+            
+            await supabaseClient.from('notifications')
+                .update({ read_at: new Date().toISOString() })
+                .eq('link_ref', String(t.id))
+                .is('read_at', null);
+                
+            await fetchNotifications();
+            notifUpdateBadge();
+        }
+        window._resolvingRecurringId = null;
+    }
+
+    await fetchFromCloud();
+    renderAll();
+    closeTxnModal();
+    showToast(wasEditing ? '✅ Transaction updated' : '✅ Transaction posted', 'success');
+}
         // ==================================================
         // TXN ACTIONS
         // ==================================================
