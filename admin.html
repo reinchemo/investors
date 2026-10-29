@@ -516,14 +516,17 @@
             <div class="info"><span>Total Admins</span><strong id="statTotal">0</strong></div>
             <div class="icon"><i class="fas fa-users"></i></div>
         </div>
+
         <div class="stat-card card-green" style="cursor: pointer;" onclick="filterUsersByType('full')">
             <div class="info"><span>Full Admins</span><strong id="statFull">0</strong></div>
             <div class="icon"><i class="fas fa-shield-check"></i></div>
         </div>
+
         <div class="stat-card card-pink" style="cursor: pointer;" onclick="filterUsersByType('limited')">
             <div class="info"><span>Limited Access</span><strong id="statLimited">0</strong></div>
             <div class="icon"><i class="fas fa-user-cog"></i></div>
         </div>
+
         <div class="stat-card card-blue">
             <div class="info"><span>Current User</span><strong id="statCurrent" style="font-size:1.2rem;">Loading...</strong></div>
             <div class="icon"><i class="fas fa-user"></i></div>
@@ -847,6 +850,24 @@
         // USER MANAGEMENT LOGIC
         // ==========================================
 
+        window.filterUsersByType = function(type) {
+            activeUserFilter = type;
+
+            document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+
+            if (type === 'all') {
+                const card = document.querySelector('.card-purple');
+                if (card) card.classList.add('active-filter');
+            } else if (type === 'full') {
+                const card = document.querySelector('.card-green');
+                if (card) card.classList.add('active-filter');
+            } else if (type === 'limited') {
+                const card = document.querySelector('.card-pink');
+                if (card) card.classList.add('active-filter');
+            }
+
+            renderUsers();
+        };
 
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
@@ -900,14 +921,14 @@
             }
 
             document.getElementById('statTotal').textContent = allUsers.length;
-            document.getElementById('statFull').textContent = allUsers.filter(u => u.roleName === 'Full Administrator').length;
-            document.getElementById('statLimited').textContent = allUsers.filter(u => u.roleName !== 'Full Administrator').length;
+            document.getElementById('statFull').textContent = allUsers.filter(u => u.roleName === 'Full Administrator' || u.roleName === 'Full Admin').length;
+            document.getElementById('statLimited').textContent = allUsers.filter(u => u.roleName !== 'Full Administrator' && u.roleName !== 'Full Admin').length;
 
             let filtered = [...allUsers];
             if (activeUserFilter === 'full') {
-                filtered = filtered.filter(u => u.roleName === 'Full Administrator');
+                filtered = filtered.filter(u => u.roleName === 'Full Administrator' || u.roleName === 'Full Admin');
             } else if (activeUserFilter === 'limited') {
-                filtered = filtered.filter(u => u.roleName !== 'Full Administrator');
+                filtered = filtered.filter(u => u.roleName !== 'Full Administrator' && u.roleName !== 'Full Admin');
             }
 
             if (searchQ) {
@@ -928,7 +949,7 @@
             tbody.innerHTML = filtered.map((u, index) => {
                         const initial = (u.full_name || u.email || 'U').charAt(0).toUpperCase();
                         const colorClass = colors[index % colors.length];
-                        const isFull = u.roleName === 'Full Administrator';
+                        const isFull = u.roleName === 'Full Administrator' || u.roleName === 'Full Admin';
                         const chipClass = isFull ? 'chip-full' : 'chip-custom';
 
                         const displayName = u.full_name || u.email.split('@')[0];
@@ -1081,7 +1102,7 @@
             window.location.href = 'login.html';
         });
 
-                    (async() => {
+        (async() => {
             if (await checkAuth()) {
                 // Load roles first
                 await loadRoles();
