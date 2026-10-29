@@ -3499,43 +3499,26 @@
             // Hide top navigation buttons based on the EXACT names in your Admin Matrix
             if (!can('view', 'Dividend Declaration')) {
                 const el = document.getElementById('dividendsBtn');
-                if (el) {
-                    el.style.display = 'none';
-                    console.log("Hid Dividends");
-                }
+                if (el) el.style.display = 'none';
             }
             if (!can('view', 'Capitalization Table')) {
                 const el = document.getElementById('capTableBtn');
-                if (el) {
-                    el.style.display = 'none';
-                    console.log("Hid Cap Table");
-                }
+                if (el) el.style.display = 'none';
             }
             if (!can('view', 'Share Ledger')) {
                 const el = document.getElementById('investorTxnBtn');
-                if (el) {
-                    el.style.display = 'none';
-                    console.log("Hid Transactions");
-                }
+                if (el) el.style.display = 'none';
             }
             if (!can('view', 'Reserve')) {
                 const el = document.getElementById('reserveBtn');
-                if (el) {
-                    el.style.display = 'none';
-                    console.log("Hid Reserve");
-                }
+                if (el) el.style.display = 'none';
             }
             if (!can('view', 'Audit Log')) {
                 const el = document.getElementById('auditBtn');
-                if (el) {
-                    el.style.display = 'none';
-                    console.log("Hid Audit Log");
-                }
+                if (el) el.style.display = 'none';
             }
 
-            // For things like Proposals and Payments that don't have a direct module name in the matrix, 
-            // we can hide them based on whether they have access to the core equity modules.
-            // For now, let's just force them to hide if they aren't full admin.
+            // Hide other navigation buttons
             const proposalsBtn = document.getElementById('proposalsBtn');
             if (proposalsBtn) proposalsBtn.style.display = 'none';
             const dilutionBtn = document.getElementById('dilutionBtn');
@@ -3544,14 +3527,32 @@
             if (paymentsBtn) paymentsBtn.style.display = 'none';
             const reconBtn = document.getElementById('reconBtn');
             if (reconBtn) reconBtn.style.display = 'none';
-            const addInvestorBtn = document.getElementById('addInvestorBtn');
-            if (addInvestorBtn) addInvestorBtn.style.display = 'none';
-            const addInvestorBtn2 = document.getElementById('addInvestorBtn2');
-            if (addInvestorBtn2) addInvestorBtn2.style.display = 'none';
 
             // Hide Admin Roles link
             const adminLinks = document.querySelectorAll('a[href="admin.html"]');
             adminLinks.forEach(a => a.style.display = 'none');
+
+            // 🔥 NEW: Hide the "Add Investor" buttons if they can't create
+            if (!can('create', 'Capitalization Table')) {
+                const addInv1 = document.getElementById('addInvestorBtn');
+                const addInv2 = document.getElementById('addInvestorBtn2');
+                if (addInv1) addInv1.style.display = 'none';
+                if (addInv2) addInv2.style.display = 'none';
+            }
+
+            // 🔥 NEW: Hide Edit/Delete actions in the table if they can't edit/delete
+            // We use a slight delay to ensure the table has finished rendering
+            setTimeout(() => {
+                const canEdit = can('edit', 'Capitalization Table');
+                const canDelete = can('delete', 'Capitalization Table');
+
+                if (!canEdit) {
+                    document.querySelectorAll('.edit-btn').forEach(btn => btn.style.display = 'none');
+                }
+                if (!canDelete) {
+                    document.querySelectorAll('.del-btn').forEach(btn => btn.style.display = 'none');
+                }
+            }, 500);
 
             console.log("Finished hiding buttons.");
         }
@@ -5142,6 +5143,10 @@ function renderTable() {
         }
 
         async function saveInvestor() {
+             // 🔥 GUARD CLAUSE
+            if (!can('create', 'Capitalization Table') && !can('edit', 'Capitalization Table')) {
+                return alert('Access Denied: You do not have permission to modify investors.');
+            }
             const name = document.getElementById('invName').value.trim();
             const equity = safeNum(document.getElementById('invEquity').value);
             const color = document.getElementById('invColor').value || '#4fb6a8';
@@ -7007,6 +7012,11 @@ function renderTable() {
         }
 
         async function saveInvestment() {
+
+              // 🔥 GUARD CLAUSE
+            if (!can('create', 'Capitalization Table')) {
+                return alert('Access Denied: You do not have permission to add investments.');
+            }
             const investorId = parseInt(document.getElementById('investmentModal').dataset.investorId);
             const type = document.getElementById('invType').value;
             const amount = safeNum(document.getElementById('invAmount').value);
@@ -7071,6 +7081,10 @@ function renderTable() {
         }
 
         async function deleteInvestment(investmentId) {
+             // 🔥 GUARD CLAUSE
+            if (!can('delete', 'Capitalization Table')) {
+                return alert('Access Denied: You do not have permission to delete investments.');
+            }
             if (!confirm('Delete this investment record?')) return;
 
             const {
