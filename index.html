@@ -6606,17 +6606,29 @@ function renderTable() {
         return;
     }
 
+    // Check if the selected month is the CURRENT month
+    const selectedMonthStr = dateVal.slice(0, 7); // e.g., "2026-10"
+    const now = new Date();
+    const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    const isLiveMonth = (selectedMonthStr >= currentMonthStr);
+
+    // Get the EXACT live number from the main dashboard state
+    const liveVirtualEquity = Math.round(safeNum(summary.starlinkVirtualInvestment));
+
     let exactTotalEquity = 0;
     
     const rows = (data || []).map(r => {
-        exactTotalEquity = safeNum(r.total_equity_ksh); 
         const inv = investors.find(i => i.name === r.holder_name);
+        
+        // 🔥 IF IT'S THE LIVE MONTH: Override the Virtual equity with the live number
+        const displayEquity = (r.is_virtual && isLiveMonth) ? liveVirtualEquity : safeNum(r.equity_ksh);
+        
         return {
             id: r.is_virtual ? null : (inv ? inv.id : null),
             name: r.holder_name,
             number: r.is_virtual ? '—' : (inv ? inv.investorNumber : ''),
-            equity: safeNum(r.equity_ksh),
-            pct: safeNum(r.ownership_pct), // EXACT % from DB
+            equity: displayEquity,
+            pct: safeNum(r.ownership_pct), 
             lastChange: r.is_virtual ? 'snapshot' : 'ledger',
             lastRef: r.is_virtual ? 'imported_history' : 'share_ledger',
             date: dateVal,
@@ -6624,7 +6636,11 @@ function renderTable() {
         };
     });
 
+    // Sort by equity descending
     rows.sort((a, b) => b.equity - a.equity);
+
+    // 🔥 RECALCULATE TOTALS & PERCENTAGES EXACTLY IN JS
+    const grandTotal = rows.reduce((s, r) => s + r.equity, 0);
 
     document.getElementById('capTableSummary').innerHTML = `
         <div class="recon-stat good">
@@ -6633,7 +6649,7 @@ function renderTable() {
         </div>
         <div class="recon-stat good">
             <div class="recon-stat-label"><i class="fas fa-coins"></i> TOTAL EQUITY</div>
-            <div class="recon-stat-value">KSh ${fmt(exactTotalEquity)}</div>
+            <div class="recon-stat-value">KSh ${fmt(grandTotal)}</div>
         </div>
         <div class="recon-stat warn">
             <div class="recon-stat-label"><i class="fas fa-calendar"></i> AS OF</div>
@@ -6648,7 +6664,9 @@ function renderTable() {
     }
 
     body.innerHTML = rows.map(r => {
-        const pctDisplay = r.pct.toFixed(2); // Uses DB %
+        // 🔥 Calculate the live percentage using the exact total
+        const pctDisplay = grandTotal > 0 ? ((r.equity / grandTotal) * 100).toFixed(2) : '0.00';
+        
         const rowClass = r.isStarlink ? 'recon-row-caution' : '';
         const changeLabel = r.isStarlink 
             ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
@@ -6666,7 +6684,7 @@ function renderTable() {
         <tr class="total-row">
             <td><strong>TOTAL</strong></td>
             <td></td>
-            <td style="text-align:right;"><strong>KSh ${fmt(exactTotalEquity)}</strong></td>
+            <td style="text-align:right;"><strong>KSh ${fmt(grandTotal)}</strong></td>
             <td style="text-align:right;"><strong>100.00%</strong></td>
             <td></td>
             <td></td>
@@ -6675,7 +6693,7 @@ function renderTable() {
 
     const reconcileEl = document.getElementById('capTableReconcile');
     const reconcileTxt = document.getElementById('capTableReconcileText');
-    if (exactTotalEquity > 0) {
+    if (grandTotal > 0) {
         reconcileEl.classList.remove('warning');
         reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders at the specified timestamp.`;
     } else {
@@ -6683,7 +6701,6 @@ function renderTable() {
         reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
     }
 }
-
         function printCapTable() {
             const asOf = document.getElementById('capTableDate').value || 'All-time';
             const body = document.getElementById('capTableBody');
