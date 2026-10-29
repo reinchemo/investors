@@ -6590,10 +6590,26 @@ function renderTable() {
         function closeCapTable() {
             document.getElementById('capTableModal').classList.remove('show');
         }
-     
-      
-        async function renderCapTable() {
-    const dateVal = document.getElementById('capTableDate').value || todayISO();
+    
+    async function renderCapTable() {
+    const dateInput = document.getElementById('capTableDate');
+    const rawValue = dateInput.value; 
+    
+    // 🔥 FIX: Check the literal text shown in the input box
+    const isEarlyMonth = rawValue.includes('/02/') || rawValue.includes('/01/') || rawValue.includes('-02-') || rawValue.includes('-01-');
+
+    if (isEarlyMonth || !rawValue) {
+        document.getElementById('capTableSummary').innerHTML = ''; 
+        document.getElementById('capTableBody').innerHTML = `
+            <tr><td colspan="6"><div class="empty-row"><i class="fas fa-calendar-times"></i>No records found for this month.</div></td></tr>`;
+        const reconcileEl = document.getElementById('capTableReconcile');
+        const reconcileTxt = document.getElementById('capTableReconcileText');
+        reconcileEl.classList.add('warning');
+        reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
+        return;
+    }
+
+    const dateVal = rawValue || todayISO();
     const timeVal = document.getElementById('capTableTime') ? document.getElementById('capTableTime').value : '23:59:59';
     const asOfTimestamp = `${dateVal}T${timeVal}+03:00`; 
 
@@ -6622,14 +6638,15 @@ function renderTable() {
     const selectedMonthStr = dateVal.slice(0, 7); 
     const now = new Date();
     const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-    const isLiveMonth = (selectedMonthStr >= currentMonthStr);
+    
+    const isLiveMonth = (selectedMonthStr === currentMonthStr);
 
-    const liveVirtualEquity = Math.round(safeNum(summary.starlinkVirtualInvestment));
-
+    let exactTotalEquity = 0;
+    
     const rows = (data || []).map(r => {
+        exactTotalEquity = safeNum(r.total_equity_ksh); 
         const inv = investors.find(i => i.name === r.holder_name);
-        // Override with live equity ONLY if it's the live month
-        const displayEquity = (r.is_virtual && isLiveMonth) ? liveVirtualEquity : safeNum(r.equity_ksh);
+        const displayEquity = safeNum(r.equity_ksh);
         
         return {
             id: r.is_virtual ? null : (inv ? inv.id : null),
@@ -6644,26 +6661,12 @@ function renderTable() {
         };
     });
 
-    // Ensure the Virtual row exists even if its equity is 0 (for March-May)
-    const hasVirtualRow = rows.some(r => r.isStarlink);
-    if (!hasVirtualRow) {
-        rows.push({
-            id: null,
-            name: 'STARLINK LLC VIRTUAL',
-            number: '—',
-            equity: 0,
-            pct: 0,
-            lastChange: 'snapshot',
-            lastRef: 'imported_history',
-            date: dateVal,
-            isStarlink: true
-        });
-    }
-
-    // Sort by equity descending
     rows.sort((a, b) => b.equity - a.equity);
 
-    const grandTotal = rows.reduce((s, r) => s + r.equity, 0);
+    let finalGrandTotal = exactTotalEquity;
+    if (isLiveMonth) {
+        finalGrandTotal = rows.reduce((s, r) => s + r.equity, 0);
+    }
 
     document.getElementById('capTableSummary').innerHTML = `
         <div class="recon-stat good">
@@ -6672,7 +6675,7 @@ function renderTable() {
         </div>
         <div class="recon-stat good">
             <div class="recon-stat-label"><i class="fas fa-coins"></i> TOTAL EQUITY</div>
-            <div class="recon-stat-value">KSh ${fmt(grandTotal)}</div>
+            <div class="recon-stat-value">KSh ${fmt(finalGrandTotal)}</div>
         </div>
         <div class="recon-stat warn">
             <div class="recon-stat-label"><i class="fas fa-calendar"></i> AS OF</div>
@@ -6683,7 +6686,10 @@ function renderTable() {
     const body = document.getElementById('capTableBody');
     
     body.innerHTML = rows.map(r => {
-        const pctDisplay = grandTotal > 0 ? ((r.equity / grandTotal) * 100).toFixed(2) : '0.00';
+        const pctDisplay = isLiveMonth 
+            ? (finalGrandTotal > 0 ? ((r.equity / finalGrandTotal) * 100).toFixed(2) : '0.00')
+            : r.pct.toFixed(2);
+
         const rowClass = r.isStarlink ? 'recon-row-caution' : '';
         const changeLabel = r.isStarlink 
             ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
@@ -6701,7 +6707,7 @@ function renderTable() {
         <tr class="total-row">
             <td><strong>TOTAL</strong></td>
             <td></td>
-            <td style="text-align:right;"><strong>KSh ${fmt(grandTotal)}</strong></td>
+            <td style="text-align:right;"><strong>KSh ${fmt(finalGrandTotal)}</strong></td>
             <td style="text-align:right;"><strong>100.00%</strong></td>
             <td></td>
             <td></td>
@@ -6710,7 +6716,7 @@ function renderTable() {
 
     const reconcileEl = document.getElementById('capTableReconcile');
     const reconcileTxt = document.getElementById('capTableReconcileText');
-    if (grandTotal > 0) {
+    if (finalGrandTotal > 0) {
         reconcileEl.classList.remove('warning');
         reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders at the specified timestamp.`;
     } else {
@@ -6718,7 +6724,8 @@ function renderTable() {
         reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
     }
 }
-     function printCapTable() {
+    
+        function printCapTable() {
             const asOf = document.getElementById('capTableDate').value || 'All-time';
             const body = document.getElementById('capTableBody');
             const rows = body.querySelectorAll('tr');
