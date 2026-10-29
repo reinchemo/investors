@@ -4757,49 +4757,63 @@
 
         // --- APPLY PERMISSIONS TO UI ---
         function applyPermissionsToUI() {
-            console.log("Running Permissions Check. Admin:", window.IS_FULL_ADMIN);
+            if (window.IS_FULL_ADMIN) return;
 
-            if (window.IS_FULL_ADMIN) {
-                console.log("User is Admin. Skipping hide.");
-                return;
-            }
+            // Helper to hide elements safely
+            const hide = (selector) => {
+                document.querySelectorAll(selector).forEach(el => el.style.display = 'none');
+            };
 
-            // 1. Hide all restricted Tabs (Using the exact data-view IDs)
-            const restrictedTabs = ['payroll', 'staff', 'categories', 'backup', 'budgets', 'assets', 'reports', 'health'];
-            restrictedTabs.forEach(tabView => {
-                const tab = document.querySelector(`.tab[data-view="${tabView}"]`);
-                if (tab) {
+            // 1. Hide all Tabs they don't have access to view
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                const view = tab.dataset.view;
+                // Map tab view to module name (customize as needed)
+                let moduleName = view;
+                if (view === 'ledger') moduleName = 'Central Ledger';
+                if (view === 'income') moduleName = 'Income';
+                if (view === 'expenditure') moduleName = 'Expenditure';
+                if (view === 'mpesa') moduleName = 'M-PESA';
+                if (view === 'approvals') moduleName = 'Approvals';
+                if (view === 'staff') moduleName = 'Staff';
+                if (view === 'payroll') moduleName = 'Payroll';
+                if (view === 'assets') moduleName = 'Assets';
+                if (view === 'reports') moduleName = 'Reports';
+                if (view === 'tasks') moduleName = 'Tasks';
+                if (view === 'attendance') moduleName = 'Attendance';
+                if (view === 'stock') moduleName = 'Stock';
+                if (view === 'customers') moduleName = 'Customers';
+                if (view === 'projects') moduleName = 'Projects';
+                if (view === 'categories') moduleName = 'Categories';
+                if (view === 'recurring') moduleName = 'Recurring';
+                if (view === 'budgets') moduleName = 'Budgets';
+                if (view === 'overtime') moduleName = 'Overtime';
+                if (view === 'leave') moduleName = 'Leave';
+                if (view === 'health') moduleName = 'System Health';
+
+                if (!can('view', moduleName)) {
                     tab.style.display = 'none';
-                    console.log("Hid tab:", tabView);
                 }
             });
 
-            // 2. Hide the "New Transaction" buttons
-            const newTxnBtn = document.getElementById('newTxnBtn');
-            if (newTxnBtn) {
-                newTxnBtn.style.display = 'none';
-                console.log("Hid New Transaction button");
-            }
-            const newTxnBtn2 = document.getElementById('newTxnBtn2');
-            if (newTxnBtn2) {
-                newTxnBtn2.style.display = 'none';
-            }
-
-            // 3. Hide the "Admin Roles" button by searching for the link
-            const adminLinks = document.querySelectorAll('a[href="admin.html"]');
-            adminLinks.forEach(link => {
-                link.style.display = 'none';
-                console.log("Hid Admin Roles link");
+            // 2. Hide ALL "Create / Add / New" buttons
+            const hideCreate = ['newTxnBtn', 'newTxnBtn2', 'newIncomeBtn', 'newExpenseBtn', 'newLocationBtn', 'newStaffBtn', 'runPayrollBtn', 'newAssetBtn', 'newTaskBtn', 'newStockBtn', 'newCustomerBtn', 'newProjectBtn', 'newCategoryBtn', 'newRecurringBtn', 'newBudgetBtn', 'newOvertimeBtn', 'newLeaveBtn', 'newCasualBtn'];
+            hideCreate.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
             });
 
-            // 4. Hide "Run Payroll" button
-            const runPayrollBtn = document.getElementById('runPayrollBtn');
-            if (runPayrollBtn) {
-                runPayrollBtn.style.display = 'none';
-                console.log("Hid Run Payroll button");
+            // 3. Hide specific Edit/Delete buttons on tables
+            // We do this by listening to the clicks and blocking them, but we also hide the buttons visually.
+            if (!can('edit', 'Capitalization Table')) {
+                hide('.edit-btn');
+                hide('.del-btn');
+                hide('#addInvestorBtn');
+                hide('#addInvestorBtn2');
             }
 
-            console.log("✅ Permission hiding complete.");
+            // Hide the Admin Roles button for non-admins
+            hide('a[href="admin.html"]');
         }
 
         function can(action, moduleName) {
