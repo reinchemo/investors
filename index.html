@@ -4210,25 +4210,33 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         // ==================================================
         // BUILD INVESTORS
         // ==================================================
-        function buildInvestors() {
-            const list = investors.map(i => ({
-                id: i.id,
-                name: i.name,
-                color: i.color || '#4fb6a8',
-                equity: safeNum(i.equity),
-                isStarlink: false
-            }));
-            list.push({
-                name: 'STARLINK LLC VIRTUAL',
-                equity: Math.round(safeNum(summary.starlinkVirtualInvestment)),
-                color: '#c89a5b',
-                isStarlink: true,
-                rawEquity: safeNum(summary.starlinkVirtualInvestment)
-            });
-            return list;
-        }
-
-        function renderTable() {
+  function buildInvestors() {
+    const list = investors.map(i => ({
+        id: i.id,
+        name: i.name,
+        color: i.color || '#4fb6a8',
+        equity: safeNum(i.equity),
+        isStarlink: false,
+        status: i.status || 'active',
+        investorNumber: i.investorNumber || ''
+    }));
+    
+    // Use the exact unrounded value from the summary
+    const virtualEquity = Math.round(safeNum(summary.starlinkVirtualInvestment));
+    
+    list.push({
+        name: 'STARLINK LLC VIRTUAL',
+        equity: virtualEquity,
+        color: '#c89a5b',
+        isStarlink: true,
+        rawEquity: safeNum(summary.starlinkVirtualInvestment),
+        status: 'active'
+    });
+    
+    // 🔥 THE FIX: Sort by equity descending so VIRTUAL is always in the correct position
+    return list.sort((a, b) => b.equity - a.equity);
+}
+    function renderTable() {
             const tbody = document.getElementById('investorTableBody');
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
@@ -4236,6 +4244,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             all.forEach(inv => {
                 const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
                 const rowClass = inv.isStarlink ? 'highlight-row' : '';
+                
                 if (inv.isStarlink) {
                     html += `<tr class="${rowClass}">
                         <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
@@ -4248,7 +4257,9 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 } else {
                     const statusClass = inv.status === 'inactive' ? 'cancelled' :
                         inv.status === 'prospect' ? 'pending' : 'paid';
-                    html += `<tr class="${rowClass}">
+                    
+                    // ADDED: onclick to the row and cursor pointer
+                    html += `<tr class="${rowClass}" style="cursor: pointer;" onclick="openInvestorDetail(${inv.id})">
                         <td><a href="#" class="investor-name-link" data-id="${inv.id}" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(inv.name)}</a></td>
                         <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#7f9bb8;">${escapeHTML(inv.investorNumber || '—')}</span></td>
                         <td><span class="status-pill ${statusClass}">${escapeHTML(inv.status || 'active')}</span></td>
@@ -4256,8 +4267,8 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                         <td class="equity-ratio">${ratio}%</td>
                         <td>
                             <div class="row-actions">
-                                <button class="edit-btn" data-id="${inv.id}" title="Edit">✏️</button>
-                                <button class="del-btn" data-id="${inv.id}" title="Delete">🗑️</button>
+                                <button class="edit-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Edit">✏️</button>
+                                <button class="del-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Delete">🗑️</button>
                             </div>
                         </td>
                     </tr>`;
@@ -4268,12 +4279,24 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 <td><strong>${fmt(totalEquity)}</strong></td>
                 <td><strong>100.00%</strong></td>
                 <td></td>
-            </tr>`;            tbody.innerHTML = html;
+            </tr>`;            
+            
+            tbody.innerHTML = html;
 
-            tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openInvestorModal(parseInt(btn.dataset.id))));
-            tbody.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', () => deleteInvestor(parseInt(btn.dataset.id))));
+            // ADDED: e.stopPropagation() to the click listeners so they don't fire the row click
+            tbody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openInvestorModal(parseInt(btn.dataset.id));
+            }));
+            
+            tbody.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteInvestor(parseInt(btn.dataset.id));
+            }));
+            
             tbody.querySelectorAll('.investor-name-link').forEach(link => link.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 openInvestorDetail(parseInt(link.dataset.id));
             }));
 
@@ -6564,8 +6587,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         function closeCapTable() {
             document.getElementById('capTableModal').classList.remove('show');
         }
-     
-        async function renderCapTable() {
+     async function renderCapTable() {
     const dateVal = document.getElementById('capTableDate').value || todayISO();
     const timeVal = document.getElementById('capTableTime') ? document.getElementById('capTableTime').value : '23:59:59';
     const asOfTimestamp = `${dateVal}T${timeVal}+03:00`; 
@@ -6590,7 +6612,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             name: r.holder_name,
             number: r.is_virtual ? '—' : (inv ? inv.investorNumber : ''),
             equity: safeNum(r.equity_ksh),
-            pct: safeNum(r.ownership_pct), // EXACT % from DB
+            pct: safeNum(r.ownership_pct), // Use the exact percentage from the database
             lastChange: r.is_virtual ? 'snapshot' : 'ledger',
             lastRef: r.is_virtual ? 'imported_history' : 'share_ledger',
             date: dateVal,
@@ -6622,7 +6644,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     }
 
     body.innerHTML = rows.map(r => {
-        const pctDisplay = r.pct.toFixed(2); // Uses DB %
+        const pctDisplay = r.pct.toFixed(2); 
         const rowClass = r.isStarlink ? 'recon-row-caution' : '';
         const changeLabel = r.isStarlink 
             ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
@@ -6657,7 +6679,6 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
     }
 }
-
         function printCapTable() {
             const asOf = document.getElementById('capTableDate').value || 'All-time';
             const body = document.getElementById('capTableBody');
