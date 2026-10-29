@@ -4233,11 +4233,16 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
             let html = '';
-            all.forEach(inv => {
+                        all.forEach(inv => {
                 const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
                 const rowClass = inv.isStarlink ? 'highlight-row' : '';
+                
+                // Make row clickable for real investors
+                const clickAction = inv.isStarlink ? '' : `onclick="openInvestorDetail(${inv.id})"`;
+                const pointerStyle = inv.isStarlink ? '' : 'cursor: pointer;';
+
                 if (inv.isStarlink) {
-                    html += `<tr class="${rowClass}">
+                    html += `<tr class="${rowClass}" style="${pointerStyle}">
                         <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
                         <td>—</td>
                         <td>—</td>
@@ -6564,104 +6569,99 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         function closeCapTable() {
             document.getElementById('capTableModal').classList.remove('show');
         }
+     
         async function renderCapTable() {
-            const dateVal = document.getElementById('capTableDate').value || todayISO();
-            const timeVal = document.getElementById('capTableTime') ? document.getElementById('capTableTime').value : '23:59:59';
-            const asOfTimestamp = `${dateVal}T${timeVal}+03:00`; // EAT timezone
+    const dateVal = document.getElementById('capTableDate').value || todayISO();
+    const timeVal = document.getElementById('capTableTime') ? document.getElementById('capTableTime').value : '23:59:59';
+    const asOfTimestamp = `${dateVal}T${timeVal}+03:00`; 
 
-            // Call the new RPC function we created in Supabase
-            const { data, error } = await supabaseClient.rpc('get_ownership_as_of', { 
-                p_timestamp: asOfTimestamp 
-            });
+    const { data, error } = await supabaseClient.rpc('get_ownership_as_of', { 
+        p_timestamp: asOfTimestamp 
+    });
 
-            if (error) {
-                console.error("Failed to fetch snapshot:", error);
-                showError("Could not load historical cap table: " + error.message);
-                return;
-            }
+    if (error) {
+        console.error("Failed to fetch snapshot:", error);
+        showError("Could not load historical cap table: " + error.message);
+        return;
+    }
 
-            // Format data for the table
-            // The RPC returns: holder_name, equity_ksh, ownership_pct, is_virtual
-            const rows = (data || []).map(r => {
-                const inv = investors.find(i => i.name === r.holder_name);
-                return {
-                    id: r.is_virtual ? null : (inv ? inv.id : null),
-                    name: r.holder_name,
-                    number: r.is_virtual ? '—' : (inv ? inv.investorNumber : ''),
-                    equity: safeNum(r.equity_ksh),
-                    pct: safeNum(r.ownership_pct),
-                    lastChange: r.is_virtual ? 'snapshot' : 'ledger',
-                    lastRef: r.is_virtual ? 'imported_history' : 'share_ledger',
-                    date: dateVal,
-                    isStarlink: r.is_virtual
-                };
-            });
+    let exactTotalEquity = 0;
+    
+    const rows = (data || []).map(r => {
+        exactTotalEquity = safeNum(r.total_equity_ksh); 
+        const inv = investors.find(i => i.name === r.holder_name);
+        return {
+            id: r.is_virtual ? null : (inv ? inv.id : null),
+            name: r.holder_name,
+            number: r.is_virtual ? '—' : (inv ? inv.investorNumber : ''),
+            equity: safeNum(r.equity_ksh),
+            pct: safeNum(r.ownership_pct), // EXACT % from DB
+            lastChange: r.is_virtual ? 'snapshot' : 'ledger',
+            lastRef: r.is_virtual ? 'imported_history' : 'share_ledger',
+            date: dateVal,
+            isStarlink: r.is_virtual
+        };
+    });
 
-            // Sort by equity descending
-            rows.sort((a, b) => b.equity - a.equity);
+    rows.sort((a, b) => b.equity - a.equity);
 
-            const grandTotal = rows.reduce((s, r) => s + r.equity, 0);
+    document.getElementById('capTableSummary').innerHTML = `
+        <div class="recon-stat good">
+            <div class="recon-stat-label"><i class="fas fa-users"></i> HOLDERS</div>
+            <div class="recon-stat-value">${rows.length}</div>
+        </div>
+        <div class="recon-stat good">
+            <div class="recon-stat-label"><i class="fas fa-coins"></i> TOTAL EQUITY</div>
+            <div class="recon-stat-value">KSh ${fmt(exactTotalEquity)}</div>
+        </div>
+        <div class="recon-stat warn">
+            <div class="recon-stat-label"><i class="fas fa-calendar"></i> AS OF</div>
+            <div class="recon-stat-value" style="font-size:0.9rem;">${dateVal} ${timeVal}</div>
+        </div>
+    `;
 
-            // Summary stats
-            document.getElementById('capTableSummary').innerHTML = `
-                <div class="recon-stat good">
-                    <div class="recon-stat-label"><i class="fas fa-users"></i> HOLDERS</div>
-                    <div class="recon-stat-value">${rows.length}</div>
-                </div>
-                <div class="recon-stat good">
-                    <div class="recon-stat-label"><i class="fas fa-coins"></i> TOTAL EQUITY</div>
-                    <div class="recon-stat-value">KSh ${fmt(grandTotal)}</div>
-                </div>
-                <div class="recon-stat warn">
-                    <div class="recon-stat-label"><i class="fas fa-calendar"></i> AS OF</div>
-                    <div class="recon-stat-value" style="font-size:0.9rem;">${dateVal} ${timeVal}</div>
-                </div>
-            `;
+    const body = document.getElementById('capTableBody');
+    if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-users"></i>No ownership found for this timestamp.</div></td></tr>`;
+        return;
+    }
 
-            // Table rows
-            const body = document.getElementById('capTableBody');
-            if (!rows.length) {
-                body.innerHTML = `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-users"></i>No ownership found for this timestamp.</div></td></tr>`;
-                return;
-            }
-
-            body.innerHTML = rows.map(r => {
-                const pctDisplay = grandTotal > 0 ? ((r.equity / grandTotal) * 100).toFixed(2) : '0.00';
-                const rowClass = r.isStarlink ? 'recon-row-caution' : '';
-                const changeLabel = r.isStarlink 
-                    ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
-                    : `<span class="status-pill active" style="font-size:0.6rem;">ledger</span>`;
-                
-                return `<tr class="${rowClass}">
+    body.innerHTML = rows.map(r => {
+        const pctDisplay = r.pct.toFixed(2); // Uses DB %
+        const rowClass = r.isStarlink ? 'recon-row-caution' : '';
+        const changeLabel = r.isStarlink 
+            ? `<span class="status-pill pending" style="font-size:0.6rem;">snapshot</span>` 
+            : `<span class="status-pill active" style="font-size:0.6rem;">ledger</span>`;
+        
+        return `<tr class="${rowClass}">
 <td><a href="#" onclick="event.preventDefault(); if('${r.name}' !== 'STARLINK LLC VIRTUAL') { const inv = investors.find(i => i.name === '${r.name}'); if(inv) { closeCapTable(); openInvestorDetail(inv.id); } }" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(r.name)}</a>${r.isStarlink ? ' <span class="starlink-tag">snapshot</span>' : ''}</td>
-                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.number)}</span></td>
-                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(r.equity)}</td>
-                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">${pctDisplay}%</td>
-                    <td>${changeLabel}</td>
-                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.lastRef)}</td>
-                </tr>`;
-            }).join('') + `
-                <tr class="total-row">
-                    <td><strong>TOTAL</strong></td>
-                    <td></td>
-                    <td style="text-align:right;"><strong>KSh ${fmt(grandTotal)}</strong></td>
-                    <td style="text-align:right;"><strong>100.00%</strong></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            `;
+            <td><span style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.number)}</span></td>
+            <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(r.equity)}</td>
+            <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">${pctDisplay}%</td>
+            <td>${changeLabel}</td>
+            <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${escapeHTML(r.lastRef)}</td>
+        </tr>`;
+    }).join('') + `
+        <tr class="total-row">
+            <td><strong>TOTAL</strong></td>
+            <td></td>
+            <td style="text-align:right;"><strong>KSh ${fmt(exactTotalEquity)}</strong></td>
+            <td style="text-align:right;"><strong>100.00%</strong></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
 
-            // Reconcile
-            const reconcileEl = document.getElementById('capTableReconcile');
-            const reconcileTxt = document.getElementById('capTableReconcileText');
-            if (grandTotal > 0) {
-                reconcileEl.classList.remove('warning');
-                reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders at the specified timestamp.`;
-            } else {
-                reconcileEl.classList.add('warning');
-                reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
-            }
-        }
+    const reconcileEl = document.getElementById('capTableReconcile');
+    const reconcileTxt = document.getElementById('capTableReconcileText');
+    if (exactTotalEquity > 0) {
+        reconcileEl.classList.remove('warning');
+        reconcileTxt.textContent = `Cap table totals 100% across ${rows.length} holders at the specified timestamp.`;
+    } else {
+        reconcileEl.classList.add('warning');
+        reconcileTxt.textContent = 'No equity recorded for this timestamp — cap table is empty.';
+    }
+}
 
         function printCapTable() {
             const asOf = document.getElementById('capTableDate').value || 'All-time';
@@ -9017,4 +9017,5 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
 
 
+</html>
 </html>
