@@ -4140,13 +4140,10 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
         // ==================================================
         let starlinkInvestmentTotalFromView = 0;
 
-        async function fetchStarlinkInvestmentTotal() {
+             async function fetchStarlinkInvestmentTotal() {
             if (!supabaseClient) return 0;
             try {
-                const {
-                    data,
-                    error
-                } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('starlink_virtual_capital_total')
                     .select('total')
                     .single();
@@ -4157,7 +4154,21 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 }
 
                 starlinkInvestmentTotalFromView = safeNum(data?.total);
-                console.log('📊 Starlink Investment total from view:', starlinkInvestmentTotalFromView);
+                
+                // 🆕 AUTO-SYNC THE LIVE NUMBER TO THE CURRENT MONTH SNAPSHOT
+                const now = new Date();
+                const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+                const snapshotTimestamp = `${lastDay} 23:59:59+03`;
+                
+                // We do this in the background, without waiting for it
+                supabaseClient.from('virtual_equity_snapshots').upsert({
+                    as_of_timestamp: snapshotTimestamp,
+                    equity_ksh: Math.round(starlinkInvestmentTotalFromView),
+                    source: 'live_sync'
+                }, { onConflict: 'as_of_timestamp' }).then(() => {
+                    console.log('✅ Synced live Virtual equity to snapshot');
+                });
+
                 return starlinkInvestmentTotalFromView;
             } catch (e) {
                 console.warn('Starlink Investment fetch error:', e.message);
@@ -6515,17 +6526,16 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             return balances;
         }
 
-                  async function openCapTable() {
+                          async function openCapTable() {
             const modal = document.getElementById('capTableModal');
             modal.classList.add('show');
-            // Default: show today
+            
             const now = new Date();
             const dateStr = now.toISOString().split('T')[0];
             const timeStr = now.toTimeString().split(' ')[0];
             
             document.getElementById('capTableDate').value = dateStr;
             
-            // Add a time input dynamically if it doesn't exist
             if (!document.getElementById('capTableTime')) {
                 const timeInput = document.createElement('input');
                 timeInput.type = 'time';
@@ -6538,11 +6548,14 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 timeInput.style.color = '#f2f0eb';
                 timeInput.style.border = '1px solid rgba(120,200,220,0.2)';
                 document.getElementById('capTableDate').parentNode.appendChild(timeInput);
-                
-                // Re-render when time changes
-                timeInput.addEventListener('change', renderCapTable);
             } else {
                 document.getElementById('capTableTime').value = timeStr;
+            }
+
+            // Make it update automatically when the date or time changes
+            document.getElementById('capTableDate').addEventListener('change', renderCapTable);
+            if (document.getElementById('capTableTime')) {
+                document.getElementById('capTableTime').addEventListener('change', renderCapTable);
             }
 
             await renderCapTable();
@@ -8677,29 +8690,39 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             }
             return false;
         }
-        function viewMonthlyRecords(type) {
-            // 1. Open the Transactions modal
-            const txnModal = document.getElementById('investorTxnModal');
-            if (txnModal) txnModal.classList.add('show');
-
-            // 2. Set the date filters to the current month
+               function viewMonthlyRecords(type) {
+            // 1. Get the current month range (Manual String Format to avoid timezone shifts)
             const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // e.g. "10"
+            
+            const lastDayObj = new Date(year, now.getMonth() + 1, 0);
+            const lastDay = String(lastDayObj.getDate()).padStart(2, '0'); // e.g. "31"
 
-            document.getElementById('invTxnFilterFrom').value = firstDay;
-            document.getElementById('invTxnFilterTo').value = lastDay;
+            const firstDayStr = `${year}-${month}-01`;
+            const lastDayStr = `${year}-${month}-${lastDay}`;
 
-            // 3. Set the Type filter (if 'all', clear it, otherwise set it)
+            // 2. Set the date filters in the modal
+            document.getElementById('invTxnFilterFrom').value = firstDayStr;
+            document.getElementById('invTxnFilterTo').value = lastDayStr;
+
+            // 3. Set the type filter
             if (type === 'all') {
                 document.getElementById('invTxnFilterType').value = '';
             } else {
                 document.getElementById('invTxnFilterType').value = type;
             }
 
-            // 4. Clear search and render
+            // 4. Clear other filters
             document.getElementById('invTxnFilterSearch').value = '';
+            document.getElementById('invTxnFilterCategory').value = '';
+            document.getElementById('invTxnFilterLocation').value = '';
+
+            // 5. Render the table inside the modal
             renderInvestorTxns();
+
+            // 6. Open the modal
+            document.getElementById('investorTxnModal').classList.add('show');
         }
 
         function reserveCurrentBalance() {
