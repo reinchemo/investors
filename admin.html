@@ -846,16 +846,7 @@
         // ==========================================
         // USER MANAGEMENT LOGIC
         // ==========================================
-        function filterUsersByType(type) {
-            activeUserFilter = type;
 
-            document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
-            if (type === 'all') document.querySelector('.card-purple').classList.add('active-filter');
-            if (type === 'full') document.querySelector('.card-green').classList.add('active-filter');
-            if (type === 'limited') document.querySelector('.card-pink').classList.add('active-filter');
-
-            renderUsers();
-        }
 
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
@@ -1090,10 +1081,25 @@
             window.location.href = 'login.html';
         });
 
-        (async() => {
+                    (async() => {
             if (await checkAuth()) {
-                await Promise.all([loadRoles(), loadUsers()]);
-                document.getElementById('userSearchInput')?.addEventListener('input', renderUsers);
+                // Load roles first
+                await loadRoles();
+                
+                // Load users
+                await loadUsers();
+                
+                // Force the default filter to show "Total Admins"
+                activeUserFilter = 'all';
+                const purpleCard = document.querySelector('.card-purple');
+                if (purpleCard) purpleCard.classList.add('active-filter');
+                renderUsers();
+
+                // Attach search listener
+                const searchInput = document.getElementById('userSearchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', renderUsers);
+                }
             }
         })();
     </script>
