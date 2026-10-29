@@ -4233,16 +4233,11 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
             const all = buildInvestors();
             const totalEquity = all.reduce((s, i) => s + i.equity, 0);
             let html = '';
-                        all.forEach(inv => {
+            all.forEach(inv => {
                 const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
                 const rowClass = inv.isStarlink ? 'highlight-row' : '';
-                
-                // Make row clickable for real investors
-                const clickAction = inv.isStarlink ? '' : `onclick="openInvestorDetail(${inv.id})"`;
-                const pointerStyle = inv.isStarlink ? '' : 'cursor: pointer;';
-
                 if (inv.isStarlink) {
-                    html += `<tr class="${rowClass}" style="${pointerStyle}">
+                    html += `<tr class="${rowClass}">
                         <td>${escapeHTML(inv.name)} <span class="starlink-tag"><i class="fas fa-plus-circle" style="margin-right:2px;"></i>live</span></td>
                         <td>—</td>
                         <td>—</td>
@@ -9017,5 +9012,4 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
 
 
 
-</html>
 </html>
