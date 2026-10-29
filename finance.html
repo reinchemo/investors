@@ -6588,25 +6588,27 @@
             }
         }
 
-          function viewMonthlyRecords(type) {
+        function viewMonthlyRecords(type) {
             // 1. Switch to the Ledger tab
             const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
             if (ledgerTab) ledgerTab.click();
 
-            // 2. Get the EXACT start and end of the current month
+            // 2. Set the date filters to the current month (Manual String Format)
             const now = new Date();
             const year = now.getFullYear();
-            const month = now.getMonth();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // e.g. "10"
 
-            // First day of the month (e.g., 2026-10-01)
-            const firstDay = new Date(year, month, 1).toISOString().split('T')[0];
-            
-            // Last day of the month (e.g., 2026-10-31)
-            const lastDay = new Date(year, month + 1, 0).toISOString().split('T')[0];
+            // Get the last day of the month
+            const lastDayObj = new Date(year, now.getMonth() + 1, 0);
+            const lastDay = String(lastDayObj.getDate()).padStart(2, '0'); // e.g. "31"
+
+            // Build the exact strings (YYYY-MM-DD)
+            const firstDayStr = `${year}-${month}-01`;
+            const lastDayStr = `${year}-${month}-${lastDay}`;
 
             // 3. Set the date filters in the Ledger
-            document.getElementById('ldgFilterFrom').value = firstDay;
-            document.getElementById('ldgFilterTo').value = lastDay;
+            document.getElementById('ldgFilterFrom').value = firstDayStr;
+            document.getElementById('ldgFilterTo').value = lastDayStr;
 
             // 4. Set the type filter
             if (type === 'all') {
