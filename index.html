@@ -4236,30 +4236,18 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
     // 🔥 THE FIX: Sort by equity descending so VIRTUAL is always in the correct position
     return list.sort((a, b) => b.equity - a.equity);
 }
-   function renderTable() {
+   
+
+function renderTable() {
     const tbody = document.getElementById('investorTableBody');
     const all = buildInvestors();
     
-    // Calculate total based on our exact list
     const totalEquity = all.reduce((s, i) => s + i.equity, 0);
     let html = '';
     
     all.forEach(inv => {
-        let ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
+        const ratio = totalEquity > 0 ? ((inv.equity / totalEquity) * 100).toFixed(2) : '0.00';
         const rowClass = inv.isStarlink ? 'highlight-row' : '';
-        
-        // 🔥 FIX: Force the Virtual % to exactly 20.15% if the date is October (current period)
-        // This matches the Cap Table snapshot exactly.
-        if (inv.isStarlink) {
-            const now = new Date();
-            const currentMonth = now.getMonth(); // October is 9
-            const currentYear = now.getFullYear(); // 2026
-            
-            // If we are in October 2026, use the exact locked ratio
-            if (currentMonth === 9 && currentYear === 2026) {
-                ratio = '20.15%'; 
-            }
-        }
 
         if (inv.isStarlink) {
             html += `<tr class="${rowClass}">
@@ -4267,7 +4255,7 @@ EMPLOYEE_PAYMENTS = (empRows || []).map(r => ({
                 <td>—</td>
                 <td>—</td>
                 <td><strong>${fmt(inv.equity)}</strong></td>
-                <td class="equity-ratio">${ratio}</td>
+                <td class="equity-ratio">${ratio}%</td>
                 <td></td>
             </tr>`;
         } else {
