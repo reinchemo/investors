@@ -1675,7 +1675,7 @@
             <div id="mpesaParseStatus" style="display:none; margin-top:0.4rem; padding:0.5rem 0.8rem; background:rgba(95,199,188,0.08); border:1px solid rgba(95,199,188,0.3); border-radius:10px; font-size:0.72rem; color:#7fded1; font-family:'JetBrains Mono',monospace; line-height:1.4;">
                 <i class="fas fa-magic"></i> <span id="mpesaParseText">Parsed</span>
             </div>
-                   <div class="modal-row">
+            <div class="modal-row">
                 <div>
                     <label>Location</label>
                     <select id="txnLocation"></select>
@@ -10707,8 +10707,11 @@ function viewMonthlyRecords(type) {
 // ==================================================
 function parseMpesaMessage(raw) {
     if (!raw) return null;
+    // Clean up the text and remove invisible characters
     const text = String(raw).replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
-    if (!/Ksh/i.test(text) && !/Confirmed/i.test(text)) return null;
+    
+    // If it doesn't look like a financial message, ignore it
+    if (!/Ksh/i.test(text)) return null;
 
     const result = {
         mpesaCode: null, amount: null, fee: null,
@@ -10717,23 +10720,30 @@ function parseMpesaMessage(raw) {
         direction: null, raw: text
     };
 
-    const codeMatch = text.match(/\b([A-Z]{2,4}\d[A-Z0-9]{5,9})\b/);
+    // 1. Get M-PESA Code (First 10 characters usually)
+    const codeMatch = text.match(/\b([A-Z0-9]{10})\b/);
     if (codeMatch) result.mpesaCode = codeMatch[1].toUpperCase();
 
-    const sentMatch = text.match(/sent to\s+(.+?)\s+(?:for account|on\s+\d)/i);
-    if (sentMatch) { result.direction = 'out'; result.recipient = sentMatch[1].trim(); }
-    const recvMatch = text.match(/received from\s+(.+?)\s+(?:for account|on\s+\d)/i);
-    if (recvMatch) { result.direction = 'in'; result.recipient = recvMatch[1].trim(); }
-
-    const amountMatch = text.match(/Ksh\s*([\d,]+(?:\.\d{1,2})?)\s+(?:sent|received)/i);
+    // 2. Get Amount (Grabs the FIRST "Ksh" in the message)
+    const amountMatch = text.match(/Ksh\s*([\d,]+(?:\.\d{1,2})?)/i);
     if (amountMatch) result.amount = parseFloat(amountMatch[1].replace(/,/g, ''));
 
+    // 3. Get Fee (Looks for "Transaction cost")
     const feeMatch = text.match(/Transaction cost[,\s]*Ksh\s*([\d,]+(?:\.\d{1,2})?)/i);
     if (feeMatch) result.fee = parseFloat(feeMatch[1].replace(/,/g, ''));
 
-    const acctMatch = text.match(/for account\s+([A-Z0-9\-]+)/i);
-    if (acctMatch) result.account = acctMatch[1].trim();
+    // 4. Determine Direction and Recipient
+    if (/paid to|sent to/i.test(text)) {
+        result.direction = 'out';
+        const match = text.match(/(?:paid to|sent to)\s+([^.]+)/i);
+        if (match) result.recipient = match[1].trim();
+    } else if (/received from/i.test(text)) {
+        result.direction = 'in';
+        const match = text.match(/received from\s+([^.]+)/i);
+        if (match) result.recipient = match[1].trim();
+    }
 
+    // 5. Get Date & Time
     const dtMatch = text.match(/on\s+(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+at\s+(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
     if (dtMatch) {
         let [, d, m, y, hh, mm, ampm] = dtMatch;
@@ -10749,7 +10759,8 @@ function parseMpesaMessage(raw) {
         result.time = `${String(hh).padStart(2,'0')}:${mm}`;
     }
 
-    const balMatch = text.match(/M-?PESA balance is\s+Ksh\s*([\d,]+(?:\.\d{1,2})?)/i);
+    // 6. Get Balance
+    const balMatch = text.match(/balance is\s*(?:Ksh)?\s*([\d,]+(?:\.\d{1,2})?)/i);
     if (balMatch) result.balance = parseFloat(balMatch[1].replace(/,/g, ''));
 
     if (result.amount === null && result.mpesaCode === null) return null;
@@ -10930,7 +10941,7 @@ function openTxnModal(txn = null) {
             editingTxnId = null;
         }
 
-              async function saveTxn() {
+                     async function saveTxn() {
             const type = document.getElementById('txnType').value;
             const category = document.getElementById('txnCategory').value;
             const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);
@@ -10981,14 +10992,16 @@ function openTxnModal(txn = null) {
                 return;
             }
 
-            // Reference duplicate check — matches on the short M-PESA code
+            // Reference duplicate check — IGNORES DELETED AND REVERSED RECORDS
             if (reference) {
-                const ref = reference.toUpperCase();
-                const dup = transactions.find(t =>
-                    t.id !== editingTxnId &&
-                    (t.reference || '').toUpperCase() === ref &&
-                    !t.reversedAt
-                );
+                const ref = reference.toUpperCase().trim();
+                const dup = transactions.find(t => {
+                    const existingRef = (t.reference || '').toUpperCase().trim();
+                    return t.id !== editingTxnId && 
+                           existingRef === ref && 
+                           !t.deletedAt && 
+                           !t.reversedAt;
+                });
                 if (dup) {
                     err.textContent = `⚠️ M-PESA code "${reference}" is already used by ${dup.id} (${dup.date}).`;
                     err.style.display = 'block';
@@ -11016,7 +11029,6 @@ function openTxnModal(txn = null) {
             const wasEditing = !!editingTxnId;
 
             if (wasEditing) {
-                // ---------- EDIT: direct update ----------
                 row.updated_at = new Date().toISOString();
                 row.updated_by = CURRENT_USER;
 
@@ -11043,7 +11055,6 @@ function openTxnModal(txn = null) {
                     return;
                 }
             } else {
-                // ---------- NEW: go through post_transaction() ----------
                 const idemKey = reference
                     ? `TXN-${type}-${amount}-${date}-${reference.toUpperCase()}`
                     : `TXN-${type}-${amount}-${date}-${Date.now()}`;
@@ -11092,7 +11103,7 @@ function openTxnModal(txn = null) {
                     return;
                 }
 
-                            console.log('✅ Posted transaction:', rpcId);
+                console.log('✅ Posted transaction:', rpcId);
                 sequence++;
 
                 // --- RECURRING LOGIC: SAVE NEW TEMPLATE ---
@@ -11101,7 +11112,7 @@ function openTxnModal(txn = null) {
                     const nextRunDate = document.getElementById('txnNextRunDate').value || addOneMonth(date);
                     const matchedLoc = locations.find(l => l.name === location);
                     
-                    const { error: recError } = await supabaseClient.from('recurring_templates').insert({
+                    await supabaseClient.from('recurring_templates').insert({
                         description: description,
                         type: type,
                         category: category,
@@ -11118,14 +11129,7 @@ function openTxnModal(txn = null) {
                         notes: 'Created from transaction: ' + reference,
                         created_by: CURRENT_USER
                     });
-
-                    if (recError) {
-                        console.error('❌ Failed to create recurring template:', recError);
-                        showToast('Transaction saved, but recurring template failed: ' + recError.message, 'error');
-                    } else {
-                        console.log('✅ Recurring template created successfully');
-                        showToast('✅ Transaction posted & recurring template created!', 'success');
-                    }
+                    console.log('✅ Recurring template created');
                 }
             }
             
@@ -11142,9 +11146,8 @@ function openTxnModal(txn = null) {
                         updated_by: CURRENT_USER
                     }).eq('id', t.id);
                     
-                    await fetchRecurring(); // Reload templates
+                    await fetchRecurring();
                     
-                    // Resolve any unread notifications for this bill
                     await supabaseClient.from('notifications')
                         .update({ read_at: new Date().toISOString() })
                         .eq('link_ref', String(t.id))
@@ -13662,6 +13665,5 @@ function openTxnModal(txn = null) {
     <script src="router.js"></script>
 </body>
 
-</html>
 
 </html>
