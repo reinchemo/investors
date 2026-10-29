@@ -6588,23 +6588,34 @@
             }
         }
 
-        function viewMonthlyRecords(type) {
+          function viewMonthlyRecords(type) {
             // 1. Switch to the Ledger tab
             const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
             if (ledgerTab) ledgerTab.click();
 
-            // 2. Set the date filters to the current month
+            // 2. Get the EXACT start and end of the current month
             const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+            const year = now.getFullYear();
+            const month = now.getMonth();
 
+            // First day of the month (e.g., 2026-10-01)
+            const firstDay = new Date(year, month, 1).toISOString().split('T')[0];
+            
+            // Last day of the month (e.g., 2026-10-31)
+            const lastDay = new Date(year, month + 1, 0).toISOString().split('T')[0];
+
+            // 3. Set the date filters in the Ledger
             document.getElementById('ldgFilterFrom').value = firstDay;
             document.getElementById('ldgFilterTo').value = lastDay;
 
-            // 3. Set the Type filter
-            document.getElementById('ldgFilterType').value = type;
+            // 4. Set the type filter
+            if (type === 'all') {
+                document.getElementById('ldgFilterType').value = '';
+            } else {
+                document.getElementById('ldgFilterType').value = type;
+            }
 
-            // 4. Clear search and render
+            // 5. Clear search and render
             document.getElementById('ldgFilterSearch').value = '';
             renderLedger();
         }
@@ -8248,26 +8259,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
     }
 }
 
-function viewMonthlyRecords(type) {
-            // 1. Switch to the Ledger tab
-            const ledgerTab = document.querySelector('.tab[data-view="ledger"]');
-            if (ledgerTab) ledgerTab.click();
 
-            // 2. Set the date filters to the current month
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-
-            document.getElementById('ldgFilterFrom').value = firstDay;
-            document.getElementById('ldgFilterTo').value = lastDay;
-
-            // 3. Set the Type filter
-            document.getElementById('ldgFilterType').value = type;
-
-            // 4. Clear search and render
-            document.getElementById('ldgFilterSearch').value = '';
-            renderLedger();
-        }
 
                 function printLedger() {
             const from = document.getElementById('ldgFilterFrom').value || 'All time';
