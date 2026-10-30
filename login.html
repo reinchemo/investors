@@ -3,21 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>STARLINK · Manage Administrators</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARLINK · Sign In</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=3"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-         :root {
-            --bg-dark: #0b1120;
-            --panel-bg: #141e33;
-            --border: #1f2d4a;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --teal: #38bdf8;
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -26,620 +17,126 @@
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-main);
-            padding: 2rem;
+            background: #0a0e1a;
             min-height: 100vh;
-        }
-        /* HEADER */
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .header h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-        
-        .nav-actions {
-            display: flex;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--panel-bg);
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-family: inherit;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-        }
-        
-        .btn:hover {
-            border-color: var(--teal);
-            transform: translateY(-1px);
-        }
-        
-        .btn-primary {
-            background: #2563eb;
-            border-color: #2563eb;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-        /* STATS CARDS */
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            padding: 1.5rem;
-            border-radius: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .stat-card.active-filter {
-            outline: 2px solid white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-        }
-        
-        .stat-card .info span {
-            display: block;
-            font-size: 0.85rem;
-            opacity: 0.9;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-card .info strong {
-            font-size: 1.8rem;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        .stat-card .icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-        }
-        
-        .card-purple {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-        }
-        
-        .card-green {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        
-        .card-pink {
-            background: linear-gradient(135deg, #ec4899, #db2777);
-        }
-        
-        .card-blue {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        }
-        /* TABLE CONTAINER */
-        
-        .table-container {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-        
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .table-header h3 {
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .search-bar {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .search-bar input {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--bg-dark);
-            color: white;
-            width: 250px;
-            font-family: inherit;
-        }
-        
-        .table-wrap {
-            overflow-x: auto;
-            width: 100%;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-        }
-        
-        th,
-        td {
-            padding: 1rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-        
-        th {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-        /* AVATARS & BADGES */
-        
-        .user-cell {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: white;
-            flex-shrink: 0;
-        }
-        
-        .avatar.blue {
-            background: #3b82f6;
-        }
-        
-        .avatar.green {
-            background: #10b981;
-        }
-        
-        .avatar.purple {
-            background: #8b5cf6;
-        }
-        
-        .avatar.red {
-            background: #ef4444;
-        }
-        
-        .avatar.orange {
-            background: #f59e0b;
-        }
-        
-        .avatar.gray {
-            background: #64748b;
-        }
-        
-        .status-chip {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        
-        .chip-full {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a78bfa;
-        }
-        
-        .chip-custom {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
-        }
-        /* ICONS & BUTTONS */
-        
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .icon-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        
-        .icon-btn:hover.edit {
-            border-color: #f59e0b;
-            color: #f59e0b;
-        }
-        
-        .icon-btn:hover.delete {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
-        /* MATRIX TABLE */
-        
-        .matrix-table th,
-        .matrix-table td {
-            text-align: center;
-            padding: 0.6rem;
-        }
-        
-        .matrix-table td:first-child {
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        .matrix-table input[type="checkbox"] {
-            accent-color: var(--teal);
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        /* MODAL */
-        
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(5, 10, 20, 0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            color: #f2f0eb;
+            background-image: radial-gradient(circle at 0% 0%, rgba(95, 199, 188, 0.12) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(122, 90, 248, 0.12) 0%, transparent 50%);
             padding: 1rem;
         }
         
-        .modal-overlay.show {
-            display: flex;
-        }
-        
-        .modal-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+        .login-box {
+            background: linear-gradient(135deg, rgba(24, 38, 60, 0.85), rgba(15, 26, 46, 0.95));
+            border: 1px solid rgba(95, 199, 188, 0.25);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
             width: 100%;
-            max-width: 480px;
-            padding: 2rem;
-            max-height: 90vh;
-            overflow-y: auto;
+            max-width: 400px;
+            box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
         }
         
-        .modal-card h3 {
+        .login-box h2 {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            color: #f2f0eb;
-            margin-bottom: 1rem;
+            text-align: center;
+            color: #5fc7bc;
+            margin-bottom: 0.4rem;
+            font-size: 1.5rem;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
         }
         
-        .modal-card label {
+        .login-box p {
+            text-align: center;
+            color: #7f9bb8;
+            font-size: 0.82rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
             display: block;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             color: #7f9bb8;
             text-transform: uppercase;
             margin-bottom: 0.4rem;
-            margin-top: 0.8rem;
         }
         
-        .modal-card input,
-        .modal-card select {
+        .form-group input {
             width: 100%;
-            padding: 0.7rem;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: white;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(120, 200, 220, 0.2);
+            border-radius: 10px;
+            color: #f2f0eb;
             font-family: inherit;
+            transition: all 0.3s;
         }
         
-        .modal-card input:focus,
-        .modal-card select:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: var(--teal);
+            border-color: #5fc7bc;
+            background: rgba(95, 199, 188, 0.06);
         }
         
-        .modal-card select option {
+        .btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, #1a7a6a, #5fc7bc);
             color: #0a0e1a;
-        }
-        
-        .modal-error {
-            color: #f0a89f;
-            font-size: 0.82rem;
-            margin-top: 0.7rem;
-            padding: 0.55rem 0.8rem;
-            background: rgba(226, 104, 91, 0.1);
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 0.6rem;
-            margin-top: 1.5rem;
-        }
-        
-        .modal-actions button {
-            flex: 1;
-            padding: 0.8rem;
             border: none;
-            border-radius: 8px;
-            font-family: inherit;
+            border-radius: 10px;
             font-weight: 700;
             cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s;
         }
         
-        .modal-actions .cancel {
-            background: rgba(255, 255, 255, 0.06);
-            color: #c7d5e6;
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(95, 199, 188, 0.5);
         }
         
-        .modal-actions .save {
-            background: linear-gradient(135deg, #1a5a9c, #2a7ac4);
-            color: #fff;
-        }
-        /* RESPONSIVE DESIGN */
-        
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .nav-actions {
-                width: 100%;
-            }
-            .nav-actions .btn {
-                flex: 1;
-                font-size: 0.75rem;
-                padding: 0.5rem;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .table-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .search-bar {
-                width: 100%;
-            }
-            .search-bar input {
-                flex: 1;
-                width: 100%;
-            }
+        .error {
+            color: #f0a89f;
+            font-size: 0.82rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.6rem;
+            background: rgba(226, 104, 91, 0.1);
+            border: 1px solid rgba(226, 104, 91, 0.3);
+            border-radius: 8px;
+            display: none;
         }
     </style>
 </head>
 
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div>
-            <h1><i class="fas fa-shield-alt" style="color: #38bdf8;"></i> Manage Administrators</h1>
-            <p>Manage system administrators and their access levels</p>
+    <div class="login-box">
+        <h2><i class="fas fa-satellite-dish"></i> STARLINK</h2>
+        <p>Sign in to Finance & Equity</p>
+        <div class="error" id="errorMsg"></div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="you@example.com" autocomplete="username">
         </div>
-        <div class="nav-actions">
-            <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Equity</a>
-            <a href="finance.html" class="btn"><i class="fas fa-coins"></i> Finance</a>
-            <button class="btn btn-primary" id="btnAddAdmin"><i class="fas fa-plus"></i> Add Admin</button>
-            <button class="btn" id="btnLogout" style="color:#f0a89f; border-color:rgba(226,104,91,0.3);"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
         </div>
-    </div>
-
-    <!-- STATS CARDS -->
-    <div class="stats-grid">
-        <div class="stat-card card-purple" style="cursor: pointer;" onclick="filterUsersByType('all')">
-            <div class="info"><span>Total Admins</span><strong id="statTotal">0</strong></div>
-            <div class="icon"><i class="fas fa-users"></i></div>
-        </div>
-
-        <div class="stat-card card-green" style="cursor: pointer;" onclick="filterUsersByType('full')">
-            <div class="info"><span>Full Admins</span><strong id="statFull">0</strong></div>
-            <div class="icon"><i class="fas fa-shield-check"></i></div>
-        </div>
-
-        <div class="stat-card card-pink" style="cursor: pointer;" onclick="filterUsersByType('limited')">
-            <div class="info"><span>Limited Access</span><strong id="statLimited">0</strong></div>
-            <div class="icon"><i class="fas fa-user-cog"></i></div>
-        </div>
-
-        <div class="stat-card card-blue">
-            <div class="info"><span>Current User</span><strong id="statCurrent" style="font-size:1.2rem;">Loading...</strong></div>
-            <div class="icon"><i class="fas fa-user"></i></div>
-        </div>
-    </div>
-
-    <!-- ADMINISTRATOR LIST -->
-    <div class="table-container">
-        <div class="table-header">
-            <h3><i class="fas fa-list"></i> Administrator List</h3>
-            <div class="search-bar">
-                <input type="text" id="userSearchInput" placeholder="Search by username or role...">
-            </div>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username / Name</th>
-                        <th>Phone Number</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <tr>
-                        <td colspan="4" style="text-align:center;">Loading users...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ROLES TABLE -->
-    <div class="table-container">
-        <div class="table-header">
-            <h3><i class="fas fa-user-tag"></i> Role Definitions</h3>
-            <button class="btn btn-primary" id="btnAddRole"><i class="fas fa-plus"></i> Create Role</button>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Role Name</th>
-                        <th>Description</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="rolesTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ADD ADMIN MODAL -->
-    <div class="modal-overlay" id="addAdminModal">
-        <div class="modal-card">
-            <h3><i class="fas fa-user-plus" style="color:#38bdf8;"></i> Create New User</h3>
-            <label>Full Name</label>
-            <input type="text" id="newAdminName" placeholder="e.g. John Doe">
-            <label>Email Address <span style="color:#e8837a;">*</span></label>
-            <input type="email" id="newAdminEmail" placeholder="name@example.com">
-            <label>Password <span style="color:#e8837a;">*</span></label>
-            <input type="password" id="newAdminPassword" placeholder="Minimum 6 characters">
-            <label>Assign Role <span style="color:#e8837a;">*</span></label>
-            <select id="newAdminRole"></select>
-            <div class="modal-error" id="addAdminError"></div>
-            <div class="modal-actions">
-                <button class="cancel" id="addAdminCancel">Cancel</button>
-                <button class="save" id="addAdminSave">Create User</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ROLE PERMISSIONS MODAL -->
-    <div class="modal-overlay" id="roleModal">
-        <div class="modal-card" style="max-width: 900px; width: 95%;">
-            <h3 id="modalTitle">Role Details</h3>
-            <label>Role Name</label>
-            <input type="text" id="roleName" placeholder="e.g. Accountant">
-            <label>Description</label>
-            <input type="text" id="roleDesc" placeholder="Short description">
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem; flex-wrap: wrap; gap: 1rem;">
-                <h3 style="margin:0; font-size:1rem;">Permissions</h3>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;" onclick="selectAllMatrix(true)">Select All</button>
-                    <button class="btn" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;" onclick="selectAllMatrix(false)">Clear</button>
-                </div>
-            </div>
-
-            <div style="max-height: 400px; overflow: auto; border: 1px solid var(--border); border-radius: 8px;">
-                <table class="matrix-table" style="width:100%; min-width: 600px;">
-                    <thead>
-                        <tr>
-                            <th style="text-align:left; padding:0.6rem;">Module</th>
-                            <th>View</th>
-                            <th>Create</th>
-                            <th>Edit</th>
-                            <th>Delete</th>
-                            <th>Approve</th>
-                            <th>Export</th>
-                        </tr>
-                    </thead>
-                    <tbody id="matrixBody"></tbody>
-                </table>
-            </div>
-
-            <div class="modal-actions">
-                <button class="cancel" onclick="closeModal('roleModal')">Cancel</button>
-                <button class="save" onclick="saveRole()" id="saveRoleBtn">Save Role</button>
-            </div>
-        </div>
+        <button class="btn" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
     </div>
 
     <script>
@@ -647,482 +144,70 @@
         const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const MODULES = [
-            "Capitalization Table", "Share Ledger", "Dividend Declaration", "Distributions",
-            "Reserve", "Audit Log", "Dashboard", "Central Ledger", "Income", "Expenditure",
-            "M-PESA", "Approvals", "Locations", "Staff", "Payroll", "Assets", "Reports",
-            "Tasks", "Attendance", "Stock", "Customers", "Projects", "Categories",
-            "Recurring", "Budgets", "Overtime", "Leave", "System Health"
-        ];
-
-        let allRoles = [];
-        let allUsers = [];
-        let currentRoleId = null;
-        let activeUserFilter = 'all';
-
-        // ==========================================
-        // AUTHENTICATION
-        // ==========================================
-        async function checkAuth() {
+        // If already logged in, go straight to the app
+        (async() => {
             const {
                 data: {
                     session
                 }
             } = await supabaseClient.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return false;
+            if (session) window.location.href = 'index.html';
+        })();
+
+        async function doLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errEl = document.getElementById('errorMsg');
+            const btn = document.getElementById('loginBtn');
+            errEl.style.display = 'none';
+
+            if (!email || !password) {
+                errEl.textContent = 'Please enter both email and password.';
+                errEl.style.display = 'block';
+                return;
             }
 
-            const {
-                data: ur
-            } = await supabaseClient
-                .from('user_roles')
-                .select('role_id, roles(is_full_admin, name)')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
 
-            if (!ur || !ur.roles || !ur.roles.is_full_admin) {
-                document.body.innerHTML = '<h1 style="text-align:center; margin-top:20vh; color:#f0a89f;">Access Denied</h1><p style="text-align:center; color:#7f9bb8;">You must be a Full Administrator to view this page.</p>';
-                return false;
-            }
-
-            const currentEmail = session.user.email || 'Admin';
-            document.getElementById('statCurrent').textContent = currentEmail.split('@')[0];
-            return true;
-        }
-
-        // ==========================================
-        // ROLES LOGIC
-        // ==========================================
-        async function loadRoles() {
             const {
                 data,
                 error
-            } = await supabaseClient
-                .from('roles')
-                .select('*')
-                .order('is_full_admin', {
-                    ascending: false
-                })
-                .order('name');
-
-            if (!error) {
-                allRoles = data || [];
-                renderRoles();
-            }
-        }
-
-        function renderRoles() {
-            const body = document.getElementById('rolesTableBody');
-            if (!allRoles.length) {
-                body.innerHTML = '<tr><td colspan="4" style="text-align:center;">No roles found.</td></tr>';
-                return;
-            }
-            body.innerHTML = allRoles.map(r => `
-                <tr>
-                    <td><strong>${r.name}</strong></td>
-                    <td>${r.description || '—'}</td>
-                    <td><span class="status-chip ${r.is_full_admin ? 'chip-full' : 'chip-custom'}">${r.is_full_admin ? 'Full Admin' : 'Custom'}</span></td>
-                    <td>
-                        <div class="actions-cell">
-                            <button class="icon-btn edit" onclick="editRole('${r.id}')" title="Edit Role Permissions">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function buildMatrix() {
-            const body = document.getElementById('matrixBody');
-            body.innerHTML = MODULES.map(m => `
-                <tr>
-                    <td style="font-weight:600;">${m}</td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_view"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_create"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_edit"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_delete"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_approve"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_export"></td>
-                </tr>
-            `).join('');
-        }
-
-        function selectAllMatrix(state) {
-            document.querySelectorAll('#matrixBody input[type="checkbox"]').forEach(cb => cb.checked = state);
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-
-        document.getElementById('btnAddRole').addEventListener('click', () => {
-            currentRoleId = null;
-            document.getElementById('modalTitle').textContent = 'Create Role';
-            document.getElementById('roleName').value = '';
-            document.getElementById('roleDesc').value = '';
-            document.getElementById('roleName').disabled = false;
-            buildMatrix();
-            document.getElementById('roleModal').classList.add('show');
-        });
-
-        async function editRole(id) {
-            const r = allRoles.find(x => x.id === id);
-            if (!r) return;
-            currentRoleId = id;
-            document.getElementById('modalTitle').textContent = 'Edit Role — ' + r.name;
-            document.getElementById('roleName').value = r.name;
-            document.getElementById('roleDesc').value = r.description || '';
-            document.getElementById('roleName').disabled = r.is_full_admin;
-            buildMatrix();
-
-            const {
-                data
-            } = await supabaseClient.from('role_permissions').select('*').eq('role_id', id);
-            (data || []).forEach(p => {
-                ['can_view', 'can_create', 'can_edit', 'can_delete', 'can_approve', 'can_export'].forEach(action => {
-                    if (p[action]) {
-                        const cb = document.querySelector(`#matrixBody input[data-module="${p.module}"][data-action="${action}"]`);
-                        if (cb) cb.checked = true;
-                    }
-                });
+            } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password
             });
-            document.getElementById('roleModal').classList.add('show');
-        }
-
-        async function saveRole() {
-            const name = document.getElementById('roleName').value.trim();
-            const desc = document.getElementById('roleDesc').value.trim();
-            if (!name) return alert('Role name is required.');
-
-            const btn = document.getElementById('saveRoleBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-            let roleId = currentRoleId;
-            if (!roleId) {
-                const {
-                    data,
-                    error
-                } = await supabaseClient.from('roles').insert({
-                    name,
-                    description: desc
-                }).select('id').single();
-                if (error) {
-                    alert(error.message);
-                    btn.disabled = false;
-                    btn.innerHTML = 'Save Role';
-                    return;
-                }
-                roleId = data.id;
-            } else {
-                await supabaseClient.from('roles').update({
-                    name,
-                    description: desc
-                }).eq('id', roleId);
-            }
-
-            const permsByModule = {};
-            document.querySelectorAll('#matrixBody input[type="checkbox"]:checked').forEach(cb => {
-                const mod = cb.dataset.module;
-                if (!permsByModule[mod]) permsByModule[mod] = {
-                    role_id: roleId,
-                    module: mod
-                };
-                permsByModule[mod][cb.dataset.action] = true;
-            });
-
-            await supabaseClient.from('role_permissions').delete().eq('role_id', roleId);
-            const permRows = Object.values(permsByModule);
-            if (permRows.length > 0) {
-                await supabaseClient.from('role_permissions').insert(permRows);
-            }
 
             btn.disabled = false;
-            btn.innerHTML = 'Save Role';
-            closeModal('roleModal');
-            loadRoles();
-        }
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
 
-        // ==========================================
-        // USER MANAGEMENT LOGIC
-        // ==========================================
-
-        window.filterUsersByType = function(type) {
-            activeUserFilter = type;
-
-            document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
-
-            if (type === 'all') {
-                const card = document.querySelector('.card-purple');
-                if (card) card.classList.add('active-filter');
-            } else if (type === 'full') {
-                const card = document.querySelector('.card-green');
-                if (card) card.classList.add('active-filter');
-            } else if (type === 'limited') {
-                const card = document.querySelector('.card-pink');
-                if (card) card.classList.add('active-filter');
-            }
-
-            renderUsers();
-        };
-
-        async function loadUsers() {
-            const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Loading users...</td></tr>';
-
-            try {
-                const {
-                    data: profiles,
-                    error: profErr
-                } = await supabaseClient
-                    .from('profiles')
-                    .select('id, full_name, email');
-                if (profErr) throw profErr;
-
-                const {
-                    data: userRoles,
-                    error: urErr
-                } = await supabaseClient
-                    .from('user_roles')
-                    .select('user_id, roles(name)');
-                if (urErr) throw urErr;
-
-                allUsers = profiles.map(profile => {
-                    const roleRecord = userRoles.find(ur => ur.user_id === profile.id);
-                    const roleName = roleRecord && roleRecord.roles ? roleRecord.roles.name : 'Unassigned';
-
-                    return {
-                        id: profile.id,
-                        full_name: profile.full_name,
-                        email: profile.email,
-                        roleName: roleName
-                    };
-                });
-
-                renderUsers();
-
-            } catch (err) {
-                console.error("Error fetching users:", err);
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#f0a89f;">Error: ${err.message}</td></tr>`;
-            }
-        }
-
-        function renderUsers() {
-            const tbody = document.getElementById('usersTableBody');
-            const searchInput = document.getElementById('userSearchInput');
-            const searchQ = searchInput ? searchInput.value.toLowerCase() : '';
-
-            if (!allUsers.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>';
+            if (error) {
+                errEl.textContent = error.message;
+                errEl.style.display = 'block';
                 return;
             }
 
-            document.getElementById('statTotal').textContent = allUsers.length;
-            document.getElementById('statFull').textContent = allUsers.filter(u => u.roleName === 'Full Administrator' || u.roleName === 'Full Admin').length;
-            document.getElementById('statLimited').textContent = allUsers.filter(u => u.roleName !== 'Full Administrator' && u.roleName !== 'Full Admin').length;
+            // Confirm the account has a role assigned
+            const {
+                data: ur,
+                error: urErr
+            } = await supabaseClient
+                .from('user_roles').select('role_id').eq('user_id', data.user.id).maybeSingle();
 
-            let filtered = [...allUsers];
-            if (activeUserFilter === 'full') {
-                filtered = filtered.filter(u => u.roleName === 'Full Administrator' || u.roleName === 'Full Admin');
-            } else if (activeUserFilter === 'limited') {
-                filtered = filtered.filter(u => u.roleName !== 'Full Administrator' && u.roleName !== 'Full Admin');
-            }
-
-            if (searchQ) {
-                filtered = filtered.filter(u =>
-                    (u.full_name || '').toLowerCase().includes(searchQ) ||
-                    (u.email || '').toLowerCase().includes(searchQ) ||
-                    (u.roleName || '').toLowerCase().includes(searchQ)
-                );
-            }
-
-            if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users match your filter/search.</td></tr>';
+            if (urErr || !ur || !ur.role_id) {
+                await supabaseClient.auth.signOut();
+                errEl.textContent = 'Your account has no role assigned. Contact your administrator.';
+                errEl.style.display = 'block';
                 return;
             }
 
-            const colors = ['blue', 'green', 'purple', 'red', 'orange', 'gray'];
-
-            tbody.innerHTML = filtered.map((u, index) => {
-                        const initial = (u.full_name || u.email || 'U').charAt(0).toUpperCase();
-                        const colorClass = colors[index % colors.length];
-                        const isFull = u.roleName === 'Full Administrator' || u.roleName === 'Full Admin';
-                        const chipClass = isFull ? 'chip-full' : 'chip-custom';
-
-                        const displayName = u.full_name || u.email.split('@')[0];
-                        const subText = u.full_name ? `@${u.email.split('@')[0]}` : '';
-
-                        return `
-                <tr>
-                    <td>
-                        <div class="user-cell">
-                            <div class="avatar ${colorClass}">${initial}</div>
-                            <div>
-                                <strong>${displayName}</strong>
-                                ${subText ? `<div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${subText}</div>` : ''}
-                            </div>
-                        </div>
-                    </td>
-                    <td>—</td>
-                    <td><span class="status-chip ${chipClass}">${u.roleName}</span></td>
-                    <td>
-                        <div class="actions-cell">
-                            <button class="icon-btn edit" onclick="editUserRole('${u.id}', '${u.roleName}')" title="Edit Role">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                            <button class="icon-btn delete" onclick="deleteUser('${u.id}')" title="Delete User">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
+            window.location.href = 'index.html';
         }
 
-        window.editUserRole = async function(userId, currentRoleName) {
-            const newRoleName = prompt(`Enter new role name for this user (e.g., Accountant, Viewer):`, currentRoleName);
-            if (!newRoleName || newRoleName === currentRoleName) return;
-
-            try {
-                const { data: roleData, error: roleErr } = await supabaseClient
-                    .from('roles')
-                    .select('id')
-                    .eq('name', newRoleName)
-                    .single();
-
-                if (roleErr || !roleData) throw new Error(`Role '${newRoleName}' not found.`);
-
-                const { error: updateErr } = await supabaseClient
-                    .from('user_roles')
-                    .update({ role_id: roleData.id })
-                    .eq('user_id', userId);
-
-                if (updateErr) throw updateErr;
-
-                alert('Role updated successfully');
-                loadUsers(); 
-
-            } catch (err) {
-                alert(err.message);
-            }
-        };
-
-        window.deleteUser = async function(userId) {
-            if (!confirm('WARNING: Are you sure you want to permanently delete this user? They will lose all access immediately.')) return;
-
-            try {
-                const { error } = await supabaseClient.rpc('delete_user', { user_id_to_delete: userId });
-                if (error) throw error;
-                alert('User deleted successfully');
-                loadUsers();
-            } catch (err) {
-                alert('Error deleting user: ' + err.message + '\n\n(Make sure the delete_user RPC exists in Supabase)');
-            }
-        };
-
-        // ==========================================
-        // ADD ADMIN MODAL
-        // ==========================================
-        document.getElementById('btnAddAdmin').addEventListener('click', () => {
-            document.getElementById('newAdminName').value = '';
-            document.getElementById('newAdminEmail').value = '';
-            document.getElementById('newAdminPassword').value = '';
-            document.getElementById('addAdminError').style.display = 'none';
-
-            const roleSel = document.getElementById('newAdminRole');
-            roleSel.innerHTML = allRoles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-
-            document.getElementById('addAdminModal').classList.add('show');
+        document.getElementById('loginBtn').addEventListener('click', doLogin);
+        document.getElementById('password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doLogin();
         });
-
-        document.getElementById('addAdminCancel').addEventListener('click', () => {
-            document.getElementById('addAdminModal').classList.remove('show');
-        });
-
-        document.getElementById('addAdminSave').addEventListener('click', async () => {
-            const fullName = document.getElementById('newAdminName').value.trim();
-            const email = document.getElementById('newAdminEmail').value.trim();
-            const password = document.getElementById('newAdminPassword').value;
-            const roleId = document.getElementById('newAdminRole').value;
-            const btn = document.getElementById('addAdminSave');
-            const err = document.getElementById('addAdminError');
-
-            err.style.display = 'none';
-
-            if (!email || !password) {
-                err.textContent = 'Email and Password are required.';
-                err.style.display = 'block';
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-
-            try {
-                const { data, error } = await supabaseClient.functions.invoke('create-user-v2', {
-                    body: { email, password, role_id: roleId, full_name: fullName }
-                });
-
-                if (error) {
-                    let exactError = error.message;
-                    if (error.context) {
-                        try {
-                            const errData = await error.context.json();
-                            if (errData && errData.error) exactError = errData.error;
-                        } catch (e) {}
-                    }
-                    throw new Error(exactError);
-                }
-
-                if (data && data.error) throw new Error(data.error);
-
-                document.getElementById('addAdminModal').classList.remove('show');
-                alert('✅ User created successfully!');
-                
-                loadUsers(); 
-
-            } catch (e) {
-                console.error("Full Error Object:", e);
-                err.textContent = e.message;
-                err.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Create User';
-            }
-        });
-
-        // ==========================================
-        // LOGOUT & INITIALIZATION
-        // ==========================================
-        document.getElementById('btnLogout').addEventListener('click', async() => {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
-        });
-
-        (async() => {
-            if (await checkAuth()) {
-                // Load roles first
-                await loadRoles();
-                
-                // Load users
-                await loadUsers();
-                
-                // Force the default filter to show "Total Admins"
-                activeUserFilter = 'all';
-                const purpleCard = document.querySelector('.card-purple');
-                if (purpleCard) purpleCard.classList.add('active-filter');
-                renderUsers();
-
-                // Attach search listener
-                const searchInput = document.getElementById('userSearchInput');
-                if (searchInput) {
-                    searchInput.addEventListener('input', renderUsers);
-                }
-            }
-        })();
     </script>
 </body>
 
