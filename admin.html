@@ -146,8 +146,8 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <button onclick="switchView('view-role')" class="flex-1 md:flex-none px-4 py-2 bg-transparent border border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 text-sm font-medium rounded-lg transition">
-                        <i class="fas fa-shield-alt mr-2"></i> Create Role
-                    </button>
+    <i class="fas fa-shield-alt mr-2"></i> Create Role
+</button>
                     <button onclick="switchView('view-add')" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-lg shadow-blue-500/30">
                         <i class="fas fa-user-plus mr-2"></i> Add New Administrator
                     </button>
@@ -156,7 +156,8 @@
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 cursor-pointer hover:scale-[1.02] transition">
+                <!-- Card 1 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
                     <div>
                         <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">Total Admins</p>
                         <h2 class="text-3xl font-bold text-white" id="statTotal">0</h2>
@@ -165,7 +166,8 @@
                         <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 cursor-pointer hover:scale-[1.02] transition" onclick="filterUsers('full')">
+                <!-- Card 2 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20">
                     <div>
                         <p class="text-xs font-semibold text-emerald-100 uppercase tracking-wider mb-1">Full Admins</p>
                         <h2 class="text-3xl font-bold text-white" id="statFull">0</h2>
@@ -174,7 +176,8 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                 </div>
-                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/20 cursor-pointer hover:scale-[1.02] transition" onclick="filterUsers('limited')">
+                <!-- Card 3 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/20">
                     <div>
                         <p class="text-xs font-semibold text-pink-100 uppercase tracking-wider mb-1">Limited Access</p>
                         <h2 class="text-3xl font-bold text-white" id="statLimited">0</h2>
@@ -183,6 +186,7 @@
                         <i class="fas fa-user-cog"></i>
                     </div>
                 </div>
+                <!-- Card 4 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/20">
                     <div>
                         <p class="text-xs font-semibold text-cyan-100 uppercase tracking-wider mb-1">Current User</p>
