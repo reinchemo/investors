@@ -4754,6 +4754,12 @@
 
             return false;
         }
+        // Helper function to add exactly one month to a date
+        function addOneMonth(dateString) {
+            const d = new Date(dateString);
+            d.setMonth(d.getMonth() + 1);
+            return d.toISOString().split('T')[0];
+        }
 
         // --- APPLY PERMISSIONS TO UI ---
         function applyPermissionsToUI() {
@@ -5362,8 +5368,10 @@
             } else {
                 row.created_by = CURRENT_USER;
                 const {
+                    data: recData,
                     error
-                } = await supabaseClient.from('recurring_templates').insert(row);
+                } = await supabaseClient.from('recurring_templates').insert(row).select().single();
+
                 if (error) {
                     if (error.code === '23505') {
                         err.textContent = '⚠️ An active template with this description and day already exists.';
@@ -5371,8 +5379,11 @@
                         err.textContent = '⚠️ Save failed: ' + error.message;
                     }
                     err.style.display = 'block';
+                    console.error('Template Insert Error:', error);
                     return;
                 }
+
+                console.log('✅ Template created successfully:', recData);
                 await logAudit('CREATE', `Recurring`, `Created template: ${description} (day ${dayOfMonth})`, '', description);
                 showToast('✅ Template created', 'success');
             }
@@ -11158,12 +11169,13 @@ function openTxnModal(txn = null) {
         sequence++;
 
         // --- RECURRING LOGIC: SAVE NEW TEMPLATE ---
-        const isRecurring = document.getElementById('txnIsRecurring') && document.getElementById('txnIsRecurring').checked;
+              const isRecurring = document.getElementById('txnIsRecurring') && document.getElementById('txnIsRecurring').checked;
         if (isRecurring) {
             const nextRunDate = document.getElementById('txnNextRunDate').value || addOneMonth(date);
             const matchedLoc = locations.find(l => l.name === location);
             
-            await supabaseClient.from('recurring_templates').insert({
+            // 🔥 Added error catching and .select() to see the result
+            const { data: recData, error: recErr } = await supabaseClient.from('recurring_templates').insert({
                 description: description,
                 type: type,
                 category: category,
@@ -11179,8 +11191,19 @@ function openTxnModal(txn = null) {
                 active: true,
                 notes: 'Created from transaction: ' + reference,
                 created_by: CURRENT_USER
-            });
-            console.log('✅ Recurring template created');
+            }).select();
+
+            if (recErr) {
+                console.error('❌ Failed to create recurring template:', recErr);
+                showToast('⚠️ Transaction saved, but recurring template failed: ' + recErr.message, 'error');
+            } else {
+                console.log('✅ Recurring template created successfully:', recData);
+                showToast('✅ Transaction posted & Recurring template created', 'success');
+                
+                // 🔥 Force the recurring list to refresh immediately
+                await fetchRecurring();
+                renderRecurring();
+            }
         }
     }
     
@@ -13752,5 +13775,6 @@ function openTxnModal(txn = null) {
     <script src="mpesa-parser.js"></script>
     <script src="router.js"></script>
 </body>
+
 
 </html>
