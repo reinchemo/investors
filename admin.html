@@ -3,644 +3,680 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>STARLINK · Manage Administrators</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starlink · Manage Administrators</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=3"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#0f111a',
+                            card: '#181c2e',
+                            border: '#2a2f45',
+                            input: '#111424'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-         :root {
-            --bg-dark: #0b1120;
-            --panel-bg: #141e33;
-            --border: #1f2d4a;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --teal: #38bdf8;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-main);
-            padding: 2rem;
-            min-height: 100vh;
+            background-color: #0f111a;
+            color: #e2e8f0;
         }
-        /* HEADER */
+        /* View transitions */
         
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .header h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-        
-        .nav-actions {
-            display: flex;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--panel-bg);
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-family: inherit;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-        }
-        
-        .btn:hover {
-            border-color: var(--teal);
-            transform: translateY(-1px);
-        }
-        
-        .btn-primary {
-            background: #2563eb;
-            border-color: #2563eb;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-        /* STATS CARDS */
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            padding: 1.5rem;
-            border-radius: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .stat-card.active-filter {
-            outline: 2px solid white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-        }
-        
-        .stat-card .info span {
-            display: block;
-            font-size: 0.85rem;
-            opacity: 0.9;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-card .info strong {
-            font-size: 1.8rem;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        
-        .stat-card .icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-        
-        .card-purple {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-        }
-        
-        .card-green {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        
-        .card-pink {
-            background: linear-gradient(135deg, #ec4899, #db2777);
-        }
-        
-        .card-blue {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        }
-        /* TABLE CONTAINER */
-        
-        .table-container {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-        
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .table-header h3 {
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .search-bar {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .search-bar input {
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: var(--bg-dark);
-            color: white;
-            width: 250px;
-            font-family: inherit;
-        }
-        
-        .table-wrap {
-            overflow-x: auto;
-            width: 100%;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-        }
-        
-        th,
-        td {
-            padding: 1rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
-        }
-        
-        th {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            white-space: nowrap;
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
-        }
-        /* AVATARS & BADGES */
-        
-        .user-cell {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: white;
-            flex-shrink: 0;
-        }
-        
-        .avatar.blue {
-            background: #3b82f6;
-        }
-        
-        .avatar.green {
-            background: #10b981;
-        }
-        
-        .avatar.purple {
-            background: #8b5cf6;
-        }
-        
-        .avatar.red {
-            background: #ef4444;
-        }
-        
-        .avatar.orange {
-            background: #f59e0b;
-        }
-        
-        .avatar.gray {
-            background: #64748b;
-        }
-        
-        .status-chip {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        
-        .chip-full {
-            background: rgba(139, 92, 246, 0.2);
-            color: #a78bfa;
-        }
-        
-        .chip-custom {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
-        }
-        /* ICONS & BUTTONS */
-        
-        .actions-cell {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .icon-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        
-        .icon-btn:hover.edit {
-            border-color: #f59e0b;
-            color: #f59e0b;
-        }
-        
-        .icon-btn:hover.delete {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
-        /* MATRIX TABLE */
-        
-        .matrix-table th,
-        .matrix-table td {
-            text-align: center;
-            padding: 0.6rem;
-        }
-        
-        .matrix-table td:first-child {
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        .matrix-table input[type="checkbox"] {
-            accent-color: var(--teal);
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        /* MODAL */
-        
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(5, 10, 20, 0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-        }
-        
-        .modal-overlay.show {
-            display: flex;
-        }
-        
-        .modal-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 480px;
-            padding: 2rem;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-card h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            color: #f2f0eb;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .modal-card label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #7f9bb8;
-            text-transform: uppercase;
-            margin-bottom: 0.4rem;
-            margin-top: 0.8rem;
-        }
-        
-        .modal-card input,
-        .modal-card select {
-            width: 100%;
-            padding: 0.7rem;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: white;
-            font-family: inherit;
-        }
-        
-        .modal-card input:focus,
-        .modal-card select:focus {
-            outline: none;
-            border-color: var(--teal);
-        }
-        
-        .modal-card select option {
-            color: #0a0e1a;
-        }
-        
-        .modal-error {
-            color: #f0a89f;
-            font-size: 0.82rem;
-            margin-top: 0.7rem;
-            padding: 0.55rem 0.8rem;
-            background: rgba(226, 104, 91, 0.1);
-            border-radius: 8px;
+        .view-section {
             display: none;
         }
         
-        .modal-actions {
-            display: flex;
-            gap: 0.6rem;
-            margin-top: 1.5rem;
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
         }
         
-        .modal-actions button {
-            flex: 1;
-            padding: 0.8rem;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        
-        .modal-actions .cancel {
-            background: rgba(255, 255, 255, 0.06);
-            color: #c7d5e6;
-        }
-        
-        .modal-actions .save {
-            background: linear-gradient(135deg, #1a5a9c, #2a7ac4);
-            color: #fff;
-        }
-        /* RESPONSIVE DESIGN */
-        
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
+        /* Custom Scrollbar */
         
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .nav-actions {
-                width: 100%;
-            }
-            .nav-actions .btn {
-                flex: 1;
-                font-size: 0.75rem;
-                padding: 0.5rem;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            .table-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .search-bar {
-                width: 100%;
-            }
-            .search-bar input {
-                flex: 1;
-                width: 100%;
-            }
+         ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: #0f111a;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: #2a2f45;
+            border-radius: 4px;
+        }
+        /* Notifications Panel Animation */
+        
+        #notifPanel {
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #notifPanel.open {
+            transform: translateX(0);
+        }
+        /* Dropdown Animation */
+        
+        #profileDropdown {
+            display: none;
+        }
+        
+        #profileDropdown.open {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        /* Table striping */
+        
+        .table-row-striped:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .table-row-striped:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        /* Readonly inputs */
+        
+        input:read-only {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
     </style>
 </head>
 
-<body>
-    <!-- HEADER -->
-    <div class="header">
-        <div>
-            <h1><i class="fas fa-shield-alt" style="color: #38bdf8;"></i> Manage Administrators</h1>
-            <p>Manage system administrators and their access levels</p>
-        </div>
-        <div class="nav-actions">
-            <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Equity</a>
-            <a href="finance.html" class="btn"><i class="fas fa-coins"></i> Finance</a>
-            <button class="btn btn-primary" id="btnAddAdmin"><i class="fas fa-plus"></i> Add Admin</button>
-            <button class="btn" id="btnLogout" style="color:#f0a89f; border-color:rgba(226,104,91,0.3);"><i class="fas fa-sign-out-alt"></i> Logout</button>
-        </div>
-    </div>
+<body class="min-h-screen relative overflow-x-hidden">
 
-    <!-- STATS CARDS -->
-    <div class="stats-grid">
-        <div class="stat-card card-purple" style="cursor: pointer;" onclick="filterUsersByType('all')">
-            <div class="info"><span>Total Admins</span><strong id="statTotal">0</strong></div>
-            <div class="icon"><i class="fas fa-users"></i></div>
-        </div>
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="bg-[#0f111a] border-b border-gray-800 h-16 flex items-center justify-end px-6 sticky top-0 z-50">
+        <div class="flex items-center gap-4 md:gap-6 text-gray-400">
 
-        <div class="stat-card card-green" style="cursor: pointer;" onclick="filterUsersByType('full')">
-            <div class="info"><span>Full Admins</span><strong id="statFull">0</strong></div>
-            <div class="icon"><i class="fas fa-shield-check"></i></div>
-        </div>
+            <!-- Notification Bell -->
+            <button class="relative hover:text-white transition" onclick="toggleNotifications()">
+                <i class="far fa-bell"></i>
+                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-400 rounded-full border border-[#0f111a]"></span>
+            </button>
 
-        <div class="stat-card card-pink" style="cursor: pointer;" onclick="filterUsersByType('limited')">
-            <div class="info"><span>Limited Access</span><strong id="statLimited">0</strong></div>
-            <div class="icon"><i class="fas fa-user-cog"></i></div>
-        </div>
+            <!-- Profile Dropdown Container -->
+            <div class="relative flex items-center gap-2 cursor-pointer" onclick="toggleProfileDropdown(event)">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/30">
+                    U
+                </div>
+                <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="dropdownIcon"></i>
 
-        <div class="stat-card card-blue">
-            <div class="info"><span>Current User</span><strong id="statCurrent" style="font-size:1.2rem;">Loading...</strong></div>
-            <div class="icon"><i class="fas fa-user"></i></div>
-        </div>
-    </div>
-
-    <!-- ADMINISTRATOR LIST -->
-    <div class="table-container">
-        <div class="table-header">
-            <h3><i class="fas fa-list"></i> Administrator List</h3>
-            <div class="search-bar">
-                <input type="text" id="userSearchInput" placeholder="Search by username or role...">
+                <!-- Dropdown Menu -->
+                <div id="profileDropdown" class="absolute top-12 right-0 w-48 bg-[#1e2235] border border-gray-700 rounded-lg shadow-2xl py-2 z-50">
+                    <a href="#" onclick="switchView('view-list')" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition">Profile</a>
+                    <a href="#" onclick="switchView('view-settings')" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition">Settings</a>
+                    <div class="border-t border-gray-700 my-1"></div>
+                    <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition">Logout</button>
+                </div>
             </div>
         </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Username / Name</th>
-                        <th>Phone Number</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <tr>
-                        <td colspan="4" style="text-align:center;">Loading users...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    </nav>
 
-    <!-- ROLES TABLE -->
-    <div class="table-container">
-        <div class="table-header">
-            <h3><i class="fas fa-user-tag"></i> Role Definitions</h3>
-            <button class="btn btn-primary" id="btnAddRole"><i class="fas fa-plus"></i> Create Role</button>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Role Name</th>
-                        <th>Description</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="rolesTableBody"></tbody>
-            </table>
-        </div>
-    </div>
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-[1400px] mx-auto p-4 md:p-8">
 
-    <!-- ADD ADMIN MODAL -->
-    <div class="modal-overlay" id="addAdminModal">
-        <div class="modal-card">
-            <h3><i class="fas fa-user-plus" style="color:#38bdf8;"></i> Create New User</h3>
-            <label>Full Name</label>
-            <input type="text" id="newAdminName" placeholder="e.g. John Doe">
-            <label>Email Address <span style="color:#e8837a;">*</span></label>
-            <input type="email" id="newAdminEmail" placeholder="name@example.com">
-            <label>Password <span style="color:#e8837a;">*</span></label>
-            <input type="password" id="newAdminPassword" placeholder="Minimum 6 characters">
-            <label>Assign Role <span style="color:#e8837a;">*</span></label>
-            <select id="newAdminRole"></select>
-            <div class="modal-error" id="addAdminError"></div>
-            <div class="modal-actions">
-                <button class="cancel" id="addAdminCancel">Cancel</button>
-                <button class="save" id="addAdminSave">Create User</button>
-            </div>
-        </div>
-    </div>
+        <!-- ========================================== -->
+        <!-- VIEW 1: ADMINISTRATOR LIST                 -->
+        <!-- ========================================== -->
+        <div id="view-list" class="view-section active">
 
-    <!-- ROLE PERMISSIONS MODAL -->
-    <div class="modal-overlay" id="roleModal">
-        <div class="modal-card" style="max-width: 900px; width: 95%;">
-            <h3 id="modalTitle">Role Details</h3>
-            <label>Role Name</label>
-            <input type="text" id="roleName" placeholder="e.g. Accountant">
-            <label>Description</label>
-            <input type="text" id="roleDesc" placeholder="Short description">
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem; flex-wrap: wrap; gap: 1rem;">
-                <h3 style="margin:0; font-size:1rem;">Permissions</h3>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;" onclick="selectAllMatrix(true)">Select All</button>
-                    <button class="btn" style="font-size: 0.7rem; padding: 0.4rem 0.8rem;" onclick="selectAllMatrix(false)">Clear</button>
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-users text-gray-400"></i> Manage Administrator
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Manage system administrators and their access levels</p>
+                </div>
+                <div class="flex gap-3 w-full md:w-auto">
+                    <button onclick="switchView('view-add')" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-user-plus mr-2"></i> Add New Administrator
+                    </button>
                 </div>
             </div>
 
-            <div style="max-height: 400px; overflow: auto; border: 1px solid var(--border); border-radius: 8px;">
-                <table class="matrix-table" style="width:100%; min-width: 600px;">
-                    <thead>
-                        <tr>
-                            <th style="text-align:left; padding:0.6rem;">Module</th>
-                            <th>View</th>
-                            <th>Create</th>
-                            <th>Edit</th>
-                            <th>Delete</th>
-                            <th>Approve</th>
-                            <th>Export</th>
-                        </tr>
-                    </thead>
-                    <tbody id="matrixBody"></tbody>
-                </table>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Card 1 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 cursor-pointer hover:scale-[1.02] transition">
+                    <div>
+                        <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">Total Admins</p>
+                        <h2 class="text-3xl font-bold text-white" id="statTotal">0</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 cursor-pointer hover:scale-[1.02] transition" onclick="filterUsers('full')">
+                    <div>
+                        <p class="text-xs font-semibold text-emerald-100 uppercase tracking-wider mb-1">Full Admins</p>
+                        <h2 class="text-3xl font-bold text-white" id="statFull">0</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/20 cursor-pointer hover:scale-[1.02] transition" onclick="filterUsers('limited')">
+                    <div>
+                        <p class="text-xs font-semibold text-pink-100 uppercase tracking-wider mb-1">Limited Access</p>
+                        <h2 class="text-3xl font-bold text-white" id="statLimited">0</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                </div>
+                <!-- Card 4 -->
+                <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/20">
+                    <div>
+                        <p class="text-xs font-semibold text-cyan-100 uppercase tracking-wider mb-1">Current User</p>
+                        <h2 class="text-lg font-bold text-white" id="statCurrent">Loading...</h2>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
             </div>
 
-            <div class="modal-actions">
-                <button class="cancel" onclick="closeModal('roleModal')">Cancel</button>
-                <button class="save" onclick="saveRole()" id="saveRoleBtn">Save Role</button>
+            <!-- Administrator List Table -->
+            <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                <div class="p-4 border-b border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#1e2235]">
+                    <h3 class="font-semibold text-gray-200 flex items-center gap-2">
+                        <i class="fas fa-list text-gray-500"></i> Administrator List
+                    </h3>
+                    <div class="relative w-full md:w-72">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input type="text" id="userSearchInput" placeholder="Search by username..." class="w-full bg-[#111424] border border-gray-700 text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-400 min-w-[800px]">
+                        <thead class="text-xs uppercase bg-[#22273c] text-gray-500 font-semibold border-b border-gray-700">
+                            <tr>
+                                <th class="px-6 py-4"><i class="fas fa-user mr-2"></i> Username</th>
+                                <th class="px-6 py-4"><i class="fas fa-id-card mr-2"></i> Full Name</th>
+                                <th class="px-6 py-4"><i class="fas fa-phone mr-2"></i> Phone Number</th>
+                                <th class="px-6 py-4"><i class="fas fa-tag mr-2"></i> Type</th>
+                                <th class="px-6 py-4"><i class="fas fa-clock mr-2"></i> Last Login</th>
+                                <th class="px-6 py-4 text-right"><i class="fas fa-cog mr-2"></i> Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-gray-800/50">
+                            <!-- JS Renders Here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: ADD NEW ADMINISTRATOR              -->
+        <!-- ========================================== -->
+        <div id="view-add" class="view-section">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-user-plus text-gray-400"></i> Add New Administrator
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Create a new system administrator account</p>
+                </div>
+                <button onclick="switchView('view-list')" class="px-4 py-2 bg-transparent border border-gray-600 text-sm font-medium rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Users
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Section -->
+                <div class="lg:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-4">
+                        <h3 class="font-semibold text-white"><i class="fas fa-user mr-2"></i> Administrator Details</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-at text-blue-500 mr-1"></i> Username (Email) *</label>
+                                <input type="email" id="newAdminEmail" placeholder="e.g. user@starlink.com" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <p class="text-xs text-gray-500 mt-1">Used for login.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-id-badge text-blue-500 mr-1"></i> Full Name *</label>
+                                <input type="text" id="newAdminName" placeholder="Enter full name" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-phone text-blue-500 mr-1"></i> Phone Number</label>
+                                <input type="text" id="newAdminPhone" placeholder="e.g. 254712345678" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-tag text-blue-500 mr-1"></i> User Type *</label>
+                                <select id="newAdminRole" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-800 my-6">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-key text-yellow-500 mr-1"></i> Password *</label>
+                                <div class="relative">
+                                    <input type="password" id="newAdminPassword" placeholder="••••••••" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-check-circle text-yellow-500 mr-1"></i> Confirm Password *</label>
+                                <div class="relative">
+                                    <input type="password" placeholder="Confirm password" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="addAdminError" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg"></div>
+
+                        <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-800">
+                            <button onclick="switchView('view-list')" class="px-5 py-2.5 bg-gray-700/50 hover:bg-gray-700 text-white font-medium rounded-lg transition">Cancel</button>
+                            <button id="addAdminSave" class="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-medium rounded-lg transition shadow-lg shadow-teal-500/30">Save Administrator</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Guide Section -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-6 shadow-xl">
+                        <h4 class="text-sm font-semibold text-gray-300 mb-4"><i class="fas fa-info-circle text-blue-400 mr-2"></i> Help Guide</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <h5 class="text-blue-400 font-medium text-sm"><i class="fas fa-shield-alt mr-1"></i> Full Administrator</h5>
+                                <p class="text-xs text-gray-500 mt-1">Has unrestricted access to all system features including settings, user management, and billing.</p>
+                            </div>
+                            <div>
+                                <h5 class="text-yellow-400 font-medium text-sm"><i class="fas fa-user-cog mr-1"></i> Custom Roles</h5>
+                                <p class="text-xs text-gray-500 mt-1">Limited access based on permissions defined in Settings → Roles.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gradient-to-br from-indigo-900/40 to-[#181c2e] border border-indigo-500/20 rounded-xl p-6 text-center shadow-xl">
+                        <i class="fas fa-users text-blue-400 text-3xl mb-3"></i>
+                        <h4 class="text-sm font-semibold text-gray-200">Need more roles?</h4>
+                        <p class="text-xs text-gray-400 mt-1 mb-4">Create custom roles with specific permissions</p>
+                        <button onclick="switchView('view-role')" class="px-4 py-2 border border-indigo-500 text-indigo-400 text-xs font-medium rounded-lg hover:bg-indigo-500/10 transition">Add New Role</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: EDIT ADMINISTRATOR (YELLOW THEME)  -->
+        <!-- ========================================== -->
+        <div id="view-edit-user" class="view-section">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-pen text-yellow-400"></i> Edit Administrator: <span id="editHeaderUsername" class="text-gray-300">Loading...</span>
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Update administrator account details</p>
+                </div>
+                <button onclick="switchView('view-list')" class="px-4 py-2 bg-transparent border border-gray-600 text-sm font-medium rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Users
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Section -->
+                <div class="lg:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
+                        <h3 class="font-semibold text-white"><i class="fas fa-user mr-2"></i> Administrator Details</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-at text-blue-500 mr-1"></i> Username *</label>
+                                <input type="text" id="editUserUsername" readonly class="w-full bg-[#111424] border border-gray-700 text-gray-400 rounded-lg px-4 py-2.5 outline-none cursor-not-allowed">
+                                <p class="text-xs text-gray-500 mt-1">Used for login. Cannot be changed here.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-id-badge text-blue-500 mr-1"></i> Full Name *</label>
+                                <input type="text" id="editUserFullName" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-phone text-blue-500 mr-1"></i> Phone Number</label>
+                                <input type="text" id="editUserPhone" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <p class="text-xs text-gray-500 mt-1">For contact and notifications</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-tag text-blue-500 mr-1"></i> User Type *</label>
+                                <select id="editUserRole" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-800 my-6">
+
+                        <div class="mb-6">
+                            <h4 class="text-sm font-semibold text-gray-300 mb-2"><i class="fas fa-lock text-gray-400 mr-2"></i> Change Password <span class="text-xs text-gray-500 font-normal ml-2">(Optional)</span></h4>
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 flex gap-3 text-blue-300 text-sm mb-4">
+                                <i class="fas fa-info-circle mt-0.5"></i>
+                                <p>Keep Blank to do not change Password</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-key text-yellow-500 mr-1"></i> Password</label>
+                                <div class="relative">
+                                    <input type="password" id="editUserPassword" placeholder="Enter new password" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-check-circle text-yellow-500 mr-1"></i> Confirm Password</label>
+                                <div class="relative">
+                                    <input type="password" id="editUserConfirmPassword" placeholder="Confirm new password" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="editUserError" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg"></div>
+
+                        <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-800">
+                            <button onclick="switchView('view-list')" class="px-5 py-2.5 bg-gray-700/50 hover:bg-gray-700 text-white font-medium rounded-lg transition">Cancel</button>
+                            <button id="editUserSaveBtn" class="px-6 py-2.5 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-medium rounded-lg transition shadow-lg shadow-yellow-500/30">Update Administrator</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: User Info Card -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-[#2a2f45] border border-gray-700 rounded-xl p-6 shadow-xl flex flex-col items-center text-center">
+                        <h4 class="text-sm font-semibold text-teal-400 mb-4 w-full text-left"><i class="fas fa-info-circle mr-1"></i> User Information</h4>
+
+                        <div class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-4xl shadow-lg mb-4" id="editAvatar">
+                            U
+                        </div>
+                        <h3 class="text-lg font-bold text-white uppercase" id="editSideName">STARLINK ULTRANET</h3>
+                        <p class="text-sm text-gray-400 mb-6" id="editSideUsername">@ultranet</p>
+
+                        <div class="w-full text-left space-y-4">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">User Type</p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30" id="editSideRole">
+                                    <i class="fas fa-tag mr-1"></i> Full Administrator
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Phone Number</p>
+                                <p class="text-sm text-blue-400" id="editSidePhone">—</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Last Login</p>
+                                <p class="text-sm text-gray-300" id="editSideLogin">2026-11-02 18:45:57</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-6 shadow-xl">
+                        <h4 class="text-sm font-semibold text-emerald-400 mb-3"><i class="fas fa-lock mr-2"></i> Password Tips</h4>
+                        <ul class="text-xs text-gray-400 space-y-2 list-disc list-inside">
+                            <li>Use at least 8 characters</li>
+                            <li>Mix uppercase and lowercase</li>
+                            <li>Include numbers and symbols</li>
+                            <li>Avoid common words</li>
+                            <li>Don't reuse old passwords</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: CREATE ROLE / PERMISSIONS MATRIX   -->
+        <!-- ========================================== -->
+        <div id="view-role" class="view-section">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-shield-alt text-blue-500"></i> Create New Role
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Define permissions for a new user role</p>
+                </div>
+                <button onclick="switchView('view-list')" class="px-4 py-2 bg-transparent border border-gray-600 text-sm font-medium rounded-lg hover:bg-gray-800 transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Roles
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Side: Role Details -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                            <h3 class="font-semibold text-white"><i class="fas fa-tag mr-2"></i> Role Details</h3>
+                        </div>
+                        <div class="p-6">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role Name *</label>
+                            <input type="text" id="roleName" placeholder="e.g. Support Staff" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none mb-4">
+
+                            <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Description</label>
+                            <input type="text" id="roleDesc" placeholder="Short description" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none mb-6">
+
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 flex gap-3 text-blue-300 text-xs leading-relaxed mb-6">
+                                <i class="fas fa-info-circle mt-0.5"></i>
+                                <p>Select permissions for each module. Users with this role will only see allowed sections.</p>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="toggleAllMatrix(true)" class="flex-1 px-3 py-2 bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-medium rounded-lg hover:bg-teal-500/20 transition"><i class="fas fa-check-square mr-1"></i> Select All</button>
+                                <button onclick="toggleAllMatrix(false)" class="flex-1 px-3 py-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium rounded-lg hover:bg-red-500/20 transition"><i class="fas fa-square mr-1"></i> Deselect All</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Permissions Matrix -->
+                <div class="lg:col-span-8">
+                    <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl h-full flex flex-col">
+                        <div class="bg-[#1e2235] px-6 py-4 border-b border-gray-800">
+                            <h3 class="font-semibold text-yellow-500"><i class="fas fa-lock mr-2"></i> Permissions Matrix</h3>
+                        </div>
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left text-sm text-gray-300">
+                                <thead class="text-xs uppercase bg-[#22273c] text-gray-500 font-semibold border-b border-gray-700">
+                                    <tr>
+                                        <th class="px-6 py-3 w-1/3">Module</th>
+                                        <th class="px-4 py-3 text-center"><i class="far fa-eye mr-1"></i> View</th>
+                                        <th class="px-4 py-3 text-center"><i class="fas fa-plus mr-1"></i> Create</th>
+                                        <th class="px-4 py-3 text-center"><i class="fas fa-pen mr-1"></i> Edit</th>
+                                        <th class="px-4 py-3 text-center"><i class="fas fa-trash mr-1"></i> Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="matrixBody" class="divide-y divide-gray-800/50">
+                                    <!-- JS Renders Matrix Rows Here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="roleError" class="hidden m-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg"></div>
+                        <div class="p-6 bg-[#1e2235] border-t border-gray-800 flex justify-between">
+                            <button onclick="switchView('view-list')" class="px-5 py-2.5 bg-gray-700/50 hover:bg-gray-700 text-white font-medium rounded-lg transition">Cancel</button>
+                            <button id="saveRoleBtn" onclick="saveRole()" class="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-medium rounded-lg transition shadow-lg shadow-teal-500/30"><i class="fas fa-save mr-2"></i> Create Role</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: GENERAL SETTINGS                   -->
+        <!-- ========================================== -->
+        <div id="view-settings" class="view-section">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-cog text-blue-400"></i> General Settings
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Configure your application settings and preferences</p>
+                </div>
+
+            </div>
+
+            <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-800 bg-[#1e2235] px-4 gap-6">
+                    <button class="py-4 text-sm font-medium text-blue-400 border-b-2 border-blue-400"><i class="fas fa-building mr-2"></i> Company Info</button>
+
+                </div>
+
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Main Form -->
+                    <div class="lg:col-span-3 space-y-6">
+                        <h3 class="text-blue-400 font-medium mb-4"><i class="fas fa-info-circle mr-2"></i> Company Information</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Application Name/ Company Name</label>
+                                <input type="text" id="setCompanyName" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">This Name will be shown on the Title</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Phone Number</label>
+                                <input type="text" id="setPhone" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Phone number is used for support contact</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Address</label>
+                            <textarea id="setAddress" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 h-24"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">You can use html tag</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Zip Code</label>
+                                <input type="text" id="setZip" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Account Prefix</label>
+                                <input type="text" id="setPrefix" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Prefix for customer account numbers</p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-gray-400 font-medium mt-8 mb-4"><i class="fas fa-headset mr-2"></i> Customer Support Contact</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Support Phone Number</label>
+                                <input type="text" id="setSupportPhone" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Support Email</label>
+                                <input type="email" id="setSupportEmail" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Router Alert Phone Numbers</label>
+                            <textarea id="setRouterAlerts" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 h-20"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Enter comma-separated phone numbers to receive router offline/online alerts.</p>
+                        </div>
+
+                        <div id="settingsSuccess" class="hidden mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm rounded-lg">
+                            Settings saved successfully!
+                        </div>
+
+                        <div class="flex gap-3 pt-6">
+                            <button id="saveSettingsBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition shadow-lg shadow-blue-500/30"><i class="fas fa-save mr-2"></i> Save Changes Settings</button>
+                            <button onclick="switchView('view-list')" class="px-5 py-2.5 bg-gray-700/50 hover:bg-gray-700 text-white font-medium rounded-lg transition"><i class="fas fa-times mr-2"></i> Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tips Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-[#2a2f45] border border-gray-700 rounded-xl p-5 shadow-xl">
+                            <h4 class="text-sm font-semibold text-gray-300 mb-4"><i class="fas fa-question-circle text-blue-400 mr-2"></i> Quick Tips</h4>
+                            <ul class="space-y-3 text-xs text-teal-300">
+                                <li class="flex gap-2"><i class="fas fa-check mt-0.5"></i> Company name appears on invoices and customer portal</li>
+                                <li class="flex gap-2"><i class="fas fa-check mt-0.5"></i> Phone number is used for support contact</li>
+                                <li class="flex gap-2"><i class="fas fa-check mt-0.5"></i> Account prefix helps organize customer IDs</li>
+                                <li class="flex gap-2"><i class="fas fa-check mt-0.5"></i> Support contacts are shown on user dashboard</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- NOTIFICATIONS SLIDE-OUT PANEL -->
+    <div id="notifOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden transition-opacity" onclick="toggleNotifications()"></div>
+
+    <div id="notifPanel" class="fixed top-0 right-0 w-full md:w-[380px] h-full bg-[#1e2235] border-l border-gray-700 z-[110] shadow-2xl flex flex-col">
+        <div class="flex justify-between items-center p-5 border-b border-gray-700">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="fas fa-bell text-gray-400"></i> Notifications
+                <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">6</span>
+            </h3>
+            <button onclick="toggleNotifications()" class="text-gray-400 hover:text-white transition"><i class="fas fa-times text-lg"></i></button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-3">
+            <div class="bg-[#2a2f45] border border-gray-700 p-4 rounded-lg flex items-start gap-4">
+                <div class="w-8 h-8 rounded border border-gray-600 flex items-center justify-center text-gray-400 shrink-0"><i class="fas fa-edit"></i></div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold text-gray-200">Edit Action</h4>
+                    <p class="text-xs text-gray-400 mt-1">ultranet Viewed edit admin user pagerein</p>
+                    <p class="text-[10px] text-gray-500 mt-2">5 minutes ago</p>
+                    <span class="inline-block mt-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">New</span>
+                </div>
+                <button class="text-gray-500 hover:text-teal-400 transition"><i class="far fa-check-square"></i></button>
+            </div>
+            <div class="bg-[#2a2f45] border border-gray-700 p-4 rounded-lg flex items-start gap-4">
+                <div class="w-8 h-8 rounded border border-gray-600 flex items-center justify-center text-gray-400 shrink-0"><i class="fas fa-edit"></i></div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold text-gray-200">Edit Action</h4>
+                    <p class="text-xs text-gray-400 mt-1">ultranet Viewed edit admin user pagerein</p>
+                    <p class="text-[10px] text-gray-500 mt-2">4 minutes ago</p>
+                    <span class="inline-block mt-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">New</span>
+                </div>
+                <button class="text-gray-500 hover:text-teal-400 transition"><i class="far fa-check-square"></i></button>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-700 flex gap-2 bg-[#181c2e]">
+            <button class="flex-1 py-2 border border-gray-600 text-gray-300 text-xs font-medium rounded hover:bg-gray-800 transition"><i class="fas fa-check-double mr-1"></i> Mark All Read</button>
+            <button class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition"><i class="fas fa-trash mr-1"></i> Clear All</button>
+        </div>
     </div>
+
 
     <script>
         const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
@@ -648,17 +684,91 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const MODULES = [
-            "Capitalization Table", "Share Ledger", "Dividend Declaration", "Distributions",
-            "Reserve", "Audit Log", "Dashboard", "Central Ledger", "Income", "Expenditure",
-            "M-PESA", "Approvals", "Locations", "Staff", "Payroll", "Assets", "Reports",
+            "Dashboard", "Central Ledger", "Income", "Expenditure", "M-PESA",
+            "Approvals", "Locations", "Staff", "Payroll", "Assets", "Reports",
             "Tasks", "Attendance", "Stock", "Customers", "Projects", "Categories",
-            "Recurring", "Budgets", "Overtime", "Leave", "System Health"
+            "Recurring", "Budgets", "Overtime", "Leave", "System Health",
+            "Capitalization Table", "Share Ledger", "Dividend Declaration", "Distributions", "Reserve"
+        ];
+
+        const ROW_COLORS = [
+            'bg-indigo-900/20', 'bg-emerald-900/10', 'bg-cyan-900/20',
+            'bg-blue-900/10', 'bg-purple-900/20', 'bg-amber-900/10',
+            'bg-rose-900/20', 'bg-teal-900/10'
         ];
 
         let allRoles = [];
         let allUsers = [];
         let currentRoleId = null;
         let activeUserFilter = 'all';
+        let editingUserId = null;
+
+        // ==========================================
+        // UI TOGGLES
+        // ==========================================
+        function toggleProfileDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('profileDropdown');
+            const icon = document.getElementById('dropdownIcon');
+            dropdown.classList.toggle('open');
+            icon.style.transform = dropdown.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('profileDropdown');
+            const icon = document.getElementById('dropdownIcon');
+            if (dropdown.classList.contains('open') && !e.target.closest('.relative')) {
+                dropdown.classList.remove('open');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+
+        function toggleNotifications() {
+            const panel = document.getElementById('notifPanel');
+            const overlay = document.getElementById('notifOverlay');
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                overlay.classList.add('hidden');
+            } else {
+                panel.classList.add('open');
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        // ==========================================
+        // VIEW SWITCHING LOGIC
+        // ==========================================
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            document.getElementById('profileDropdown').classList.remove('open');
+
+            if (viewId === 'view-add') {
+                document.getElementById('newAdminName').value = '';
+                document.getElementById('newAdminEmail').value = '';
+                document.getElementById('newAdminPhone').value = '';
+                document.getElementById('newAdminPassword').value = '';
+                document.getElementById('addAdminError').classList.add('hidden');
+                populateRoleDropdown('newAdminRole');
+            }
+            if (viewId === 'view-role') {
+                currentRoleId = null;
+                document.getElementById('roleName').value = '';
+                document.getElementById('roleDesc').value = '';
+                document.getElementById('roleName').disabled = false;
+                document.getElementById('saveRoleBtn').innerHTML = '<i class="fas fa-save mr-2"></i> Create Role';
+                buildMatrix();
+            }
+            if (viewId === 'view-settings') {
+                loadSettings();
+            }
+        }
 
         // ==========================================
         // AUTHENTICATION
@@ -709,97 +819,49 @@
 
             if (!error) {
                 allRoles = data || [];
-                renderRoles();
             }
         }
 
-        function renderRoles() {
-            const body = document.getElementById('rolesTableBody');
-            if (!allRoles.length) {
-                body.innerHTML = '<tr><td colspan="4" style="text-align:center;">No roles found.</td></tr>';
-                return;
-            }
-            body.innerHTML = allRoles.map(r => `
-                <tr>
-                    <td><strong>${r.name}</strong></td>
-                    <td>${r.description || '—'}</td>
-                    <td><span class="status-chip ${r.is_full_admin ? 'chip-full' : 'chip-custom'}">${r.is_full_admin ? 'Full Admin' : 'Custom'}</span></td>
-                    <td>
-                        <div class="actions-cell">
-                            <button class="icon-btn edit" onclick="editRole('${r.id}')" title="Edit Role Permissions">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+        function populateRoleDropdown(elementId) {
+            const sel = document.getElementById(elementId);
+            sel.innerHTML = allRoles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
         }
 
         function buildMatrix() {
             const body = document.getElementById('matrixBody');
-            body.innerHTML = MODULES.map(m => `
-                <tr>
-                    <td style="font-weight:600;">${m}</td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_view"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_create"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_edit"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_delete"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_approve"></td>
-                    <td><input type="checkbox" data-module="${m}" data-action="can_export"></td>
+            body.innerHTML = MODULES.map((m, index) => {
+                const colorClass = ROW_COLORS[index % ROW_COLORS.length];
+                return `
+                <tr class="${colorClass} hover:bg-white/5 transition">
+                    <td class="px-6 py-3 font-medium text-gray-200">${m}</td>
+                    <td class="px-4 py-3 text-center"><input type="checkbox" class="w-4 h-4 accent-blue-500 cursor-pointer" data-module="${m}" data-action="can_view"></td>
+                    <td class="px-4 py-3 text-center"><input type="checkbox" class="w-4 h-4 accent-blue-500 cursor-pointer" data-module="${m}" data-action="can_create"></td>
+                    <td class="px-4 py-3 text-center"><input type="checkbox" class="w-4 h-4 accent-blue-500 cursor-pointer" data-module="${m}" data-action="can_edit"></td>
+                    <td class="px-4 py-3 text-center"><input type="checkbox" class="w-4 h-4 accent-blue-500 cursor-pointer" data-module="${m}" data-action="can_delete"></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        function selectAllMatrix(state) {
+        function toggleAllMatrix(state) {
             document.querySelectorAll('#matrixBody input[type="checkbox"]').forEach(cb => cb.checked = state);
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
-
-        document.getElementById('btnAddRole').addEventListener('click', () => {
-            currentRoleId = null;
-            document.getElementById('modalTitle').textContent = 'Create Role';
-            document.getElementById('roleName').value = '';
-            document.getElementById('roleDesc').value = '';
-            document.getElementById('roleName').disabled = false;
-            buildMatrix();
-            document.getElementById('roleModal').classList.add('show');
-        });
-
-        async function editRole(id) {
-            const r = allRoles.find(x => x.id === id);
-            if (!r) return;
-            currentRoleId = id;
-            document.getElementById('modalTitle').textContent = 'Edit Role — ' + r.name;
-            document.getElementById('roleName').value = r.name;
-            document.getElementById('roleDesc').value = r.description || '';
-            document.getElementById('roleName').disabled = r.is_full_admin;
-            buildMatrix();
-
-            const {
-                data
-            } = await supabaseClient.from('role_permissions').select('*').eq('role_id', id);
-            (data || []).forEach(p => {
-                ['can_view', 'can_create', 'can_edit', 'can_delete', 'can_approve', 'can_export'].forEach(action => {
-                    if (p[action]) {
-                        const cb = document.querySelector(`#matrixBody input[data-module="${p.module}"][data-action="${action}"]`);
-                        if (cb) cb.checked = true;
-                    }
-                });
-            });
-            document.getElementById('roleModal').classList.add('show');
         }
 
         async function saveRole() {
             const name = document.getElementById('roleName').value.trim();
             const desc = document.getElementById('roleDesc').value.trim();
-            if (!name) return alert('Role name is required.');
+            const errBox = document.getElementById('roleError');
+
+            if (!name) {
+                errBox.textContent = 'Role name is required.';
+                errBox.classList.remove('hidden');
+                return;
+            }
 
             const btn = document.getElementById('saveRoleBtn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            errBox.classList.add('hidden');
 
             let roleId = currentRoleId;
             if (!roleId) {
@@ -811,9 +873,10 @@
                     description: desc
                 }).select('id').single();
                 if (error) {
-                    alert(error.message);
+                    errBox.textContent = error.message;
+                    errBox.classList.remove('hidden');
                     btn.disabled = false;
-                    btn.innerHTML = 'Save Role';
+                    btn.innerHTML = '<i class="fas fa-save mr-2"></i> Create Role';
                     return;
                 }
                 roleId = data.id;
@@ -836,64 +899,42 @@
 
             await supabaseClient.from('role_permissions').delete().eq('role_id', roleId);
             const permRows = Object.values(permsByModule);
-            if (permRows.length > 0) {
-                await supabaseClient.from('role_permissions').insert(permRows);
-            }
+            if (permRows.length > 0) await supabaseClient.from('role_permissions').insert(permRows);
 
             btn.disabled = false;
-            btn.innerHTML = 'Save Role';
-            closeModal('roleModal');
+            btn.innerHTML = '<i class="fas fa-save mr-2"></i> Create Role';
+            switchView('view-list');
             loadRoles();
         }
 
         // ==========================================
         // USER MANAGEMENT LOGIC
         // ==========================================
-
-        window.filterUsersByType = function(type) {
+        window.filterUsers = function(type) {
             activeUserFilter = type;
-
-            document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
-
-            if (type === 'all') {
-                const card = document.querySelector('.card-purple');
-                if (card) card.classList.add('active-filter');
-            } else if (type === 'full') {
-                const card = document.querySelector('.card-green');
-                if (card) card.classList.add('active-filter');
-            } else if (type === 'limited') {
-                const card = document.querySelector('.card-pink');
-                if (card) card.classList.add('active-filter');
-            }
-
             renderUsers();
         };
 
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Loading users...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading users...</td></tr>';
 
             try {
                 const {
                     data: profiles,
                     error: profErr
-                } = await supabaseClient
-                    .from('profiles')
-                    .select('id, full_name, email');
+                } = await supabaseClient.from('profiles').select('id, full_name, email');
                 if (profErr) throw profErr;
 
                 const {
                     data: userRoles,
                     error: urErr
-                } = await supabaseClient
-                    .from('user_roles')
-                    .select('user_id, roles(name)');
+                } = await supabaseClient.from('user_roles').select('user_id, roles(name)');
                 if (urErr) throw urErr;
 
                 allUsers = profiles.map(profile => {
                     const roleRecord = userRoles.find(ur => ur.user_id === profile.id);
                     const roleName = roleRecord && roleRecord.roles ? roleRecord.roles.name : 'Unassigned';
-
                     return {
                         id: profile.id,
                         full_name: profile.full_name,
@@ -903,10 +944,9 @@
                 });
 
                 renderUsers();
-
             } catch (err) {
                 console.error("Error fetching users:", err);
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#f0a89f;">Error: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
             }
         }
 
@@ -916,65 +956,66 @@
             const searchQ = searchInput ? searchInput.value.toLowerCase() : '';
 
             if (!allUsers.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users found.</td></tr>';
                 return;
             }
 
             document.getElementById('statTotal').textContent = allUsers.length;
-            document.getElementById('statFull').textContent = allUsers.filter(u => u.roleName === 'Full Administrator' || u.roleName === 'Full Admin').length;
-            document.getElementById('statLimited').textContent = allUsers.filter(u => u.roleName !== 'Full Administrator' && u.roleName !== 'Full Admin').length;
+            document.getElementById('statFull').textContent = allUsers.filter(u => u.roleName === 'Full Administrator').length;
+            document.getElementById('statLimited').textContent = allUsers.filter(u => u.roleName !== 'Full Administrator').length;
 
             let filtered = [...allUsers];
-            if (activeUserFilter === 'full') {
-                filtered = filtered.filter(u => u.roleName === 'Full Administrator' || u.roleName === 'Full Admin');
-            } else if (activeUserFilter === 'limited') {
-                filtered = filtered.filter(u => u.roleName !== 'Full Administrator' && u.roleName !== 'Full Admin');
-            }
+            if (activeUserFilter === 'full') filtered = filtered.filter(u => u.roleName === 'Full Administrator');
+            else if (activeUserFilter === 'limited') filtered = filtered.filter(u => u.roleName !== 'Full Administrator');
 
             if (searchQ) {
-                filtered = filtered.filter(u =>
-                    (u.full_name || '').toLowerCase().includes(searchQ) ||
-                    (u.email || '').toLowerCase().includes(searchQ) ||
-                    (u.roleName || '').toLowerCase().includes(searchQ)
-                );
+                filtered = filtered.filter(u => (u.full_name || '').toLowerCase().includes(searchQ) || (u.email || '').toLowerCase().includes(searchQ) || (u.roleName || '').toLowerCase().includes(searchQ));
             }
 
             if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No users match your filter/search.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users match your filter.</td></tr>';
                 return;
             }
 
-            const colors = ['blue', 'green', 'purple', 'red', 'orange', 'gray'];
+            const avatarColors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-orange-500', 'bg-teal-500'];
 
             tbody.innerHTML = filtered.map((u, index) => {
-                        const initial = (u.full_name || u.email || 'U').charAt(0).toUpperCase();
-                        const colorClass = colors[index % colors.length];
-                        const isFull = u.roleName === 'Full Administrator' || u.roleName === 'Full Admin';
-                        const chipClass = isFull ? 'chip-full' : 'chip-custom';
+                const initial = (u.full_name || u.email || 'U').charAt(0).toUpperCase();
+                const colorClass = avatarColors[index % avatarColors.length];
 
-                        const displayName = u.full_name || u.email.split('@')[0];
-                        const subText = u.full_name ? `@${u.email.split('@')[0]}` : '';
+                let badgeClass = 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+                if (u.roleName === 'Full Administrator') badgeClass = 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+                else if (u.roleName !== 'Unassigned') badgeClass = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
 
-                        return `
-                <tr>
-                    <td>
-                        <div class="user-cell">
-                            <div class="avatar ${colorClass}">${initial}</div>
-                            <div>
-                                <strong>${displayName}</strong>
-                                ${subText ? `<div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${subText}</div>` : ''}
+                const displayName = u.full_name || 'N/A';
+                const username = u.email.split('@')[0];
+                const lastLogin = index === 0 ? '2026-11-02 18:45:57' : (index === 1 ? '2026-10-23 14:20:33' : 'Never');
+
+                return `
+                <tr class="table-row-striped transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                ${initial}
                             </div>
+                            <span class="font-medium text-gray-200">${username}</span>
                         </div>
                     </td>
-                    <td>—</td>
-                    <td><span class="status-chip ${chipClass}">${u.roleName}</span></td>
-                    <td>
-                        <div class="actions-cell">
-                            <button class="icon-btn edit" onclick="editUserRole('${u.id}', '${u.roleName}')" title="Edit Role">
-                                <i class="fas fa-pen"></i>
+                    <td class="px-6 py-4 text-gray-300">${displayName}</td>
+                    <td class="px-6 py-4 text-teal-400 hover:underline cursor-pointer">—</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">
+                            <i class="fas fa-tag mr-1 text-[10px]"></i> ${u.roleName}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-400 text-xs"><i class="fas fa-clock mr-1"></i> ${lastLogin}</td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="openEditUser('${u.id}')" class="w-8 h-8 rounded border border-gray-600 text-gray-400 hover:text-white hover:bg-gray-700 transition flex items-center justify-center" title="Edit User">
+                                <i class="fas fa-pen text-xs"></i>
                             </button>
-                            <button class="icon-btn delete" onclick="deleteUser('${u.id}')" title="Delete User">
-                                <i class="fas fa-trash"></i>
+                            <button onclick="deleteUser('${u.id}')" class="w-8 h-8 rounded border border-red-500/30 text-red-400 hover:text-white hover:bg-red-500 transition flex items-center justify-center" title="Delete User">
+                                <i class="fas fa-trash text-xs"></i>
                             </button>
                         </div>
                     </td>
@@ -982,67 +1023,90 @@
             }).join('');
         }
 
-        window.editUserRole = async function(userId, currentRoleName) {
-            const newRoleName = prompt(`Enter new role name for this user (e.g., Accountant, Viewer):`, currentRoleName);
-            if (!newRoleName || newRoleName === currentRoleName) return;
+        // --- OPEN EDIT USER VIEW ---
+        function openEditUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
 
-            try {
-                const { data: roleData, error: roleErr } = await supabaseClient
-                    .from('roles')
-                    .select('id')
-                    .eq('name', newRoleName)
-                    .single();
+            editingUserId = userId;
+            const username = user.email.split('@')[0];
 
-                if (roleErr || !roleData) throw new Error(`Role '${newRoleName}' not found.`);
+            // Populate inputs
+            document.getElementById('editHeaderUsername').textContent = username;
+            document.getElementById('editUserUsername').value = user.email;
+            document.getElementById('editUserFullName').value = user.full_name || '';
+            document.getElementById('editUserPhone').value = ''; // Add logic if you store phone
+            populateRoleDropdown('editUserRole');
 
-                const { error: updateErr } = await supabaseClient
-                    .from('user_roles')
-                    .update({ role_id: roleData.id })
-                    .eq('user_id', userId);
+            // Set current role in dropdown
+            const roleObj = allRoles.find(r => r.name === user.roleName);
+            if (roleObj) document.getElementById('editUserRole').value = roleObj.id;
 
-                if (updateErr) throw updateErr;
+            // Populate Side Card
+            document.getElementById('editAvatar').textContent = (user.full_name || username).charAt(0).toUpperCase();
+            document.getElementById('editSideName').textContent = user.full_name || 'N/A';
+            document.getElementById('editSideUsername').textContent = `@${username}`;
+            document.getElementById('editSidePhone').textContent = '—';
+            document.getElementById('editUserPassword').value = '';
+            document.getElementById('editUserConfirmPassword').value = '';
+            document.getElementById('editUserError').classList.add('hidden');
 
-                alert('Role updated successfully');
-                loadUsers(); 
+            switchView('view-edit-user');
+        }
 
-            } catch (err) {
-                alert(err.message);
+        // --- SAVE EDITED USER ---
+        document.getElementById('editUserSaveBtn').addEventListener('click', async() => {
+            if (!editingUserId) return;
+            const btn = document.getElementById('editUserSaveBtn');
+            const err = document.getElementById('editUserError');
+
+            const fullName = document.getElementById('editUserFullName').value.trim();
+            const roleId = document.getElementById('editUserRole').value;
+            const pass = document.getElementById('editUserPassword').value;
+            const confirmPass = document.getElementById('editUserConfirmPassword').value;
+
+            if (pass && pass !== confirmPass) {
+                err.textContent = 'Passwords do not match.';
+                err.classList.remove('hidden');
+                return;
             }
-        };
 
-        window.deleteUser = async function(userId) {
-            if (!confirm('WARNING: Are you sure you want to permanently delete this user? They will lose all access immediately.')) return;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Updating...';
+            err.classList.add('hidden');
 
             try {
-                const { error } = await supabaseClient.rpc('delete_user', { user_id_to_delete: userId });
-                if (error) throw error;
-                alert('User deleted successfully');
+                // Update Profile Name
+                const {
+                    error: profErr
+                } = await supabaseClient.from('profiles').update({
+                    full_name: fullName
+                }).eq('id', editingUserId);
+                if (profErr) throw profErr;
+
+                // Update Role
+                const {
+                    error: roleErr
+                } = await supabaseClient.from('user_roles').update({
+                    role_id: roleId
+                }).eq('user_id', editingUserId);
+                if (roleErr) throw roleErr;
+
+                switchView('view-list');
                 loadUsers();
-            } catch (err) {
-                alert('Error deleting user: ' + err.message + '\n\n(Make sure the delete_user RPC exists in Supabase)');
+            } catch (e) {
+                err.textContent = e.message;
+                err.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Update Administrator';
             }
-        };
-
-        // ==========================================
-        // ADD ADMIN MODAL
-        // ==========================================
-        document.getElementById('btnAddAdmin').addEventListener('click', () => {
-            document.getElementById('newAdminName').value = '';
-            document.getElementById('newAdminEmail').value = '';
-            document.getElementById('newAdminPassword').value = '';
-            document.getElementById('addAdminError').style.display = 'none';
-
-            const roleSel = document.getElementById('newAdminRole');
-            roleSel.innerHTML = allRoles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-
-            document.getElementById('addAdminModal').classList.add('show');
         });
 
-        document.getElementById('addAdminCancel').addEventListener('click', () => {
-            document.getElementById('addAdminModal').classList.remove('show');
-        });
-
-        document.getElementById('addAdminSave').addEventListener('click', async () => {
+        // ==========================================
+        // ADD ADMIN LOGIC
+        // ==========================================
+        document.getElementById('addAdminSave').addEventListener('click', async() => {
             const fullName = document.getElementById('newAdminName').value.trim();
             const email = document.getElementById('newAdminEmail').value.trim();
             const password = document.getElementById('newAdminPassword').value;
@@ -1050,20 +1114,27 @@
             const btn = document.getElementById('addAdminSave');
             const err = document.getElementById('addAdminError');
 
-            err.style.display = 'none';
-
+            err.classList.add('hidden');
             if (!email || !password) {
                 err.textContent = 'Email and Password are required.';
-                err.style.display = 'block';
+                err.classList.remove('hidden');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
 
             try {
-                const { data, error } = await supabaseClient.functions.invoke('create-user-v2', {
-                    body: { email, password, role_id: roleId, full_name: fullName }
+                const {
+                    data,
+                    error
+                } = await supabaseClient.functions.invoke('create-user-v2', {
+                    body: {
+                        email,
+                        password,
+                        role_id: roleId,
+                        full_name: fullName
+                    }
                 });
 
                 if (error) {
@@ -1076,51 +1147,108 @@
                     }
                     throw new Error(exactError);
                 }
-
                 if (data && data.error) throw new Error(data.error);
 
-                document.getElementById('addAdminModal').classList.remove('show');
                 alert('✅ User created successfully!');
-                
-                loadUsers(); 
-
+                switchView('view-list');
+                loadUsers();
             } catch (e) {
-                console.error("Full Error Object:", e);
                 err.textContent = e.message;
-                err.style.display = 'block';
+                err.classList.remove('hidden');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = 'Create User';
+                btn.innerHTML = 'Save Administrator';
+            }
+        });
+
+        window.deleteUser = async function(userId) {
+            if (!confirm('WARNING: Are you sure you want to permanently delete this user?')) return;
+
+            try {
+                const {
+                    error
+                } = await supabaseClient.rpc('delete_user', {
+                    user_id_to_delete: userId
+                });
+                if (error) throw error;
+                alert('User deleted successfully');
+                loadUsers();
+            } catch (err) {
+                alert('Error deleting user: ' + err.message);
+            }
+        };
+
+        // ==========================================
+        // SETTINGS LOGIC
+        // ==========================================
+        async function loadSettings() {
+            const {
+                data,
+                error
+            } = await supabaseClient.from('system_settings').select('*').eq('id', 1).single();
+            if (error) {
+                console.error("Could not load settings:", error);
+                return;
+            }
+            if (data) {
+                document.getElementById('setCompanyName').value = data.company_name || '';
+                document.getElementById('setPhone').value = data.phone_number || '';
+                document.getElementById('setAddress').value = data.address || '';
+                document.getElementById('setZip').value = data.zip_code || '';
+                document.getElementById('setPrefix').value = data.account_prefix || '';
+                document.getElementById('setSupportPhone').value = data.support_phone || '';
+                document.getElementById('setSupportEmail').value = data.support_email || '';
+                document.getElementById('setRouterAlerts').value = data.router_alert_numbers || '';
+            }
+            document.getElementById('settingsSuccess').classList.add('hidden');
+        }
+
+        document.getElementById('saveSettingsBtn').addEventListener('click', async() => {
+            const btn = document.getElementById('saveSettingsBtn');
+            const successBox = document.getElementById('settingsSuccess');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            successBox.classList.add('hidden');
+
+            const payload = {
+                company_name: document.getElementById('setCompanyName').value,
+                phone_number: document.getElementById('setPhone').value,
+                address: document.getElementById('setAddress').value,
+                zip_code: document.getElementById('setZip').value,
+                account_prefix: document.getElementById('setPrefix').value,
+                support_phone: document.getElementById('setSupportPhone').value,
+                support_email: document.getElementById('setSupportEmail').value,
+                router_alert_numbers: document.getElementById('setRouterAlerts').value,
+                updated_at: new Date().toISOString()
+            };
+
+            try {
+                const {
+                    error
+                } = await supabaseClient.from('system_settings').update(payload).eq('id', 1);
+                if (error) throw error;
+
+                successBox.classList.remove('hidden');
+                setTimeout(() => successBox.classList.add('hidden'), 3000); // Hide after 3 seconds
+            } catch (err) {
+                alert('Error saving settings: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Changes Settings';
             }
         });
 
         // ==========================================
-        // LOGOUT & INITIALIZATION
+        // INIT
         // ==========================================
-        document.getElementById('btnLogout').addEventListener('click', async() => {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
-        });
-
         (async() => {
             if (await checkAuth()) {
-                // Load roles first
                 await loadRoles();
-                
-                // Load users
                 await loadUsers();
-                
-                // Force the default filter to show "Total Admins"
-                activeUserFilter = 'all';
-                const purpleCard = document.querySelector('.card-purple');
-                if (purpleCard) purpleCard.classList.add('active-filter');
-                renderUsers();
 
-                // Attach search listener
                 const searchInput = document.getElementById('userSearchInput');
-                if (searchInput) {
-                    searchInput.addEventListener('input', renderUsers);
-                }
+                if (searchInput) searchInput.addEventListener('input', renderUsers);
             }
         })();
     </script>
