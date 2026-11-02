@@ -3490,16 +3490,30 @@
             return false;
         }
 
-
         function applyEquityPermissions() {
             if (window.IS_FULL_ADMIN) return;
 
             // 1. Hide top navigation buttons
-            if (!can('view', 'Dividend Declaration')) document.getElementById('dividendsBtn')?.style.setProperty('display', 'none');
-            if (!can('view', 'Capitalization Table')) document.getElementById('capTableBtn')?.style.setProperty('display', 'none');
-            if (!can('view', 'Share Ledger')) document.getElementById('investorTxnBtn')?.style.setProperty('display', 'none');
-            if (!can('view', 'Reserve')) document.getElementById('reserveBtn')?.style.setProperty('display', 'none');
-            if (!can('view', 'Audit Log')) document.getElementById('auditBtn')?.style.setProperty('display', 'none');
+            if (!can('view', 'Dividend Declaration')) {
+                const el = document.getElementById('dividendsBtn');
+                if (el) el.style.setProperty('display', 'none');
+            }
+            if (!can('view', 'Capitalization Table')) {
+                const el = document.getElementById('capTableBtn');
+                if (el) el.style.setProperty('display', 'none');
+            }
+            if (!can('view', 'Share Ledger')) {
+                const el = document.getElementById('investorTxnBtn');
+                if (el) el.style.setProperty('display', 'none');
+            }
+            if (!can('view', 'Reserve')) {
+                const el = document.getElementById('reserveBtn');
+                if (el) el.style.setProperty('display', 'none');
+            }
+            if (!can('view', 'Audit Log')) {
+                const el = document.getElementById('auditBtn');
+                if (el) el.style.setProperty('display', 'none');
+            }
 
             const proposalsBtn = document.getElementById('proposalsBtn');
             if (proposalsBtn) proposalsBtn.style.display = 'none';
@@ -3516,14 +3530,19 @@
             // 2. Hide Add Buttons
             const canEditCapTable = can('edit', 'Capitalization Table');
             if (!canEditCapTable) {
-                document.getElementById('addInvestorBtn')?.style.setProperty('display', 'none');
-                document.getElementById('addInvestorBtn2')?.style.setProperty('display', 'none');
+                const addBtn1 = document.getElementById('addInvestorBtn');
+                const addBtn2 = document.getElementById('addInvestorBtn2');
+                if (addBtn1) addBtn1.style.setProperty('display', 'none');
+                if (addBtn2) addBtn2.style.setProperty('display', 'none');
             }
 
             const canEditDivs = can('edit', 'Dividend Declaration');
             if (!canEditDivs) {
-                document.getElementById('newDividendBtn')?.style.setProperty('display', 'none');
-                document.getElementById('newDividendFromHistoryBtn')?.style.setProperty('display', 'none'); // 👈 ADD THIS LINE
+                const newDivBtn = document.getElementById('newDividendBtn');
+                const newDivHistBtn = document.getElementById('newDividendFromHistoryBtn'); // 👈 ADDED THIS
+
+                if (newDivBtn) newDivBtn.style.setProperty('display', 'none');
+                if (newDivHistBtn) newDivHistBtn.style.setProperty('display', 'none');
             }
 
             // 3. Continuously strip away action buttons (Runs every 500ms to catch dynamically loaded rows)
@@ -3536,7 +3555,6 @@
                 // Strip Dividend actions
                 if (!canEditDivs) {
                     document.querySelectorAll('.div-edit-btn, .div-delete-btn').forEach(btn => btn.style.display = 'none');
-                    // Hide Approve / Mark Paid / Cancel buttons inside the Dividend Detail Modal
                     document.querySelectorAll('.div-action-btn').forEach(btn => {
                         if (btn.innerText.includes('Approve') || btn.innerText.includes('Paid') || btn.innerText.includes('Cancel')) {
                             btn.style.display = 'none';
@@ -3544,12 +3562,13 @@
                     });
                 }
 
-                // Strip any other rogue buttons
                 if (!can('edit', 'Payroll')) {
                     document.querySelectorAll('.btn-edit, .btn-delete, .btn-view').forEach(btn => btn.style.display = 'none');
                 }
             }, 500);
         }
+
+
         if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
             Chart.register(ChartDataLabels);
         }
@@ -7925,10 +7944,20 @@ function renderTable() {
         // ==================================================
         // DIVIDEND HISTORY MODAL (dynamic)
         // ==================================================
-           function openDividendsHistoryModal() {
+                function openDividendsHistoryModal() {
             const body = document.getElementById('dividendHistoryBody');
             if (!body) return;
-            
+
+            // 🔥 PERMISSION CHECK: Hide the "New Distribution" button inside the modal if they are a Viewer
+            const newDivBtn = document.getElementById('newDividendFromHistoryBtn');
+            if (newDivBtn) {
+                if (!can('edit', 'Dividend Declaration')) {
+                    newDivBtn.style.display = 'none';
+                } else {
+                    newDivBtn.style.display = 'inline-flex'; // Show it for Admins
+                }
+            }
+
             if (!dividends.length) {
                 body.innerHTML = `<tr><td colspan="9"><div class="empty-row"><i class="fas fa-coins"></i>No dividend distributions yet. Create one to get started.</div></td></tr>`;
             } else {
@@ -7957,7 +7986,7 @@ function renderTable() {
                         const editClass = isLocked ? 'div-edit-btn warn' : 'div-edit-btn';
                         const deleteClass = isLocked ? 'div-delete-btn warn' : 'div-delete-btn';
                         const paidAmt = safeNum(d.totalDistributable) - safeNum(d.reserveAmount);
-                        const payDate = computePayDate(d.periodLabel); // Uses the new helper function
+                        const payDate = computePayDate(d.periodLabel); 
 
                         return `<tr>
                             <td onclick="openDividendDetail('${d.id}')" style="cursor:pointer;"><span class="div-ref">${escapeHTML(d.id)}</span></td>
@@ -7980,6 +8009,7 @@ function renderTable() {
             }
             document.getElementById('dividendsHistoryModal').classList.add('show');
         }
+
         function closeDividendsHistoryModal() {
             document.getElementById('dividendsHistoryModal').classList.remove('show');
         }
