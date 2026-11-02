@@ -12,7 +12,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=4"></script>
 
     <script>
         tailwind.config = {
@@ -106,6 +106,13 @@
     <!-- TOP NAVIGATION BAR -->
     <nav class="bg-[#0f111a] border-b border-gray-800 h-16 flex items-center justify-end px-6 sticky top-0 z-50">
         <div class="flex items-center gap-4 md:gap-6 text-gray-400">
+
+            <!-- Back to Equity Button -->
+            <a href="index.html" class="hover:text-teal-400 transition flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-700 hover:border-teal-500 bg-gray-800/50">
+                <i class="fas fa-arrow-left text-xs"></i>
+                <span class="text-xs font-medium">Equity</span>
+            </a>
+
             <!-- Notification Bell -->
             <button class="relative hover:text-white transition" onclick="toggleNotifications()">
                 <i class="far fa-bell"></i>
@@ -146,8 +153,8 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <button onclick="switchView('view-role')" class="flex-1 md:flex-none px-4 py-2 bg-transparent border border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 text-sm font-medium rounded-lg transition">
-    <i class="fas fa-shield-alt mr-2"></i> Create Role
-</button>
+                        <i class="fas fa-shield-alt mr-2"></i> Create Role
+                    </button>
                     <button onclick="switchView('view-add')" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-lg shadow-blue-500/30">
                         <i class="fas fa-user-plus mr-2"></i> Add New Administrator
                     </button>
@@ -156,7 +163,6 @@
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <!-- Card 1 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20">
                     <div>
                         <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">Total Admins</p>
@@ -166,7 +172,6 @@
                         <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <!-- Card 2 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20">
                     <div>
                         <p class="text-xs font-semibold text-emerald-100 uppercase tracking-wider mb-1">Full Admins</p>
@@ -176,7 +181,6 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                 </div>
-                <!-- Card 3 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/20">
                     <div>
                         <p class="text-xs font-semibold text-pink-100 uppercase tracking-wider mb-1">Limited Access</p>
@@ -186,7 +190,6 @@
                         <i class="fas fa-user-cog"></i>
                     </div>
                 </div>
-                <!-- Card 4 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/20">
                     <div>
                         <p class="text-xs font-semibold text-cyan-100 uppercase tracking-wider mb-1">Current User</p>
@@ -204,9 +207,11 @@
                     <h3 class="font-semibold text-gray-200 flex items-center gap-2">
                         <i class="fas fa-list text-gray-500"></i> Administrator List
                     </h3>
-                    <div class="relative w-full md:w-72">
+                    <!-- Form wrapper to stop browser autofill -->
+                    <form class="relative w-full md:w-72" onsubmit="event.preventDefault();">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                        <input type="text" id="userSearchInput" placeholder="Search by username..." autocomplete="off" autocapitalize="off" spellcheck="false" class="w-full bg-[#111424] border border-gray-700 text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition">                        </div>
+                        <input type="text" id="userSearchInput" placeholder="Search by username..." autocomplete="off" autocapitalize="off" spellcheck="false" class="w-full bg-[#111424] border border-gray-700 text-sm text-white rounded-lg pl-9 pr-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </form>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-400 min-w-[800px]">
@@ -645,9 +650,6 @@
         let activeUserFilter = 'all';
         let editingUserId = null;
 
-        // ==========================================
-        // NEW: TOGGLE PASSWORD VISIBILITY
-        // ==========================================
         function togglePassword(inputId, icon) {
             const input = document.getElementById(inputId);
             if (input.type === 'password') {
@@ -661,9 +663,6 @@
             }
         }
 
-        // ==========================================
-        // UI TOGGLES
-        // ==========================================
         function toggleProfileDropdown(e) {
             e.stopPropagation();
             const dropdown = document.getElementById('profileDropdown');
@@ -861,7 +860,6 @@
             tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading users...</td></tr>';
 
             try {
-                // 1. Fetch profiles and roles
                 const {
                     data: profiles,
                     error: profErr
@@ -874,7 +872,7 @@
                 } = await supabaseClient.from('user_roles').select('user_id, roles(name)');
                 if (urErr) throw urErr;
 
-                // 2. Fetch Auth Users to get last_sign_in_at via the RPC
+                // Fetch Auth Users to get last_sign_in_at via the RPC
                 const {
                     data: authUsers,
                     error: authErr
@@ -889,12 +887,10 @@
                     });
                 }
 
-                // 3. Map everything together
                 allUsers = profiles.map(profile => {
                     const roleRecord = userRoles.find(ur => ur.user_id === profile.id);
                     const roleName = roleRecord && roleRecord.roles ? roleRecord.roles.name : 'Unassigned';
 
-                    // Format the last login
                     let formattedLogin = 'Never';
                     if (lastLoginMap[profile.id]) {
                         const d = new Date(lastLoginMap[profile.id]);
@@ -916,7 +912,6 @@
 
                 renderUsers();
             } catch (err) {
-                console.error("Error fetching users:", err);
                 tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
             }
         }
