@@ -6596,11 +6596,11 @@ function renderTable() {
             document.getElementById('capTableModal').classList.remove('show');
         }
     
-    async function renderCapTable() {
+   async function renderCapTable() {
     const dateInput = document.getElementById('capTableDate');
     const rawValue = dateInput.value; 
     
-    // 🔥 FIX: Check the literal text shown in the input box
+    // Check the literal text shown in the input box for Jan/Feb
     const isEarlyMonth = rawValue.includes('/02/') || rawValue.includes('/01/') || rawValue.includes('-02-') || rawValue.includes('-01-');
 
     if (isEarlyMonth || !rawValue) {
@@ -6642,16 +6642,22 @@ function renderTable() {
 
     const selectedMonthStr = dateVal.slice(0, 7); 
     const now = new Date();
+    // Get the current month string (e.g. "2026-11")
     const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
     
-    const isLiveMonth = (selectedMonthStr === currentMonthStr);
+    // 🔥 FIX: If the date picked is the current month OR a future month, we force live mode.
+    const isLiveMonth = (selectedMonthStr >= currentMonthStr);
+
+    // 🔥 FIX: Grab the exact live number straight from the dashboard state
+    const liveVirtualEquity = Math.round(safeNum(summary.starlinkVirtualInvestment));
 
     let exactTotalEquity = 0;
     
     const rows = (data || []).map(r => {
-        exactTotalEquity = safeNum(r.total_equity_ksh); 
         const inv = investors.find(i => i.name === r.holder_name);
-        const displayEquity = safeNum(r.equity_ksh);
+        
+        // 🔥 FIX: If it's the live month, override the Virtual equity with the live number
+        const displayEquity = (r.is_virtual && isLiveMonth) ? liveVirtualEquity : safeNum(r.equity_ksh);
         
         return {
             id: r.is_virtual ? null : (inv ? inv.id : null),
@@ -6668,10 +6674,8 @@ function renderTable() {
 
     rows.sort((a, b) => b.equity - a.equity);
 
-    let finalGrandTotal = exactTotalEquity;
-    if (isLiveMonth) {
-        finalGrandTotal = rows.reduce((s, r) => s + r.equity, 0);
-    }
+    // Recalculate total if we are using live data
+    let finalGrandTotal = rows.reduce((s, r) => s + r.equity, 0);
 
     document.getElementById('capTableSummary').innerHTML = `
         <div class="recon-stat good">
@@ -6691,9 +6695,8 @@ function renderTable() {
     const body = document.getElementById('capTableBody');
     
     body.innerHTML = rows.map(r => {
-        const pctDisplay = isLiveMonth 
-            ? (finalGrandTotal > 0 ? ((r.equity / finalGrandTotal) * 100).toFixed(2) : '0.00')
-            : r.pct.toFixed(2);
+        // Recalculate percentages based on the live total
+        const pctDisplay = (finalGrandTotal > 0 ? ((r.equity / finalGrandTotal) * 100).toFixed(2) : '0.00');
 
         const rowClass = r.isStarlink ? 'recon-row-caution' : '';
         const changeLabel = r.isStarlink 
@@ -7402,11 +7405,12 @@ function renderTable() {
             }
         }
 
-        function openDividendModal(editId = null, editReason = '') {
+             function openDividendModal(editId = null, editReason = '') {
             editingDividendId = editId;
             const titleEl = document.getElementById('dividendModalTitle');
             const errEl = document.getElementById('divError');
             errEl.style.display = 'none';
+            
             if (editId) {
                 const d = dividends.find(x => x.id === editId);
                 if (!d) return;
@@ -7414,6 +7418,10 @@ function renderTable() {
                 document.getElementById('divTotal').value = d.totalDistributable;
                 document.getElementById('divPeriod').value = d.periodLabel;
                 document.getElementById('divNotes').value = d.notes || '';
+                
+                // 🔥 ADDED: Load the saved snapshot date (or default to today if it was missing)
+                document.getElementById('divSnapshotDate').value = d.snapshotDate || todayISO(); 
+                
                 window._editReason = editReason || '';
                 window._oldStatus = d.status;
             } else {
@@ -7424,6 +7432,10 @@ function renderTable() {
                     year: 'numeric'
                 });
                 document.getElementById('divNotes').value = '';
+                
+                // 🔥 ADDED: Default the snapshot date to today
+                document.getElementById('divSnapshotDate').value = todayISO(); 
+                
                 window._editReason = '';
                 window._oldStatus = null;
             }
@@ -7438,12 +7450,17 @@ function renderTable() {
             window._oldStatus = null;
         }
 
-        function previewDividend() {
+                async function previewDividend() {
             const total = safeNum(document.getElementById('divTotal').value);
             const period = document.getElementById('divPeriod').value.trim();
             const notes = document.getElementById('divNotes').value.trim();
+            
+            // 🔥 FIX: Get the Snapshot Date
+            const snapshotDateVal = document.getElementById('divSnapshotDate').value;
+            
             const errEl = document.getElementById('divError');
             errEl.style.display = 'none';
+            
             if (total <= 0) {
                 errEl.textContent = '⚠️ Enter a distributable amount greater than 0.';
                 errEl.style.display = 'block';
@@ -7454,6 +7471,12 @@ function renderTable() {
                 errEl.style.display = 'block';
                 return;
             }
+            if (!snapshotDateVal) {
+                errEl.textContent = '⚠️ Please select a Snapshot Cutoff Date.';
+                errEl.style.display = 'block';
+                return;
+            }
+
             const dup = dividends.find(d => d.id !== editingDividendId && d.periodLabel.toLowerCase() === period.toLowerCase() && d.status !== 'cancelled');
             if (dup) {
                 errEl.textContent = `⚠️ A distribution for "${period}" already exists (${dup.status}).`;
@@ -7461,8 +7484,78 @@ function renderTable() {
                 return;
             }
 
-            const allocations = calcAllocations(total);
-            const allocSum = allocations.reduce((s, a) => s + a.amount, 0);
+            // 🔥 FIX: Fetch the historical ownership from the database using the selected date
+            const btn = document.getElementById('divPreviewBtn');
+            const oldHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching snapshot...';
+
+            const asOfTimestamp = `${snapshotDateVal}T23:59:59+03:00`;
+            const { data: historicalData, error: histErr } = await supabaseClient.rpc('get_ownership_as_of', { 
+                p_timestamp: asOfTimestamp 
+            });
+
+            btn.disabled = false;
+            btn.innerHTML = oldHtml;
+
+            if (histErr || !historicalData || historicalData.length === 0) {
+                errEl.textContent = '⚠️ Could not find cap table data for that date. Try a different date.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            // 🔥 FIX: Calculate allocations based on the historical data, not the live dashboard
+            const totalEquity = historicalData.reduce((s, r) => s + safeNum(r.equity_ksh), 0);
+            
+            if (totalEquity === 0) {
+                errEl.textContent = '⚠️ Total equity for this date is zero.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            const allocations = historicalData.map(r => {
+                const pct = (safeNum(r.equity_ksh) / totalEquity) * 100;
+                const rawAmt = total * (pct / 100);
+                return {
+                    investorId: r.is_virtual ? 'virtual' : (investors.find(i => i.name === r.holder_name)?.id || null),
+                    name: r.holder_name,
+                    equity: safeNum(r.equity_ksh),
+                    percentage: +pct.toFixed(4),
+                    rawAmount: rawAmt,
+                    floorAmount: Math.floor(rawAmt),
+                    roundingAdj: 0,
+                    isVirtual: r.is_virtual
+                };
+            });
+
+            // Rounding logic (Largest Remainder Method)
+            const floorSum = allocations.reduce((s, r) => s + r.floorAmount, 0);
+            let remainder = Math.round(total) - floorSum;
+            const sorted = [...allocations].sort((a, b) => (b.rawAmount - b.floorAmount) - (a.rawAmount - a.floorAmount));
+            let i = 0;
+            while (remainder > 0 && i < sorted.length * 10) {
+                sorted[i % sorted.length].floorAmount += 1;
+                remainder -= 1;
+                i++;
+            }
+            allocations.forEach(r => {
+                const match = sorted.find(s => s.name === r.name);
+                if (match) r.floorAmount = match.floorAmount;
+                r.roundingAdj = +(r.floorAmount - r.rawAmount).toFixed(4);
+            });
+
+            // Format for the preview
+            const finalAllocations = allocations.map(r => ({
+                investorId: r.investorId,
+                name: r.name,
+                equity: r.equity,
+                percentage: r.percentage,
+                amount: r.floorAmount,
+                roundingAdj: r.roundingAdj,
+                isVirtual: r.isVirtual
+            }));
+
+            const allocSum = finalAllocations.reduce((s, a) => s + a.amount, 0);
             const reconciled = allocSum === Math.round(total);
 
             if (editingDividendId) {
@@ -7474,7 +7567,8 @@ function renderTable() {
                         periodLabel: period,
                         totalDistributable: total,
                         notes,
-                        allocations,
+                        allocations: finalAllocations,
+                        snapshotDate: snapshotDateVal, // Store the date
                         updatedAt: new Date().toISOString(),
                         updatedBy: CURRENT_USER,
                         lastEditedAt: new Date().toISOString(),
@@ -7492,7 +7586,8 @@ function renderTable() {
                     periodLabel: period,
                     totalDistributable: total,
                     notes,
-                    allocations,
+                    allocations: finalAllocations,
+                    snapshotDate: snapshotDateVal, // Store the date
                     status: 'draft',
                     createdAt: new Date().toISOString(),
                     createdBy: CURRENT_USER,
@@ -7505,9 +7600,9 @@ function renderTable() {
             }
 
             document.getElementById('previewTotal').textContent = 'KSh ' + fmt(total);
-            document.getElementById('previewPeriod').textContent = period;
+            document.getElementById('previewPeriod').textContent = period + ' (Snapshot: ' + snapshotDateVal + ')';
             const body = document.getElementById('previewBody');
-            body.innerHTML = allocations.map(a => `<tr><td>${escapeHTML(a.name)}</td><td class="alloc-pct">${a.percentage.toFixed(2)}%</td><td class="alloc-amount" style="color:#7f9bb8;">${fmtDec(a.amount - a.roundingAdj)}</td><td class="alloc-amount" style="color:${a.roundingAdj >= 0 ? '#7ee0a2' : '#f0a89f'};">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td><td class="alloc-amount">${fmt(a.amount)}</td></tr>`).join('') + `<tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td colspan="2" style="text-align:right;"><strong>Reconciled to:</strong></td><td><strong>${fmt(allocSum)}</strong></td></tr>`;
+            body.innerHTML = finalAllocations.map(a => `<tr><td>${escapeHTML(a.name)}</td><td class="alloc-pct">${a.percentage.toFixed(2)}%</td><td class="alloc-amount" style="color:#7f9bb8;">${fmtDec(a.amount - a.roundingAdj)}</td><td class="alloc-amount" style="color:${a.roundingAdj >= 0 ? '#7ee0a2' : '#f0a89f'};">${a.roundingAdj >= 0 ? '+' : ''}${a.roundingAdj.toFixed(2)}</td><td class="alloc-amount">${fmt(a.amount)}</td></tr>`).join('') + `<tr class="total-row"><td colspan="2"><strong>TOTAL</strong></td><td colspan="2" style="text-align:right;"><strong>Reconciled to:</strong></td><td><strong>${fmt(allocSum)}</strong></td></tr>`;
 
             const reconcileEl = document.getElementById('previewReconcile');
             const reconcileTxt = document.getElementById('previewReconcileText');
@@ -7532,17 +7627,17 @@ function renderTable() {
             const isEdit = !!pendingDividend._isEdit;
             const wasLocked = pendingDividend._oldStatus === 'approved' || pendingDividend._oldStatus === 'processing' || pendingDividend._oldStatus === 'paid';
 
-            const row = {
+                       const row = {
                 id: pendingDividend.id,
                 period_label: pendingDividend.periodLabel,
                 total_distributable: pendingDividend.totalDistributable,
                 notes: pendingDividend.notes || null,
                 status: pendingDividend.status,
                 allocations: pendingDividend.allocations,
+                snapshot_date: pendingDividend.snapshotDate || null, // 🔥 ADD THIS LINE
                 created_at: pendingDividend.createdAt,
                 created_by: pendingDividend.createdBy
             };
-
             if (isEdit) {
                 row.updated_at = new Date().toISOString();
                 row.updated_by = CURRENT_USER;
