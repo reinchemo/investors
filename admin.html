@@ -38,7 +38,6 @@
             background-color: #0f111a;
             color: #e2e8f0;
         }
-        /* View transitions */
         
         .view-section {
             display: none;
@@ -59,7 +58,6 @@
                 transform: translateY(0);
             }
         }
-        /* Custom Scrollbar */
         
          ::-webkit-scrollbar {
             width: 6px;
@@ -74,7 +72,6 @@
             background: #2a2f45;
             border-radius: 4px;
         }
-        /* Notifications Panel Animation */
         
         #notifPanel {
             transform: translateX(100%);
@@ -84,7 +81,6 @@
         #notifPanel.open {
             transform: translateX(0);
         }
-        /* Dropdown Animation */
         
         #profileDropdown {
             display: none;
@@ -94,7 +90,6 @@
             display: block;
             animation: fadeIn 0.2s ease;
         }
-        /* Table striping */
         
         .table-row-striped:nth-child(even) {
             background-color: rgba(255, 255, 255, 0.02);
@@ -102,12 +97,6 @@
         
         .table-row-striped:hover {
             background-color: rgba(255, 255, 255, 0.05);
-        }
-        /* Readonly inputs */
-        
-        input:read-only {
-            opacity: 0.7;
-            cursor: not-allowed;
         }
     </style>
 </head>
@@ -117,7 +106,6 @@
     <!-- TOP NAVIGATION BAR -->
     <nav class="bg-[#0f111a] border-b border-gray-800 h-16 flex items-center justify-end px-6 sticky top-0 z-50">
         <div class="flex items-center gap-4 md:gap-6 text-gray-400">
-
             <!-- Notification Bell -->
             <button class="relative hover:text-white transition" onclick="toggleNotifications()">
                 <i class="far fa-bell"></i>
@@ -149,8 +137,6 @@
         <!-- VIEW 1: ADMINISTRATOR LIST                 -->
         <!-- ========================================== -->
         <div id="view-list" class="view-section active">
-
-            <!-- Header -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-white flex items-center gap-2">
@@ -158,7 +144,10 @@
                     </h1>
                     <p class="text-sm text-gray-500 mt-1">Manage system administrators and their access levels</p>
                 </div>
-                <div class="flex gap-3 w-full md:w-auto">
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <button onclick="switchView('view-role')" class="flex-1 md:flex-none px-4 py-2 bg-transparent border border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 text-sm font-medium rounded-lg transition">
+                        <i class="fas fa-shield-alt mr-2"></i> Create Role
+                    </button>
                     <button onclick="switchView('view-add')" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-lg shadow-blue-500/30">
                         <i class="fas fa-user-plus mr-2"></i> Add New Administrator
                     </button>
@@ -167,7 +156,6 @@
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <!-- Card 1 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 cursor-pointer hover:scale-[1.02] transition">
                     <div>
                         <p class="text-xs font-semibold text-indigo-100 uppercase tracking-wider mb-1">Total Admins</p>
@@ -177,7 +165,6 @@
                         <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <!-- Card 2 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20 cursor-pointer hover:scale-[1.02] transition" onclick="filterUsers('full')">
                     <div>
                         <p class="text-xs font-semibold text-emerald-100 uppercase tracking-wider mb-1">Full Admins</p>
@@ -187,7 +174,6 @@
                         <i class="fas fa-shield-alt"></i>
                     </div>
                 </div>
-                <!-- Card 3 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-pink-500 to-rose-500 shadow-lg shadow-pink-500/20 cursor-pointer hover:scale-[1.02] transition" onclick="filterUsers('limited')">
                     <div>
                         <p class="text-xs font-semibold text-pink-100 uppercase tracking-wider mb-1">Limited Access</p>
@@ -197,7 +183,6 @@
                         <i class="fas fa-user-cog"></i>
                     </div>
                 </div>
-                <!-- Card 4 -->
                 <div class="rounded-2xl p-5 flex justify-between items-center bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/20">
                     <div>
                         <p class="text-xs font-semibold text-cyan-100 uppercase tracking-wider mb-1">Current User</p>
@@ -257,7 +242,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Form Section -->
                 <div class="lg:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
                     <div class="bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-4">
                         <h3 class="font-semibold text-white"><i class="fas fa-user mr-2"></i> Administrator Details</h3>
@@ -282,28 +266,24 @@
                                 <select id="newAdminRole" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none"></select>
                             </div>
                         </div>
-
                         <hr class="border-gray-800 my-6">
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-key text-yellow-500 mr-1"></i> Password *</label>
                                 <div class="relative">
                                     <input type="password" id="newAdminPassword" placeholder="••••••••" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
-                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer hover:text-white transition" onclick="togglePassword('newAdminPassword', this)"></i>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-check-circle text-yellow-500 mr-1"></i> Confirm Password *</label>
                                 <div class="relative">
                                     <input type="password" placeholder="Confirm password" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
-                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer hover:text-white transition" onclick="togglePassword('newAdminPassword', this)"></i>
                                 </div>
                             </div>
                         </div>
-
                         <div id="addAdminError" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg"></div>
-
                         <div class="flex justify-between items-center mt-8 pt-4 border-t border-gray-800">
                             <button onclick="switchView('view-list')" class="px-5 py-2.5 bg-gray-700/50 hover:bg-gray-700 text-white font-medium rounded-lg transition">Cancel</button>
                             <button id="addAdminSave" class="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-medium rounded-lg transition shadow-lg shadow-teal-500/30">Save Administrator</button>
@@ -311,7 +291,6 @@
                     </div>
                 </div>
 
-                <!-- Help Guide Section -->
                 <div class="lg:col-span-1 space-y-6">
                     <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-6 shadow-xl">
                         <h4 class="text-sm font-semibold text-gray-300 mb-4"><i class="fas fa-info-circle text-blue-400 mr-2"></i> Help Guide</h4>
@@ -325,12 +304,6 @@
                                 <p class="text-xs text-gray-500 mt-1">Limited access based on permissions defined in Settings → Roles.</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-gradient-to-br from-indigo-900/40 to-[#181c2e] border border-indigo-500/20 rounded-xl p-6 text-center shadow-xl">
-                        <i class="fas fa-users text-blue-400 text-3xl mb-3"></i>
-                        <h4 class="text-sm font-semibold text-gray-200">Need more roles?</h4>
-                        <p class="text-xs text-gray-400 mt-1 mb-4">Create custom roles with specific permissions</p>
-                        <button onclick="switchView('view-role')" class="px-4 py-2 border border-indigo-500 text-indigo-400 text-xs font-medium rounded-lg hover:bg-indigo-500/10 transition">Add New Role</button>
                     </div>
                 </div>
             </div>
@@ -353,7 +326,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Form Section -->
                 <div class="lg:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
                     <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
                         <h3 class="font-semibold text-white"><i class="fas fa-user mr-2"></i> Administrator Details</h3>
@@ -362,8 +334,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-at text-blue-500 mr-1"></i> Username *</label>
-                                <input type="text" id="editUserUsername" readonly class="w-full bg-[#111424] border border-gray-700 text-gray-400 rounded-lg px-4 py-2.5 outline-none cursor-not-allowed">
-                                <p class="text-xs text-gray-500 mt-1">Used for login. Cannot be changed here.</p>
+                                <input type="text" id="editUserUsername" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <p class="text-xs text-gray-500 mt-1">Used for login. Changing this will update their email.</p>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-id-badge text-blue-500 mr-1"></i> Full Name *</label>
@@ -395,14 +367,14 @@
                                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-key text-yellow-500 mr-1"></i> Password</label>
                                 <div class="relative">
                                     <input type="password" id="editUserPassword" placeholder="Enter new password" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
-                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer hover:text-white transition" onclick="togglePassword('editUserPassword', this)"></i>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"><i class="fas fa-check-circle text-yellow-500 mr-1"></i> Confirm Password</label>
                                 <div class="relative">
                                     <input type="password" id="editUserConfirmPassword" placeholder="Confirm new password" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none pr-10">
-                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+                                    <i class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer hover:text-white transition" onclick="togglePassword('editUserConfirmPassword', this)"></i>
                                 </div>
                             </div>
                         </div>
@@ -420,13 +392,9 @@
                 <div class="lg:col-span-1 space-y-6">
                     <div class="bg-[#2a2f45] border border-gray-700 rounded-xl p-6 shadow-xl flex flex-col items-center text-center">
                         <h4 class="text-sm font-semibold text-teal-400 mb-4 w-full text-left"><i class="fas fa-info-circle mr-1"></i> User Information</h4>
-
-                        <div class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-4xl shadow-lg mb-4" id="editAvatar">
-                            U
-                        </div>
+                        <div class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-4xl shadow-lg mb-4" id="editAvatar">U</div>
                         <h3 class="text-lg font-bold text-white uppercase" id="editSideName">STARLINK ULTRANET</h3>
                         <p class="text-sm text-gray-400 mb-6" id="editSideUsername">@ultranet</p>
-
                         <div class="w-full text-left space-y-4">
                             <div>
                                 <p class="text-xs text-gray-400 mb-1">User Type</p>
@@ -440,7 +408,7 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-400 mb-1">Last Login</p>
-                                <p class="text-sm text-gray-300" id="editSideLogin">2026-11-02 18:45:57</p>
+                                <p class="text-sm text-gray-300" id="editSideLogin">Never</p>
                             </div>
                         </div>
                     </div>
@@ -476,7 +444,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Left Side: Role Details -->
                 <div class="lg:col-span-4 space-y-6">
                     <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
                         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
@@ -485,15 +452,12 @@
                         <div class="p-6">
                             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role Name *</label>
                             <input type="text" id="roleName" placeholder="e.g. Support Staff" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none mb-4">
-
                             <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Description</label>
                             <input type="text" id="roleDesc" placeholder="Short description" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none mb-6">
-
                             <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 flex gap-3 text-blue-300 text-xs leading-relaxed mb-6">
                                 <i class="fas fa-info-circle mt-0.5"></i>
                                 <p>Select permissions for each module. Users with this role will only see allowed sections.</p>
                             </div>
-
                             <div class="flex gap-2">
                                 <button onclick="toggleAllMatrix(true)" class="flex-1 px-3 py-2 bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-medium rounded-lg hover:bg-teal-500/20 transition"><i class="fas fa-check-square mr-1"></i> Select All</button>
                                 <button onclick="toggleAllMatrix(false)" class="flex-1 px-3 py-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium rounded-lg hover:bg-red-500/20 transition"><i class="fas fa-square mr-1"></i> Deselect All</button>
@@ -502,7 +466,6 @@
                     </div>
                 </div>
 
-                <!-- Right Side: Permissions Matrix -->
                 <div class="lg:col-span-8">
                     <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl h-full flex flex-col">
                         <div class="bg-[#1e2235] px-6 py-4 border-b border-gray-800">
@@ -519,9 +482,7 @@
                                         <th class="px-4 py-3 text-center"><i class="fas fa-trash mr-1"></i> Delete</th>
                                     </tr>
                                 </thead>
-                                <tbody id="matrixBody" class="divide-y divide-gray-800/50">
-                                    <!-- JS Renders Matrix Rows Here -->
-                                </tbody>
+                                <tbody id="matrixBody" class="divide-y divide-gray-800/50"></tbody>
                             </table>
                         </div>
                         <div id="roleError" class="hidden m-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg"></div>
@@ -545,21 +506,16 @@
                     </h1>
                     <p class="text-sm text-gray-500 mt-1">Configure your application settings and preferences</p>
                 </div>
-
             </div>
 
             <div class="bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
-                <!-- Tabs -->
                 <div class="flex border-b border-gray-800 bg-[#1e2235] px-4 gap-6">
                     <button class="py-4 text-sm font-medium text-blue-400 border-b-2 border-blue-400"><i class="fas fa-building mr-2"></i> Company Info</button>
-
                 </div>
 
                 <div class="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <!-- Main Form -->
                     <div class="lg:col-span-3 space-y-6">
                         <h3 class="text-blue-400 font-medium mb-4"><i class="fas fa-info-circle mr-2"></i> Company Information</h3>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Application Name/ Company Name</label>
@@ -572,13 +528,11 @@
                                 <p class="text-xs text-gray-500 mt-1">Phone number is used for support contact</p>
                             </div>
                         </div>
-
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Address</label>
                             <textarea id="setAddress" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 h-24"></textarea>
                             <p class="text-xs text-gray-500 mt-1">You can use html tag</p>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Zip Code</label>
@@ -590,9 +544,7 @@
                                 <p class="text-xs text-gray-500 mt-1">Prefix for customer account numbers</p>
                             </div>
                         </div>
-
                         <h3 class="text-gray-400 font-medium mt-8 mb-4"><i class="fas fa-headset mr-2"></i> Customer Support Contact</h3>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Support Phone Number</label>
@@ -603,7 +555,6 @@
                                 <input type="email" id="setSupportEmail" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500">
                             </div>
                         </div>
-
                         <div class="mt-8">
                             <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Router Alert Phone Numbers</label>
                             <textarea id="setRouterAlerts" class="w-full bg-[#111424] border border-gray-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 h-20"></textarea>
@@ -620,7 +571,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick Tips Sidebar -->
                     <div class="lg:col-span-1">
                         <div class="bg-[#2a2f45] border border-gray-700 rounded-xl p-5 shadow-xl">
                             <h4 class="text-sm font-semibold text-gray-300 mb-4"><i class="fas fa-question-circle text-blue-400 mr-2"></i> Quick Tips</h4>
@@ -660,23 +610,12 @@
                 </div>
                 <button class="text-gray-500 hover:text-teal-400 transition"><i class="far fa-check-square"></i></button>
             </div>
-            <div class="bg-[#2a2f45] border border-gray-700 p-4 rounded-lg flex items-start gap-4">
-                <div class="w-8 h-8 rounded border border-gray-600 flex items-center justify-center text-gray-400 shrink-0"><i class="fas fa-edit"></i></div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-gray-200">Edit Action</h4>
-                    <p class="text-xs text-gray-400 mt-1">ultranet Viewed edit admin user pagerein</p>
-                    <p class="text-[10px] text-gray-500 mt-2">4 minutes ago</p>
-                    <span class="inline-block mt-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">New</span>
-                </div>
-                <button class="text-gray-500 hover:text-teal-400 transition"><i class="far fa-check-square"></i></button>
-            </div>
         </div>
         <div class="p-4 border-t border-gray-700 flex gap-2 bg-[#181c2e]">
             <button class="flex-1 py-2 border border-gray-600 text-gray-300 text-xs font-medium rounded hover:bg-gray-800 transition"><i class="fas fa-check-double mr-1"></i> Mark All Read</button>
             <button class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition"><i class="fas fa-trash mr-1"></i> Clear All</button>
         </div>
     </div>
-
 
     <script>
         const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
@@ -702,6 +641,22 @@
         let currentRoleId = null;
         let activeUserFilter = 'all';
         let editingUserId = null;
+
+        // ==========================================
+        // NEW: TOGGLE PASSWORD VISIBILITY
+        // ==========================================
+        function togglePassword(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
 
         // ==========================================
         // UI TOGGLES
@@ -740,13 +695,9 @@
             window.location.href = 'login.html';
         }
 
-        // ==========================================
-        // VIEW SWITCHING LOGIC
-        // ==========================================
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-
             document.getElementById('profileDropdown').classList.remove('open');
 
             if (viewId === 'view-add') {
@@ -770,9 +721,6 @@
             }
         }
 
-        // ==========================================
-        // AUTHENTICATION
-        // ==========================================
         async function checkAuth() {
             const {
                 data: {
@@ -802,9 +750,6 @@
             return true;
         }
 
-        // ==========================================
-        // ROLES LOGIC
-        // ==========================================
         async function loadRoles() {
             const {
                 data,
@@ -816,10 +761,7 @@
                     ascending: false
                 })
                 .order('name');
-
-            if (!error) {
-                allRoles = data || [];
-            }
+            if (!error) allRoles = data || [];
         }
 
         function populateRoleDropdown(elementId) {
@@ -851,7 +793,6 @@
             const name = document.getElementById('roleName').value.trim();
             const desc = document.getElementById('roleDesc').value.trim();
             const errBox = document.getElementById('roleError');
-
             if (!name) {
                 errBox.textContent = 'Role name is required.';
                 errBox.classList.remove('hidden');
@@ -907,9 +848,6 @@
             loadRoles();
         }
 
-        // ==========================================
-        // USER MANAGEMENT LOGIC
-        // ==========================================
         window.filterUsers = function(type) {
             activeUserFilter = type;
             renderUsers();
@@ -920,10 +858,11 @@
             tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading users...</td></tr>';
 
             try {
+                // 1. Fetch profiles and roles
                 const {
                     data: profiles,
                     error: profErr
-                } = await supabaseClient.from('profiles').select('id, full_name, email');
+                } = await supabaseClient.from('profiles').select('id, full_name, email, phone');
                 if (profErr) throw profErr;
 
                 const {
@@ -932,14 +871,43 @@
                 } = await supabaseClient.from('user_roles').select('user_id, roles(name)');
                 if (urErr) throw urErr;
 
+                // 2. Fetch Auth Users to get last_sign_in_at via the RPC
+                const {
+                    data: authUsers,
+                    error: authErr
+                } = await supabaseClient.rpc('get_user_emails_and_logins');
+
+                const lastLoginMap = {};
+                if (!authErr && authUsers) {
+                    authUsers.forEach(u => {
+                        if (u.last_sign_in_at) {
+                            lastLoginMap[u.id] = u.last_sign_in_at;
+                        }
+                    });
+                }
+
+                // 3. Map everything together
                 allUsers = profiles.map(profile => {
                     const roleRecord = userRoles.find(ur => ur.user_id === profile.id);
                     const roleName = roleRecord && roleRecord.roles ? roleRecord.roles.name : 'Unassigned';
+
+                    // Format the last login
+                    let formattedLogin = 'Never';
+                    if (lastLoginMap[profile.id]) {
+                        const d = new Date(lastLoginMap[profile.id]);
+                        formattedLogin = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+
                     return {
                         id: profile.id,
                         full_name: profile.full_name,
                         email: profile.email,
-                        roleName: roleName
+                        phone: profile.phone || '',
+                        roleName: roleName,
+                        lastLogin: formattedLogin
                     };
                 });
 
@@ -972,11 +940,6 @@
                 filtered = filtered.filter(u => (u.full_name || '').toLowerCase().includes(searchQ) || (u.email || '').toLowerCase().includes(searchQ) || (u.roleName || '').toLowerCase().includes(searchQ));
             }
 
-            if (!filtered.length) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">No users match your filter.</td></tr>';
-                return;
-            }
-
             const avatarColors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-orange-500', 'bg-teal-500'];
 
             tbody.innerHTML = filtered.map((u, index) => {
@@ -989,7 +952,6 @@
 
                 const displayName = u.full_name || 'N/A';
                 const username = u.email.split('@')[0];
-                const lastLogin = index === 0 ? '2026-11-02 18:45:57' : (index === 1 ? '2026-10-23 14:20:33' : 'Never');
 
                 return `
                 <tr class="table-row-striped transition-colors">
@@ -1002,13 +964,13 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-gray-300">${displayName}</td>
-                    <td class="px-6 py-4 text-teal-400 hover:underline cursor-pointer">—</td>
+                    <td class="px-6 py-4 text-teal-400 hover:underline cursor-pointer">${u.phone || '—'}</td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">
                             <i class="fas fa-tag mr-1 text-[10px]"></i> ${u.roleName}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-gray-400 text-xs"><i class="fas fa-clock mr-1"></i> ${lastLogin}</td>
+                    <td class="px-6 py-4 text-gray-400 text-xs"><i class="fas fa-clock mr-1"></i> ${u.lastLogin}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
                             <button onclick="openEditUser('${u.id}')" class="w-8 h-8 rounded border border-gray-600 text-gray-400 hover:text-white hover:bg-gray-700 transition flex items-center justify-center" title="Edit User">
@@ -1023,44 +985,68 @@
             }).join('');
         }
 
-        // --- OPEN EDIT USER VIEW ---
         function openEditUser(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
-
             editingUserId = userId;
             const username = user.email.split('@')[0];
 
-            // Populate inputs
             document.getElementById('editHeaderUsername').textContent = username;
             document.getElementById('editUserUsername').value = user.email;
             document.getElementById('editUserFullName').value = user.full_name || '';
-            document.getElementById('editUserPhone').value = ''; // Add logic if you store phone
+            document.getElementById('editUserPhone').value = user.phone || '';
             populateRoleDropdown('editUserRole');
 
-            // Set current role in dropdown
             const roleObj = allRoles.find(r => r.name === user.roleName);
             if (roleObj) document.getElementById('editUserRole').value = roleObj.id;
 
-            // Populate Side Card
             document.getElementById('editAvatar').textContent = (user.full_name || username).charAt(0).toUpperCase();
             document.getElementById('editSideName').textContent = user.full_name || 'N/A';
             document.getElementById('editSideUsername').textContent = `@${username}`;
-            document.getElementById('editSidePhone').textContent = '—';
+            document.getElementById('editSidePhone').textContent = user.phone || '—';
+            document.getElementById('editSideLogin').textContent = user.lastLogin;
+
+            const badge = document.getElementById('editSideRole');
+            if (user.roleName === 'Full Administrator') {
+                badge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30';
+            } else {
+                badge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+            }
+            badge.innerHTML = `<i class="fas fa-tag mr-1"></i> ${user.roleName}`;
+
             document.getElementById('editUserPassword').value = '';
             document.getElementById('editUserConfirmPassword').value = '';
             document.getElementById('editUserError').classList.add('hidden');
 
+            document.getElementById('editUserFullName').oninput = (e) => {
+                document.getElementById('editSideName').textContent = e.target.value || 'N/A';
+                document.getElementById('editAvatar').textContent = (e.target.value || 'U').charAt(0).toUpperCase();
+            };
+            document.getElementById('editUserPhone').oninput = (e) => {
+                document.getElementById('editSidePhone').textContent = e.target.value || '—';
+            };
+            document.getElementById('editUserRole').onchange = (e) => {
+                const selectedText = e.target.options[e.target.selectedIndex].text;
+                const b = document.getElementById('editSideRole');
+                if (selectedText === 'Full Administrator') {
+                    b.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30';
+                } else {
+                    b.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
+                }
+                b.innerHTML = `<i class="fas fa-tag mr-1"></i> ${selectedText}`;
+            };
+
             switchView('view-edit-user');
         }
 
-        // --- SAVE EDITED USER ---
         document.getElementById('editUserSaveBtn').addEventListener('click', async() => {
             if (!editingUserId) return;
             const btn = document.getElementById('editUserSaveBtn');
             const err = document.getElementById('editUserError');
 
+            const email = document.getElementById('editUserUsername').value.trim();
             const fullName = document.getElementById('editUserFullName').value.trim();
+            const phone = document.getElementById('editUserPhone').value.trim();
             const roleId = document.getElementById('editUserRole').value;
             const pass = document.getElementById('editUserPassword').value;
             const confirmPass = document.getElementById('editUserConfirmPassword').value;
@@ -1076,21 +1062,37 @@
             err.classList.add('hidden');
 
             try {
-                // Update Profile Name
-                const {
-                    error: profErr
-                } = await supabaseClient.from('profiles').update({
-                    full_name: fullName
-                }).eq('id', editingUserId);
-                if (profErr) throw profErr;
-
-                // Update Role
                 const {
                     error: roleErr
                 } = await supabaseClient.from('user_roles').update({
                     role_id: roleId
                 }).eq('user_id', editingUserId);
                 if (roleErr) throw roleErr;
+
+                const {
+                    data,
+                    error
+                } = await supabaseClient.functions.invoke('update-user', {
+                    body: {
+                        user_id: editingUserId,
+                        email: email,
+                        password: pass || undefined,
+                        full_name: fullName,
+                        phone: phone
+                    }
+                });
+
+                if (error) {
+                    let exactError = error.message;
+                    if (error.context) {
+                        try {
+                            const errData = await error.context.json();
+                            if (errData && errData.error) exactError = errData.error;
+                        } catch (e) {}
+                    }
+                    throw new Error(exactError);
+                }
+                if (data && data.error) throw new Error(data.error);
 
                 switchView('view-list');
                 loadUsers();
@@ -1103,12 +1105,10 @@
             }
         });
 
-        // ==========================================
-        // ADD ADMIN LOGIC
-        // ==========================================
         document.getElementById('addAdminSave').addEventListener('click', async() => {
             const fullName = document.getElementById('newAdminName').value.trim();
             const email = document.getElementById('newAdminEmail').value.trim();
+            const phone = document.getElementById('newAdminPhone').value.trim();
             const password = document.getElementById('newAdminPassword').value;
             const roleId = document.getElementById('newAdminRole').value;
             const btn = document.getElementById('addAdminSave');
@@ -1133,7 +1133,8 @@
                         email,
                         password,
                         role_id: roleId,
-                        full_name: fullName
+                        full_name: fullName,
+                        phone
                     }
                 });
 
@@ -1163,7 +1164,6 @@
 
         window.deleteUser = async function(userId) {
             if (!confirm('WARNING: Are you sure you want to permanently delete this user?')) return;
-
             try {
                 const {
                     error
@@ -1178,18 +1178,12 @@
             }
         };
 
-        // ==========================================
-        // SETTINGS LOGIC
-        // ==========================================
         async function loadSettings() {
             const {
                 data,
                 error
             } = await supabaseClient.from('system_settings').select('*').eq('id', 1).single();
-            if (error) {
-                console.error("Could not load settings:", error);
-                return;
-            }
+            if (error) return;
             if (data) {
                 document.getElementById('setCompanyName').value = data.company_name || '';
                 document.getElementById('setPhone').value = data.phone_number || '';
@@ -1206,7 +1200,6 @@
         document.getElementById('saveSettingsBtn').addEventListener('click', async() => {
             const btn = document.getElementById('saveSettingsBtn');
             const successBox = document.getElementById('settingsSuccess');
-
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
             successBox.classList.add('hidden');
@@ -1228,9 +1221,8 @@
                     error
                 } = await supabaseClient.from('system_settings').update(payload).eq('id', 1);
                 if (error) throw error;
-
                 successBox.classList.remove('hidden');
-                setTimeout(() => successBox.classList.add('hidden'), 3000); // Hide after 3 seconds
+                setTimeout(() => successBox.classList.add('hidden'), 3000);
             } catch (err) {
                 alert('Error saving settings: ' + err.message);
             } finally {
@@ -1239,14 +1231,10 @@
             }
         });
 
-        // ==========================================
-        // INIT
-        // ==========================================
         (async() => {
             if (await checkAuth()) {
                 await loadRoles();
                 await loadUsers();
-
                 const searchInput = document.getElementById('userSearchInput');
                 if (searchInput) searchInput.addEventListener('input', renderUsers);
             }
