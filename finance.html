@@ -4765,16 +4765,10 @@
         function applyPermissionsToUI() {
             if (window.IS_FULL_ADMIN) return;
 
-            // Helper to hide elements safely
-            const hide = (selector) => {
-                document.querySelectorAll(selector).forEach(el => el.style.display = 'none');
-            };
-
-            // 1. Hide all Tabs they don't have access to view
+            // 1. Hide Tabs they don't have access to view
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => {
                 const view = tab.dataset.view;
-                // Map tab view to module name (customize as needed)
                 let moduleName = view;
                 if (view === 'ledger') moduleName = 'Central Ledger';
                 if (view === 'income') moduleName = 'Income';
@@ -4784,7 +4778,6 @@
                 if (view === 'staff') moduleName = 'Staff';
                 if (view === 'payroll') moduleName = 'Payroll';
                 if (view === 'assets') moduleName = 'Assets';
-                if (view === 'reports') moduleName = 'Reports';
                 if (view === 'tasks') moduleName = 'Tasks';
                 if (view === 'attendance') moduleName = 'Attendance';
                 if (view === 'stock') moduleName = 'Stock';
@@ -4802,24 +4795,41 @@
                 }
             });
 
-            // 2. Hide ALL "Create / Add / New" buttons
-            const hideCreate = ['newTxnBtn', 'newTxnBtn2', 'newIncomeBtn', 'newExpenseBtn', 'newLocationBtn', 'newStaffBtn', 'runPayrollBtn', 'newAssetBtn', 'newTaskBtn', 'newStockBtn', 'newCustomerBtn', 'newProjectBtn', 'newCategoryBtn', 'newRecurringBtn', 'newBudgetBtn', 'newOvertimeBtn', 'newLeaveBtn', 'newCasualBtn'];
+            // 2. Hide ALL "Create / Add / New" buttons statically
+            const hideCreate = ['newTxnBtn', 'newTxnBtn2', 'newIncomeBtn', 'newExpenseBtn', 'newLocationBtn', 'newStaffBtn', 'runPayrollBtn', 'newAssetBtn', 'newTaskBtn', 'newStockBtn', 'newCustomerBtn', 'newProjectBtn', 'newCategoryBtn', 'newRecurringBtn', 'newBudgetBtn', 'newOvertimeBtn', 'newLeaveBtn', 'newCasualBtn', 'newReserveMovementBtn'];
             hideCreate.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
 
-            // 3. Hide specific Edit/Delete buttons on tables
-            // We do this by listening to the clicks and blocking them, but we also hide the buttons visually.
-            if (!can('edit', 'Capitalization Table')) {
-                hide('.edit-btn');
-                hide('.del-btn');
-                hide('#addInvestorBtn');
-                hide('#addInvestorBtn2');
-            }
+            // Hide Admin Roles link
+            document.querySelectorAll('a[href="admin.html"]').forEach(a => a.style.display = 'none');
 
-            // Hide the Admin Roles button for non-admins
-            hide('a[href="admin.html"]');
+            // 3. Continuously strip away Edit/Delete/Approve buttons from tables
+            // This runs every 500ms to catch buttons that are loaded dynamically
+            setInterval(() => {
+                // Central Ledger, Income, Expenditure
+                if (!can('edit', 'Central Ledger')) {
+                    document.querySelectorAll('.edit-btn, .del-btn, .reverse-btn').forEach(btn => btn.style.display = 'none');
+                }
+                // Payroll
+                if (!can('edit', 'Payroll')) {
+                    document.querySelectorAll('.btn-edit, .btn-delete').forEach(btn => btn.style.display = 'none');
+                }
+                // Tasks
+                if (!can('edit', 'Tasks')) {
+                    document.querySelectorAll('.task-title-link').forEach(link => link.style.pointerEvents = 'none'); // Stop them clicking into edit mode
+                    document.querySelectorAll('.edit-btn, .del-btn').forEach(btn => btn.style.display = 'none');
+                }
+                // Dividends / Approvals (if applicable in this app)
+                if (!can('approve', 'Approvals')) {
+                    document.querySelectorAll('.approve-btn').forEach(btn => btn.style.display = 'none');
+                }
+                // Categories, Budgets, Recurring, Overtime, Leave
+                if (!can('edit', 'Categories') || !can('edit', 'Budgets') || !can('edit', 'Recurring')) {
+                    document.querySelectorAll('.edit-btn, .del-btn').forEach(btn => btn.style.display = 'none');
+                }
+            }, 500);
         }
 
         function can(action, moduleName) {
@@ -9461,6 +9471,10 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
         }
 
                 async function saveStaff() {
+                      // 🔥 GUARD CLAUSE
+            if (!can('create', 'Staff') && !can('edit', 'Staff')) {
+                return alert('Access Denied: You cannot modify staff.');
+            }
             // §82 — sanitize text inputs before validation
             const employeeNumber = Validation.sanitize(document.getElementById('stfNumber').value, 20);
             const status = document.getElementById('stfStatus').value;
@@ -11011,6 +11025,11 @@ function openTxnModal(txn = null) {
         }
 
                     async function saveTxn() {
+
+                         // 🔥 GUARD CLAUSE
+            if (!can('create', 'Central Ledger') && !can('edit', 'Central Ledger')) {
+                return alert('Access Denied: You only have View permissions for the Ledger.');
+            }
     const type = document.getElementById('txnType').value;
     const category = document.getElementById('txnCategory').value;
     const description = Validation.sanitize(document.getElementById('txnDesc').value, 200);
@@ -11247,6 +11266,10 @@ function openTxnModal(txn = null) {
         };
 
         window.deleteTxn = function(id) {
+            // 🔥 GUARD CLAUSE
+            if (!can('delete', 'Central Ledger')) {
+                return alert('Access Denied: You cannot delete transactions.');
+            }
             const t = transactions.find(x => x.id === id);
             if (!t) return;
             const reason = prompt(`Delete ${t.id} — ${t.description} (KSh ${fmt(t.amount)})?\n\nThis is a soft delete. The record is hidden but not removed and can be restored later.\n\nReason for deletion:`, '');
