@@ -3490,35 +3490,17 @@
             return false;
         }
 
-        function applyEquityPermissions() {
-            console.log("Running applyEquityPermissions. Admin status:", window.IS_FULL_ADMIN);
 
-            // If they are a full admin, do nothing. Show everything.
+        function applyEquityPermissions() {
             if (window.IS_FULL_ADMIN) return;
 
-            // Hide top navigation buttons based on the EXACT names in your Admin Matrix
-            if (!can('view', 'Dividend Declaration')) {
-                const el = document.getElementById('dividendsBtn');
-                if (el) el.style.display = 'none';
-            }
-            if (!can('view', 'Capitalization Table')) {
-                const el = document.getElementById('capTableBtn');
-                if (el) el.style.display = 'none';
-            }
-            if (!can('view', 'Share Ledger')) {
-                const el = document.getElementById('investorTxnBtn');
-                if (el) el.style.display = 'none';
-            }
-            if (!can('view', 'Reserve')) {
-                const el = document.getElementById('reserveBtn');
-                if (el) el.style.display = 'none';
-            }
-            if (!can('view', 'Audit Log')) {
-                const el = document.getElementById('auditBtn');
-                if (el) el.style.display = 'none';
-            }
+            // 1. Hide top navigation buttons
+            if (!can('view', 'Dividend Declaration')) document.getElementById('dividendsBtn')?.style.setProperty('display', 'none');
+            if (!can('view', 'Capitalization Table')) document.getElementById('capTableBtn')?.style.setProperty('display', 'none');
+            if (!can('view', 'Share Ledger')) document.getElementById('investorTxnBtn')?.style.setProperty('display', 'none');
+            if (!can('view', 'Reserve')) document.getElementById('reserveBtn')?.style.setProperty('display', 'none');
+            if (!can('view', 'Audit Log')) document.getElementById('auditBtn')?.style.setProperty('display', 'none');
 
-            // Hide other navigation buttons
             const proposalsBtn = document.getElementById('proposalsBtn');
             if (proposalsBtn) proposalsBtn.style.display = 'none';
             const dilutionBtn = document.getElementById('dilutionBtn');
@@ -3529,32 +3511,44 @@
             if (reconBtn) reconBtn.style.display = 'none';
 
             // Hide Admin Roles link
-            const adminLinks = document.querySelectorAll('a[href="admin.html"]');
-            adminLinks.forEach(a => a.style.display = 'none');
+            document.querySelectorAll('a[href="admin.html"]').forEach(a => a.style.display = 'none');
 
-            // 🔥 NEW: Hide the "Add Investor" buttons if they can't create
-            if (!can('create', 'Capitalization Table')) {
-                const addInv1 = document.getElementById('addInvestorBtn');
-                const addInv2 = document.getElementById('addInvestorBtn2');
-                if (addInv1) addInv1.style.display = 'none';
-                if (addInv2) addInv2.style.display = 'none';
+            // 2. Hide Add Buttons
+            const canEditCapTable = can('edit', 'Capitalization Table');
+            if (!canEditCapTable) {
+                document.getElementById('addInvestorBtn')?.style.setProperty('display', 'none');
+                document.getElementById('addInvestorBtn2')?.style.setProperty('display', 'none');
             }
 
-            // 🔥 NEW: Hide Edit/Delete actions in the table if they can't edit/delete
-            // We use a slight delay to ensure the table has finished rendering
-            setTimeout(() => {
-                const canEdit = can('edit', 'Capitalization Table');
-                const canDelete = can('delete', 'Capitalization Table');
+            const canEditDivs = can('edit', 'Dividend Declaration');
+            if (!canEditDivs) {
+                document.getElementById('newDividendBtn')?.style.setProperty('display', 'none');
+                document.getElementById('newDividendFromHistoryBtn')?.style.setProperty('display', 'none'); // 👈 ADD THIS LINE
+            }
 
-                if (!canEdit) {
-                    document.querySelectorAll('.edit-btn').forEach(btn => btn.style.display = 'none');
+            // 3. Continuously strip away action buttons (Runs every 500ms to catch dynamically loaded rows)
+            setInterval(() => {
+                // Strip Investor table actions
+                if (!canEditCapTable) {
+                    document.querySelectorAll('.edit-btn, .del-btn').forEach(btn => btn.style.display = 'none');
                 }
-                if (!canDelete) {
-                    document.querySelectorAll('.del-btn').forEach(btn => btn.style.display = 'none');
+
+                // Strip Dividend actions
+                if (!canEditDivs) {
+                    document.querySelectorAll('.div-edit-btn, .div-delete-btn').forEach(btn => btn.style.display = 'none');
+                    // Hide Approve / Mark Paid / Cancel buttons inside the Dividend Detail Modal
+                    document.querySelectorAll('.div-action-btn').forEach(btn => {
+                        if (btn.innerText.includes('Approve') || btn.innerText.includes('Paid') || btn.innerText.includes('Cancel')) {
+                            btn.style.display = 'none';
+                        }
+                    });
+                }
+
+                // Strip any other rogue buttons
+                if (!can('edit', 'Payroll')) {
+                    document.querySelectorAll('.btn-edit, .btn-delete, .btn-view').forEach(btn => btn.style.display = 'none');
                 }
             }, 500);
-
-            console.log("Finished hiding buttons.");
         }
         if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
             Chart.register(ChartDataLabels);
