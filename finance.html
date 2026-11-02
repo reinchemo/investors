@@ -8748,7 +8748,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             doPrint(html);
         }
 
-        function renderPayroll() {
+              function renderPayroll() {
             const body = document.getElementById('payrollBody');
             if (!body) return;
 
@@ -8783,25 +8783,51 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 const statusLabel = r.status.charAt(0).toUpperCase() + r.status.slice(1);
                 const postedLabel = r.postedAt ? new Date(r.postedAt).toLocaleDateString() : '—';
 
-                return `<tr>
-                    <td><a href="#" class="payroll-period-link" data-id="${r.id}" style="color:#7fded1; text-decoration:none; font-weight:700; font-family:'JetBrains Mono',monospace; border-bottom:1px dotted #5fc7bc;">${escapeHTML(r.period)}</a></td>
+                // We use data-id attributes instead of inline onclick to guarantee they bind correctly
+                return `<tr style="cursor: pointer;" class="payroll-row" data-id="${r.id}">
+                    <td><span style="color:#7fded1; font-weight:700; font-family:'JetBrains Mono',monospace; border-bottom:1px dotted #5fc7bc;">${escapeHTML(r.period)}</span></td>
                     <td>${escapeHTML(r.runDate || '—')}</td>
                     <td style="text-align:right; font-family:'JetBrains Mono',monospace;">${staffCount}</td>
                     <td class="amount-expense" style="text-align:right; font-family:'JetBrains Mono',monospace; font-weight:700;">KSh ${fmt(r.totalNet)}</td>
                     <td><span class="status-pill ${escapeHTML(r.status)}">${escapeHTML(statusLabel)}</span></td>
                     <td style="font-size:0.78rem; color:#7f9bb8;">${escapeHTML(postedLabel)}</td>
                     <td>
-                        <div class="row-actions">
-                            <button class="edit-btn" onclick="openPayrollDetail(${r.id})" title="View"><i class="fas fa-eye"></i></button>
+                        <div class="row-actions" style="display:flex; gap:0.4rem; justify-content:flex-end;">
+                            <button class="edit-btn btn-view" data-id="${r.id}" title="View Details"><i class="fas fa-eye"></i></button>
+                            <button class="edit-btn btn-edit" data-id="${r.id}" title="Edit Run"><i class="fas fa-edit"></i></button>
+                            <button class="del-btn btn-delete" data-id="${r.id}" title="Delete Run"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>`;
             }).join('');
 
-            body.querySelectorAll('.payroll-period-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openPayrollDetail(parseInt(link.dataset.id, 10));
+            // 🔥 FIX: Attach event listeners directly to the DOM elements
+            body.querySelectorAll('.payroll-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    // If they clicked a button, don't open the detail modal
+                    if (e.target.closest('button')) return;
+                    openPayrollDetail(parseInt(row.dataset.id, 10));
+                });
+            });
+
+            body.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openPayrollDetail(parseInt(btn.dataset.id, 10));
+                });
+            });
+
+            body.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editPayrollRun(parseInt(btn.dataset.id, 10));
+                });
+            });
+
+            body.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletePayrollRun(parseInt(btn.dataset.id, 10));
                 });
             });
         }
@@ -9789,50 +9815,74 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
         }
 
-        function openPayrollWizard() {
+               function openPayrollWizard(editRunId = null) {
             currentWizardStep = 1;
             wizardLines = [];
+            editingPayrollRunId = editRunId; // 🔥 This tracks if we are editing
 
             const activeStaff = staff.filter(s => s.status === 'active');
-            if (!activeStaff.length) {
+            if (!activeStaff.length && !editRunId) {
                 showToast('⚠️ No active staff. Add staff first.', 'error');
                 return;
             }
 
-            document.getElementById('pwPeriod').value = getDefaultPeriod();
-            document.getElementById('pwRunDate').value = todayISO();
-            document.getElementById('pwNotes').value = '';
+            if (editRunId) {
+                // 🔥 EDIT MODE: Load existing run data
+                const run = payrollRuns.find(r => r.id === editRunId);
+                const items = payrollItems.filter(i => i.runId === editRunId);
+                
+                document.getElementById('pwPeriod').value = run.period;
+                document.getElementById('pwRunDate').value = run.runDate;
+                document.getElementById('pwNotes').value = run.notes || '';
+                
+                wizardLines = items.map(item => {
+                    const s = staff.find(x => x.id === item.staffId) || {};
+                    return {
+                        staffId: item.staffId,
+                        employeeNumber: s.employeeNumber || '',
+                        fullName: s.fullName || 'Unknown',
+                        role: s.role || '',
+                        locationId: s.locationId,
+                        salary: safeNum(item.gross),
+                        amount: safeNum(item.gross),
+                        include: true,
+                        hasSalary: true
+                    };
+                });
+            } else {
+                // 🔥 NEW MODE: Blank slate
+                document.getElementById('pwPeriod').value = getDefaultPeriod();
+                document.getElementById('pwRunDate').value = todayISO();
+                document.getElementById('pwNotes').value = '';
+                
+                const wizardPeriod = document.getElementById('pwPeriod').value || getDefaultPeriod();
+                wizardLines = activeStaff.map(s => {
+                    const baseSalary = safeNum(s.salary);
+                    const otEntries = overtimeEntries.filter(e =>
+                        e.staffId === s.id && e.status === 'approved' && e.period === wizardPeriod
+                    );
+                    const otAmount = otEntries.reduce((sum, e) => sum + e.amount, 0);
+                    const otHours = otEntries.reduce((sum, e) => sum + e.hours, 0);
+
+                    return {
+                        staffId: s.id,
+                        employeeNumber: s.employeeNumber || '',
+                        fullName: s.fullName,
+                        role: s.role || '',
+                        locationId: s.locationId,
+                        salary: baseSalary,
+                        overtime: otAmount,
+                        overtimeHours: otHours,
+                        amount: baseSalary + otAmount,
+                        include: true,
+                        hasSalary: baseSalary > 0
+                    };
+                });
+            }
+
             document.getElementById('pwError1').style.display = 'none';
             document.getElementById('pwError2').style.display = 'none';
             document.getElementById('pwError3').style.display = 'none';
-
-                       const wizardPeriod = document.getElementById('pwPeriod').value || getDefaultPeriod();
-
-            wizardLines = activeStaff.map(s => {
-                const baseSalary = safeNum(s.salary);
-                const otEntries = overtimeEntries.filter(e =>
-                    e.staffId === s.id &&
-                    e.status === 'approved' &&
-                    e.period === wizardPeriod
-                );
-                const otAmount = otEntries.reduce((sum, e) => sum + e.amount, 0);
-                const otHours = otEntries.reduce((sum, e) => sum + e.hours, 0);
-
-                return {
-                    staffId: s.id,
-                    employeeNumber: s.employeeNumber || '',
-                    fullName: s.fullName,
-                    role: s.role || '',
-                    locationId: s.locationId,
-                    salary: baseSalary,
-                    overtime: otAmount,
-                    overtimeHours: otHours,
-                    overtimeEntryIds: otEntries.map(e => e.id),
-                    amount: baseSalary + otAmount,
-                    include: true,
-                    hasSalary: baseSalary > 0
-                };
-            });
 
             setWizardStep(1);
             document.getElementById('payrollWizardModal').classList.add('show');
@@ -13660,10 +13710,47 @@ function openTxnModal(txn = null) {
         });
 
         document.addEventListener('DOMContentLoaded', startApp);
+                // ==================================================
+        // PAYROLL EDIT & DELETE FUNCTIONS
+        // ==================================================
+             function editPayrollRun(runId) {
+            const r = payrollRuns.find(x => x.id === runId);
+            if (!r) return;
+            
+            // 🔥 FIX: Allow both drafts and cancelled runs to be edited
+            if (r.status !== 'draft' && r.status !== 'cancelled') {
+                return alert('⚠️ Only DRAFT or CANCELLED payroll runs can be edited. If this run is approved or posted, you must cancel it first.');
+            }
+            
+            openPayrollWizard(runId); 
+        }
+
+        async function deletePayrollRun(runId) {
+            const r = payrollRuns.find(x => x.id === runId);
+            if (!r) return;
+            
+            if (r.status === 'posted') {
+                return alert('⚠️ Cannot delete a POSTED payroll run. You must cancel it first to reverse the ledger entries.');
+            }
+            
+            if (!confirm(`Are you sure you want to permanently delete the ${r.status} payroll run for ${r.period}? This cannot be undone.`)) return;
+
+            try {
+                await supabaseClient.from('payroll_items').delete().eq('run_id', runId);
+                const { error } = await supabaseClient.from('payroll_runs').delete().eq('id', runId);
+                
+                if (error) throw error;
+                
+                showToast('✅ Payroll run deleted', 'success');
+                await loadPayrollFromCloud();
+                renderPayroll();
+            } catch (err) {
+                alert('Error deleting payroll: ' + err.message);
+            }
+        }
     </script>
     <script src="mpesa-parser.js"></script>
     <script src="router.js"></script>
 </body>
-
 
 </html>
