@@ -3292,6 +3292,7 @@
                 <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
                 <button class="btn btn-ghost" id="reconBtn"><i class="fas fa-balance-scale"></i> Reconcile <span id="reconCountNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(226,104,91,0.3); color:#f0a89f; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="reserveBtn"><i class="fas fa-piggy-bank"></i> Reserve <span id="reserveBalanceNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(200,154,91,0.3); color:#f4c98d; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
+                <button class="btn btn-ghost" id="analyticsBtn"><i class="fas fa-chart-line"></i> Analytics</button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
 
@@ -3463,6 +3464,45 @@
         </div>
 
         <div class="footer-note"><i class="fas fa-clock"></i> Last updated: <strong id="lastUpdatedValue">—</strong></div>
+    </div>
+
+    <!-- 2FA OTP MODAL -->
+    <div class="modal-overlay" id="otpModal">
+        <div class="modal-card" style="max-width:420px;">
+            <h3><i class="fas fa-shield-alt" style="color:#5fc7bc;"></i> Security Verification</h3>
+            <p style="color:#7f9bb8; font-size:0.85rem; margin-bottom:1rem;">
+                A 6-digit code has been sent to your email. Enter it below to access this document.
+            </p>
+            <label>Verification Code</label>
+            <input type="text" id="otpCodeInput" placeholder="123456" maxlength="6" style="font-family:'JetBrains Mono',monospace; font-size:1.4rem; letter-spacing:0.5em; text-align:center;">
+            <div class="modal-error" id="otpError"></div>
+            <div class="modal-actions">
+                <button class="cancel" onclick="closeOtpModal()">Cancel</button>
+                <button class="save" id="otpVerifyBtn">Verify & Open</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANALYTICS MODAL -->
+    <div class="modal-overlay" id="analyticsModal">
+        <div class="modal-card" style="max-width:1000px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-chart-line" style="color:#5fc7bc;"></i> Notification Analytics</h3>
+                <button class="btn btn-ghost add-employee-btn" id="analyticsRefreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+
+            <div class="summary-row" id="analyticsSummary">
+                <!-- Dynamic stats will go here -->
+            </div>
+
+            <div class="chart-wrapper" style="height:300px; margin-top:1rem; background:rgba(15,26,46,0.3); border-radius:12px; padding:1rem;">
+                <canvas id="notifVolumeChart"></canvas>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" onclick="document.getElementById('analyticsModal').classList.remove('show')">Close</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -4282,12 +4322,17 @@ function renderTable() {
                 <td><span class="status-pill ${statusClass}">${escapeHTML(inv.status || 'active')}</span></td>
                 <td>${fmt(inv.equity)}</td>
                 <td class="equity-ratio">${ratio}%</td>
-                <td>
-                    <div class="row-actions">
-                        <button class="edit-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Edit">✏️</button>
-                        <button class="del-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Delete">🗑️</button>
-                    </div>
-                </td>
+               <td>
+    <div class="row-actions">
+        <!-- 🔥 NEW: PDF Button -->
+        <button class="edit-btn" onclick="event.stopPropagation(); openSecurePdf(${inv.id})" title="View PDF Statement">
+            <i class="fas fa-file-pdf" style="color:#e8837a;"></i>
+        </button>
+        
+        <button class="edit-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Edit">✏️</button>
+        <button class="del-btn" data-id="${inv.id}" onclick="event.stopPropagation()" title="Delete">🗑️</button>
+    </div>
+</td>
             </tr>`;
         }
     });
@@ -4318,6 +4363,39 @@ function renderTable() {
     }));
 
     return totalEquity;
+}
+
+
+async function openSecurePdf(investorId) {
+    const inv = investors.find(i => i.id === investorId);
+    if (!inv) return;
+
+    if (!inv.email) {
+        showToast('⚠️ This investor does not have an email address saved.', 'error');
+        return;
+    }
+
+    // 1. Show loading
+    showToast('Generating secure link...', 'info');
+
+    try {
+        // 2. Generate the Signed URL from Supabase Storage
+        // (Change 'test.pdf' to the actual file name if you generate dynamic PDFs later)
+        const { data, error } = await supabaseClient.storage
+            .from('statements')
+            .createSignedUrl('test.pdf', 60 * 60 * 72); // 72 hours
+
+        if (error) throw error;
+        if (!data || !data.signedUrl) throw new Error('Could not generate signed URL');
+
+        // 3. Trigger the 2FA Flow
+        // This will save the OTP to the DB, send the email, and open the modal
+        await requestPdfAccess(inv.email, data.signedUrl);
+
+    } catch (err) {
+        console.error(err);
+        showToast('Failed to generate PDF: ' + err.message, 'error');
+    }
 }
                 async function renderSummaryCards() {
             const now = new Date();
@@ -8504,6 +8582,227 @@ function renderTable() {
         // ==================================================
         // INIT
         // ==================================================
+
+/**
+ * QUEUE NOTIFICATION HELPER
+ * Safely pushes a notification to the Supabase queue.
+ * Wrapped in try/catch so it NEVER breaks the financial logic.
+ */
+async function queueNotification(eventType, channel, recipientContact, payload) {
+    if (!recipientContact) return; // Skip if no phone/email
+    
+    try {
+        // 1. Check suppression list (Opt-outs)
+        const { data: suppressed } = await supabaseClient
+            .from('suppression_list')
+            .select('contact')
+            .eq('contact', recipientContact)
+            .maybeSingle();
+
+        if (suppressed) {
+            console.log(`Skipped notification to ${recipientContact} (User opted out)`);
+            return; // Exit silently
+        }
+
+        // 2. Insert into Queue
+        const { error } = await supabaseClient
+            .from('notification_queue')
+            .insert([{
+                event_type: eventType,
+                channel: channel,
+                recipient_contact: recipientContact,
+                payload: payload
+            }]);
+
+        if (error) throw error;
+        console.log(`✅ Queued ${eventType} for ${recipientContact}`);
+
+    } catch (err) {
+        // CRITICAL: We only console.error. We NEVER throw an error that stops the dividend/payroll.
+        console.error("❌ Notification Queue Failed (Financial data is safe):", err.message);
+    }
+}
+        
+// ==================================================
+// 2FA (OTP) FOR SENSITIVE PDF LINKS
+// ==================================================
+let pendingPdfUrl = null;
+let pendingPdfEmail = null;
+
+async function requestPdfAccess(email, signedUrl) {
+    pendingPdfEmail = email;
+    pendingPdfUrl = signedUrl;
+    
+    // Generate 6-digit code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60000).toISOString(); // 10 minutes
+    
+    // Save to database
+    const { error } = await supabaseClient.from('otp_tokens').insert({
+        email: email,
+        code: otpCode,
+        expires_at: expiresAt
+    });
+    
+    if (error) {
+        showToast('Failed to generate code: ' + error.message, 'error');
+        return;
+    }
+    
+    // Send via email (using the queue)
+    queueNotification('otp_auth', 'email', email, {
+        subject: '🔐 Security Code — Starlink Statement Access',
+        html: `
+            <div style="font-family:Arial,sans-serif; max-width:600px; margin:0 auto;">
+                <h2 style="color:#0b2b4a;">Security Verification</h2>
+                <p>You requested access to a confidential financial statement.</p>
+                <p>Your one-time verification code is:</p>
+                <div style="font-size:2rem; font-family:'Courier New',monospace; font-weight:bold; 
+                            letter-spacing:0.3em; background:#f0f5fb; padding:1rem; 
+                            text-align:center; border-radius:8px; color:#1a5a9c;">
+                    ${otpCode}
+                </div>
+                <p style="color:#7f9bb8; font-size:0.85rem;">This code expires in 10 minutes. If you didn't request this, ignore this email.</p>
+            </div>
+        `
+    });
+    
+    // Show the modal
+    document.getElementById('otpCodeInput').value = '';
+    document.getElementById('otpError').style.display = 'none';
+    document.getElementById('otpModal').classList.add('show');
+    setTimeout(() => document.getElementById('otpCodeInput').focus(), 100);
+}
+
+async function verifyOtpAndOpen() {
+    const code = document.getElementById('otpCodeInput').value.trim();
+    const err = document.getElementById('otpError');
+    err.style.display = 'none';
+    
+    if (!code || code.length !== 6) {
+        err.textContent = '⚠️ Enter the 6-digit code from your email.';
+        err.style.display = 'block';
+        return;
+    }
+    
+    const btn = document.getElementById('otpVerifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    
+    // Call the verify-otp edge function
+    const { data, error } = await supabaseClient.functions.invoke('verify-otp', {
+        body: { email: pendingPdfEmail, code: code }
+    });
+    
+    btn.disabled = false;
+    btn.innerHTML = 'Verify & Open';
+    
+    if (error || !data?.success) {
+        err.textContent = '⚠️ Invalid or expired code. Please try again.';
+        err.style.display = 'block';
+        return;
+    }
+    
+    // Success — open the PDF
+    closeOtpModal();
+    window.open(pendingPdfUrl, '_blank');
+    showToast('✅ Access granted', 'success');
+}
+
+function closeOtpModal() {
+    document.getElementById('otpModal').classList.remove('show');
+    pendingPdfEmail = null;
+    pendingPdfUrl = null;
+}
+
+// Wire up the modal
+document.getElementById('otpVerifyBtn')?.addEventListener('click', verifyOtpAndOpen);
+document.getElementById('otpCodeInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') verifyOtpAndOpen();
+});
+
+// ==================================================
+// ANALYTICS LOGIC (PHASE 2 SPRINT 1)
+// ==================================================
+let analyticsChartInstance = null;
+
+async function openAnalyticsModal() {
+    document.getElementById('analyticsModal').classList.add('show');
+    await loadAnalyticsData();
+}
+
+async function loadAnalyticsData() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const { data: logs, error } = await supabaseClient
+        .from('notification_logs')
+        .select('*')
+        .gte('created_at', thirtyDaysAgo.toISOString());
+
+    if (error) {
+        showToast('Failed to load analytics: ' + error.message, 'error');
+        return;
+    }
+
+    const totalSent = logs.filter(l => l.status === 'sent').length;
+    const totalFailed = logs.filter(l => l.status === 'failed').length;
+    const totalCost = logs.reduce((sum, l) => sum + (safeNum(l.cost)), 0);
+    const smsCount = logs.filter(l => l.channel === 'sms').length;
+    const emailCount = logs.filter(l => l.channel === 'email').length;
+    const waCount = logs.filter(l => l.channel === 'whatsapp').length;
+
+    document.getElementById('analyticsSummary').innerHTML = `
+        <div class="summary-card income"><div class="summary-label">TOTAL SENT</div><div class="summary-value">${totalSent}</div><div class="summary-sub">${totalFailed} failed</div></div>
+        <div class="summary-card expense"><div class="summary-label">TOTAL COST</div><div class="summary-value">KSh ${fmt(totalCost)}</div><div class="summary-sub">Last 30 days</div></div>
+        <div class="summary-card"><div class="summary-label">CHANNEL BREAKDOWN</div><div class="summary-value" style="font-size:1rem;">SMS: ${smsCount} | WA: ${waCount} | Email: ${emailCount}</div><div class="summary-sub">Volume</div></div>
+    `;
+
+    const dailyData = {};
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyData[dateStr] = { sms: 0, whatsapp: 0, email: 0 };
+    }
+
+    logs.forEach(log => {
+        if (log.status !== 'sent') return;
+        const dateStr = log.created_at.split('T')[0];
+        if (dailyData[dateStr]) {
+            dailyData[dateStr][log.channel]++;
+        }
+    });
+
+    const labels = Object.keys(dailyData);
+    const smsData = labels.map(d => dailyData[d].sms);
+    const waData = labels.map(d => dailyData[d].whatsapp);
+    const emailData = labels.map(d => dailyData[d].email);
+
+    if (analyticsChartInstance) analyticsChartInstance.destroy();
+    const ctx = document.getElementById('notifVolumeChart').getContext('2d');
+    
+    analyticsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels.map(l => l.slice(5)), 
+            datasets: [
+                { label: 'SMS', data: smsData, backgroundColor: '#2a7ac4' },
+                { label: 'WhatsApp', data: waData, backgroundColor: '#6fcb93' },
+                { label: 'Email', data: emailData, backgroundColor: '#b8a0ff' }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#c7d5e6' } } },
+            scales: {
+                x: { stacked: true, ticks: { color: '#7f9bb8' }, grid: { display: false } },
+                y: { stacked: true, ticks: { color: '#7f9bb8' }, grid: { color: 'rgba(120,200,220,0.06)' } }
+            }
+        }
+    });
+}
         async function init() {
             setLoading(true);
             if (typeof supabase === 'undefined') {
@@ -8847,6 +9146,10 @@ function renderTable() {
                 closeDividendsHistoryModal();
                 openDividendModal(null);
             });
+
+                       // Wire Analytics
+            document.getElementById('analyticsBtn')?.addEventListener('click', openAnalyticsModal);
+            document.getElementById('analyticsRefreshBtn')?.addEventListener('click', loadAnalyticsData);
 
             await logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
@@ -9209,7 +9512,5 @@ function renderTable() {
     <script src="mpesa-parser.js"></script>
     <script src="router.js"></script>
 </body>
-
-
 
 </html>
