@@ -3506,6 +3506,40 @@
         </div>
     </div>
 
+    <!-- TEMPLATE MANAGEMENT MODAL -->
+    <div class="modal-overlay" id="templatesModal">
+        <div class="modal-card" style="max-width:900px;">
+            <div class="payments-modal-header">
+                <h3><i class="fas fa-language" style="color:#5fc7bc;"></i> Message Templates</h3>
+                <button class="btn btn-primary add-employee-btn" onclick="openNewTemplateModal()"><i class="fas fa-plus"></i> New Template</button>
+            </div>
+
+            <div class="info-banner" style="background:linear-gradient(135deg, rgba(95,199,188,0.12), rgba(95,199,188,0.04)); border-color:rgba(95,199,188,0.3); color:#7fded1; margin-bottom:1rem;">
+                <i class="fas fa-info-circle"></i>
+                <div>Manage your English and Swahili templates here. If a Swahili translation is missing, the system automatically falls back to English.</div>
+            </div>
+
+            <div class="employee-table-wrap">
+                <table class="employee-table" style="min-width:700px;">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Channel</th>
+                            <th>Language</th>
+                            <th>Preview</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="templatesBody"></tbody>
+                </table>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel" onclick="document.getElementById('templatesModal').classList.remove('show')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================================================
         // CONFIG
@@ -8803,11 +8837,27 @@ async function loadAnalyticsData() {
     if (analyticsChartInstance) analyticsChartInstance.destroy();
     const ctx = document.getElementById('notifVolumeChart').getContext('2d');
     
-       analyticsChartInstance = new Chart(ctx, {
+    analyticsChartInstance = new Chart(ctx, {
         type: 'bar',
-        // ... (chart options)
+        data: {
+            labels: labels.map(l => l.slice(5)), 
+            datasets: [
+                { label: 'SMS', data: smsData, backgroundColor: '#2a7ac4' },
+                { label: 'WhatsApp', data: waData, backgroundColor: '#6fcb93' },
+                { label: 'Email', data: emailData, backgroundColor: '#b8a0ff' }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#c7d5e6' } } },
+            scales: {
+                x: { stacked: true, ticks: { color: '#7f9bb8' }, grid: { display: false } },
+                y: { stacked: true, ticks: { color: '#7f9bb8' }, grid: { color: 'rgba(120,200,220,0.06)' } }
+            }
+        }
     });
-}
+        }
 
 // ==================================================
 // TEMPLATE MANAGEMENT LOGIC
@@ -8893,6 +8943,7 @@ async function openNewTemplateModal() {
         loadTemplates();
     }
 }
+
         async function init() {
             setLoading(true);
             if (typeof supabase === 'undefined') {
@@ -9237,9 +9288,12 @@ async function openNewTemplateModal() {
                 openDividendModal(null);
             });
 
-                       // Wire Analytics
+                                  // Wire Analytics
             document.getElementById('analyticsBtn')?.addEventListener('click', openAnalyticsModal);
             document.getElementById('analyticsRefreshBtn')?.addEventListener('click', loadAnalyticsData);
+            
+            // Wire Templates
+            document.getElementById('templatesBtn')?.addEventListener('click', openTemplatesModal);
 
             await logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
             setLoading(false);
@@ -9603,4 +9657,4 @@ async function openNewTemplateModal() {
     <script src="router.js"></script>
 </body>
 
-</html> 
+</html>
