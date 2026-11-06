@@ -5981,9 +5981,30 @@ async function openSecurePdf(investorId) {
                 return;
             }
 
-            await logAudit('PAID', `Proposal #${id}`, `Funded — KSh ${fmt(p.proposedAmount)} to ${inv.name}`, p.status, 'funded');
+                       await logAudit('PAID', `Proposal #${id}`, `Funded — KSh ${fmt(p.proposedAmount)} to ${inv.name}`, p.status, 'funded');
 
-            await fetchSummary();
+            await fetchSummary(); // Refresh local state to get new totals
+
+            // 🔥 NEW: TRIGGER OWNERSHIP CHANGE NOTIFICATION (§3.1)
+            if (inv.phone || inv.email) {
+                // Calculate the Before and After percentages
+                const totalEquityAfter = investors.reduce((sum, i) => sum + safeNum(i.equity), 0) + safeNum(summary.starlinkVirtualInvestment);
+                const totalEquityBefore = totalEquityAfter - p.proposedAmount;
+                
+                const pctBefore = totalEquityBefore > 0 ? ((oldEquity / totalEquityBefore) * 100).toFixed(2) : '0.00';
+                const pctAfter = totalEquityAfter > 0 ? ((newEquity / totalEquityAfter) * 100).toFixed(2) : '0.00';
+
+                const channel = inv.phone ? 'sms' : 'email';
+                const contact = inv.phone || inv.email;
+                const msg = `Hello ${inv.name}, your investment of KSh ${fmt(p.proposedAmount)} has been funded. Your ownership changed from ${pctBefore}% to ${pctAfter}%.`;
+
+                queueNotification('cap_table_change', channel, contact, { 
+                    message: msg,
+                    subject: "Your Ownership Has Changed",
+                    html: `<p>${msg}</p>`
+                });
+            }
+
             renderProposals();
             openProposalDetail(id);
             showToast('✅ Proposal funded and investment recorded', 'success');
