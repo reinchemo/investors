@@ -13400,6 +13400,46 @@ function openTxnModal(txn = null) {
         // ==================================================
         // INIT
         // ==================================================
+/**
+ * QUEUE NOTIFICATION HELPER
+ * Safely pushes a notification to the Supabase queue.
+ * Wrapped in try/catch so it NEVER breaks the financial logic.
+ */
+async function queueNotification(eventType, channel, recipientContact, payload) {
+    if (!recipientContact) return; // Skip if no phone/email
+    
+    try {
+        // 1. Check suppression list (Opt-outs)
+        const { data: suppressed } = await supabaseClient
+            .from('suppression_list')
+            .select('contact')
+            .eq('contact', recipientContact)
+            .maybeSingle();
+
+        if (suppressed) {
+            console.log(`Skipped notification to ${recipientContact} (User opted out)`);
+            return; // Exit silently
+        }
+
+        // 2. Insert into Queue
+        const { error } = await supabaseClient
+            .from('notification_queue')
+            .insert([{
+                event_type: eventType,
+                channel: channel,
+                recipient_contact: recipientContact,
+                payload: payload
+            }]);
+
+        if (error) throw error;
+        console.log(`✅ Queued ${eventType} for ${recipientContact}`);
+
+    } catch (err) {
+        // CRITICAL: We only console.error. We NEVER throw an error that stops the dividend/payroll.
+        console.error("❌ Notification Queue Failed (Financial data is safe):", err.message);
+    }
+}
+
            async function init() {
             if (typeof supabase === 'undefined') {
                 showToast('Supabase library not loaded. Please refresh.', 'error');
