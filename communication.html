@@ -752,8 +752,7 @@
             document.getElementById('analyticsSummary').innerHTML = `
                 <div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Total Sent</h4><h2>${totalSent}</h2></div></div>
                 <div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Failed</h4><h2>${totalFailed}</h2></div></div>
-                <div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Total Cost</h4><h2>KSh ${totalCost}</h2></div></div>
-            `;
+<div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Total Cost</h4><h2>KSh ${totalCost.toFixed(2)}</h2></div></div>            `;
 
             // Chart
             if (analyticsChartInstance) analyticsChartInstance.destroy();
