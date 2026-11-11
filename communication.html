@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=3"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -371,8 +372,13 @@
         <div class="menu-item" onclick="switchTab('whatsapp', this)"><i class="fab fa-whatsapp"></i> WhatsApp</div>
 
         <div class="menu-label">Management</div>
-        <div class="menu-item" id="menuTemplates" onclick="openTemplatesModal()"><i class="fas fa-language"></i> Message Templates</div>
-        <div class="menu-item" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Dashboard</div>
+        <div class="menu-item" onclick="openAnalyticsModal()"><i class="fas fa-chart-line"></i> Analytics</div>
+        <div class="menu-item" onclick="openTemplatesModal()"><i class="fas fa-language"></i> Message Templates</div>
+
+        <div style="margin-top: auto; border-top: 1px solid rgba(120, 200, 220, 0.1); padding-top: 1rem;">
+            <div class="menu-item" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back to Dashboard</div>
+        </div>
+    </div>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -499,6 +505,17 @@
                 <button class="btn btn-ghost" style="flex:1; justify-content:center;" onclick="document.getElementById('sendMessageModal').classList.remove('show')">Cancel</button>
                 <button class="btn btn-primary" style="flex:1; justify-content:center;" id="dispatchMessageBtn" onclick="dispatchMessage()">Send Now</button>
             </div>
+        </div>
+    </div>
+    <!-- ANALYTICS MODAL -->
+    <div class="modal-overlay" id="analyticsModal">
+        <div class="modal-card" style="max-width:800px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="margin:0;"><i class="fas fa-chart-line" style="color:#5fc7bc;"></i> Notification Analytics</h3>
+                <button class="btn btn-ghost" onclick="document.getElementById('analyticsModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="display:flex; gap:1rem; margin-bottom:1rem;" id="analyticsSummary"></div>
+            <div style="height:250px; width:100%;"><canvas id="notifVolumeChart"></canvas></div>
         </div>
     </div>
     <script>
@@ -711,6 +728,73 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadLogs();
         });
+        // ==================================================
+        // ANALYTICS LOGIC
+        // ==================================================
+        let analyticsChartInstance = null;
+
+        function openAnalyticsModal() {
+            document.getElementById('analyticsModal').classList.add('show');
+
+            // Summary
+            const totalSent = allLogs.filter(l => l.status === 'sent').length;
+            const totalFailed = allLogs.filter(l => l.status === 'failed').length;
+            const totalCost = allLogs.reduce((sum, l) => sum + (parseFloat(l.cost) || 0), 0);
+
+            document.getElementById('analyticsSummary').innerHTML = `
+                <div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Total Sent</h4><h2>${totalSent}</h2></div></div>
+                <div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Failed</h4><h2>${totalFailed}</h2></div></div>
+                <div class="stat-card" style="flex:1;"><div class="stat-info"><h4>Total Cost</h4><h2>KSh ${totalCost}</h2></div></div>
+            `;
+
+            // Chart
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+            const ctx = document.getElementById('notifVolumeChart').getContext('2d');
+
+            analyticsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['SMS', 'Email', 'WhatsApp'],
+                    datasets: [{
+                        label: 'Messages Sent',
+                        data: [
+                            allLogs.filter(l => l.channel === 'sms' && l.status === 'sent').length,
+                            allLogs.filter(l => l.channel === 'email' && l.status === 'sent').length,
+                            allLogs.filter(l => l.channel === 'whatsapp' && l.status === 'sent').length
+                        ],
+                        backgroundColor: ['#2a7ac4', '#b8a0ff', '#6fcb93'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                color: '#7f9bb8'
+                            },
+                            grid: {
+                                color: 'rgba(120,200,220,0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#c7d5e6'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 
