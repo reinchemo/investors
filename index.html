@@ -5140,10 +5140,10 @@ async function openSecurePdf(investorId) {
                                 }
                             }
                         },
-                        datalabels: hasLabels ? {
+                                          datalabels: hasLabels ? {
                             color: '#ffffff',
                             font: {
-                                size: 11,
+                                size: 10, // Slightly smaller for mobile
                                 weight: '700',
                                 family: 'Space Grotesk'
                             },
@@ -5155,6 +5155,7 @@ async function openSecurePdf(investorId) {
                             display: function(ctx) {
                                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                                 const v = ctx.dataset.data[ctx.dataIndex];
+                                // Only show label if it's >= 5% to prevent overlapping
                                 return total > 0 && (v / total) * 100 >= 5;
                             }
                         } : {}
@@ -5162,19 +5163,19 @@ async function openSecurePdf(investorId) {
                 }
             });
 
-            const barCanvas = document.getElementById('barChart');
+                    const barCanvas = document.getElementById('barChart');
             if (barChartInstance) barChartInstance.destroy();
             barChartInstance = new Chart(barCanvas.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels,
                     datasets: [{
-                        label: 'Equity (KSh)',
+                        label: 'Equity',
                         data: values,
                         backgroundColor: colors.map(c => c + 'dd'),
                         borderColor: colors,
                         borderWidth: 2,
-                        borderRadius: 8,
+                        borderRadius: 6,
                         barPercentage: 0.7,
                         categoryPercentage: 0.8,
                         hoverBackgroundColor: colors.map(c => c),
@@ -5189,9 +5190,7 @@ async function openSecurePdf(investorId) {
                         easing: 'easeOutQuart'
                     },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(10, 20, 35, 0.95)',
                             titleColor: '#f2f0eb',
@@ -5209,13 +5208,16 @@ async function openSecurePdf(investorId) {
                         datalabels: hasLabels ? {
                             anchor: 'end',
                             align: 'top',
-                            color: '#c7d5e6',
+                            color: '#f2f0eb',           // Brighter text
                             font: {
-                                size: 10,
+                                size: 10,               // Slightly smaller to fit
                                 weight: '700',
                                 family: 'JetBrains Mono'
                             },
                             formatter: function(v) {
+                                // Format as '1.08M' or '588k' to save horizontal space
+                                if (v >= 1000000) return (v/1000000).toFixed(1) + 'M';
+                                if (v >= 1000) return (v/1000).toFixed(0) + 'k';
                                 return fmt(v);
                             },
                             offset: 4
@@ -5224,42 +5226,32 @@ async function openSecurePdf(investorId) {
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: 'rgba(120, 200, 220, 0.06)'
-                            },
+                            grid: { color: 'rgba(120, 200, 220, 0.06)' },
                             ticks: {
                                 callback: function(v) {
-                                    return 'KSh ' + fmt(v);
+                                    // Shorten Y axis numbers so they don't take up half the screen
+                                    if (v >= 1000000) return 'KSh ' + (v/1000000).toFixed(1) + 'M';
+                                    if (v >= 1000) return 'KSh ' + (v/1000).toFixed(0) + 'k';
+                                    return 'KSh ' + v;
                                 },
-                                font: {
-                                    size: 10,
-                                    family: 'JetBrains Mono'
-                                },
-                                color: '#7f9bb8'
+                                font: { size: 9, family: 'JetBrains Mono' },
+                                color: '#7f9bb8',
+                                maxTicksLimit: 5 // Stops the axis from getting too crowded
                             }
                         },
                         x: {
-                            grid: {
-                                display: false
-                            },
+                            grid: { display: false },
                             ticks: {
-                                font: {
-                                    size: 10,
-                                    weight: '600',
-                                    family: 'Plus Jakarta Sans'
-                                },
+                                font: { size: 9, weight: '600', family: 'Plus Jakarta Sans' },
                                 color: '#c7d5e6',
-                                maxRotation: 30,
-                                minRotation: 15,
+                                maxRotation: 45, // Better angle for long names
+                                minRotation: 45,
                                 autoSkip: false
                             }
                         }
                     },
                     layout: {
-                        padding: {
-                            top: 24,
-                            bottom: 6
-                        }
+                        padding: { top: 25, bottom: 0, left: 0, right: 10 }
                     }
                 }
             });
@@ -9805,9 +9797,9 @@ async function openNewTemplateModal() {
             }
         }
 
-                // Boot the app when the DOM is ready
+        // Boot the app when the DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
-            // Removed setupMobileNav() because it conflicts with the inline onclick added in Fix 1
+            setupMobileNav();
             startApp();
         });
     </script>
