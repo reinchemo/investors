@@ -621,12 +621,23 @@
     <!-- BULK SMS MODAL -->
     <div class="modal-overlay" id="bulkSmsModal">
         <div class="modal-card" style="max-width:600px;">
-            <h3><i class="fas fa-bullhorn" style="color:#5fc7bc;"></i> Bulk SMS Campaign</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h3 style="margin:0;"><i class="fas fa-bullhorn" style="color:#5fc7bc;"></i> Bulk Campaign</h3>
+                <button class="btn btn-ghost" onclick="document.getElementById('bulkSmsModal').classList.remove('show')"><i class="fas fa-times"></i></button>
+            </div>
             <label>Recipient Segment</label>
             <select id="bulkSegment">
                 <option value="all">All Investors</option>
                 <option value="active">Active Investors Only</option>
             </select>
+            <label>Send Via</label>
+            <select id="bulkChannel">
+                <option value="sms">SMS Only</option>
+                <option value="email">Email Only</option>
+                <option value="whatsapp">WhatsApp Only</option>
+                <option value="all">ALL CHANNELS (SMS + Email + WhatsApp)</option>
+            </select>
+
             <label>Message</label>
             <textarea id="bulkMessage" rows="4"></textarea>
             <div style="display:flex; gap:0.5rem; margin-top:1rem;">
@@ -905,28 +916,86 @@
 
         async function sendBulkSms() {
             const segment = document.getElementById('bulkSegment').value;
+            const channel = document.getElementById('bulkChannel').value;
             const message = document.getElementById('bulkMessage').value.trim();
+
             if (!message) return alert('Please enter a message.');
-            let query = supabaseClient.from('investors').select('phone').not('phone', 'is', null);
+
+            // 1. Fetch investors based on segment
+            let query = supabaseClient.from('investors').select('*');
             if (segment === 'active') query = query.eq('status', 'active');
+
             const {
                 data: investors
             } = await query;
             if (!investors || investors.length === 0) return alert('No investors found.');
 
-            const rows = investors.map(inv => ({
-                event_type: 'bulk_campaign',
-                channel: 'sms',
-                recipient_contact: inv.phone,
-                payload: {
-                    message: message
-                }
-            }));
-            await supabaseClient.from('notification_queue').insert(rows);
+            let queuedCount = 0;
+            const rows = [];
 
-            alert(`✅ Queued ${rows.length} messages!`);
+            // 2. Format Payload based on Channel
+            investors.forEach(inv => {
+                const payload = channel === 'email' ? {
+                    subject: 'Starlink Notification',
+                    html: `<p>${message}</p>`
+                } : {
+                    message: message
+                };
+
+                // If sending to ALL, we create 3 separate queue items for each investor
+                if (channel === 'all') {
+                    if (inv.phone) rows.push({
+                        event_type: 'bulk_campaign',
+                        channel: 'sms',
+                        recipient_contact: inv.phone,
+                        payload: {
+                            message
+                        }
+                    });
+                    if (inv.email) rows.push({
+                        event_type: 'bulk_campaign',
+                        channel: 'email',
+                        recipient_contact: inv.email,
+                        payload: {
+                            subject: 'Starlink Notification',
+                            html: `<p>${message}</p>`
+                        }
+                    });
+                    if (inv.phone) rows.push({
+                        event_type: 'bulk_campaign',
+                        channel: 'whatsapp',
+                        recipient_contact: inv.phone,
+                        payload: {
+                            message
+                        }
+                    });
+                } else {
+                    // Single channel logic
+                    const contact = channel === 'email' ? inv.email : inv.phone;
+                    if (contact) {
+                        rows.push({
+                            event_type: 'bulk_campaign',
+                            channel: channel,
+                            recipient_contact: contact,
+                            payload: payload
+                        });
+                    }
+                }
+            });
+
+            if (rows.length === 0) return alert('No valid recipients found for this channel.');
+
+            // 3. Insert into Queue
+            const {
+                error
+            } = await supabaseClient.from('notification_queue').insert(rows);
+            if (error) return alert('Error queuing messages: ' + error.message);
+
+            alert(`✅ Successfully queued ${rows.length} messages!`);
             document.getElementById('bulkSmsModal').classList.remove('show');
-            fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-notification-queue', {
+
+            // 4. Trigger all relevant processors
+            const triggerProcessor = (func) => fetch(`https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/${func}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL',
@@ -934,9 +1003,13 @@
                 },
                 body: '{}'
             });
+
+            if (channel === 'sms' || channel === 'all') triggerProcessor('process-notification-queue');
+            if (channel === 'email' || channel === 'all') triggerProcessor('process-email-queue');
+            if (channel === 'whatsapp' || channel === 'all') triggerProcessor('process-whatsapp-queue');
+
             setTimeout(loadLogs, 3000);
         }
-
         // ==================================================
         // 5. RESEND FAILED SMS
         // ==================================================
