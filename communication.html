@@ -1,1 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starlink LLC · Communication Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+         :root {
+            --bg-color: #f4f7f6;
+            --sidebar-bg: #ffffff;
+            --text-main: #333;
+            --text-muted: #888;
+            --primary: #2ecc71;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --border: #e1e8ed;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* Sidebar */
+        
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+        }
+        
+        .menu-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .menu-item:hover,
+        .menu-item.active {
+            background: #f0fdf4;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+        /* Main Content */
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .top-nav {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+        
+        .page-title p {
+            margin: 5px 0 0 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        /* Stats Cards */
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-info h4 {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-info h2 {
+            margin: 10px 0 0 0;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f0fdf4;
+            color: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+        }
+        /* Tabs */
+        
+        .tabs {
+            display: flex;
+            padding: 0 30px;
+            border-bottom: 1px solid var(--border);
+            background: white;
+            gap: 20px;
+        }
+        
+        .tab {
+            padding: 15px 10px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        /* Table Area */
+        
+        .table-container {
+            padding: 30px;
+        }
+        
+        .table-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        
+        th {
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .status-sent {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-pending {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-cube"></i> Communication
+        </div>
+        <div class="menu-item active"><i class="fas fa-envelope"></i> Emails</div>
+        <div class="menu-item"><i class="fas fa-sms"></i> SMS</div>
+        <div class="menu-item"><i class="fab fa-whatsapp"></i> WhatsApp</div>
+        <div class="menu-item" style="margin-top: auto; border-top: 1px solid var(--border);" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-nav">
+            <div class="page-title">
+                <h1 id="pageTitle">SMS Messages</h1>
+                <p id="pageSubtitle">View and manage all SMS communications with investors</p>
+            </div>
+            <button class="btn btn-primary" onclick="openTemplateModal()"><i class="fas fa-plus"></i> New Template</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>All Messages</h4>
+                    <h2 id="statTotal">0</h2>
+                </div>
+                <div class="stat-icon"><i class="fas fa-comment"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4 style="color:var(--secondary)">Sent</h4>
+                    <h2 id="statSent" style="color:var(--secondary)">0</h2>
+                </div>
+                <div class="stat-icon" style="background:#e0f2fe; color:var(--secondary)"><i class="fas fa-check"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4 style="color:var(--danger)">Failed</h4>
+                    <h2 id="statFailed" style="color:var(--danger)">0</h2>
+                </div>
+                <div class="stat-icon" style="background:#fee2e2; color:var(--danger)"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>This Month</h4>
+                    <h2 id="statMonth">0</h2>
+                </div>
+                <div class="stat-icon" style="background:#fef08a; color:#ca8a04"><i class="fas fa-calendar-alt"></i></div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3 style="margin:0;">All Messages</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Message</th>
+                            <th>Recipient</th>
+                            <th>Date Sent</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messageTableBody">
+                        <!-- Data goes here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let allLogs = [];
+
+        async function loadLogs() {
+            const {
+                data,
+                error
+            } = await supabaseClient.from('notification_logs').select('*').order('created_at', {
+                ascending: false
+            });
+            if (!error && data) {
+                allLogs = data;
+                renderTable('sms'); // Default to SMS
+            }
+        }
+
+        function renderTable(channel) {
+            // Update UI headers
+            document.getElementById('pageTitle').innerText = channel.toUpperCase() + ' Messages';
+            document.getElementById('pageSubtitle').innerText = `View and manage all ${channel.toUpperCase()} communications with investors`;
+
+            // Filter logs
+            const filtered = allLogs.filter(log => log.channel === channel);
+
+            // Calculate Stats
+            const total = filtered.length;
+            const sent = filtered.filter(l => l.status === 'sent').length;
+            const failed = filtered.filter(l => l.status === 'failed').length;
+            const thisMonth = filtered.filter(l => new Date(l.created_at).getMonth() === new Date().getMonth()).length;
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statSent').innerText = sent;
+            document.getElementById('statFailed').innerText = failed;
+            document.getElementById('statMonth').innerText = thisMonth;
+
+            // Render Rows
+            const tbody = document.getElementById('messageTableBody');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color: #888;">No messages found for this channel.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(log => {
+                const date = new Date(log.created_at).toLocaleString();
+                let statusClass = 'status-pending';
+                if (log.status === 'sent') statusClass = 'status-sent';
+                if (log.status === 'failed') statusClass = 'status-failed';
+
+                return `
+                    <tr>
+                        <td>#${log.id.split('-')[0]}</td>
+                        <td><div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${log.message_preview}">${log.message_preview}</div></td>
+                        <td style="font-family: monospace;">${log.recipient_contact}</td>
+                        <td>${date}</td>
+                        <td><span class="status-badge ${statusClass}">${log.status.toUpperCase()}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Simple Navigation simulation
+        document.querySelectorAll('.menu-item').forEach((item, index) => {
+            item.addEventListener('click', function() {
+                if (this.innerText.includes('Back')) return; // Ignore back button
+
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                if (this.innerText.includes('Emails')) renderTable('email');
+                if (this.innerText.includes('SMS')) renderTable('sms');
+                if (this.innerText.includes('WhatsApp')) renderTable('whatsapp');
+            });
+        });
+
+        // Init
+        loadLogs();
+    </script>
+</body>
+
+</html>
