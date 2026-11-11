@@ -2728,7 +2728,7 @@
 
     <!-- PROPOSALS LIST MODAL -->
     <div class="modal-overlay" id="proposalsModal">
-      <div class="modal-card" style="max-width:min(1100px, 95vw);">
+        <div class="modal-card" style="max-width:min(1100px, 95vw);">
             <div class="payments-modal-header">
                 <h3><i class="fas fa-file-signature" style="color:#b8a0ff;"></i> Investment Proposals</h3>
                 <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
@@ -2851,8 +2851,8 @@
 
     <!-- CAP TABLE MODAL -->
     <div class="modal-overlay" id="capTableModal">
-<div class="modal-card" style="max-width:min(1000px, 95vw);">
-        <div class="payments-modal-header">
+        <div class="modal-card" style="max-width:1000px;">
+            <div class="payments-modal-header">
                 <h3><i class="fas fa-layer-group" style="color:#5fc7bc;"></i> Capitalization Table</h3>
                 <button class="btn btn-ghost add-employee-btn" id="printCapTableBtn"><i class="fas fa-print"></i> Print</button>
             </div>
@@ -9426,7 +9426,11 @@ async function openNewTemplateModal() {
             // Wire Templates
             document.getElementById('templatesBtn')?.addEventListener('click', openTemplatesModal);
 
-            await logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
+                       try {
+                await logAudit('LOGIN', 'System', 'Admin opened investor dashboard');
+            } catch (e) {
+                console.warn('Audit log failed:', e);
+            }
             setLoading(false);
         }
                 // ==================================================
@@ -9801,9 +9805,9 @@ async function openNewTemplateModal() {
             }
         }
 
-        // Boot the app when the DOM is ready
+                // Boot the app when the DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
-            setupMobileNav();
+            // Removed setupMobileNav() because it conflicts with the inline onclick added in Fix 1
             startApp();
         });
     </script>
@@ -9812,4 +9816,4 @@ async function openNewTemplateModal() {
 
 </body>
 
-</html>
+</html>    
