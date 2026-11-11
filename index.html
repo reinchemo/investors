@@ -259,7 +259,18 @@
                 border-top: 1px solid rgba(120, 200, 220, 0.1);
             }
             .nav-actions.open {
-                display: flex;
+                display: flex !important;
+                flex-direction: column !important;
+                background: #0f1a2e !important;
+                position: absolute !important;
+                top: 70px !important;
+                left: 10px !important;
+                right: 10px !important;
+                z-index: 9999 !important;
+                border: 1px solid rgba(120, 200, 220, 0.3) !important;
+                padding: 1rem !important;
+                border-radius: 16px !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
             }
             .nav-actions .btn,
             .nav-actions a.btn {
@@ -3315,21 +3326,49 @@
 
     <div class="dashboard">
 
-        <nav class="nav">
+              <nav class="nav" style="position: relative;">
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
-           
-                        <button class="nav-toggle" id="navToggle" aria-label="Menu" onclick="
-                const menu = document.getElementById('navActions');
-                const icon = this.querySelector('i');
-                menu.classList.toggle('open');
-                if (menu.classList.contains('open')) {
-                    icon.className = 'fas fa-times';
-                } else {
-                    icon.className = 'fas fa-bars';
+
+            <!-- 🟢 CSS-ONLY MOBILE MENU (Cannot break) -->
+            <style>
+                .mobile-menu-wrapper { display: none; }
+                @media (max-width: 768px) {
+                    .nav-actions { display: none !important; }
+                    .mobile-menu-wrapper { display: block; position: absolute; right: 0; top: 0; z-index: 9999; }
+                    .mobile-menu-wrapper summary { list-style: none; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(120,200,220,0.2); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #c7d5e6; }
+                    .mobile-menu-wrapper summary::-webkit-details-marker { display: none; }
+                    .mobile-menu-wrapper[open] summary { background: rgba(120,200,220,0.15); color: #e8eef7; }
+                    .mobile-menu-content { position: absolute; right: 0; top: 50px; width: 250px; background: #121a2a; border: 1px solid rgba(120,200,220,0.2); border-radius: 12px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 70vh; overflow-y: auto; }
+                    .mobile-menu-content .btn, .mobile-menu-content a.btn { width: 100%; justify-content: flex-start; padding: 0.6rem 0.8rem; font-size: 0.8rem; }
                 }
-            ">
-            <i class="fas fa-bars"></i>
-        </button>
+            </style>
+
+            <div class="mobile-menu-wrapper">
+                <details>
+                    <summary><i class="fas fa-bars"></i></summary>
+                    <div class="mobile-menu-content">
+                        <!-- Duplicate your buttons here for mobile -->
+                        <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank"><i class="fas fa-arrow-left"></i> Back Home</a>
+                        <a href="finance.html" class="btn btn-primary"><i class="fas fa-coins"></i> Finance</a>
+                        <a href="communication.html" class="btn btn-primary"><i class="fas fa-comments"></i> Communications</a>
+                        <button class="btn btn-ghost" onclick="openCapTable()"><i class="fas fa-layer-group"></i> Cap Table</button>
+                        <button class="btn btn-ghost" onclick="openProposalsModal()"><i class="fas fa-file-signature"></i> Proposals</button>
+                        <button class="btn btn-ghost" onclick="openDilutionSimulator()"><i class="fas fa-flask"></i> Simulator</button>
+                        <button class="btn btn-ghost" onclick="document.getElementById('investorTxnBtn').click()"><i class="fas fa-receipt"></i> Transactions</button>
+                        <button class="btn btn-ghost" onclick="openPaymentsModal()"><i class="fas fa-money-check-alt"></i> Payments</button>
+                        <button class="btn btn-ghost" onclick="openDividendsHistoryModal()"><i class="fas fa-coins"></i> Dividends</button>
+                        <button class="btn btn-ghost" onclick="openReconModal()"><i class="fas fa-balance-scale"></i> Reconcile</button>
+                        <button class="btn btn-ghost" onclick="openReserveModal()"><i class="fas fa-piggy-bank"></i> Reserve</button>
+                        <button class="btn btn-ghost" onclick="openAuditModal()"><i class="fas fa-history"></i> Audit Log</button>
+                        <button class="btn btn-ghost" onclick="openInvestorModal(null)"><i class="fas fa-plus"></i> Add Investor</button>
+                        <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank"><i class="fas fa-external-link-alt"></i> Login Expenditures</a>
+                        <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1);"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15);"><i class="fas fa-shield-alt"></i> Admin Roles</a>
+                    </div>
+                </details>
+            </div>
+
+            <!-- DESKTOP NAVIGATION (Hidden on Mobile) -->
             <div class="nav-actions" id="navActions">
                 <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-arrow-left"></i><span>Back Home</span>
@@ -3337,12 +3376,9 @@
                 <a href="finance.html" class="btn btn-primary">
                     <i class="fas fa-coins"></i><span>Finance</span>
                 </a>
-
-                <!-- 🔥 NEW COMMUNICATIONS BUTTON -->
                 <a href="communication.html" class="btn btn-primary" style="background:linear-gradient(135deg, #2ecc71, #27ae60); border-color:#27ae60;">
                     <i class="fas fa-comments"></i><span>Communications</span>
                 </a>
-
                 <button class="btn btn-ghost" id="capTableBtn"><i class="fas fa-layer-group"></i> Cap Table</button>
                 <button class="btn btn-ghost" id="proposalsBtn"><i class="fas fa-file-signature"></i> Proposals <span id="proposalsCountNav" style="display:none; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(122,90,248,0.35); color:#b8a0ff; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="dilutionBtn"><i class="fas fa-flask"></i> Simulator</button>
@@ -3351,21 +3387,11 @@
                 <button class="btn btn-ghost" id="dividendsBtn"><i class="fas fa-coins"></i> Dividends</button>
                 <button class="btn btn-ghost" id="reconBtn"><i class="fas fa-balance-scale"></i> Reconcile <span id="reconCountNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(226,104,91,0.3); color:#f0a89f; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="reserveBtn"><i class="fas fa-piggy-bank"></i> Reserve <span id="reserveBalanceNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(200,154,91,0.3); color:#f4c98d; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
-
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
-
-                <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">
-                    <i class="fas fa-external-link-alt"></i><span>Login Expenditures</span>
-                </a>
-
-                <!-- FIXED LOGOUT & ADMIN BUTTONS -->
-                <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1); padding: 0.55rem 1.1rem; border-radius: 60px; font-weight: 600; font-size: 0.85rem;">
-                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-            </button>
-                <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15); padding: 0.55rem 1.1rem; border-radius: 60px; font-weight: 600; font-size: 0.85rem;">
-                    <i class="fas fa-shield-alt"></i><span>Admin Roles</span>
-                </a>
+                <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i><span>Login Expenditures</span></a>
+                <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1);"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+                <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15);"><i class="fas fa-shield-alt"></i><span>Admin Roles</span></a>
             </div>
         </nav>
 
@@ -9733,10 +9759,9 @@ async function openNewTemplateModal() {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
-                    console.warn("No active session. Bypassing auth for testing.");
-                    // window.location.href = 'login.html'; // Temporarily disabled for local testing
-                    setTimeout(() => init(), 0); 
-                    return;
+                    // Temporarily disabled to allow local testing
+                    // window.location.href = 'login.html'; 
+                    // return;
                 }
 
                 const { data: ur } = await supabaseClient
