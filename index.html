@@ -3326,20 +3326,69 @@
 
     <div class="dashboard">
 
-              <nav class="nav" style="position: relative;">
+        <nav class="nav" style="position: relative;">
             <div class="brand"><i class="fas fa-satellite-dish"></i><span>STARLINK LLC</span></div>
 
             <!-- 🟢 CSS-ONLY MOBILE MENU (Cannot break) -->
             <style>
-                .mobile-menu-wrapper { display: none; }
+                .mobile-menu-wrapper {
+                    display: none;
+                }
+                
                 @media (max-width: 768px) {
-                    .nav-actions { display: none !important; }
-                    .mobile-menu-wrapper { display: block; position: absolute; right: 0; top: 0; z-index: 9999; }
-                    .mobile-menu-wrapper summary { list-style: none; cursor: pointer; background: rgba(255,255,255,0.05); border: 1px solid rgba(120,200,220,0.2); width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #c7d5e6; }
-                    .mobile-menu-wrapper summary::-webkit-details-marker { display: none; }
-                    .mobile-menu-wrapper[open] summary { background: rgba(120,200,220,0.15); color: #e8eef7; }
-                    .mobile-menu-content { position: absolute; right: 0; top: 50px; width: 250px; background: #121a2a; border: 1px solid rgba(120,200,220,0.2); border-radius: 12px; padding: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; box-shadow: 0 10px 30px rgba(0,0,0,0.8); max-height: 70vh; overflow-y: auto; }
-                    .mobile-menu-content .btn, .mobile-menu-content a.btn { width: 100%; justify-content: flex-start; padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+                    .nav-actions {
+                        display: none !important;
+                    }
+                    .mobile-menu-wrapper {
+                        display: block;
+                        position: absolute;
+                        right: 0;
+                        top: 0;
+                        z-index: 9999;
+                    }
+                    .mobile-menu-wrapper summary {
+                        list-style: none;
+                        cursor: pointer;
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 1px solid rgba(120, 200, 220, 0.2);
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #c7d5e6;
+                    }
+                    .mobile-menu-wrapper summary::-webkit-details-marker {
+                        display: none;
+                    }
+                    .mobile-menu-wrapper[open] summary {
+                        background: rgba(120, 200, 220, 0.15);
+                        color: #e8eef7;
+                    }
+                    .mobile-menu-content {
+                        position: absolute;
+                        right: 0;
+                        top: 50px;
+                        width: 250px;
+                        background: #121a2a;
+                        border: 1px solid rgba(120, 200, 220, 0.2);
+                        border-radius: 12px;
+                        padding: 0.5rem;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.4rem;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+                        max-height: 70vh;
+                        overflow-y: auto;
+                    }
+                    .mobile-menu-content .btn,
+                    .mobile-menu-content a.btn {
+                        width: 100%;
+                        justify-content: flex-start;
+                        padding: 0.6rem 0.8rem;
+                        font-size: 0.8rem;
+                    }
                 }
             </style>
 
@@ -8126,15 +8175,59 @@ async function openSecurePdf(investorId) {
 
                 if (error) throw error;
 
-                // 3. Log the audit
+                              // 3. Log the audit
                 await logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}. Reserve: KSh ${fmt(reserveAmt)}`, d.status, 'paid');
+
+                // 🔥 NEW: TRIGGER NOTIFICATIONS TO INVESTORS
+                if (Array.isArray(d.allocations)) {
+                    for (const alloc of d.allocations) {
+                        // Skip the virtual account
+                        if (!alloc.isVirtual && alloc.name !== 'STARLINK LLC VIRTUAL') {
+                            const investor = investors.find(i => i.name === alloc.name);
+                            
+                            if (investor) {
+                                const msgPayload = {
+                                    template_code: 'dividend_paid_sms',
+                                    name: investor.name,
+                                    amount: fmt(alloc.amount),
+                                    message: `Hello ${investor.name}, your dividend of KSh ${fmt(alloc.amount)} for ${d.periodLabel} has been processed.`
+                                };
+
+                                // Send SMS
+                                if (investor.phone) {
+                                    await queueNotification('dividend_paid', 'sms', investor.phone, msgPayload);
+                                }
+                                
+                                // Send Email
+                                if (investor.email) {
+                                    await queueNotification('dividend_paid', 'email', investor.email, {
+                                        template_code: 'dividend_paid_sms',
+                                        name: investor.name,
+                                        amount: fmt(alloc.amount),
+                                        subject: `Dividend Payment — ${d.periodLabel}`,
+                                        html: `<p>Hello ${investor.name},</p><p>Your dividend of <strong>KSh ${fmt(alloc.amount)}</strong> for ${d.periodLabel} has been processed.</p>`
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Trigger the queues to send immediately
+                    fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-notification-queue', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
+                    });
+                    
+                    fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-email-queue', {
+                        method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
+                    });
+                }
 
                 // 4. Refresh the UI
                 await fetchSummary();
                 renderDividendOverview();
                 renderReconciliationBanner();
                 openDividendDetail(id);
-                showToast('✅ Dividend marked as paid', 'success');
+                showToast('✅ Dividend marked as paid & notifications sent!', 'success');
 
             } catch (e) {
                 showError('Mark paid failed: ' + e.message);
