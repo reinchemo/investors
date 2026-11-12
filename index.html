@@ -8142,10 +8142,10 @@ async function openSecurePdf(investorId) {
             renderReconciliationBanner();
             openDividendDetail(id);
         }
-                                   async function markPaid(id) {
+                async function markPaid(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
-            if (!confirm(`Mark ${d.id} as PAID?\n\nThis will lock the distribution and update the reserve.`)) return;
+            if (!confirm(`Mark ${d.id} as PAID?\n\nThis will lock the distribution and send SMS, Email, and WhatsApp notifications to all investors.`)) return;
 
             const btn = event.target.closest('button');
             const oldHtml = btn.innerHTML;
@@ -8158,7 +8158,6 @@ async function openSecurePdf(investorId) {
                 if (Array.isArray(d.allocations)) {
                     const virtualAlloc = d.allocations.find(a => a.isVirtual || /VIRTUAL/i.test(a.name || ''));
                     if (virtualAlloc) {
-                        // Try stage2 first, then fallback to amount
                         reserveAmt = safeNum(virtualAlloc.stage2) || safeNum(virtualAlloc.amount);
                     }
                 }
@@ -8175,59 +8174,80 @@ async function openSecurePdf(investorId) {
 
                 if (error) throw error;
 
-                              // 3. Log the audit
+                // 3. Log the audit
                 await logAudit('PAID', `Dividend ${id}`, `Marked ${d.periodLabel} as paid — KSh ${fmt(d.totalDistributable)}. Reserve: KSh ${fmt(reserveAmt)}`, d.status, 'paid');
 
-                // 🔥 NEW: TRIGGER NOTIFICATIONS TO INVESTORS
+                // 4. TRIGGER NOTIFICATIONS (SMS + EMAIL + WHATSAPP)
                 if (Array.isArray(d.allocations)) {
+                    let smsQueued = false;
+                    let emailQueued = false;
+                    let waQueued = false;
+
                     for (const alloc of d.allocations) {
-                        // Skip the virtual account
                         if (!alloc.isVirtual && alloc.name !== 'STARLINK LLC VIRTUAL') {
                             const investor = investors.find(i => i.name === alloc.name);
                             
                             if (investor) {
+                                // Sanitize phone: remove +, spaces, and ensure country code
+                                let cleanPhone = (investor.phone || '').replace(/\D/g, ''); 
+                                if (cleanPhone.startsWith('0')) cleanPhone = '254' + cleanPhone.substring(1);
+
                                 const msgPayload = {
-                                    template_code: 'dividend_paid_sms',
                                     name: investor.name,
                                     amount: fmt(alloc.amount),
+                                    template_code: 'dividend_paid_sms',
                                     message: `Hello ${investor.name}, your dividend of KSh ${fmt(alloc.amount)} for ${d.periodLabel} has been processed.`
                                 };
 
-                                // Send SMS
-                                if (investor.phone) {
-                                    await queueNotification('dividend_paid', 'sms', investor.phone, msgPayload);
+                                // Channel 1: SMS
+                                if (cleanPhone) {
+                                    await queueNotification('dividend_paid', 'sms', cleanPhone, msgPayload);
+                                    smsQueued = true;
                                 }
                                 
-                                // Send Email
+                                // Channel 2: WhatsApp
+                                if (cleanPhone) {
+                                    await queueNotification('dividend_paid', 'whatsapp', cleanPhone, msgPayload);
+                                    waQueued = true;
+                                }
+                                
+                                // Channel 3: Email
                                 if (investor.email) {
                                     await queueNotification('dividend_paid', 'email', investor.email, {
-                                        template_code: 'dividend_paid_sms',
-                                        name: investor.name,
-                                        amount: fmt(alloc.amount),
+                                        ...msgPayload,
                                         subject: `Dividend Payment — ${d.periodLabel}`,
                                         html: `<p>Hello ${investor.name},</p><p>Your dividend of <strong>KSh ${fmt(alloc.amount)}</strong> for ${d.periodLabel} has been processed.</p>`
                                     });
+                                    emailQueued = true;
                                 }
                             }
                         }
                     }
                     
-                    // Trigger the queues to send immediately
-                    fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-notification-queue', {
-                        method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
-                    });
-                    
-                    fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-email-queue', {
-                        method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
-                    });
+                    // 5. Fire the processors to send immediately
+                    if (smsQueued) {
+                        fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-notification-queue', {
+                            method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
+                        });
+                    }
+                    if (waQueued) {
+                        fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-whatsapp-queue', {
+                            method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
+                        });
+                    }
+                    if (emailQueued) {
+                        fetch('https://ujhasodlnduoozlmxdbv.supabase.co/functions/v1/process-email-queue', {
+                            method: 'POST', headers: { 'Authorization': 'Bearer sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL', 'Content-Type': 'application/json' }, body: '{}'
+                        });
+                    }
                 }
 
-                // 4. Refresh the UI
+                // 6. Refresh the UI
                 await fetchSummary();
                 renderDividendOverview();
                 renderReconciliationBanner();
                 openDividendDetail(id);
-                showToast('✅ Dividend marked as paid & notifications sent!', 'success');
+                showToast('✅ Dividend paid! SMS, Email, and WhatsApp queued.', 'success');
 
             } catch (e) {
                 showError('Mark paid failed: ' + e.message);
@@ -8236,6 +8256,7 @@ async function openSecurePdf(investorId) {
                 btn.innerHTML = oldHtml;
             }
         }
+                                 
         async function cancelDividend(id) {
             const d = dividends.find(x => x.id === id);
             if (!d) return;
