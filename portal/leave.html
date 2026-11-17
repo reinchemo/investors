@@ -711,35 +711,21 @@ form.addEventListener("submit",async function(event){
  submitButton.textContent="Submitting...";
 
  try{
-  // Recheck the authenticated account immediately before submission.
-  const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
-  if(sessionError)throw sessionError;
-  if(!sessionData.session)throw new Error("Your session has expired. Please sign in again.");
-
-  const {data:account,error:accountError}=await supabaseClient
-   .from("personal_portal_accounts")
-   .select("staff_id,account_status")
-   .eq("user_id",sessionData.session.user.id)
-   .maybeSingle();
-
-  if(accountError)throw accountError;
-  if(!account||account.account_status!=="active"||Number(account.staff_id)!==Number(staffId)){
-   throw new Error("Your employee portal access could not be verified.");
-  }
-
-  const {error}=await supabaseClient
-   .from("leave_requests")
-   .insert({
-    staff_id:staffId,
+  const {data,error}=await supabaseClient.functions.invoke(
+   "personal-portal-leave",
+   {body:{
+    action:"submit",
     leave_type:leaveType,
     start_date:startDate,
     end_date:endDate,
-    days:days,
-    reason:reason,
-    status:"pending"
-   });
+    reason:reason
+   }}
+  );
 
   if(error)throw error;
+  if(!data||data.success!==true){
+   throw new Error(data?.error||"Unable to submit your leave request.");
+  }
 
   form.reset();
   formMessage.textContent="Your leave request has been submitted for approval.";
