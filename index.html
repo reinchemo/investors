@@ -10064,7 +10064,7 @@ async function openNewTemplateModal() {
   toggle.addEventListener('click',()=>document.body.classList.toggle('starlink-sidebar-open'));
   overlay.addEventListener('click',close);
   side.addEventListener('click',e=>{if(e.target.closest('a'))close()});
-  actions.addEventListener('click',e=>{if(e.target.closest('button'))close()});
+  actions.addEventListener('click',e=>{if(e.target.closest('button'))close()},{capture:true});
   const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.add('starlink-current');
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
