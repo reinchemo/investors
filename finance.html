@@ -11356,7 +11356,7 @@ function openTxnModal(txn = null) {
             const oldHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reversing...';
 
-            const { data, error } = await supabaseClient.rpc('reverse_transaction', {
+            const { data, error } = await supabaseClient.rpc('reverse_transaction_authorized', {
                 p_original_id: reversingTxnId,
                 p_reason:      reason,
                 p_actor:       CURRENT_USER
@@ -13362,7 +13362,7 @@ function openTxnModal(txn = null) {
         async function approveCasualPayment(id) {
             if (!confirm('Approve this casual payment? This will automatically post an expense to the Central Ledger.')) return;
 
-            const { data, error } = await supabaseClient.rpc('approve_casual_payment', {
+            const { data, error } = await supabaseClient.rpc('approve_casual_payment_authorized', {
                 p_id: id,
                 p_actor: CURRENT_USER
             });
