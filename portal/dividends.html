@@ -582,12 +582,10 @@
             const awaiting = dividends.filter(item => String(item.status).toLowerCase() !== "paid");
             const paidTotal = paid.reduce((sum, item) => sum + Number(item.amount || 0), 0);
             const pendingTotal = awaiting.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-            const latest = dividends.length ? Number(dividends[0].amount || 0) : 0;
 
             document.getElementById("totalDividends").textContent = money(paidTotal);
             document.getElementById("distributionCount").textContent = dividends.length;
             document.getElementById("pendingDividends").textContent = money(pendingTotal);
-            document.getElementById("latestDividend").textContent = money(latest);
 
             if (!dividends.length) {
                 content.innerHTML = `
