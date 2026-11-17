@@ -125,7 +125,8 @@ async function loadPaymentHistory(){
   box.innerHTML='<tr><td colspan="4" class="empty error">Payment history could not load: '+safe(e.message||"Request failed")+'</td></tr>';
  }
 }
-\nasync function loadEquityHistory(){
+
+async function loadEquityHistory(){
  const box=$("equitySummary");
  try{
   const {data,error}=await db.functions.invoke("portal-personal-data",{body:{action:"equity_earnings"}});
