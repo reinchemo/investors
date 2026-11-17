@@ -408,7 +408,7 @@
         const content = document.getElementById("content");
 
         function safe(value) {
-            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
                 "&": "&amp;",
                 "<": "&lt;",
                 ">": "&gt;",
@@ -475,8 +475,8 @@
         }
 
         function renderProfile(user, account, staff, investor) {
-            const displayName = staff ? .full_name || investor ? .name ||
-                user.user_metadata ? .full_name || "Portal User";
+            const displayName = staff ?.full_name || investor ?.name ||
+                user.user_metadata ?.full_name || "Portal User";
 
             const classifications = [];
             if (staff) classifications.push("Employee");
