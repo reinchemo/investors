@@ -4074,8 +4074,17 @@
             }
 
             try {
-                const { error } = await supabaseClient.from('audit_logs').insert(row);
+                const { data: auditId, error } = await supabaseClient.rpc('write_management_audit_log', {
+                    p_action: row.action,
+                    p_target: row.target,
+                    p_details: row.details,
+                    p_old_value: row.old_value,
+                    p_new_value: row.new_value,
+                    p_warning: row.warning
+                });
                 if (error) throw error;
+                row.id = auditId;
+                row.timestamp = new Date().toISOString();
 
                 // Add to the visible log only after the database confirms the insert.
                 auditLogs.push({
