@@ -772,9 +772,15 @@
             html += money(record.gross);
             html += "</strong></div>";
 
-            html += '<div class="row"><span>Deductions</span><strong>';
-            html += money(record.deductions);
-            html += "</strong></div>";
+            html += '<div class="row"><span>Basic pay</span><strong>' + money(record.basic_pay) + "</strong></div>";
+            html += '<div class="row"><span>Overtime</span><strong>' + money(record.overtime_pay) + "</strong></div>";
+            html += '<div class="row"><span>Allowances</span><strong>' + money(record.allowances) + "</strong></div>";
+            html += '<div class="row"><span>PAYE</span><strong>' + money(record.paye) + "</strong></div>";
+            html += '<div class="row"><span>NSSF</span><strong>' + money(record.employee_nssf) + "</strong></div>";
+            html += '<div class="row"><span>SHIF</span><strong>' + money(record.employee_shif) + "</strong></div>";
+            html += '<div class="row"><span>Housing levy</span><strong>' + money(record.employee_housing_levy) + "</strong></div>";
+            html += '<div class="row"><span>Other deductions</span><strong>' + money(record.other_deductions) + "</strong></div>";
+            html += '<div class="row"><span>Total deductions</span><strong>' + money(record.deductions) + "</strong></div>";
 
             html += '<div class="row total"><span>Net pay</span><strong>';
             html += money(record.net);
