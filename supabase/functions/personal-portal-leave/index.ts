@@ -142,6 +142,25 @@ Deno.serve(async (req) => {
       return respond({ error: "Your leave request could not be submitted. Please try again." }, 500);
     }
 
+    // Write an append-only audit event using the server-side service client.
+    // Audit failures are logged but never undo a successfully submitted leave request.
+    const { error: auditError } = await admin.from("audit_logs").insert({
+      id: crypto.randomUUID(),
+      user_name: user.email || user.id,
+      action: "personal_portal_leave_submitted",
+      target: String(request.id),
+      details: "Personal leave request submitted through the employee portal.",
+      new_value: JSON.stringify({
+        leave_type: request.leave_type,
+        start_date: request.start_date,
+        end_date: request.end_date,
+        days: request.days,
+        status: request.status,
+      }),
+      warning: false,
+    });
+    if (auditError) console.error("Leave audit log:", auditError);
+
     return respond({ success: true, request });
   } catch (error) {
     console.error("Personal leave function:", error);
