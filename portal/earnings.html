@@ -145,6 +145,7 @@ async function loadPaymentHistory(){
  }catch(e){box.innerHTML='<div class="empty error">'+safe(e.message||"Unable to load cap-table history.")+'</div>';}
 }
 loadEquityHistory();
+loadPaymentHistory();
 init().catch(e=>{$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to initialise your employee earnings dashboard.")+'</span>';});
 </script>
 </body>
