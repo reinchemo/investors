@@ -93,25 +93,21 @@ async function loadPeriod(){
  const daily=Number(staff.salary||0)/range.days;
  const indicative=Math.round(daily*daysKnown);
  $("dailyRate").textContent=staff.salary==null?"Not configured":money(daily);
- $("paidDays").textContent=String(daysKnown);
- $("earned").textContent=staff.salary==null?"Not available":money(indicative);
+ $("paidDays").textContent=String(attendanceDates.size);
+ $("earned").textContent=staff.salary==null?"Not available":money(Math.round(daily*attendanceDates.size));
  $("attendanceRows").innerHTML=approved.length?approved.map(x=>'<tr><td>'+dateText(x.date)+'</td><td>'+timeText(x.check_in)+'</td><td>'+timeText(x.check_out)+'</td><td>'+statusBadge(x.status)+'</td></tr>').join(""):'<tr><td colspan="4" class="empty">No approved attendance recorded for this period.</td></tr>';
  $("breakdown").innerHTML=[
  ["Approved attendance days",attendanceDates.size],
- ["Approved leave days",leaveDays],
+ ["Approved leave days (policy review)",leaveDays],
  ["Pending attendance (excluded)",pending.length],
  ["Rejected attendance",rejected.length],
  ["Calendar days in period",range.days],
- ["Indicative earnings",staff.salary==null?"Not configured":money(indicative)]
+ ["Attendance-based subtotal",staff.salary==null?"Not configured":money(Math.round(daily*attendanceDates.size))]
  ].map(([k,v])=>'<div class="rowitem"><span>'+safe(k)+'</span><strong>'+safe(v)+'</strong></div>').join("");
  $("leaveRows").innerHTML=approvedLeave.length?approvedLeave.map(x=>'<div class="rowitem"><span><strong>'+safe(x.leave_type)+'</strong><br>'+dateText(x.start_date)+' – '+dateText(x.end_date)+'</span>'+statusBadge(x.status)+'</div>').join(""):'<div class="empty">No approved leave in this period.</div>';
  $("overtimeRows").innerHTML=(o.data||[]).length?(o.data||[]).map(x=>'<tr><td>'+safe(x.period)+'</td><td>'+safe(x.hours)+'</td><td>'+money(x.amount)+'</td><td>'+statusBadge(x.status)+'</td></tr>').join(""):'<tr><td colspan="4" class="empty">No overtime records found for this period.</td></tr>';
- const runIds=[...new Set((p.data||[]).map(x=>x.run_id).filter(Boolean))];
- let runs=[];
- if(runIds.length){const {data,error:re}=await db.from("payroll_runs").select("id,period,status,posted_at").in("id",runIds);if(re)throw re;runs=data||[];}
- const posted=(p.data||[]).filter(x=>{const r=runs.find(y=>y.id===x.run_id);return r&&r.status==="posted";});
- $("payrollRows").innerHTML=posted.length?posted.map(x=>{const r=runs.find(y=>y.id===x.run_id);return '<tr><td>'+safe(r.period)+'</td><td>'+money(x.gross)+'</td><td>'+money(x.deductions)+'</td><td class="good">'+money(x.net)+'</td></tr>';}).join(""):'<tr><td colspan="4" class="empty">No posted payroll items are available.</td></tr>';
- $("calculationNotice").innerHTML='<strong>Calculation note:</strong> The figure above is an indicative subtotal based on approved attendance and approved leave records visible for this month. It does not yet include automatically calculated paid Sundays/public holidays or paid-leave category rules because the approved company holiday and leave-pay configuration has not been verified. Pending attendance is excluded. Final payroll remains subject to authorised review.';
+ $("payrollRows").innerHTML='<tr><td colspan="4" class="empty">For confirmed posted payroll payments and payslips, open <a href="payments.html" style="color:var(--cyan)">Payments</a> or <a href="payslips.html" style="color:var(--cyan)">Payslips</a>. Payroll run visibility is provided through the existing server-verified portal service.</td></tr>';
+ $("calculationNotice").innerHTML='<strong>Calculation note:</strong> The figure above is an attendance-based indicative subtotal using approved attendance records only. Approved leave is displayed separately and is not assumed paid or unpaid. Sunday/public-holiday treatment and paid-leave categories are not automatically calculated because the company policy configuration has not been verified. Pending attendance is excluded. Final payroll remains subject to authorised review.';
  }catch(e){console.error(e);$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to load your earnings records.")+'</span>';}
 }
 $("refreshBtn").addEventListener("click",()=>loadPeriod().catch(e=>$("message").textContent=e.message));
