@@ -1651,6 +1651,12 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
  .starlink-shell-topbar{margin-bottom:12px}
 }
 @media(min-width:761px){.starlink-shell-overlay{display:none!important}}
+
+.starlink-shell-main{display:flex;flex-direction:column;min-width:0;min-height:100dvh;box-sizing:border-box}
+.starlink-module-frame{position:relative;display:block;flex:1 1 auto;width:100%;max-width:none;min-width:0;height:calc(100dvh - 90px);min-height:calc(100dvh - 90px);padding:0;margin:0;overflow:auto;background:#0a0e1a;box-sizing:border-box}
+.starlink-module-frame[hidden]{display:none!important}
+.starlink-module-frame iframe{display:block;width:100%;height:100%;min-height:calc(100dvh - 90px);border:0;background:#0a0e1a}
+@media(max-width:760px){.starlink-module-frame{height:calc(100dvh - 64px);min-height:calc(100dvh - 64px)}.starlink-module-frame iframe{min-height:calc(100dvh - 64px)}}
 </style>
 </head>
 
@@ -13937,8 +13943,27 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   const close=()=>document.body.classList.remove('starlink-sidebar-open');
   toggle.addEventListener('click',()=>document.body.classList.toggle('starlink-sidebar-open'));
   overlay.addEventListener('click',close);
-  side.addEventListener('click',e=>{if(e.target.closest('a'))close()});
+  const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
+  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
+  workspacePane.appendChild(frame);main.appendChild(workspacePane);
+  const titleNode=top.querySelector('.shell-title');
+  const routes={'index.html':'Equity Management','communication.html':'Communications','admin.html':'Admin Roles','finance.html':'Finance Workspace'};
+  const openWorkspace=(file,label)=>{dashboard.hidden=true;workspacePane.hidden=false;frame.src=file;titleNode.textContent=label;};
+  side.addEventListener('click',e=>{
+   const link=e.target.closest('a[href]');
+   if(!link)return;
+   const url=new URL(link.href,location.href),file=url.pathname.split('/').pop().toLowerCase();
+   if(routes[file]){e.preventDefault();openWorkspace(file,routes[file]);side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
+   else close();
+  });
   finance.addEventListener('click',e=>{if(e.target.closest('.tab'))close()});
+  frame.addEventListener('load',()=>{
+   try{frame.contentDocument.addEventListener('click',e=>{
+    const link=e.target.closest('a[href]');if(!link)return;
+    const url=new URL(link.href,frame.contentWindow.location.href),file=url.pathname.split('/').pop().toLowerCase();
+    if(routes[file]){e.preventDefault();openWorkspace(file,routes[file]);}
+   });}catch(err){console.warn('Workspace link handler unavailable',err);}
+  });
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
