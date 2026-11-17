@@ -996,30 +996,6 @@
             </nav>
 
 
-            <div class="nav-label">Management services</div>
-            <nav class="nav-links">
-                <a href="staff-management.html" data-page="staff-management">
-                    <i class="fas fa-users"></i> Staff Management
-                </a>
-
-                <a href="attendance-management.html" data-page="attendance-management">
-                    <i class="fas fa-calendar-check"></i> Attendance Management
-                </a>
-            </nav>
-
-
-            <div class="nav-label" id="managementNavLabel" style="display:none;">
-                Management
-            </div>
-
-            <nav class="nav-links" id="managementNavigation" style="display:none;">
-
-                <a href="task-review.html" data-page="task-review" id="taskReviewNavLink" style="display:none;">
-                    <i class="fas fa-clipboard-check"></i> Task Review
-                </a>
-
-            </nav>
-
             <div class="nav-label">Account</div>
 
             <nav class="nav-links">
@@ -1402,7 +1378,6 @@
         let staffRecord = null;
         let investorRecord = null;
         let dashboardLoading = false;
-        let canReviewTasks = false;
 
         const portalPages = {
             dashboard: "Overview",
@@ -1419,7 +1394,6 @@
             statements: "Statements",
             notifications: "Notifications",
             security: "Security",
-            "task-review": "Task Review"
         };
 
         const employeePages = [
@@ -1561,11 +1535,6 @@
 
             if (investorPages.includes(page) && !isInvestor) {
                 showError("This investor section is not available for your account.");
-                return;
-            }
-
-            if (page === "task-review" && canReviewTasks !== true) {
-                showError("You are not authorised to access Task Review.");
                 return;
             }
 
@@ -1791,35 +1760,8 @@
                 byId("investorNavigation").style.display = "none";
             }
 
-            // Hide management navigation until permission is confirmed
-            canReviewTasks = false;
-
-            byId("managementNavLabel").style.display = "none";
-            byId("managementNavigation").style.display = "none";
-            byId("taskReviewNavLink").style.display = "none";
-
-            // Check management Tasks edit permission
-            const permissionResult = await supabaseClient.rpc(
-                "portal_management_can_edit", {
-                    p_module: "Tasks"
-                }
-            );
-
-            if (permissionResult.error) {
-                console.error(
-                    "Task management permission check failed:",
-                    permissionResult.error
-                );
-                return;
-            }
-
-            if (permissionResult.data === true) {
-                canReviewTasks = true;
-
-                byId("managementNavLabel").style.display = "block";
-                byId("managementNavigation").style.display = "flex";
-                byId("taskReviewNavLink").style.display = "flex";
-            }
+            // Management workflows are intentionally kept outside the Personal Portal.
+            // Personal Portal navigation is limited to the signed-in user's linked roles.
         }
 
 
