@@ -65,8 +65,8 @@ function setRows(id,html,empty,cols){$(id).innerHTML=html||'<tr><td colspan="'+c
 async function init(){
  const {data:{session},error}=await db.auth.getSession();if(error)throw error;
  if(!session){location.href="../login.html";return;}
- const {data:result,error}=await db.functions.invoke("portal-personal-data",{body:{action:"employee_earnings",period:monthNow()}});
- if(error)throw error;if(!result?.success||!result.staff)throw new Error(result?.error||"This account has no active employee record.");
+ const {data:result,error:earningsError}=await db.functions.invoke("portal-personal-data",{body:{action:"employee_earnings",period:monthNow()}});
+ if(earningsError)throw earningsError;if(!result?.success||!result.staff)throw new Error(result?.error||"This account has no active employee record.");
  staff=result.staff;staffId=staff.id;
  $("salary").textContent=staff.salary==null?"Not configured":money(staff.salary);
  $("period").value=monthNow();await loadPeriod();
