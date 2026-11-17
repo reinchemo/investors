@@ -491,7 +491,7 @@
             <div class="top-actions">
                 <a class="btn" href="dashboard.html">← Dashboard</a>
                 <button class="btn" id="refreshBtn">↻ Refresh</button>
-                <button class="btn btn-primary" id="printBtn">Print Statement</button>
+                <button class="btn btn-primary" id="printBtn">Export PDF / Print</button>
                 <button class="btn" id="logoutBtn">Logout</button>
             </div>
         </header>
@@ -643,92 +643,29 @@
                 const session = await getActiveSession();
                 if (!session) return;
 
-                const {
-                    data: account,
-                    error: accountError
-                } = await supabaseClient
-                    .from("personal_portal_accounts")
-                    .select("investor_id, account_status")
-                    .eq("user_id", session.user.id)
-                    .maybeSingle();
+                // Personal finance data is read through the authenticated backend.
+                // The server derives investor_id from the signed-in user.
+                const [investorResponse, dividendResponse] = await Promise.all([
+                    supabaseClient.functions.invoke("portal-personal-data", {
+                        body: { action: "investments" }
+                    }),
+                    supabaseClient.functions.invoke("portal-personal-data", {
+                        body: { action: "dividends" }
+                    })
+                ]);
 
-                if (accountError) throw accountError;
-
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is unavailable or suspended.");
+                if (investorResponse.error) throw investorResponse.error;
+                if (dividendResponse.error) throw dividendResponse.error;
+                if (!investorResponse.data || investorResponse.data.success === false) {
+                    throw new Error(investorResponse.data?.error || "Unable to load your investment records.");
+                }
+                if (!dividendResponse.data || dividendResponse.data.success === false) {
+                    throw new Error(dividendResponse.data?.error || "Unable to load your dividend records.");
                 }
 
-                if (!account.investor_id) {
-                    content.innerHTML = `
-            <div class="empty">
-              <div class="empty-icon">🔒</div>
-              <h3>Investor Access Not Available</h3>
-              <p>This account is not linked to an investor record.</p>
-            </div>
-          `;
-
-                    updateSummary([]);
-                    return;
-                }
-
-                investorAccount = account;
-
-                const investorId = account.investor_id;
-
-                // Read the logged-in investor's own investment records.
-                const {
-                    data: investments,
-                    error: investmentError
-                } =
-                await supabaseClient
-                    .from("investments")
-                    .select("id, date, amount, type, reference, notes")
-                    .eq("investor_id", investorId)
-                    .order("date", {
-                        ascending: false
-                    });
-
-                if (investmentError) throw investmentError;
-
-                // Read the logged-in investor's own shareholding changes.
-                const {
-                    data: shareChanges,
-                    error: shareError
-                } =
-                await supabaseClient
-                    .from("share_transactions")
-                    .select("id, date, action, equity_before, equity_after, delta, pct_before, pct_after, reference, reason, notes")
-                    .eq("investor_id", investorId)
-                    .order("date", {
-                        ascending: false
-                    });
-
-                if (shareError) throw shareError;
-
-                // Retrieve only the logged-in investor's paid dividend allocations.
-                const {
-                    data: dividendResponse,
-                    error: dividendError
-                } =
-                await supabaseClient.functions.invoke(
-                    "portal-personal-data", {
-                        body: {
-                            action: "dividends"
-                        }
-                    }
-                );
-
-                if (dividendError) throw dividendError;
-
-                if (!dividendResponse || dividendResponse.success === false) {
-                    throw new Error(
-                        dividendResponse ? .error || "Unable to load your dividend records."
-                    );
-                }
-
-                const dividends = Array.isArray(dividendResponse.dividends) ?
-                    dividendResponse.dividends :
-                    [];
+                const investments = investorResponse.data.investments || [];
+                const shareChanges = investorResponse.data.transactions || [];
+                const dividends = dividendResponse.data.dividends || [];
 
                 allActivities = [];
 
@@ -760,13 +697,13 @@
 
                 dividends.forEach((item, index) => {
                     allActivities.push({
-                        id: `dividend-${item.id || index}`,
-                        date: item.paid_at || item.date,
+                        id: `dividend-${item.dividend_id || index}`,
+                        date: item.paid_at || item.created_at,
                         category: "dividend",
-                        description: item.period_label || "Dividend distribution",
-                        reference: item.reference || "Dividend allocation",
+                        description: item.period || "Dividend distribution",
+                        reference: `Dividend #${item.dividend_id || "allocation"}`,
                         amount: Number(item.amount || 0),
-                        notes: "Paid dividend allocation"
+                        notes: String(item.status).toLowerCase() === "paid" ? "Paid dividend allocation" : "Declared allocation — awaiting payment"
                     });
                 });
 

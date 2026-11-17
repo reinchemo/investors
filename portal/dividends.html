@@ -415,7 +415,7 @@
 
         <section class="summary-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Dividends Received</div>
+                <div class="stat-label">Dividends Paid</div>
                 <div class="stat-value green" id="totalDividends">KES 0.00</div>
             </div>
 
@@ -425,8 +425,8 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-label">Latest Dividend</div>
-                <div class="stat-value purple" id="latestDividend">KES 0.00</div>
+                <div class="stat-label">Awaiting Payment</div>
+                <div class="stat-value purple" id="pendingDividends">KES 0.00</div>
             </div>
         </section>
 
@@ -530,38 +530,7 @@
             pageMessage.innerHTML = "";
 
             try {
-                // Confirm that this account is active and linked to an investor.
-                const {
-                    data: account,
-                    error: accountError
-                } = await db
-                    .from("personal_portal_accounts")
-                    .select("investor_id, account_status")
-                    .eq("user_id", session.user.id)
-                    .maybeSingle();
-
-                if (accountError) throw accountError;
-
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is unavailable or suspended.");
-                }
-
-                if (!account.investor_id) {
-                    content.innerHTML = `
-            <div class="empty">
-              <div class="empty-icon">🔒</div>
-              <h3>Investor Access Not Available</h3>
-              <p>This account is not linked to an investor record.</p>
-            </div>
-          `;
-
-                    document.getElementById("totalDividends").textContent = "KES 0.00";
-                    document.getElementById("distributionCount").textContent = "0";
-                    document.getElementById("latestDividend").textContent = "KES 0.00";
-                    return;
-                }
-
-                // The backend returns only this logged-in investor's allocations.
+                // The backend derives investor access from the authenticated session.
                 const {
                     data,
                     error
@@ -575,7 +544,7 @@
 
                 if (error) throw error;
                 if (!data || data.success === false) {
-                    throw new Error(data ? .error || "Unable to load dividend information.");
+                    throw new Error(data?.error || "Unable to load dividend information.");
                 }
 
                 const dividends = Array.isArray(data.dividends) ?
@@ -609,25 +578,21 @@
         function renderDividends(dividends) {
             const content = document.getElementById("dividendContent");
 
-            const total = dividends.reduce(
-                (sum, item) => sum + Number(item.amount || 0),
-                0
-            );
+            const paid = dividends.filter(item => String(item.status).toLowerCase() === "paid");
+            const awaiting = dividends.filter(item => String(item.status).toLowerCase() !== "paid");
+            const paidTotal = paid.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            const pendingTotal = awaiting.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
-            const latest = dividends.length ?
-                Number(dividends[0].amount || 0) :
-                0;
-
-            document.getElementById("totalDividends").textContent = money(total);
+            document.getElementById("totalDividends").textContent = money(paidTotal);
             document.getElementById("distributionCount").textContent = dividends.length;
-            document.getElementById("latestDividend").textContent = money(latest);
+            document.getElementById("pendingDividends").textContent = money(pendingTotal);
 
             if (!dividends.length) {
                 content.innerHTML = `
           <div class="empty">
             <div class="empty-icon">💰</div>
             <h3>No Dividend Distributions Yet</h3>
-            <p>Your paid dividend allocations will appear here when available.</p>
+            <p>Your declared and paid dividend allocations will appear here when available.</p>
           </div>
         `;
                 return;
@@ -650,23 +615,23 @@
               ${dividends.map(item => `
                 <tr>
                   <td>
-                    <strong>${escapeHtml(item.period_label || "Dividend")}</strong>
+                    <strong>${escapeHtml(item.period || "Dividend")}</strong>
                     <div style="color:var(--muted);font-size:12px;margin-top:5px">
-                      ${formatDate(item.paid_at)}
+                      ${formatDate(item.paid_at || item.created_at)}
                     </div>
                   </td>
                   <td class="amount">${money(item.amount)}</td>
                   <td>${money(item.stage1)}</td>
                   <td>${money(item.stage2)}</td>
                   <td>${item.percentage == null ? "—" : Number(item.percentage).toFixed(2) + "%"}</td>
-                  <td><span class="badge">Paid</span></td>
+                  <td><span class="badge" style="${String(item.status).toLowerCase() === "paid" ? "" : "background:rgba(251,146,60,.12);color:#fb923c;"}">${escapeHtml(String(item.status || "pending").replace(/_/g, " ").toUpperCase())}</span></td>
                 </tr>
               `).join("")}
             </tbody>
           </table>
         </div>
         <p style="color:var(--muted);font-size:12px;margin-top:15px">
-          Showing ${dividends.length} personal paid distribution record(s).
+          Showing ${dividends.length} personal dividend allocation record(s), including unpaid distributions.
         </p>
       `;
     }

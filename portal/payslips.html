@@ -596,25 +596,25 @@
                 }
 
                 var res = await supabaseClient.functions.invoke(
-                    "personal-portal-payslips"
+                    "portal-personal-data",
+                    { body: { action: "payslips" } }
                 );
 
                 if (res.error) {
                     throw res.error;
                 }
 
-                if (res.data && res.data.error) {
-                    throw new Error(res.data.error);
+                if (res.data && res.data.success === false) {
+                    throw new Error(res.data.error || "Unable to load payslips.");
                 }
 
                 var records = [];
 
-                if (Array.isArray(res.data)) {
-                    records = res.data;
-                } else if (res.data && Array.isArray(res.data.payslips)) {
-                    records = res.data.payslips;
-                } else if (res.data && Array.isArray(res.data.data)) {
-                    records = res.data.data;
+                if (res.data && Array.isArray(res.data.payslips)) {
+                    records = res.data.payslips.map(item => ({
+                        ...item,
+                        payroll_runs: { period: item.period, run_date: item.run_date, status: "POSTED" }
+                    }));
                 }
 
                 renderPayslips(records);
@@ -748,6 +748,8 @@
 
             html += '<div class="box">';
 
+            html += '<div class="row"><span>Employee</span><strong>' + safe(record.employee_name) + '</strong></div>';
+            html += '<div class="row"><span>Employee number</span><strong>' + safe(record.employee_number) + '</strong></div>';
             html += '<div class="row"><span>Pay period</span><strong>';
             html += safe(periodText(run));
             html += "</strong></div>";
@@ -772,9 +774,15 @@
             html += money(record.gross);
             html += "</strong></div>";
 
-            html += '<div class="row"><span>Deductions</span><strong>';
-            html += money(record.deductions);
-            html += "</strong></div>";
+            html += '<div class="row"><span>Basic pay</span><strong>' + money(record.basic_pay) + "</strong></div>";
+            html += '<div class="row"><span>Overtime</span><strong>' + money(record.overtime_pay) + "</strong></div>";
+            html += '<div class="row"><span>Allowances</span><strong>' + money(record.allowances) + "</strong></div>";
+            html += '<div class="row"><span>PAYE</span><strong>' + money(record.paye) + "</strong></div>";
+            html += '<div class="row"><span>NSSF</span><strong>' + money(record.employee_nssf) + "</strong></div>";
+            html += '<div class="row"><span>SHIF</span><strong>' + money(record.employee_shif) + "</strong></div>";
+            html += '<div class="row"><span>Housing levy</span><strong>' + money(record.employee_housing_levy) + "</strong></div>";
+            html += '<div class="row"><span>Other deductions</span><strong>' + money(record.other_deductions) + "</strong></div>";
+            html += '<div class="row"><span>Total deductions</span><strong>' + money(record.deductions) + "</strong></div>";
 
             html += '<div class="row total"><span>Net pay</span><strong>';
             html += money(record.net);
