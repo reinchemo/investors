@@ -472,6 +472,27 @@ body{display:block!important}
 .data-table th:not(:first-child),.data-table td:not(:first-child){white-space:nowrap}
 @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.main-content{padding:.65rem}.stats-grid{grid-template-columns:minmax(0,1fr)}.data-table{min-width:760px}.comm-topbar{gap:.45rem}.comm-nav{max-width:100%}}
+
+/* Final responsive containment for desktop, tablet and mobile */
+*,*::before,*::after{box-sizing:border-box}
+html,body{width:100%;max-width:100%;min-width:0;margin:0!important;overflow-x:hidden!important}
+body{display:block!important;min-height:100vh}
+.main-content{display:flex;flex-direction:column;width:100%;max-width:100%;min-width:0;min-height:100vh;margin:0!important;padding:clamp(.75rem,2vw,2rem);overflow-x:hidden;overflow-y:visible}
+.comm-topbar{display:flex;flex-wrap:nowrap;width:100%;max-width:100%;min-width:0}
+.comm-nav{flex:1 1 auto;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.comm-nav-group{flex:0 0 auto}
+.top-nav,.page-title{width:100%;max-width:100%;min-width:0}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:100%;min-width:0;gap:clamp(.5rem,1vw,1rem)}
+.stat-card{width:100%;min-width:0;max-width:100%;overflow:hidden;padding:clamp(.75rem,1.5vw,1.2rem)}
+.stat-info{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.stat-info h2{font-size:clamp(1.2rem,2vw,1.8rem);overflow-wrap:anywhere}
+.table-container{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain}
+.data-table{width:100%;min-width:800px;table-layout:fixed}
+.data-table th:first-child,.data-table td:first-child{width:58%;white-space:normal;overflow-wrap:anywhere}
+.data-table th:not(:first-child),.data-table td:not(:first-child){white-space:nowrap}
+@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.main-content{padding:.75rem}.comm-topbar{gap:.4rem;padding:.55rem}.comm-brand{flex:0 0 auto}.comm-nav{flex:1 1 auto;min-width:0}.comm-home{flex:0 0 auto}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.data-table{min-width:760px}}
+@media(max-width:480px){.stats-grid{grid-template-columns:minmax(0,1fr)}.comm-brand span,.comm-home span{display:none}.comm-topbar{gap:.3rem}.comm-nav .menu-item{padding:.45rem .55rem}}
 </style>
 </head>
 
