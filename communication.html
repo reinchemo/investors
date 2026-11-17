@@ -493,6 +493,25 @@ body{display:block!important;min-height:100vh}
 @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.main-content{padding:.75rem}.comm-topbar{gap:.4rem;padding:.55rem}.comm-brand{flex:0 0 auto}.comm-nav{flex:1 1 auto;min-width:0}.comm-home{flex:0 0 auto}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.data-table{min-width:760px}}
 @media(max-width:480px){.stats-grid{grid-template-columns:minmax(0,1fr)}.comm-brand span,.comm-home span{display:none}.comm-topbar{gap:.3rem}.comm-nav .menu-item{padding:.45rem .55rem}}
+/* Responsive Communications layout: no content should extend beyond the visible page */
+*,*::before,*::after{box-sizing:border-box}
+html,body{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;overflow-x:hidden!important}
+body{min-height:100vh!important}
+.main-content{display:flex!important;flex:0 1 auto!important;flex-direction:column!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:100vh!important;margin:0!important;padding:clamp(.75rem,2vw,1.75rem)!important;overflow-x:hidden!important;overflow-y:visible!important}
+.comm-topbar{display:flex!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0 0 1.2rem!important;box-sizing:border-box!important}
+.comm-nav{flex:1 1 auto!important;min-width:0!important;max-width:100%!important;overflow-x:auto!important}
+.comm-nav-group{flex:0 0 auto!important}
+.top-nav,.page-title,.balance-banner,.stats-grid,.table-container{width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important}
+.stats-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr))!important;gap:clamp(.6rem,1vw,1rem)!important;align-items:stretch!important}
+.stat-card{display:flex!important;width:100%!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+.stat-info{flex:1 1 auto!important;min-width:0!important;max-width:100%!important;overflow-wrap:anywhere!important}
+.stat-info h2{font-size:clamp(1.15rem,2vw,1.8rem)!important;overflow-wrap:anywhere!important}
+.table-container{display:block!important;overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-x:contain!important}
+.data-table{width:100%!important;min-width:800px!important;table-layout:fixed!important}
+.data-table th:first-child,.data-table td:first-child{width:58%!important;white-space:normal!important;overflow-wrap:anywhere!important}
+.data-table th:not(:first-child),.data-table td:not(:first-child){white-space:nowrap!important}
+@media(max-width:760px){.main-content{padding:.7rem!important}.comm-topbar{gap:.35rem!important;padding:.55rem!important}.comm-brand{flex:0 0 auto!important}.comm-nav{flex:1 1 auto!important;min-width:0!important}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.data-table{min-width:760px!important}}
+@media(max-width:480px){.stats-grid{grid-template-columns:minmax(0,1fr)!important}.comm-brand span,.comm-home span{display:none!important}.comm-topbar{gap:.25rem!important}.comm-nav .menu-item{padding:.4rem .5rem!important}}
 </style>
 </head>
 
