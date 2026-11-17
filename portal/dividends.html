@@ -530,38 +530,7 @@
             pageMessage.innerHTML = "";
 
             try {
-                // Confirm that this account is active and linked to an investor.
-                const {
-                    data: account,
-                    error: accountError
-                } = await db
-                    .from("personal_portal_accounts")
-                    .select("investor_id, account_status")
-                    .eq("user_id", session.user.id)
-                    .maybeSingle();
-
-                if (accountError) throw accountError;
-
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is unavailable or suspended.");
-                }
-
-                if (!account.investor_id) {
-                    content.innerHTML = `
-            <div class="empty">
-              <div class="empty-icon">🔒</div>
-              <h3>Investor Access Not Available</h3>
-              <p>This account is not linked to an investor record.</p>
-            </div>
-          `;
-
-                    document.getElementById("totalDividends").textContent = "KES 0.00";
-                    document.getElementById("distributionCount").textContent = "0";
-                    document.getElementById("latestDividend").textContent = "KES 0.00";
-                    return;
-                }
-
-                // The backend returns only this logged-in investor's allocations.
+                // The backend derives investor access from the authenticated session.
                 const {
                     data,
                     error
