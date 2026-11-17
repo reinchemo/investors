@@ -20,6 +20,7 @@ table{width:100%;border-collapse:collapse;min-width:570px}th,td{text-align:left;
 .list{display:grid;gap:10px}.rowitem{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px}.rowitem span:first-child{color:var(--muted)}.empty,.loading{padding:24px;text-align:center;color:var(--muted);font-size:12px}.error{color:#ff9baa}.good{color:var(--green)}.footer{color:var(--muted);font-size:10px;text-align:center;padding:20px}
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cols{grid-template-columns:1fr}}@media(max-width:520px){.layout{padding:15px}.topbar{align-items:flex-start}.brand strong{font-size:14px}.grid{gap:9px}.card{padding:14px}.hero{padding:21px}.filters input{width:100%}}
 </style>
+    <link rel="stylesheet" href="portal-ui.css">
 </head>
 <body>
 <div class="layout">
@@ -63,11 +64,9 @@ function setRows(id,html,empty,cols){$(id).innerHTML=html||'<tr><td colspan="'+c
 async function init(){
  const {data:{session},error}=await db.auth.getSession();if(error)throw error;
  if(!session){location.href="../login.html";return;}
- const {data:account,error:ae}=await db.from("personal_portal_accounts").select("staff_id,account_status").eq("user_id",session.user.id).maybeSingle();
- if(ae)throw ae;if(!account||account.account_status!=="active"||!account.staff_id)throw new Error("This account is not linked to an active employee record.");
- staffId=account.staff_id;
- const {data:record,error:se}=await db.from("staff").select("id,employee_number,full_name,salary,start_date,end_date,status,annual_leave_days").eq("id",staffId).maybeSingle();
- if(se)throw se;if(!record)throw new Error("Your employee record could not be loaded.");staff=record;
+ const {data:result,error}=await db.functions.invoke("portal-personal-data",{body:{action:"employee_earnings",period:monthNow()}});
+ if(error)throw error;if(!result?.success||!result.staff)throw new Error(result?.error||"This account has no active employee record.");
+ staff=result.staff;staffId=staff.id;
  $("salary").textContent=staff.salary==null?"Not configured":money(staff.salary);
  $("period").value=monthNow();await loadPeriod();
 }
@@ -76,12 +75,9 @@ async function loadPeriod(){
  const range=rangeForMonth(period);$("periodMeta").textContent=period+" · "+range.days+" calendar days";
  ["attendanceRows","payrollRows","overtimeRows"].forEach((id)=>$(id).innerHTML='<tr><td colspan="'+(id==="attendanceRows"?4:4)+'" class="loading">Loading…</td></tr>');
  try{
- const [a,l,o]=await Promise.all([
- db.from("attendance").select("id,date,check_in,check_out,status,approval_notes").eq("staff_id",staffId).gte("date",range.start).lte("date",range.end).order("date",{ascending:false}),
- db.from("leave_requests").select("id,leave_type,start_date,end_date,days,status,notes,rejection_reason").eq("staff_id",staffId).eq("status","approved").lte("start_date",range.end).gte("end_date",range.start).order("start_date",{ascending:false}),
- db.from("overtime_entries").select("id,period,hours,rate_per_hour,amount,status,reason").eq("staff_id",staffId).eq("period",period).order("created_at",{ascending:false})
- ]);
- for(const x of [a,l,o])if(x.error)throw x.error;
+ const {data:result,error}=await db.functions.invoke("portal-personal-data",{body:{action:"employee_earnings",period}});
+ if(error)throw error;if(!result?.success)throw new Error(result?.error||"Unable to load earnings.");
+ const a={data:result.attendance||[],error:null},l={data:result.leave_requests||[],error:null},o={data:result.overtime||[],error:null};
  const approved=(a.data||[]).filter(x=>x.status==="approved");
  const pending=(a.data||[]).filter(x=>["pending","late_pending_approval"].includes(x.status));
  const rejected=(a.data||[]).filter(x=>x.status==="rejected");

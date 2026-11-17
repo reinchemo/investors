@@ -1,0 +1,65 @@
+/* STARLINK Personal Portal — shared interface polish
+   This stylesheet only improves presentation; it does not change data access or business rules. */
+:root {
+  color-scheme: dark;
+  --portal-focus: rgba(69, 223, 208, .42);
+}
+html { scroll-behavior: smooth; }
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a, button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--portal-focus);
+  outline-offset: 2px;
+}
+button, .btn, .submit, .action-btn {
+  transition: transform .18s ease, filter .18s ease, border-color .18s ease,
+    box-shadow .18s ease, background-color .18s ease;
+}
+button:not(:disabled):hover, .btn:hover, .submit:hover, .action-btn:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+}
+button:not(:disabled):active, .btn:active, .submit:active, .action-btn:active {
+  transform: translateY(1px) scale(.99);
+}
+button:disabled, .btn:disabled, .submit:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+  box-shadow: none;
+}
+input, select, textarea {
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(69, 223, 208, .65) !important;
+  box-shadow: 0 0 0 3px rgba(69, 223, 208, .09);
+}
+.card, .panel, .stat-card, .stat, .notice, .hero {
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.tablewrap, .table-wrap, .table-responsive {
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(145, 163, 191, .42) transparent;
+}
+table tbody tr { transition: background-color .16s ease; }
+table tbody tr:hover { background: rgba(69, 155, 255, .045); }
+.empty, .empty-state, [role="status"] { line-height: 1.65; }
+img, svg { max-width: 100%; }
+@media (max-width: 640px) {
+  input, select, textarea, button { font-size: 16px; }
+  .tablewrap, .table-wrap, .table-responsive { overflow-x: auto; }
+  table { min-width: 560px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

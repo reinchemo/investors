@@ -360,6 +360,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="portal-ui.css">
 </head>
 
 <body>
@@ -437,10 +438,8 @@
             content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading your profile...</div>';
 
             try {
-                const {
-                    data: sessionData,
-                    error: sessionError
-                } = await supabaseClient.auth.getSession();
+                const { data: sessionData, error: sessionError } =
+                    await supabaseClient.auth.getSession();
                 if (sessionError) throw sessionError;
 
                 if (!sessionData.session) {
@@ -448,63 +447,30 @@
                     return;
                 }
 
-                const user = sessionData.session.user;
+                const { data, error } = await supabaseClient.functions.invoke(
+                    "portal-personal-data",
+                    { body: { action: "profile" } }
+                );
 
-                const {
-                    data: account,
-                    error: accountError
-                } = await supabaseClient
-                    .from("personal_portal_accounts")
-                    .select("id,staff_id,investor_id,account_status,created_at")
-                    .eq("user_id", user.id)
-                    .maybeSingle();
-
-                if (accountError) throw accountError;
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is not active.");
+                if (error) throw error;
+                if (!data || data.success === false) {
+                    throw new Error(data?.error || "Unable to retrieve your profile.");
                 }
 
-                let staff = null;
-                let investor = null;
-
-                if (account.staff_id) {
-                    const {
-                        data,
-                        error
-                    } = await supabaseClient
-                        .from("staff")
-                        .select("id,employee_number,full_name,role,phone,email,national_id,address,start_date,status,annual_leave_days")
-                        .eq("id", account.staff_id)
-                        .maybeSingle();
-
-                    if (error) throw error;
-                    staff = data;
-                }
-
-                if (account.investor_id) {
-                    const {
-                        data,
-                        error
-                    } = await supabaseClient
-                        .from("investors")
-                        .select("id,name,investor_number,phone,email,id_number,address,equity,status,joined_date")
-                        .eq("id", account.investor_id)
-                        .maybeSingle();
-
-                    if (error) throw error;
-                    investor = data;
-                }
-
-                renderProfile(user, account, staff, investor);
-
+                renderProfile(
+                    data.user || sessionData.session.user,
+                    data.account || {},
+                    data.staff || null,
+                    data.investor || null
+                );
             } catch (error) {
                 console.error("Profile error:", error);
                 content.innerHTML = `
-   <div class="message error">
-    <strong>Unable to load your profile</strong>
-    <p>${safe(error.message||"Please sign in again and retry.")}</p>
-    <button class="btn" onclick="loadProfile()">Try again</button>
-   </div>`;
+                    <div class="message error">
+                        <strong>Unable to load your profile</strong>
+                        <p>${safe(error.message || "Please sign in again and retry.")}</p>
+                        <button class="btn" onclick="loadProfile()">Try again</button>
+                    </div>`;
             }
         }
 

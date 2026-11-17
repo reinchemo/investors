@@ -392,6 +392,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="portal-ui.css">
 </head>
 
 <body>
@@ -562,55 +563,6 @@
            VERIFY EMPLOYEE ACCOUNT
         ========================================= */
 
-        async function verifyAccount() {
-
-            const sessionResult = await db.auth.getSession();
-
-            if (
-                sessionResult.error ||
-                !sessionResult.data.session
-            ) {
-                window.location.href = "../login.html";
-                return false;
-            }
-
-            const userResult = await db.auth.getUser();
-
-            if (
-                userResult.error ||
-                !userResult.data.user
-            ) {
-                await db.auth.signOut();
-                window.location.href = "../login.html";
-                return false;
-            }
-
-            const accountResult = await db
-                .from("personal_portal_accounts")
-                .select("staff_id,account_status")
-                .eq("user_id", userResult.data.user.id)
-                .maybeSingle();
-
-            if (accountResult.error) {
-                throw new Error("Unable to verify your portal account.");
-            }
-
-            const account = accountResult.data;
-
-            if (!account ||
-                String(account.account_status).toLowerCase() !== "active" ||
-                !account.staff_id
-            ) {
-                throw new Error(
-                    "This page is available to active employee portal accounts only."
-                );
-            }
-
-            staffId = account.staff_id;
-
-            return true;
-        }
-
         /* =========================================
            TASK EDGE FUNCTION CONNECTION
         ========================================= */
@@ -665,68 +617,27 @@
         async function loadTasks() {
 
             if (loadingTasks) return;
-
             loadingTasks = true;
-
             showMessage("Loading your assigned tasks...");
 
             try {
-
-                if (!staffId) {
-                    const allowed = await verifyAccount();
-
-                    if (!allowed) return;
-                }
-
-                const result = await db
-                    .from("tasks")
-                    .select(`
-                id,
-                title,
-                description,
-                priority,
-                status,
-                progress_pct,
-                start_date,
-                deadline,
-                instructions,
-                expected_result,
-                notes,
-                created_at,
-                updated_at
-            `)
-                    .eq("assignee_staff_id", staffId)
-                    .is("deleted_at", null)
-                    .order("created_at", {
-                        ascending: false
-                    });
-
-                if (result.error) {
-                    throw result.error;
-                }
-
-                currentTasks = result.data || [];
+                const result = await taskAction({ action: "list_tasks" });
+                currentTasks = Array.isArray(result.tasks) ? result.tasks : [];
 
                 el("message").style.display = "none";
-
                 el("welcome").textContent =
-                    "You currently have " +
-                    currentTasks.length +
-                    " assigned task(s).";
+                    "You currently have " + currentTasks.length + " assigned task(s).";
 
                 updateStatistics();
                 renderTasks();
 
             } catch (error) {
-
                 console.error("Task loading error:", error);
-
                 showMessage(
                     error.message ||
                     "Unable to load your tasks. Please contact management.",
                     true
                 );
-
             } finally {
                 loadingTasks = false;
             }

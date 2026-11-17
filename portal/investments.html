@@ -386,6 +386,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="portal-ui.css">
 </head>
 
 <body>
@@ -471,88 +472,51 @@
                     data: sessionData,
                     error: sessionError
                 } = await supabaseClient.auth.getSession();
-                if (sessionError) throw sessionError;
 
+                if (sessionError) throw sessionError;
                 if (!sessionData.session) {
                     window.location.href = "../login.html";
                     return;
                 }
 
-                const user = sessionData.session.user;
-
+                // Investor identity is resolved server-side from the verified
+                // session. The browser never supplies an investor_id.
                 const {
-                    data: account,
-                    error: accountError
-                } = await supabaseClient
-                    .from("personal_portal_accounts")
-                    .select("investor_id,account_status")
-                    .eq("user_id", user.id)
-                    .maybeSingle();
+                    data: result,
+                    error: portalError
+                } = await supabaseClient.functions.invoke("portal-personal-data", {
+                    body: { action: "investments" }
+                });
 
-                if (accountError) throw accountError;
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is not active.");
+                if (portalError) throw portalError;
+                if (!result || result.success !== true) {
+                    throw new Error(result?.error || "Unable to load your investment information.");
                 }
 
-                if (!account.investor_id) {
+                if (!result.investor) {
                     content.innerHTML = `
-    <div class="message">
-     <div style="font-size:34px;margin-bottom:12px">📊</div>
-     <strong>Investor access is not available</strong>
-     <p>This account is not linked to an investor record.</p>
-    </div>`;
+                        <div class="message">
+                            <div style="font-size:34px;margin-bottom:12px">📊</div>
+                            <strong>Investor access is not available</strong>
+                            <p>This account is not linked to an active investor record.</p>
+                        </div>`;
                     return;
                 }
 
-                const {
-                    data: investor,
-                    error: investorError
-                } = await supabaseClient
-                    .from("investors")
-                    .select("id,name,investor_number,equity,status,joined_date")
-                    .eq("id", account.investor_id)
-                    .maybeSingle();
-
-                if (investorError) throw investorError;
-                if (!investor) throw new Error("Your investor record could not be found.");
-
-                const {
-                    data: investments,
-                    error: investmentError
-                } = await supabaseClient
-                    .from("investments")
-                    .select("id,date,amount,type,reference,notes,fee,deleted_at")
-                    .eq("investor_id", account.investor_id)
-                    .is("deleted_at", null)
-                    .order("date", {
-                        ascending: false
-                    });
-
-                if (investmentError) throw investmentError;
-
-                const {
-                    data: transactions,
-                    error: transactionError
-                } = await supabaseClient
-                    .from("share_transactions")
-                    .select("id,date,action,equity_before,equity_after,delta,pct_before,pct_after,reference,reason")
-                    .eq("investor_id", account.investor_id)
-                    .order("date", {
-                        ascending: false
-                    });
-
-                if (transactionError) throw transactionError;
-
-                renderInvestor(investor, investments || [], transactions || []);
+                renderInvestor(
+                    result.investor,
+                    result.investments || [],
+                    result.transactions || []
+                );
 
             } catch (error) {
                 console.error("Investment page error:", error);
                 content.innerHTML = `
-   <div class="message error">
-    <strong>Unable to load your investment information</strong>
-    <p>${safe(error.message||"Please sign in again and retry.")}</p>
-    <button class="btn" onclick="loadInvestments()">Try again</button>
-   </div>`;
+                    <div class="message error">
+                        <strong>Unable to load your investment information</strong>
+                        <p>${safe(error.message || "Please sign in again and retry.")}</p>
+                        <button class="btn" onclick="loadInvestments()">Try again</button>
+                    </div>`;
             }
         }
 
