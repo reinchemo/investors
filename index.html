@@ -10021,6 +10021,12 @@ async function openNewTemplateModal() {
     <script src="router.js"></script>
 
 
+<style id="starlink-workspace-frame">
+.starlink-module-frame{width:100%;height:calc(100vh - 90px);min-height:650px;border:1px solid rgba(133,174,210,.15);border-radius:18px;overflow:hidden;background:#0a0e1a}
+.starlink-module-frame[hidden]{display:none!important}
+.starlink-module-frame iframe{display:block;width:100%;height:100%;border:0;background:#0a0e1a}
+.dashboard[hidden]{display:none!important}
+</style>
 <script id="starlink-index-sidebar">
 (function(){
  const init=()=>{
@@ -10066,7 +10072,9 @@ async function openNewTemplateModal() {
   side.addEventListener('click',e=>{if(e.target.closest('a'))close()});
   actions.addEventListener('click',e=>{if(e.target.closest('button'))close()},{capture:true});
   const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
-  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');workspacePane.appendChild(frame);
+  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
+  frame.addEventListener('load',()=>{try{frame.contentDocument.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const u=new URL(a.href,frame.contentWindow.location.href);if(u.pathname.endsWith('/index.html')||u.pathname==='/'&&u.origin===location.origin){e.preventDefault();showHome();}}); }catch(err){console.warn('Workspace navigation hook unavailable',err);}});
+  workspacePane.appendChild(frame);
   main.appendChild(workspacePane);
   const showHome=()=>{workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';side.querySelectorAll('a').forEach(a=>a.classList.remove('starlink-current'));};
   side.addEventListener('click',e=>{
