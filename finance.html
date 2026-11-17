@@ -14088,10 +14088,16 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   },true);
 
   finance.addEventListener('click',e=>{
-   if(e.target.closest('.tab')){
-    close();
-    titleNode.textContent='Finance Workspace';
-   }
+   const clickedTab=e.target.closest('.tab');
+   if(!clickedTab)return;
+
+   // Any Finance navigation item must return to the Finance dashboard
+   // before its own tab handler's selected view is shown.
+   workspacePane.hidden=true;
+   dashboard.hidden=false;
+   titleNode.textContent='Finance Workspace';
+   side.querySelectorAll('.starlink-workspace-link').forEach(a=>a.classList.remove('starlink-current'));
+   close();
   });
   if(dashboardTab){
    dashboardTab.addEventListener('click',()=>{
