@@ -10027,6 +10027,13 @@ async function openNewTemplateModal() {
 .starlink-module-frame[hidden]{display:none!important}
 .starlink-module-frame iframe{display:block;width:100%;min-width:0;height:100%;border:0;background:#0a0e1a;box-sizing:border-box}
 @media(max-width:760px){.starlink-module-frame{height:calc(100vh - 78px);height:calc(100dvh - 78px);min-height:calc(100vh - 78px);min-height:calc(100dvh - 78px)}.starlink-shell-main{padding:10px 8px 16px}.starlink-shell-topbar{flex-shrink:0}}
+.starlink-module-frame{display:block;flex:1 1 auto;width:100%;max-width:none;min-width:0;height:calc(100vh - 90px);height:calc(100dvh - 90px);min-height:calc(100vh - 90px);min-height:calc(100dvh - 90px);border:0;border-radius:0;overflow:auto;background:#0a0e1a;box-sizing:border-box}
+.starlink-module-frame[hidden]{display:none!important}
+.starlink-module-frame iframe{display:block;width:100%;min-width:0;height:100%;border:0;background:#0a0e1a;box-sizing:border-box}
+.starlink-fullpage-modal{position:relative!important;inset:auto!important;display:block!important;width:100%!important;min-height:calc(100dvh - 90px)!important;height:auto!important;padding:0!important;margin:0!important;background:transparent!important;backdrop-filter:none!important;z-index:1!important;overflow:visible!important}
+.starlink-fullpage-modal .modal-card,.starlink-fullpage-modal .payments-modal-card{width:100%!important;max-width:none!important;max-height:none!important;height:auto!important;min-height:calc(100dvh - 90px)!important;margin:0!important;border-radius:16px!important;overflow:visible!important}
+.starlink-fullpage-modal .employee-table-wrap{max-width:100%;overflow-x:auto}
+@media(max-width:760px){.starlink-module-frame{height:calc(100dvh - 78px);min-height:calc(100dvh - 78px)}.starlink-fullpage-modal{min-height:calc(100dvh - 78px)!important}.starlink-fullpage-modal .modal-card{min-height:calc(100dvh - 78px)!important}}
 .dashboard[hidden]{display:none!important}
 </style>
 <script id="starlink-index-sidebar">
@@ -10073,6 +10080,53 @@ async function openNewTemplateModal() {
   overlay.addEventListener('click',close);
   side.addEventListener('click',e=>{if(e.target.closest('a'))close()});
   actions.addEventListener('click',e=>{if(e.target.closest('button'))close()},{capture:true});
+  const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
+  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
+  frame.addEventListener('load',()=>{try{frame.contentDocument.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const u=new URL(a.href,frame.contentWindow.location.href);if(u.pathname.endsWith('/index.html')||u.pathname==='/'&&u.origin===location.origin){e.preventDefault();showHome();}}); }catch(err){console.warn('Workspace navigation hook unavailable',err);}});
+  workspacePane.appendChild(frame);main.appendChild(workspacePane);
+  let activeModal=null, activeModalParent=null, activeModalNext=null, modalObserver=null;
+  const restoreModal=()=>{
+   if(!activeModal)return;
+   if(modalObserver)modalObserver.disconnect();
+   activeModal.classList.remove('starlink-fullpage-modal');
+   if(activeModalParent)activeModalParent.insertBefore(activeModal,activeModalNext&&activeModalNext.parentNode===activeModalParent?activeModalNext:null);
+   activeModal=null;activeModalParent=null;activeModalNext=null;modalObserver=null;
+   workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';
+   side.querySelectorAll('a,button').forEach(a=>a.classList.remove('starlink-current'));
+  };
+  const openFullPageModal=(button)=>{
+   const modals=[...document.querySelectorAll('.modal-overlay.show')];
+   const modal=modals[modals.length-1];if(!modal)return;
+   if(activeModal===modal)return;
+   if(activeModal)restoreModal();
+   activeModal=modal;activeModalParent=modal.parentNode;activeModalNext=modal.nextSibling;
+   title.textContent=(button.getAttribute('aria-label')||button.innerText||'Workspace').trim().replace(/\\s+/g,' ');
+   dashboard.hidden=true;workspacePane.hidden=false;
+   modal.classList.add('starlink-fullpage-modal');workspacePane.appendChild(modal);
+   modalObserver=new MutationObserver(()=>{if(activeModal&&!activeModal.classList.contains('show'))restoreModal();});
+   modalObserver.observe(modal,{attributes:true,attributeFilter:['class']});
+  };
+  const showHome=()=>{if(activeModal)restoreModal();workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';side.querySelectorAll('a,button').forEach(a=>a.classList.remove('starlink-current'));};
+  side.addEventListener('click',e=>{
+   const link=e.target.closest('a');
+   if(link){
+    const href=(link.getAttribute('href')||'').toLowerCase();
+    if(link.dataset.workspace==='home'||href==='#starlink-home'||href.endsWith('/index.html')){
+     e.preventDefault();frame.removeAttribute('src');showHome();close();return;
+    }
+    const financeLink=side.querySelector('a[href*="finance.html"]');if(financeLink){financeLink.removeAttribute('target');financeLink.removeAttribute('rel');}
+    const routes={'communication.html':'Communications','admin.html':'Admin Roles'};
+    const route=Object.keys(routes).find(key=>href.includes(key));
+    if(route){e.preventDefault();if(activeModal)restoreModal();dashboard.hidden=true;workspacePane.hidden=false;frame.src=route;title.textContent=routes[route];side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
+    return;
+   }
+   const button=e.target.closest('button');
+   if(button&&actions.contains(button)){
+    side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a===button));
+    window.setTimeout(()=>openFullPageModal(button),0);
+   }
+  });
+  const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.remove('starlink-current');
   const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
   const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
   frame.addEventListener('load',()=>{try{frame.contentDocument.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const u=new URL(a.href,frame.contentWindow.location.href);if(u.pathname.endsWith('/index.html')||u.pathname==='/'&&u.origin===location.origin){e.preventDefault();showHome();}}); }catch(err){console.warn('Workspace navigation hook unavailable',err);}});
