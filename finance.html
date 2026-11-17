@@ -1639,6 +1639,23 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
 .starlink-nav-subgroup{display:flex;flex-direction:column;gap:4px;margin:0 0 12px}
 .starlink-nav-subgroup .starlink-side-kicker{margin-top:12px}
 .starlink-nav-subgroup .tab{margin:0}
+.starlink-overview-group{margin-bottom:2px}
+.starlink-overview-group .starlink-dashboard-link{background:linear-gradient(105deg,rgba(55,194,183,.17),rgba(55,194,183,.06));border:1px solid rgba(75,211,198,.3)!important;color:#75e0d5!important;box-shadow:0 8px 20px -16px rgba(75,211,198,.8)}
+.starlink-overview-group .starlink-dashboard-link i{color:#67ded2!important}
+.starlink-workspace-group{padding-bottom:12px;border-bottom:1px solid var(--shell-line);gap:7px}
+.starlink-workspace-group .starlink-side-kicker{margin-bottom:5px}
+.starlink-workspace-link{background:rgba(255,255,255,.025)!important;border-color:rgba(133,174,210,.08)!important}
+.starlink-workspace-link i{color:#79a9ce!important}
+.starlink-workspace-link:hover{background:rgba(64,153,220,.13)!important;border-color:rgba(69,155,255,.2)!important}
+.starlink-exit-finance{margin-top:4px!important;color:#a9bad0!important}
+.starlink-exit-finance i{color:#8fa7c0!important}
+.starlink-logout-group{margin-top:auto;padding-top:12px;border-top:1px solid var(--shell-line)}
+.starlink-logout-link{color:#f0a49c!important;background:rgba(226,104,91,.07)!important;border:1px solid rgba(226,104,91,.25)!important;border-radius:12px!important}
+.starlink-logout-link i{color:#f0a49c!important}
+.starlink-logout-link:hover{background:rgba(226,104,91,.15)!important}
+.starlink-hidden-actions{display:none!important}
+.starlink-shell-topbar{justify-content:flex-start!important}
+.starlink-shell-topbar .shell-title{font-size:17px!important;letter-spacing:.01em}
 @media(max-width:1050px){:root{--shell-sidebar:250px}.starlink-shell-main{padding:15px}}
 @media(max-width:760px){
  .starlink-sidebar{width:min(300px,86vw);transform:translateX(-105%);box-shadow:20px 0 50px rgba(0,0,0,.35)}
@@ -13904,17 +13921,72 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   const dashboard=document.querySelector('.dashboard'),oldNav=dashboard&&dashboard.querySelector(':scope > .nav');
   const tabs=dashboard&&dashboard.querySelector(':scope > .tabs');
   if(!dashboard||!oldNav||!tabs||document.querySelector('.starlink-sidebar'))return;
+
   document.body.classList.add('starlink-shell');
-  const side=document.createElement('aside');side.className='starlink-sidebar';side.setAttribute('aria-label','Finance navigation');
-  const brand=document.createElement('div');brand.className='starlink-side-brand';brand.innerHTML='<i class="fas fa-coins"></i><span>STARLINK FINANCE</span>';side.appendChild(brand);
-  const group=(title)=>{const wrap=document.createElement('section');wrap.className='starlink-side-group';const label=document.createElement('div');label.className='starlink-side-kicker';label.textContent=title;wrap.appendChild(label);side.appendChild(wrap);return wrap};
-  const workspace=group('Workspace');
-  const links=[['communication.html','Communications','fa-comments'],['admin.html','Admin Roles','fa-shield-alt']];
-  links.forEach(([href,label,icon])=>{const a=document.createElement('a');a.href=href;a.innerHTML='<i class="fas '+icon+'"></i><span>'+label+'</span>';workspace.appendChild(a)});
-  const finance=group('Finance & Operations');
+  const side=document.createElement('aside');
+  side.className='starlink-sidebar';
+  side.setAttribute('aria-label','Finance navigation');
+
+  const brand=document.createElement('div');
+  brand.className='starlink-side-brand';
+  brand.innerHTML='<i class="fas fa-coins"></i><span>STARLINK FINANCE</span>';
+  side.appendChild(brand);
+
+  const group=(title, className='')=>{
+   const wrap=document.createElement('section');
+   wrap.className=('starlink-side-group '+className).trim();
+   if(title){
+    const label=document.createElement('div');
+    label.className='starlink-side-kicker';
+    label.textContent=title;
+    wrap.appendChild(label);
+   }
+   side.appendChild(wrap);
+   return wrap;
+  };
+
   const all=[...tabs.querySelectorAll(':scope > .tab[data-view]')];
+  const dashboardTab=all.find(t=>t.dataset.view==='dashboard');
+  const overview=group('Overview','starlink-overview-group');
+  if(dashboardTab){
+   dashboardTab.classList.add('sidebar-nav-item','starlink-dashboard-link');
+   overview.appendChild(dashboardTab);
+   dashboardTab.classList.add('active');
+  }
+
+  const workspace=group('Workspace','starlink-workspace-group');
+  const links=[
+   ['communication.html','Communications','fa-comments'],
+   ['admin.html','Admin Roles','fa-shield-alt']
+  ];
+  links.forEach(([href,label,icon])=>{
+   const a=document.createElement('a');
+   a.href=href;
+   a.className='starlink-workspace-link';
+   a.innerHTML='<i class="fas '+icon+'"></i><span>'+label+'</span>';
+   workspace.appendChild(a);
+  });
+
+  const navActions=oldNav.querySelector('.nav-actions');
+  const hiddenActions=document.createElement('div');
+  hiddenActions.className='starlink-hidden-actions';
+  hiddenActions.hidden=true;
+  if(navActions){
+   ['notifBellBtn','newTxnBtn'].forEach(id=>{
+    const el=navActions.querySelector('#'+id);
+    if(el)hiddenActions.appendChild(el);
+   });
+  }
+  document.body.appendChild(hiddenActions);
+
+  const back=document.createElement('a');
+  back.href='index.html';
+  back.className='starlink-exit-finance';
+  back.innerHTML='<i class="fas fa-arrow-left"></i><span>Back to Equity Management</span>';
+  workspace.appendChild(back);
+
+  const finance=group('Finance & Operations','starlink-finance-group');
   const groups=[
-   ['Overview',['dashboard']],
    ['Accounting',['ledger','income','expenditure','mpesa','approvals']],
    ['People & Payroll',['locations','staff','payroll','casual','attendance','leave','overtime','tasks']],
    ['Business Resources',['assets','stock','customers','projects']],
@@ -13923,61 +13995,136 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   ];
   tabs.classList.add('sidebar-tabs');
   groups.forEach(([title,keys])=>{
-   const sub=document.createElement('div');sub.className='starlink-nav-subgroup';
-   const label=document.createElement('div');label.className='starlink-side-kicker';label.textContent=title;sub.appendChild(label);
-   keys.forEach(key=>{const tab=all.find(t=>t.dataset.view===key);if(tab){tab.classList.add('sidebar-nav-item');sub.appendChild(tab)}});
+   const sub=document.createElement('div');
+   sub.className='starlink-nav-subgroup';
+   const label=document.createElement('div');
+   label.className='starlink-side-kicker';
+   label.textContent=title;
+   sub.appendChild(label);
+   keys.forEach(key=>{
+    const tab=all.find(t=>t.dataset.view===key);
+    if(tab){
+     tab.classList.add('sidebar-nav-item');
+     sub.appendChild(tab);
+    }
+   });
    if(sub.querySelector('.tab'))finance.appendChild(sub);
   });
-  const navActions=oldNav.querySelector('.nav-actions');
-  const topActions=document.createElement('div');topActions.className='starlink-shell-top-actions';
-  if(navActions){
-   const bell=navActions.querySelector('#notifBellBtn'),newTxn=navActions.querySelector('#newTxnBtn');
-   if(bell)topActions.appendChild(bell);if(newTxn)topActions.appendChild(newTxn);
-   const back=navActions.querySelector('#navBackBtn'),logout=navActions.querySelector('#navLogoutBtn'),admin=navActions.querySelector('a[href="admin.html"]');
-   [back,admin,logout].forEach(el=>{if(el){workspace.appendChild(el);el.classList.remove('btn','btn-home','btn-ghost','btn-primary')}});
+
+  const logout=navActions&&navActions.querySelector('#navLogoutBtn');
+  const logoutGroup=group('','starlink-logout-group');
+  if(logout){
+   logout.classList.remove('btn','btn-home','btn-ghost','btn-primary');
+   logout.classList.add('starlink-logout-link');
+   logoutGroup.appendChild(logout);
   }
-  const footer=document.createElement('div');footer.className='starlink-side-footer';footer.innerHTML='<i class="fas fa-shield-alt"></i> Finance controls remain permission-protected';side.appendChild(footer);
-  const main=document.createElement('main');main.className='starlink-shell-main';
-  const top=document.createElement('div');top.className='starlink-shell-topbar';
-  const left=document.createElement('div');left.style.cssText='display:flex;align-items:center;gap:12px';
-  const toggle=document.createElement('button');toggle.className='starlink-menu-toggle';toggle.type='button';toggle.setAttribute('aria-label','Open navigation');toggle.innerHTML='<i class="fas fa-bars"></i>';
-  const title=document.createElement('div');title.className='shell-title';title.textContent='Finance Workspace';
-  left.append(toggle,title);top.append(left,topActions);
-  const overlay=document.createElement('div');overlay.className='starlink-shell-overlay';
-  document.body.insertBefore(side,document.body.firstChild);document.body.insertBefore(overlay,side.nextSibling);
-  oldNav.remove();tabs.remove();main.appendChild(top);
-  main.appendChild(dashboard);document.body.appendChild(main);
+
+  const main=document.createElement('main');
+  main.className='starlink-shell-main';
+  const top=document.createElement('div');
+  top.className='starlink-shell-topbar';
+  const left=document.createElement('div');
+  left.style.cssText='display:flex;align-items:center;gap:12px';
+  const toggle=document.createElement('button');
+  toggle.className='starlink-menu-toggle';
+  toggle.type='button';
+  toggle.setAttribute('aria-label','Open navigation');
+  toggle.innerHTML='<i class="fas fa-bars"></i>';
+  const title=document.createElement('div');
+  title.className='shell-title';
+  title.textContent='Finance Workspace';
+  left.append(toggle,title);
+  top.appendChild(left);
+
+  const overlay=document.createElement('div');
+  overlay.className='starlink-shell-overlay';
+  document.body.insertBefore(side,document.body.firstChild);
+  document.body.insertBefore(overlay,side.nextSibling);
+  oldNav.remove();
+  tabs.remove();
+  main.appendChild(top);
+  main.appendChild(dashboard);
+  document.body.appendChild(main);
+
   const close=()=>document.body.classList.remove('starlink-sidebar-open');
   toggle.addEventListener('click',()=>document.body.classList.toggle('starlink-sidebar-open'));
   overlay.addEventListener('click',close);
-  const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
-  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='eager';frame.setAttribute('allow','clipboard-read; clipboard-write');
-  workspacePane.appendChild(frame);main.appendChild(workspacePane);
+
+  const workspacePane=document.createElement('section');
+  workspacePane.className='starlink-module-frame';
+  workspacePane.hidden=true;
+  const frame=document.createElement('iframe');
+  frame.title='STARLINK workspace';
+  frame.loading='eager';
+  frame.setAttribute('allow','clipboard-read; clipboard-write');
+  workspacePane.appendChild(frame);
+  main.appendChild(workspacePane);
+
   const titleNode=top.querySelector('.shell-title');
-  const routes={'index.html':'Equity Management','communication.html':'Communications','admin.html':'Admin Roles','finance.html':'Finance Workspace'};
+  const routes={'communication.html':'Communications','admin.html':'Admin Roles'};
   const openWorkspace=(file,label)=>{
-   dashboard.hidden=true;workspacePane.hidden=false;
-   if(frame.dataset.page!==file){frame.src=file;frame.dataset.page=file;}
-   titleNode.textContent=label;close();
+   dashboard.hidden=true;
+   workspacePane.hidden=false;
+   if(frame.dataset.page!==file){
+    frame.src=file;
+    frame.dataset.page=file;
+   }
+   titleNode.textContent=label;
+   close();
   };
+
   side.addEventListener('click',e=>{
-   const link=e.target.closest('a[href]');if(!link)return;
-   const url=new URL(link.getAttribute('href'),location.href),file=url.pathname.split('/').pop().toLowerCase();
-   if(routes[file]){e.preventDefault();e.stopPropagation();openWorkspace(file,routes[file]);side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));}
+   const link=e.target.closest('a[href]');
+   if(!link)return;
+   if(link.classList.contains('starlink-exit-finance'))return;
+   const url=new URL(link.getAttribute('href'),location.href);
+   const file=url.pathname.split('/').pop().toLowerCase();
+   if(routes[file]){
+    e.preventDefault();
+    e.stopPropagation();
+    openWorkspace(file,routes[file]);
+    side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));
+   }
   },true);
-  finance.addEventListener('click',e=>{if(e.target.closest('.tab'))close()});
+
+  finance.addEventListener('click',e=>{
+   if(e.target.closest('.tab')){
+    close();
+    titleNode.textContent='Finance Workspace';
+   }
+  });
+  if(dashboardTab){
+   dashboardTab.addEventListener('click',()=>{
+    workspacePane.hidden=true;
+    dashboard.hidden=false;
+    titleNode.textContent='Finance Workspace';
+    side.querySelectorAll('.starlink-workspace-link').forEach(a=>a.classList.remove('starlink-current'));
+    close();
+   });
+  }
+
   frame.addEventListener('load',()=>{
    try{
-    const doc=frame.contentDocument;if(!doc)return;
+    const doc=frame.contentDocument;
+    if(!doc)return;
     doc.addEventListener('click',e=>{
-     const link=e.target.closest('a[href]');if(!link)return;
-     const url=new URL(link.getAttribute('href'),frame.contentWindow.location.href),file=url.pathname.split('/').pop().toLowerCase();
-     if(routes[file]){e.preventDefault();e.stopPropagation();openWorkspace(file,routes[file]);}
+     const link=e.target.closest('a[href]');
+     if(!link)return;
+     const url=new URL(link.getAttribute('href'),frame.contentWindow.location.href);
+     const file=url.pathname.split('/').pop().toLowerCase();
+     if(routes[file]){
+      e.preventDefault();
+      e.stopPropagation();
+      openWorkspace(file,routes[file]);
+     }
     },true);
-   }catch(err){console.warn('Workspace link handler unavailable',err);}
+   }catch(err){
+    console.warn('Workspace link handler unavailable',err);
+   }
   });
  };
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+ else init();
 })();
 </script>
 </body>
