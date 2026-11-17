@@ -641,43 +641,24 @@ async function loadLeave(){
    return;
   }
 
-  const user=sessionData.session.user;
+  const {data,error}=await supabaseClient.functions.invoke(
+   "portal-personal-data",
+   {body:{action:"leave_history"}}
+  );
 
-  const {data:account,error:accountError}=await supabaseClient
-   .from("personal_portal_accounts")
-   .select("staff_id,account_status")
-   .eq("user_id",user.id)
-   .maybeSingle();
-
-  if(accountError)throw accountError;
-  if(!account||account.account_status!=="active"){
-   throw new Error("Your personal portal account is not active.");
+  if(error)throw error;
+  if(!data||data.success===false){
+   throw new Error(data?.error||"Unable to retrieve your leave records.");
   }
 
-  if(!account.staff_id){
+  if(!data.staff){
    throw new Error("This account is not linked to an employee record.");
   }
 
-  staffId=account.staff_id;
+  staffId=data.staff.id;
+  annualAllowance=Number(data.staff.annual_leave_days||0);
+  leaveRecords=Array.isArray(data.leave_requests)?data.leave_requests:[];
 
-  const {data:staff,error:staffError}=await supabaseClient
-   .from("staff")
-   .select("annual_leave_days")
-   .eq("id",staffId)
-   .maybeSingle();
-
-  if(staffError)throw staffError;
-  annualAllowance=Number(staff?.annual_leave_days||0);
-
-  const {data,error}=await supabaseClient
-   .from("leave_requests")
-   .select("id,leave_type,start_date,end_date,days,reason,status,notes,created_at")
-   .eq("staff_id",staffId)
-   .order("created_at",{ascending:false});
-
-  if(error)throw error;
-
-  leaveRecords=data||[];
   updateSummary();
   renderHistory();
 
