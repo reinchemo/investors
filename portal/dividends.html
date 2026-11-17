@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dividends | STARLINK ULTRANET LLC</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+         :root {
+            --bg: #080d1b;
+            --panel: #111a2d;
+            --panel2: #17233a;
+            --border: rgba(148, 163, 184, .15);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --green: #34d399;
+            --purple: #a78bfa;
+            --orange: #fb923c;
+            --red: #fb7185;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 0%, rgba(34, 211, 238, .10), transparent 30%), radial-gradient(circle at 90% 10%, rgba(139, 92, 246, .12), transparent 28%), var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", sans-serif;
+        }
+        
+        button {
+            font: inherit;
+        }
+        
+        .layout {
+            width: min(1200px, 100%);
+            margin: auto;
+            padding: 28px;
+        }
+        
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            color: #06111e;
+            font-size: 23px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            box-shadow: 0 8px 25px rgba(34, 211, 238, .18);
+        }
+        
+        .brand h2 {
+            margin: 0;
+            font-family: Outfit, sans-serif;
+            font-size: 19px;
+        }
+        
+        .brand small {
+            display: block;
+            color: var(--muted);
+            margin-top: 3px;
+            font-size: 12px;
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: var(--text);
+            border-radius: 11px;
+            padding: 11px 16px;
+            cursor: pointer;
+            transition: .2s ease;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan);
+        }
+        
+        .btn-primary {
+            color: #06111e;
+            border: 0;
+            background: linear-gradient(135deg, var(--cyan), #60a5fa);
+        }
+        
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 32px;
+            border: 1px solid rgba(34, 211, 238, .2);
+            border-radius: 23px;
+            background: linear-gradient(120deg, rgba(8, 145, 178, .18), rgba(79, 70, 229, .15), var(--panel));
+            margin-bottom: 25px;
+            animation: rise .55s ease both;
+        }
+        
+        .hero::after {
+            content: "↗";
+            position: absolute;
+            right: 35px;
+            top: 5px;
+            font-size: 120px;
+            font-weight: 800;
+            color: rgba(34, 211, 238, .08);
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .hero h1 {
+            margin: 12px 0 8px;
+            font: 800 clamp(28px, 5vw, 42px) Outfit, sans-serif;
+        }
+        
+        .hero p {
+            max-width: 600px;
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card,
+        .section-card {
+            background: linear-gradient(145deg, rgba(23, 35, 58, .96), rgba(15, 23, 42, .96));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 23px;
+            animation: rise .6s ease both;
+        }
+        
+        .stat-card:nth-child(2) {
+            animation-delay: .08s;
+        }
+        
+        .stat-card:nth-child(3) {
+            animation-delay: .16s;
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            margin-top: 12px;
+            font: 800 clamp(23px, 4vw, 32px) Outfit, sans-serif;
+            overflow-wrap: anywhere;
+        }
+        
+        .cyan {
+            color: var(--cyan);
+        }
+        
+        .green {
+            color: var(--green);
+        }
+        
+        .purple {
+            color: var(--purple);
+        }
+        
+        .section-card {
+            margin-bottom: 22px;
+        }
+        
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .section-heading h2 {
+            margin: 0;
+            font: 700 21px Outfit, sans-serif;
+        }
+        
+        .section-heading p {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 6px 0 0;
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 14px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        td {
+            padding: 17px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        
+        tbody tr {
+            transition: .2s ease;
+        }
+        
+        tbody tr:hover {
+            background: rgba(34, 211, 238, .045);
+        }
+        
+        .amount {
+            font-weight: 800;
+            color: var(--green);
+            white-space: nowrap;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 30px;
+            background: rgba(52, 211, 153, .12);
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 800;
+        }
+        
+        .empty,
+        .message {
+            text-align: center;
+            padding: 45px 20px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+        
+        .empty-icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+        
+        .spinner {
+            width: 21px;
+            height: 21px;
+            border: 3px solid rgba(34, 211, 238, .2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        
+        .notice {
+            padding: 16px;
+            border: 1px solid rgba(251, 146, 60, .25);
+            border-radius: 13px;
+            background: rgba(251, 146, 60, .08);
+            color: #fed7aa;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media(max-width: 760px) {
+            .layout {
+                padding: 17px;
+            }
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .hero {
+                padding: 25px 21px;
+            }
+            .hero::after {
+                right: 10px;
+                font-size: 85px;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .stat-card {
+                padding: 19px;
+            }
+            .section-card {
+                padding: 17px;
+            }
+            .section-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .btn {
+                padding: 10px 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="layout">
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">S</div>
+                <div>
+                    <h2>STARLINK ULTRANET LLC</h2>
+                    <small>Personal Finance & Equity Portal</small>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <a class="btn" href="dashboard.html">← Dashboard</a>
+                <button class="btn" id="refreshBtn">↻ Refresh</button>
+                <button class="btn" id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="eyebrow">Investor Centre</div>
+            <h1>My Dividends</h1>
+            <p>
+                View your personal dividend allocations, distribution breakdowns, and payment history. Your information is private to your account.
+            </p>
+        </section>
+
+        <div id="pageMessage"></div>
+
+        <section class="summary-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Dividends Received</div>
+                <div class="stat-value green" id="totalDividends">KES 0.00</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Dividend Distributions</div>
+                <div class="stat-value cyan" id="distributionCount">0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Latest Dividend</div>
+                <div class="stat-value purple" id="latestDividend">KES 0.00</div>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-heading">
+                <div>
+                    <h2>Dividend History</h2>
+                    <p>Your individual allocations from completed dividend distributions.</p>
+                </div>
+            </div>
+
+            <div id="dividendContent">
+                <div class="loading">
+                    <span class="spinner"></span> Loading your dividend records...
+                </div>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-heading">
+                <div>
+                    <h2>Understanding Your Allocation</h2>
+                    <p>How the displayed dividend amount is structured.</p>
+                </div>
+            </div>
+
+            <div class="notice">
+                <strong>Stage 1:</strong> The declared dividend is initially distributed among shareholders using their ownership percentages.
+
+                <br><br>
+
+                <strong>Stage 2:</strong> The allocation belonging to STARLINK LLC VIRTUAL is redistributed among shareholders using the same percentages.
+
+                <br><br> Your personal records display your allocation as calculated by the company's existing dividend process. This page does not recalculate or modify the dividend formula.
+            </div>
+        </section>
+
+        <footer class="footer">
+            STARLINK ULTRANET LLC · Secure Personal Investor Portal
+        </footer>
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+
+        // Use the same public publishable key as your dashboard.
+        const SUPABASE_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const db = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        const money = value =>
+            new Intl.NumberFormat("en-KE", {
+                style: "currency",
+                currency: "KES",
+                minimumFractionDigits: 2
+            }).format(Number(value || 0));
+
+        const formatDate = value => {
+            if (!value) return "—";
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ?
+                "—" :
+                date.toLocaleDateString("en-KE", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                });
+        };
+
+        async function requireSession() {
+            const {
+                data,
+                error
+            } = await db.auth.getSession();
+
+            if (error || !data.session) {
+                window.location.href = "../login.html";
+                return null;
+            }
+
+            return data.session;
+        }
+
+        async function loadDividends() {
+            const session = await requireSession();
+            if (!session) return;
+
+            const content = document.getElementById("dividendContent");
+            const pageMessage = document.getElementById("pageMessage");
+
+            content.innerHTML = `
+        <div class="loading">
+          <span class="spinner"></span>
+          Loading your dividend records...
+        </div>
+      `;
+
+            pageMessage.innerHTML = "";
+
+            try {
+                // Confirm that this account is active and linked to an investor.
+                const {
+                    data: account,
+                    error: accountError
+                } = await db
+                    .from("personal_portal_accounts")
+                    .select("investor_id, account_status")
+                    .eq("user_id", session.user.id)
+                    .maybeSingle();
+
+                if (accountError) throw accountError;
+
+                if (!account || account.account_status !== "active") {
+                    throw new Error("Your personal portal account is unavailable or suspended.");
+                }
+
+                if (!account.investor_id) {
+                    content.innerHTML = `
+            <div class="empty">
+              <div class="empty-icon">🔒</div>
+              <h3>Investor Access Not Available</h3>
+              <p>This account is not linked to an investor record.</p>
+            </div>
+          `;
+
+                    document.getElementById("totalDividends").textContent = "KES 0.00";
+                    document.getElementById("distributionCount").textContent = "0";
+                    document.getElementById("latestDividend").textContent = "KES 0.00";
+                    return;
+                }
+
+                // The backend returns only this logged-in investor's allocations.
+                const {
+                    data,
+                    error
+                } = await db.functions.invoke(
+                    "portal-personal-data", {
+                        body: {
+                            action: "dividends"
+                        }
+                    }
+                );
+
+                if (error) throw error;
+                if (!data || data.success === false) {
+                    throw new Error(data ? .error || "Unable to load dividend information.");
+                }
+
+                const dividends = Array.isArray(data.dividends) ?
+                    data.dividends :
+                    [];
+
+                renderDividends(dividends);
+
+            } catch (error) {
+                console.error("Dividend loading error:", error);
+
+                content.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">⚠️</div>
+            <h3>Unable to Load Dividends</h3>
+            <p>${escapeHtml(error.message || "Please try again later.")}</p>
+            <button class="btn btn-primary" onclick="loadDividends()">
+              Try Again
+            </button>
+          </div>
+        `;
+
+                if (error.message && error.message.toLowerCase().includes("suspend")) {
+                    pageMessage.innerHTML = `
+            <div class="notice">${escapeHtml(error.message)}</div>
+          `;
+                }
+            }
+        }
+
+        function renderDividends(dividends) {
+            const content = document.getElementById("dividendContent");
+
+            const total = dividends.reduce(
+                (sum, item) => sum + Number(item.amount || 0),
+                0
+            );
+
+            const latest = dividends.length ?
+                Number(dividends[0].amount || 0) :
+                0;
+
+            document.getElementById("totalDividends").textContent = money(total);
+            document.getElementById("distributionCount").textContent = dividends.length;
+            document.getElementById("latestDividend").textContent = money(latest);
+
+            if (!dividends.length) {
+                content.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">💰</div>
+            <h3>No Dividend Distributions Yet</h3>
+            <p>Your paid dividend allocations will appear here when available.</p>
+          </div>
+        `;
+                return;
+            }
+
+            content.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Dividend Period</th>
+                <th>Total Allocation</th>
+                <th>Stage 1</th>
+                <th>Stage 2</th>
+                <th>Ownership %</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dividends.map(item => `
+                <tr>
+                  <td>
+                    <strong>${escapeHtml(item.period_label || "Dividend")}</strong>
+                    <div style="color:var(--muted);font-size:12px;margin-top:5px">
+                      ${formatDate(item.paid_at)}
+                    </div>
+                  </td>
+                  <td class="amount">${money(item.amount)}</td>
+                  <td>${money(item.stage1)}</td>
+                  <td>${money(item.stage2)}</td>
+                  <td>${item.percentage == null ? "—" : Number(item.percentage).toFixed(2) + "%"}</td>
+                  <td><span class="badge">Paid</span></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+        <p style="color:var(--muted);font-size:12px;margin-top:15px">
+          Showing ${dividends.length} personal paid distribution record(s).
+        </p>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadDividends);
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await db.auth.signOut();
+      window.location.href = "../login.html";
+    });
+
+    loadDividends();
+    </script>
+</body>
+
+</html>

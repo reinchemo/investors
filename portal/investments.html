@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Investments | STARLINK ULTRANET LLC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+         :root {
+            --bg: #080f1e;
+            --panel: #111d32;
+            --panel2: #172640;
+            --line: rgba(148, 163, 184, .14);
+            --text: #edf4ff;
+            --muted: #91a4bf;
+            --cyan: #38d5f2;
+            --blue: #638cff;
+            --green: #35d49a;
+            --red: #ff7185;
+            --yellow: #f7c66b;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(ellipse at 10% 0%, rgba(56, 213, 242, .12), transparent 35%), radial-gradient(ellipse at 90% 10%, rgba(99, 140, 255, .12), transparent 30%), var(--bg);
+        }
+        
+        .topbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            border-bottom: 1px solid var(--line);
+            background: rgba(8, 15, 30, .88);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+        
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            color: #06101e;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        .brand-name {
+            font-family: Outfit, sans-serif;
+            font-weight: 800
+        }
+        
+        .brand-sub {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1.5px
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px
+        }
+        
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 10px 15px;
+            color: var(--text);
+            background: var(--panel2);
+            cursor: pointer;
+            transition: .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan)
+        }
+        
+        main {
+            max-width: 1150px;
+            margin: auto;
+            padding: 42px 24px 70px
+        }
+        
+        .back-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px
+        }
+        
+        .heading {
+            margin: 25px 0 28px
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px
+        }
+        
+        h1 {
+            font-family: Outfit, sans-serif;
+            font-size: clamp(30px, 5vw, 43px);
+            margin: 9px 0
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.6
+        }
+        
+        .investor-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(23, 38, 64, .98), rgba(17, 29, 50, .85));
+            margin: 28px 0;
+            animation: rise .45s ease both;
+        }
+        
+        .investor-name {
+            font-family: Outfit, sans-serif;
+            font-size: 23px;
+            font-weight: 800
+        }
+        
+        .investor-number {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px
+        }
+        
+        .investor-badge {
+            padding: 8px 13px;
+            border-radius: 30px;
+            background: rgba(53, 212, 154, .12);
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 800;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 24px 0
+        }
+        
+        .stat {
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(23, 38, 64, .95), rgba(17, 29, 50, .85));
+            animation: rise .5s ease both;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+        
+        .stat-value {
+            font-family: Outfit, sans-serif;
+            font-size: clamp(20px, 3vw, 28px);
+            font-weight: 800;
+            margin-top: 10px;
+            overflow-wrap: anywhere
+        }
+        
+        .cyan {
+            color: var(--cyan)
+        }
+        
+        .green {
+            color: var(--green)
+        }
+        
+        .yellow {
+            color: var(--yellow)
+        }
+        
+        .section-head {
+            margin: 35px 0 16px
+        }
+        
+        .section-head h2 {
+            font-family: Outfit, sans-serif;
+            font-size: 21px;
+            margin: 0
+        }
+        
+        .section-head p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px
+        }
+        
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(17, 29, 50, .9);
+            padding: 22px;
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--line);
+            border-radius: 15px
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px
+        }
+        
+        th,
+        td {
+            text-align: left;
+            padding: 16px 17px;
+            border-bottom: 1px solid var(--line);
+            font-size: 12px
+        }
+        
+        th {
+            background: rgba(23, 38, 64, .75);
+            color: var(--muted);
+            font-weight: 700
+        }
+        
+        td {
+            color: #dce8f7
+        }
+        
+        tr:last-child td {
+            border-bottom: 0
+        }
+        
+        .amount {
+            font-weight: 800;
+            color: var(--green)
+        }
+        
+        .action-tag {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 30px;
+            background: rgba(56, 213, 242, .12);
+            color: var(--cyan);
+            font-size: 10px;
+            font-weight: 800;
+        }
+        
+        .empty,
+        .message {
+            padding: 35px 22px;
+            text-align: center;
+            border: 1px dashed var(--line);
+            border-radius: 18px;
+            color: var(--muted);
+            background: rgba(17, 29, 50, .6);
+        }
+        
+        .error {
+            color: #ff9baa;
+            border-color: rgba(255, 113, 133, .3)
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 45px;
+            color: var(--muted)
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #33445e;
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        
+        .notice {
+            margin-top: 20px;
+            padding: 15px 18px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+            background: rgba(56, 213, 242, .05);
+        }
+        
+        footer {
+            text-align: center;
+            color: #71839e;
+            font-size: 11px;
+            padding: 25px;
+            border-top: 1px solid var(--line)
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+        
+        @media(max-width:700px) {
+            .topbar {
+                padding: 0 15px;
+                height: 68px
+            }
+            .brand-sub {
+                display: none
+            }
+            .top-actions .btn {
+                padding: 9px;
+                font-size: 11px
+            }
+            main {
+                padding: 28px 15px 50px
+            }
+            .summary {
+                grid-template-columns: 1fr;
+                gap: 10px
+            }
+            .stat {
+                padding: 17px
+            }
+            .investor-hero {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 19px
+            }
+            .investor-name {
+                font-size: 20px
+            }
+            .panel {
+                padding: 15px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">S</div>
+            <div>
+                <div class="brand-name">STARLINK ULTRANET</div>
+                <div class="brand-sub">PERSONAL PORTAL</div>
+            </div>
+        </div>
+        <div class="top-actions">
+            <a class="btn" href="dashboard.html">← Dashboard</a>
+            <button class="btn" onclick="logout()">Sign out</button>
+        </div>
+    </header>
+
+    <main>
+        <a class="back-link" href="dashboard.html">← Back to my dashboard</a>
+
+        <section class="heading">
+            <div class="eyebrow">INVESTOR RELATIONS</div>
+            <h1>My Investments</h1>
+            <p class="subtitle">A personal overview of your recorded capital contributions and equity.</p>
+        </section>
+
+        <div id="content">
+            <div class="loading"><span class="spinner"></span> Loading your investment records...</div>
+        </div>
+    </main>
+
+    <footer>STARLINK ULTRANET LLC · Secure Personal Investor Portal</footer>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL, SUPABASE_ANON_KEY
+        );
+
+        const content = document.getElementById("content");
+
+        function safe(value) {
+            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function money(value) {
+            return new Intl.NumberFormat("en-KE", {
+                style: "currency",
+                currency: "KES",
+                maximumFractionDigits: 2
+            }).format(Number(value || 0));
+        }
+
+        function dateText(value) {
+            if (!value) return "Not recorded";
+            const date = new Date(value + "T00:00:00");
+            if (Number.isNaN(date.getTime())) return safe(value);
+            return date.toLocaleDateString("en-KE", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            });
+        }
+
+        function display(value) {
+            return value === null || value === undefined || value === "" ? "—" : safe(value);
+        }
+
+        async function loadInvestments() {
+            content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading your investment records...</div>';
+
+            try {
+                const {
+                    data: sessionData,
+                    error: sessionError
+                } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+
+                if (!sessionData.session) {
+                    window.location.href = "../login.html";
+                    return;
+                }
+
+                const user = sessionData.session.user;
+
+                const {
+                    data: account,
+                    error: accountError
+                } = await supabaseClient
+                    .from("personal_portal_accounts")
+                    .select("investor_id,account_status")
+                    .eq("user_id", user.id)
+                    .maybeSingle();
+
+                if (accountError) throw accountError;
+                if (!account || account.account_status !== "active") {
+                    throw new Error("Your personal portal account is not active.");
+                }
+
+                if (!account.investor_id) {
+                    content.innerHTML = `
+    <div class="message">
+     <div style="font-size:34px;margin-bottom:12px">📊</div>
+     <strong>Investor access is not available</strong>
+     <p>This account is not linked to an investor record.</p>
+    </div>`;
+                    return;
+                }
+
+                const {
+                    data: investor,
+                    error: investorError
+                } = await supabaseClient
+                    .from("investors")
+                    .select("id,name,investor_number,equity,status,joined_date")
+                    .eq("id", account.investor_id)
+                    .maybeSingle();
+
+                if (investorError) throw investorError;
+                if (!investor) throw new Error("Your investor record could not be found.");
+
+                const {
+                    data: investments,
+                    error: investmentError
+                } = await supabaseClient
+                    .from("investments")
+                    .select("id,date,amount,type,reference,notes,fee,deleted_at")
+                    .eq("investor_id", account.investor_id)
+                    .is("deleted_at", null)
+                    .order("date", {
+                        ascending: false
+                    });
+
+                if (investmentError) throw investmentError;
+
+                const {
+                    data: transactions,
+                    error: transactionError
+                } = await supabaseClient
+                    .from("share_transactions")
+                    .select("id,date,action,equity_before,equity_after,delta,pct_before,pct_after,reference,reason")
+                    .eq("investor_id", account.investor_id)
+                    .order("date", {
+                        ascending: false
+                    });
+
+                if (transactionError) throw transactionError;
+
+                renderInvestor(investor, investments || [], transactions || []);
+
+            } catch (error) {
+                console.error("Investment page error:", error);
+                content.innerHTML = `
+   <div class="message error">
+    <strong>Unable to load your investment information</strong>
+    <p>${safe(error.message||"Please sign in again and retry.")}</p>
+    <button class="btn" onclick="loadInvestments()">Try again</button>
+   </div>`;
+            }
+        }
+
+        function renderInvestor(investor, investments, transactions) {
+            const totalCapital = investments.reduce(
+                (sum, item) => sum + Number(item.amount || 0), 0
+            );
+
+            const totalFees = investments.reduce(
+                (sum, item) => sum + Number(item.fee || 0), 0
+            );
+
+            const equity = Number(investor.equity || 0);
+            const shareChanges = transactions.length;
+
+            content.innerHTML = `
+  <section class="investor-hero">
+   <div>
+    <div class="investor-name">${safe(investor.name||"Investor")}</div>
+    <div class="investor-number">
+     Investor number: ${display(investor.investor_number)}
+     · Joined: ${dateText(investor.joined_date)}
+    </div>
+   </div>
+   <span class="investor-badge">${safe(investor.status||"Active")}</span>
+  </section>
+
+  <section class="summary">
+   <div class="stat">
+    <div class="stat-label">Recorded Capital Contributions</div>
+    <div class="stat-value cyan">${money(totalCapital)}</div>
+   </div>
+   <div class="stat">
+    <div class="stat-label">Current Recorded Equity</div>
+    <div class="stat-value green">${money(equity)}</div>
+   </div>
+   <div class="stat">
+    <div class="stat-label">Shareholding Transactions</div>
+    <div class="stat-value yellow">${shareChanges}</div>
+   </div>
+  </section>
+
+  <section class="section-head">
+   <h2>Capital contribution history</h2>
+   <p>Your recorded investment transactions</p>
+  </section>
+
+  ${investments.length?`
+   <div class="table-wrap">
+    <table>
+     <thead>
+      <tr>
+       <th>Date</th>
+       <th>Transaction type</th>
+       <th>Amount</th>
+       <th>Fee</th>
+       <th>Reference</th>
+      </tr>
+     </thead>
+     <tbody>
+      ${investments.map(item=>`
+       <tr>
+        <td>${dateText(item.date)}</td>
+        <td><span class="action-tag">${safe(item.type||"Investment")}</span></td>
+        <td class="amount">${money(item.amount)}</td>
+        <td>${money(item.fee)}</td>
+        <td>${display(item.reference)}</td>
+       </tr>
+      `).join("")}
+     </tbody>
+    </table>
+   </div>
+  `:`
+   <div class="empty">
+    <div style="font-size:32px;margin-bottom:10px">💼</div>
+    <strong>No capital contributions found</strong>
+    <p>Your recorded investment contributions will appear here.</p>
+   </div>
+  `}
+
+  <section class="section-head">
+   <h2>Shareholding history</h2>
+   <p>Recorded changes to your equity position</p>
+  </section>
+
+  ${transactions.length?`
+   <div class="table-wrap">
+    <table>
+     <thead>
+      <tr>
+       <th>Date</th>
+       <th>Action</th>
+       <th>Equity before</th>
+       <th>Equity after</th>
+       <th>Change</th>
+       <th>Ownership after</th>
+      </tr>
+     </thead>
+     <tbody>
+      ${transactions.map(item=>`
+       <tr>
+        <td>${dateText(item.date)}</td>
+        <td><span class="action-tag">${safe(item.action||"Update")}</span></td>
+        <td>${money(item.equity_before)}</td>
+        <td>${money(item.equity_after)}</td>
+        <td>${money(item.delta)}</td>
+        <td>${item.pct_after===null||item.pct_after===undefined?"—":safe(item.pct_after)+"%"}</td>
+       </tr>
+      `).join("")}
+     </tbody>
+    </table>
+   </div>
+  `:`
+   <div class="empty">
+    <strong>No shareholding changes recorded</strong>
+    <p>Your equity history will appear here when transactions are recorded.</p>
+   </div>
+  `}
+
+  <div class="notice">
+   <strong>Investor record protection</strong><br>
+   These figures are taken from your official STARLINK investment and shareholding records. This page is read-only. Only authorized company administrators can verify contributions or adjust equity records.
+   <br><br>
+   The capital contribution total is the sum of your non-deleted investment entries. It is not necessarily the same as your current equity value. Ownership percentage is not calculated here because the official company-wide equity denominator must come from the approved capitalization records.
+  </div>
+ `;
+}
+
+async function logout(){
+ const {error}=await supabaseClient.auth.signOut();
+ if(error){
+  alert("Unable to sign out. Please try again.");
+  return;
+ }
+ window.location.href="../login.html";
+}
+
+loadInvestments();
+    </script>
+</body>
+
+</html>

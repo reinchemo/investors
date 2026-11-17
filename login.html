@@ -5,9 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARLINK · Sign In</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=3"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         * {
             margin: 0;
@@ -31,9 +35,9 @@
             background: linear-gradient(135deg, rgba(24, 38, 60, 0.85), rgba(15, 26, 46, 0.95));
             border: 1px solid rgba(95, 199, 188, 0.25);
             border-radius: 20px;
-            padding: 2.5rem 2rem;
+            padding: 2.2rem 2rem;
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
             box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
         }
         
@@ -42,18 +46,96 @@
             text-align: center;
             color: #5fc7bc;
             margin-bottom: 0.4rem;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
         }
         
-        .login-box p {
+        .subtitle {
             text-align: center;
             color: #7f9bb8;
             font-size: 0.82rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.6rem;
+        }
+        
+        .section-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #7f9bb8;
+            text-transform: uppercase;
+            margin-bottom: 0.65rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .access-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1.4rem;
+        }
+        
+        .access-option {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .access-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .access-card {
+            min-height: 112px;
+            border: 1px solid rgba(120, 200, 220, 0.2);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+        
+        .access-card i {
+            font-size: 23px;
+            color: #7f9bb8;
+        }
+        
+        .access-card strong {
+            font-size: 0.8rem;
+            color: #dce7f3;
+        }
+        
+        .access-card small {
+            font-size: 0.65rem;
+            color: #7f9bb8;
+            line-height: 1.4;
+        }
+        
+        .access-option input:checked+.access-card {
+            border-color: #5fc7bc;
+            background: rgba(95, 199, 188, 0.1);
+            box-shadow: 0 0 0 2px rgba(95, 199, 188, 0.08);
+        }
+        
+        .access-option input:checked+.access-card i {
+            color: #5fc7bc;
+        }
+        
+        .access-option input:checked+.access-card strong {
+            color: #5fc7bc;
+        }
+        
+        .access-option input:focus-visible+.access-card {
+            outline: 2px solid #5fc7bc;
+            outline-offset: 3px;
         }
         
         .form-group {
@@ -69,34 +151,87 @@
             margin-bottom: 0.4rem;
         }
         
+        .input-wrap {
+            position: relative;
+        }
+        
+        .input-wrap>i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f9bb8;
+        }
+        
         .form-group input {
             width: 100%;
-            padding: 0.8rem 1rem;
+            padding: 0.85rem 2.8rem;
             background: rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(120, 200, 220, 0.2);
             border-radius: 10px;
             color: #f2f0eb;
             font-family: inherit;
             transition: all 0.3s;
+            outline: none;
         }
         
         .form-group input:focus {
-            outline: none;
             border-color: #5fc7bc;
             background: rgba(95, 199, 188, 0.06);
         }
         
+        .form-group input::placeholder {
+            color: #617b96;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #7f9bb8;
+            cursor: pointer;
+        }
+        
+        .error {
+            color: #f0a89f;
+            font-size: 0.82rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.7rem;
+            background: rgba(226, 104, 91, 0.1);
+            border: 1px solid rgba(226, 104, 91, 0.3);
+            border-radius: 8px;
+            display: none;
+            line-height: 1.5;
+        }
+        
+        .success {
+            color: #8ce0c5;
+            font-size: 0.82rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.7rem;
+            background: rgba(60, 190, 140, 0.1);
+            border: 1px solid rgba(60, 190, 140, 0.3);
+            border-radius: 8px;
+            display: none;
+        }
+        
         .btn {
             width: 100%;
-            padding: 0.85rem;
+            padding: 0.9rem;
             background: linear-gradient(135deg, #1a7a6a, #5fc7bc);
             color: #0a0e1a;
             border: none;
             border-radius: 10px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 1rem;
+            margin-top: 0.6rem;
             transition: all 0.3s;
+            font-family: inherit;
         }
         
         .btn:hover {
@@ -107,108 +242,457 @@
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
         
-        .error {
-            color: #f0a89f;
-            font-size: 0.82rem;
+        .security-note {
             text-align: center;
-            margin-bottom: 1rem;
-            padding: 0.6rem;
-            background: rgba(226, 104, 91, 0.1);
-            border: 1px solid rgba(226, 104, 91, 0.3);
-            border-radius: 8px;
-            display: none;
+            color: #7f9bb8;
+            font-size: 0.7rem;
+            margin-top: 1.5rem;
+        }
+        
+        .security-note i {
+            color: #5fc7bc;
+            margin-right: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #617b96;
+            font-size: 0.68rem;
+            margin-top: 1.5rem;
+        }
+        
+        @media(max-width: 420px) {
+            .login-box {
+                padding: 1.7rem 1.2rem;
+            }
+            .access-card {
+                min-height: 105px;
+            }
         }
     </style>
 </head>
 
 <body>
+
     <div class="login-box">
-        <h2><i class="fas fa-satellite-dish"></i> STARLINK</h2>
-        <p>Sign in to Finance & Equity</p>
-        <div class="error" id="errorMsg"></div>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="email" placeholder="you@example.com" autocomplete="username">
+
+        <h2>
+            <i class="fas fa-satellite-dish"></i> STARLINK
+        </h2>
+
+        <p class="subtitle">ULTRANET LLC · SECURE ACCESS</p>
+
+        <div class="error" id="errorMsg" role="alert"></div>
+        <div class="success" id="successMsg" role="status"></div>
+
+        <form id="loginForm">
+
+            <label class="section-label">Choose your destination</label>
+
+            <div class="access-options">
+
+                <label class="access-option">
+                    <input
+                        type="radio"
+                        name="loginDestination"
+                        value="management"
+                        checked
+                    >
+
+                    <div class="access-card">
+                        <i class="fas fa-chart-line"></i>
+                        <strong>Management</strong>
+                        <small>Finance, equity and administration</small>
+                    </div>
+                </label>
+
+                <label class="access-option">
+                    <input
+                        type="radio"
+                        name="loginDestination"
+                        value="portal"
+                    >
+
+                    <div class="access-card">
+                        <i class="fas fa-users"></i>
+                        <strong>Personal Portal</strong>
+                        <small>Employee and investor services</small>
+                    </div>
+                </label>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="email">Email Address</label>
+
+                <div class="input-wrap">
+                    <i class="fas fa-envelope"></i>
+
+                    <input type="email" id="email" placeholder="you@example.com" autocomplete="username" required>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="password">Password</label>
+
+                <div class="input-wrap">
+                    <i class="fas fa-lock"></i>
+
+                    <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+
+                    <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+            </div>
+
+            <button class="btn" id="loginBtn" type="submit">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In
+            </button>
+
+        </form>
+
+        <div class="security-note">
+            <i class="fas fa-shield-alt"></i> Secure administrator-managed access
         </div>
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+
+        <div class="footer">
+            STARLINK ULTRANET LLC<br> Authorized users only
         </div>
-        <button class="btn" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://ujhasodlnduoozlmxdbv.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        "use strict";
 
-        // If already logged in, go straight to the app
-        (async() => {
-            const {
-                data: {
-                    session
-                }
-            } = await supabaseClient.auth.getSession();
-            if (session) window.location.href = 'index.html';
-        })();
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
 
-        async function doLogin() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const errEl = document.getElementById('errorMsg');
-            const btn = document.getElementById('loginBtn');
-            errEl.style.display = 'none';
+        const SUPABASE_URL =
+            "https://ujhasodlnduoozlmxdbv.supabase.co";
 
-            if (!email || !password) {
-                errEl.textContent = 'Please enter both email and password.';
-                errEl.style.display = 'block';
-                return;
-            }
+        const SUPABASE_KEY =
+            "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
 
-            const {
-                data,
-                error
-            } = await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
 
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+        // ==========================================
+        // PAGE ELEMENTS
+        // ==========================================
 
-            if (error) {
-                errEl.textContent = error.message;
-                errEl.style.display = 'block';
-                return;
-            }
+        const loginForm = document.getElementById("loginForm");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const loginButton = document.getElementById("loginBtn");
 
-            // Confirm the account has a role assigned
-            const {
-                data: ur,
-                error: urErr
-            } = await supabaseClient
-                .from('user_roles').select('role_id').eq('user_id', data.user.id).maybeSingle();
+        const errorElement = document.getElementById("errorMsg");
+        const successElement = document.getElementById("successMsg");
 
-            if (urErr || !ur || !ur.role_id) {
-                await supabaseClient.auth.signOut();
-                errEl.textContent = 'Your account has no role assigned. Contact your administrator.';
-                errEl.style.display = 'block';
-                return;
-            }
 
-            window.location.href = 'index.html';
+        // ==========================================
+        // MESSAGE FUNCTIONS
+        // ==========================================
+
+        function showError(message) {
+            errorElement.textContent = message;
+            errorElement.style.display = "block";
+            successElement.style.display = "none";
         }
 
-        document.getElementById('loginBtn').addEventListener('click', doLogin);
-        document.getElementById('password').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') doLogin();
-        });
+        function showSuccess(message) {
+            successElement.textContent = message;
+            successElement.style.display = "block";
+            errorElement.style.display = "none";
+        }
+
+        function clearMessages() {
+            errorElement.textContent = "";
+            successElement.textContent = "";
+
+            errorElement.style.display = "none";
+            successElement.style.display = "none";
+        }
+
+
+        // ==========================================
+        // SHOW / HIDE PASSWORD
+        // ==========================================
+
+        document.getElementById("togglePassword")
+            .addEventListener("click", function() {
+
+                const icon = this.querySelector("i");
+
+                if (passwordInput.type === "password") {
+                    passwordInput.type = "text";
+                    icon.className = "fas fa-eye-slash";
+                    this.setAttribute("aria-label", "Hide password");
+                } else {
+                    passwordInput.type = "password";
+                    icon.className = "fas fa-eye";
+                    this.setAttribute("aria-label", "Show password");
+                }
+            });
+
+
+        // ==========================================
+        // GET SELECTED DESTINATION
+        // ==========================================
+
+        function getSelectedDestination() {
+
+            const selected = document.querySelector(
+                'input[name="loginDestination"]:checked'
+            );
+
+            if (!selected) {
+                throw new Error("Please choose where you want to sign in.");
+            }
+
+            return selected.value;
+        }
+
+
+        // ==========================================
+        // CHECK MANAGEMENT ACCESS
+        // ==========================================
+
+        async function checkManagementAccess(userId) {
+
+            const result = await supabaseClient
+                .from("user_roles")
+                .select("role_id")
+                .eq("user_id", userId)
+                .limit(1);
+
+            if (result.error) {
+                console.error("Management permission error:", result.error);
+
+                throw new Error(
+                    "Unable to verify management permissions. Please try again."
+                );
+            }
+
+            if (!result.data || result.data.length === 0) {
+                throw new Error(
+                    "This account does not have management access. Please select Personal Portal if you are an employee or investor."
+                );
+            }
+
+            return true;
+        }
+
+
+        // ==========================================
+        // CHECK PERSONAL PORTAL ACCESS
+        // ==========================================
+
+        async function checkPersonalPortalAccess(userId) {
+
+            const result = await supabaseClient
+                .from("personal_portal_accounts")
+                .select("id, user_id, staff_id, investor_id, account_status")
+                .eq("user_id", userId)
+                .maybeSingle();
+
+            if (result.error) {
+                console.error("Personal portal permission error:", result.error);
+
+                throw new Error(
+                    "Unable to verify your personal portal account. Please try again."
+                );
+            }
+
+            if (!result.data) {
+                throw new Error(
+                    "No personal portal account was found for this login. Contact your administrator."
+                );
+            }
+
+            const account = result.data;
+
+            if (account.account_status !== "active") {
+                throw new Error(
+                    "Your personal portal account is not active. Contact your administrator."
+                );
+            }
+
+            if (account.staff_id === null && account.investor_id === null) {
+                throw new Error(
+                    "Your account is not linked to an employee or investor profile. Contact your administrator."
+                );
+            }
+
+            return true;
+        }
+
+
+        // ==========================================
+        // LOGIN PROCESS
+        // ==========================================
+
+        async function doLogin(event) {
+
+            event.preventDefault();
+
+            clearMessages();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showError("Please enter both email and password.");
+                return;
+            }
+
+            let destination;
+
+            try {
+                destination = getSelectedDestination();
+            } catch (error) {
+                showError(error.message);
+                return;
+            }
+
+            loginButton.disabled = true;
+
+            loginButton.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> Verifying account...';
+
+            try {
+
+                // Authenticate the user
+
+                const loginResult = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (loginResult.error) {
+                    throw loginResult.error;
+                }
+
+                const user = loginResult.data.user;
+
+                if (!user) {
+                    throw new Error("Unable to identify your account.");
+                }
+
+
+                // ==================================
+                // MANAGEMENT DESTINATION
+                // ==================================
+
+                if (destination === "management") {
+
+                    await checkManagementAccess(user.id);
+
+                    showSuccess("Management access verified. Opening dashboard...");
+
+                    window.location.replace("index.html");
+
+                    return;
+                }
+
+
+                // ==================================
+                // PERSONAL PORTAL DESTINATION
+                // ==================================
+
+                if (destination === "portal") {
+
+                    await checkPersonalPortalAccess(user.id);
+
+                    showSuccess("Personal portal access verified. Opening your portal...");
+
+                    window.location.replace("portal/dashboard.html");
+
+                    return;
+                }
+
+                throw new Error("Invalid login destination.");
+
+            } catch (error) {
+
+                console.error("STARLINK login error:", error);
+
+                // Sign out a user whose selected destination is not authorised.
+                const signOutResult = await supabaseClient.auth.signOut();
+
+                if (signOutResult.error) {
+                    console.error("Sign-out error:", signOutResult.error);
+                }
+
+                showError(
+                    error.message ||
+                    "Unable to sign in. Check your details or contact your administrator."
+                );
+
+            } finally {
+
+                loginButton.disabled = false;
+
+                loginButton.innerHTML =
+                    '<i class="fas fa-sign-in-alt"></i> Sign In';
+            }
+        }
+
+
+        // ==========================================
+        // FORM SUBMISSION
+        // ==========================================
+
+        loginForm.addEventListener("submit", doLogin);
+
+
+        // ==========================================
+        // EXISTING SESSION HANDLING
+        // ==========================================
+
+        // Do not automatically redirect an existing session.
+        // The user must choose a destination and sign in.
+        // This prevents the management dashboard from opening
+        // automatically when the user wants the personal portal.
+
+        (async function checkExistingSession() {
+
+            try {
+
+                const result = await supabaseClient.auth.getSession();
+
+                if (result.error) {
+                    console.error("Session check:", result.error);
+                    return;
+                }
+
+                if (result.data.session) {
+
+                    showSuccess(
+                        "An account session already exists. Choose your destination and sign in again to continue."
+                    );
+                }
+
+            } catch (error) {
+
+                console.error("Session check error:", error);
+            }
+
+        })();
     </script>
+
 </body>
 
 </html>

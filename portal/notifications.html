@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notifications | STARLINK ULTRANET LLC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+         :root {
+            --bg: #080f1e;
+            --panel: #111d32;
+            --panel2: #172640;
+            --line: rgba(148, 163, 184, .14);
+            --text: #edf4ff;
+            --muted: #91a4bf;
+            --cyan: #38d5f2;
+            --blue: #638cff;
+            --green: #35d49a;
+            --red: #ff7185;
+            --yellow: #f7c66b;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(ellipse at 10% 0%, rgba(56, 213, 242, .12), transparent 35%), radial-gradient(ellipse at 90% 10%, rgba(99, 140, 255, .12), transparent 30%), var(--bg);
+        }
+        
+        .topbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            border-bottom: 1px solid var(--line);
+            background: rgba(8, 15, 30, .88);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+        
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            color: #06101e;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        .brand-name {
+            font-family: Outfit, sans-serif;
+            font-weight: 800
+        }
+        
+        .brand-sub {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1.5px
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px
+        }
+        
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 10px 15px;
+            color: var(--text);
+            background: var(--panel2);
+            cursor: pointer;
+            transition: .2s;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan)
+        }
+        
+        .btn-primary {
+            color: #06101e;
+            background: linear-gradient(120deg, var(--cyan), #82e8f6);
+            border: 0;
+            font-weight: 800;
+        }
+        
+        main {
+            max-width: 1050px;
+            margin: auto;
+            padding: 42px 24px 70px
+        }
+        
+        .back-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px
+        }
+        
+        .heading {
+            margin: 25px 0 28px
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px
+        }
+        
+        h1 {
+            font-family: Outfit, sans-serif;
+            font-size: clamp(30px, 5vw, 43px);
+            margin: 9px 0
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.6
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 28px 0
+        }
+        
+        .stat {
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: linear-gradient(145deg, rgba(23, 38, 64, .95), rgba(17, 29, 50, .85));
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+        
+        .stat-value {
+            font-family: Outfit, sans-serif;
+            font-size: 27px;
+            font-weight: 800;
+            margin-top: 9px
+        }
+        
+        .cyan {
+            color: var(--cyan)
+        }
+        
+        .green {
+            color: var(--green)
+        }
+        
+        .yellow {
+            color: var(--yellow)
+        }
+        
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 32px 0 17px;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar h2 {
+            font-family: Outfit, sans-serif;
+            font-size: 21px;
+            margin: 0
+        }
+        
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+        
+        .filter {
+            padding: 9px 13px;
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .filter.active {
+            background: rgba(56, 213, 242, .13);
+            border-color: var(--cyan);
+            color: var(--cyan)
+        }
+        
+        .notification-list {
+            display: grid;
+            gap: 12px
+        }
+        
+        .notice {
+            display: grid;
+            grid-template-columns: 45px 1fr auto;
+            gap: 15px;
+            align-items: start;
+            padding: 20px;
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: rgba(17, 29, 50, .9);
+            transition: .2s;
+            animation: rise .4s ease both;
+        }
+        
+        .notice:hover {
+            border-color: rgba(56, 213, 242, .4);
+            transform: translateY(-2px)
+        }
+        
+        .notice.unread {
+            border-left: 3px solid var(--cyan)
+        }
+        
+        .notice-icon {
+            width: 43px;
+            height: 43px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            font-size: 19px;
+            background: rgba(56, 213, 242, .12);
+        }
+        
+        .notice-title {
+            font-weight: 800;
+            font-size: 15px;
+            margin-bottom: 7px
+        }
+        
+        .notice-body {
+            font-size: 13px;
+            color: #b2c2d7;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere
+        }
+        
+        .notice-meta {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 10px
+        }
+        
+        .notice-tag {
+            display: inline-block;
+            margin-left: 7px;
+            padding: 3px 7px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            background: rgba(56, 213, 242, .12);
+            color: var(--cyan);
+        }
+        
+        .notice-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end
+        }
+        
+        .small-btn {
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--cyan);
+            padding: 8px 10px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        
+        .small-btn:disabled {
+            opacity: .5;
+            cursor: wait
+        }
+        
+        .empty,
+        .message {
+            padding: 38px 22px;
+            text-align: center;
+            border: 1px dashed var(--line);
+            border-radius: 18px;
+            color: var(--muted);
+            background: rgba(17, 29, 50, .6);
+        }
+        
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 12px
+        }
+        
+        .error {
+            color: #ff9baa;
+            border-color: rgba(255, 113, 133, .3)
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 50px;
+            color: var(--muted)
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #33445e;
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite
+        }
+        
+        footer {
+            text-align: center;
+            color: #71839e;
+            font-size: 11px;
+            padding: 25px;
+            border-top: 1px solid var(--line)
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+        
+        @media(max-width:700px) {
+            .topbar {
+                padding: 0 15px;
+                height: 68px
+            }
+            .brand-sub {
+                display: none
+            }
+            .top-actions .btn {
+                padding: 9px;
+                font-size: 11px
+            }
+            main {
+                padding: 28px 15px 50px
+            }
+            .summary {
+                grid-template-columns: 1fr;
+                gap: 10px
+            }
+            .stat {
+                padding: 16px
+            }
+            .stat-value {
+                font-size: 23px
+            }
+            .toolbar {
+                align-items: flex-start;
+                flex-direction: column
+            }
+            .notice {
+                grid-template-columns: 38px 1fr;
+                padding: 15px;
+                gap: 11px
+            }
+            .notice-icon {
+                width: 37px;
+                height: 37px;
+                font-size: 16px
+            }
+            .notice-actions {
+                grid-column: 2;
+                align-items: flex-start
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">S</div>
+            <div>
+                <div class="brand-name">STARLINK ULTRANET</div>
+                <div class="brand-sub">PERSONAL PORTAL</div>
+            </div>
+        </div>
+        <div class="top-actions">
+            <a class="btn" href="dashboard.html">← Dashboard</a>
+            <button class="btn" onclick="logout()">Sign out</button>
+        </div>
+    </header>
+
+    <main>
+        <a class="back-link" href="dashboard.html">← Back to my dashboard</a>
+
+        <section class="heading">
+            <div class="eyebrow">PERSONAL COMMUNICATION</div>
+            <h1>Notifications</h1>
+            <p class="subtitle">Important updates and messages intended for your account.</p>
+        </section>
+
+        <section class="summary">
+            <div class="stat">
+                <div class="stat-label">Total Notifications</div>
+                <div class="stat-value cyan" id="totalCount">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Unread Messages</div>
+                <div class="stat-value yellow" id="unreadCount">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Read Messages</div>
+                <div class="stat-value green" id="readCount">—</div>
+            </div>
+        </section>
+
+        <section class="toolbar">
+            <h2>Your messages</h2>
+            <div class="filters">
+                <button class="filter active" data-filter="all" onclick="setFilter('all',this)">All</button>
+                <button class="filter" data-filter="unread" onclick="setFilter('unread',this)">Unread</button>
+                <button class="filter" data-filter="read" onclick="setFilter('read',this)">Read</button>
+            </div>
+        </section>
+
+        <div id="content">
+            <div class="loading"><span class="spinner"></span> Loading notifications...</div>
+        </div>
+    </main>
+
+    <footer>STARLINK ULTRANET LLC · Secure Personal Employee Portal</footer>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+
+        /* Use the same public publishable key as dashboard.html */
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        const content = document.getElementById("content");
+        let notifications = [];
+        let currentFilter = "all";
+
+        function safe(value) {
+            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function dateText(value) {
+            if (!value) return "Date not recorded";
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return safe(value);
+            return date.toLocaleString("en-KE", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+        function iconFor(kind) {
+            const value = String(kind || "").toLowerCase();
+            if (value.includes("pay") || value.includes("salary")) return "💰";
+            if (value.includes("leave")) return "🌴";
+            if (value.includes("task")) return "📋";
+            if (value.includes("attendance")) return "🕒";
+            if (value.includes("invest")) return "📈";
+            if (value.includes("dividend")) return "💹";
+            if (value.includes("security")) return "🔐";
+            return "🔔";
+        }
+
+        function updateSummary() {
+            const unread = notifications.filter(n => !n.read_at).length;
+            document.getElementById("totalCount").textContent = notifications.length;
+            document.getElementById("unreadCount").textContent = unread;
+            document.getElementById("readCount").textContent = notifications.length - unread;
+        }
+
+        async function loadNotifications() {
+            content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading notifications...</div>';
+
+            try {
+                const {
+                    data: sessionData,
+                    error: sessionError
+                } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+
+                if (!sessionData.session) {
+                    window.location.href = "../login.html";
+                    return;
+                }
+
+                const {
+                    data,
+                    error
+                } = await supabaseClient.functions.invoke(
+                    "portal-personal-data", {
+                        body: {
+                            action: "notifications"
+                        }
+                    }
+                );
+
+                if (error) throw error;
+                if (data ? .error) throw new Error(data.error);
+
+                notifications = Array.isArray(data ? .notifications) ? data.notifications : [];
+                updateSummary();
+                renderNotifications();
+
+            } catch (error) {
+                console.error("Notifications error:", error);
+                content.innerHTML = `
+      <div class="message error">
+        <strong>Unable to load your notifications</strong>
+        <p>${safe(error.message||"Please sign in again and retry.")}</p>
+        <button class="btn" onclick="loadNotifications()">Try again</button>
+      </div>`;
+            }
+        }
+
+        function setFilter(filter, button) {
+            currentFilter = filter;
+            document.querySelectorAll(".filter").forEach(item => item.classList.remove("active"));
+            button.classList.add("active");
+            renderNotifications();
+        }
+
+        function renderNotifications() {
+            let visible = notifications;
+
+            if (currentFilter === "unread") visible = notifications.filter(n => !n.read_at);
+            if (currentFilter === "read") visible = notifications.filter(n => !!n.read_at);
+
+            if (!visible.length) {
+                content.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🔔</div>
+        <strong>${notifications.length?"No messages in this category":"You're all caught up"}</strong>
+        <p>${notifications.length?"Try another filter to view your messages.":"Personal notifications sent to your account will appear here."}</p>
+      </div>`;
+                return;
+            }
+
+            content.innerHTML = `
+    <div class="notification-list">
+      ${visible.map((notice)=>{
+        const unread=!notice.read_at;
+        const severity=String(notice.severity||"normal").toUpperCase();
+        return `
+          <article class="notice ${unread?"unread":""}">
+            <div class="notice-icon">${iconFor(notice.kind)}</div>
+            <div>
+              <div class="notice-title">
+                ${safe(notice.title||"Notification")}
+                ${unread?'<span class="notice-tag">NEW</span>':""}
+              </div>
+              <div class="notice-body">${safe(notice.body||"No additional details provided.")}</div>
+              <div class="notice-meta">
+                ${safe(dateText(notice.created_at))}
+                · ${safe(severity)}
+                ${!unread?" · Read":""}
+              </div>
+            </div>
+            <div class="notice-actions">
+              ${unread?`<button class="small-btn" onclick="markAsRead(${Number(notice.id)})">Mark as read</button>`:""}
+            </div>
+          </article>`;
+      }).join("")}
+    </div>`;
+}
+
+async function markAsRead(notificationId){
+  const notice=notifications.find(n=>Number(n.id)===Number(notificationId));
+  if(!notice||notice.read_at)return;
+
+  const button=[...document.querySelectorAll(".small-btn")]
+    .find(item=>item.getAttribute("onclick")===`markAsRead(${Number(notificationId)})`);
+
+  if(button){
+    button.disabled=true;
+    button.textContent="Updating...";
+  }
+
+  try{
+    const {data,error}=await supabaseClient.functions.invoke(
+      "portal-personal-data",
+      {body:{
+        action:"mark_notification_read",
+        notification_id:notificationId
+      }}
+    );
+
+    if(error)throw error;
+    if(data?.error)throw new Error(data.error);
+
+    notice.read_at=data.notification?.read_at||new Date().toISOString();
+    updateSummary();
+    renderNotifications();
+
+  }catch(error){
+    console.error("Mark notification read error:",error);
+    alert(error.message||"Could not update this notification.");
+    if(button){
+      button.disabled=false;
+      button.textContent="Mark as read";
+    }
+  }
+}
+
+async function logout(){
+  const {error}=await supabaseClient.auth.signOut();
+  if(error){
+    alert("Unable to sign out. Please try again.");
+    return;
+  }
+  window.location.href="../login.html";
+}
+
+loadNotifications();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080d1b">
+    <title>Attendance | STARLINK ULTRANET</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+         :root {
+            --bg: #080d1b;
+            --surface: #111a2d;
+            --surface2: #17243b;
+            --line: rgba(148, 174, 215, .14);
+            --white: #f5f8ff;
+            --muted: #91a3bf;
+            --cyan: #45dfd0;
+            --blue: #459bff;
+            --green: #3ed6a0;
+            --orange: #ffbd69;
+            --red: #ff7185;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            background: radial-gradient(ellipse at 15% 0%, rgba(32, 139, 190, .15), transparent 34%), var(--bg);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        .layout {
+            width: min(1200px, 100%);
+            margin: auto;
+            padding: 24px;
+        }
+        
+        .hero {
+            padding: 27px;
+            border: 1px solid rgba(88, 166, 232, .22);
+            border-radius: 22px;
+            background: linear-gradient(115deg, #153a59, #172c50 60%, #302552);
+            margin-bottom: 20px;
+        }
+        
+        .eyebrow {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #a9e9e8;
+        }
+        
+        .hero h1 {
+            font: 800 30px Outfit;
+            margin: 12px 0 7px;
+        }
+        
+        .hero p {
+            color: #c0d1e9;
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+        
+        .card,
+        .panel {
+            background: linear-gradient(145deg, rgba(25, 42, 68, .98), rgba(15, 25, 43, .98));
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 20px;
+        }
+        
+        .metric {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        
+        .value {
+            font: 800 25px Outfit;
+            margin-top: 12px;
+        }
+        
+        .muted {
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+        
+        .btn {
+            border: 0;
+            border-radius: 11px;
+            padding: 12px 17px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+        
+        .primary {
+            background: linear-gradient(120deg, #168fdf, #5265ed);
+        }
+        
+        .success {
+            background: linear-gradient(120deg, #079e79, #27c990);
+        }
+        
+        .dark {
+            background: #263752;
+            border: 1px solid var(--line);
+        }
+        
+        .panel {
+            padding: 0;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+        
+        .panel-head {
+            padding: 17px 20px;
+            border-bottom: 1px solid var(--line);
+            font: 700 15px Outfit;
+        }
+        
+        .panel-body {
+            padding: 18px 20px;
+        }
+        
+        .notice {
+            padding: 13px 15px;
+            background: rgba(42, 116, 190, .1);
+            border: 1px solid rgba(69, 155, 255, .2);
+            border-radius: 12px;
+            color: #b8d7f3;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 17px;
+        }
+        
+        .alert {
+            display: none;
+            padding: 13px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert.error {
+            background: rgba(160, 42, 62, .16);
+            border: 1px solid rgba(255, 113, 133, .3);
+            color: #ffb5c0;
+        }
+        
+        .alert.ok {
+            background: rgba(35, 155, 119, .1);
+            border: 1px solid rgba(62, 214, 160, .2);
+            color: #9bdcc7;
+        }
+        
+        .field {
+            width: 100%;
+            padding: 12px 13px;
+            color: var(--white);
+            background: #0d192b;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            outline: none;
+            font: inherit;
+            font-size: 12px;
+        }
+        
+        .field:focus {
+            border-color: var(--cyan);
+        }
+        
+        label {
+            display: block;
+            margin: 0 0 7px;
+            color: #9eb0ca;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 13px;
+        }
+        
+        .full {
+            grid-column: 1/-1;
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+        
+        th,
+        td {
+            text-align: left;
+            padding: 13px 15px;
+            border-bottom: 1px solid rgba(148, 174, 215, .1);
+            font-size: 11px;
+        }
+        
+        th {
+            color: #8ea2c0;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+        
+        td {
+            color: #dce6f5;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #263650;
+            color: #d4e3f6;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+        
+        .approved {
+            background: rgba(24, 155, 111, .17);
+            color: #73e2b8;
+        }
+        
+        .pending,
+        .late_pending_approval {
+            background: rgba(214, 145, 40, .17);
+            color: #ffd18b;
+        }
+        
+        .rejected {
+            background: rgba(220, 75, 95, .17);
+            color: #ff9eaa;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .right {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+        
+        .small {
+            font-size: 10px;
+            color: var(--muted);
+        }
+        
+        @media(max-width:760px) {
+            .layout {
+                padding: 15px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .hero {
+                padding: 22px;
+            }
+            .hero h1 {
+                font-size: 25px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="layout">
+
+        <section class="hero">
+            <div class="eyebrow">
+                <i class="fa-solid fa-calendar-check"></i> EMPLOYEE SERVICES / ATTENDANCE
+            </div>
+            <h1>My Attendance</h1>
+            <p>Record your working day, review attendance history and request corrections when necessary.</p>
+        </section>
+
+        <div id="message" class="alert"></div>
+
+        <div class="notice">
+            <i class="fa-solid fa-shield-halved"></i> Your attendance is linked to your signed-in employee account. The server determines your employee identity and Kenya local attendance date.
+        </div>
+
+        <section class="grid">
+
+            <div class="card">
+                <div class="metric">TODAY'S DATE (EAT)</div>
+                <div class="value" id="todayDate">—</div>
+                <div class="muted">Kenya time</div>
+            </div>
+
+            <div class="card">
+                <div class="metric">CHECK-IN</div>
+                <div class="value" id="checkInTime">—</div>
+                <div class="muted">Today's recorded start time</div>
+            </div>
+
+            <div class="card">
+                <div class="metric">CHECK-OUT</div>
+                <div class="value" id="checkOutTime">—</div>
+                <div class="muted">Today's recorded finish time</div>
+            </div>
+
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <i class="fa-solid fa-stopwatch"></i> Today's attendance
+            </div>
+
+            <div class="panel-body">
+                <div class="small" id="todayStatus">
+                    Loading today's attendance…
+                </div>
+
+                <div class="actions">
+                    <button class="btn success" id="checkInBtn">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Check in
+                </button>
+
+                    <button class="btn primary" id="checkOutBtn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Check out
+                </button>
+
+                    <button class="btn dark" id="refreshBtn">
+                    <i class="fa-solid fa-rotate"></i>
+                    Refresh
+                </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <i class="fa-solid fa-clock-rotate-left"></i> Attendance history
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Check in</th>
+                            <th>Check out</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="historyRows">
+                        <tr>
+                            <td colspan="5" class="empty">
+                                Loading attendance…
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <i class="fa-solid fa-file-pen"></i> Request an attendance correction
+            </div>
+
+            <div class="panel-body">
+
+                <p class="small">
+                    Use this form if a check-in or check-out was missed or recorded incorrectly. Your request will be sent for management review.
+                </p>
+
+                <form id="correctionForm" class="form-grid">
+
+                    <div class="full">
+                        <label for="attendanceId">Attendance record</label>
+                        <select class="field" id="attendanceId" required>
+                        <option value="">Select a date</option>
+                    </select>
+                    </div>
+
+                    <div>
+                        <label for="requestedIn">Correct check-in (optional)</label>
+                        <input class="field" id="requestedIn" type="datetime-local">
+                    </div>
+
+                    <div>
+                        <label for="requestedOut">Correct check-out (optional)</label>
+                        <input class="field" id="requestedOut" type="datetime-local">
+                    </div>
+
+                    <div class="full">
+                        <label for="reason">Reason for correction</label>
+                        <textarea class="field" id="reason" rows="3" maxlength="1000" required placeholder="Explain what needs to be corrected…"></textarea>
+                    </div>
+
+                    <div class="full right">
+                        <button class="btn primary" id="submitCorrection" type="submit">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Submit request
+                    </button>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <div class="small" style="text-align:center;padding:12px">
+            STARLINK ULTRANET LLC · Personal Finance Portal
+        </div>
+
+    </main>
+
+    <script>
+        /* =========================================
+                                                                                                                                                                                           SUPABASE CONFIGURATION
+                                                                                                                                                                                        ========================================= */
+
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+
+        const SUPABASE_ANON_KEY =
+            "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        const $ = id => document.getElementById(id);
+
+        let attendanceRows = [];
+
+
+        /* =========================================
+           NOTIFICATIONS
+        ========================================= */
+
+        function showMessage(message, type = "ok") {
+            const el = $("message");
+
+            el.textContent = message;
+            el.className = `alert show ${type}`;
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+
+        /* =========================================
+           DATE AND TIME FORMATTING
+        ========================================= */
+
+        function dateInKenya() {
+            return new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Africa/Nairobi",
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }).format(new Date());
+        }
+
+        function timeText(value) {
+            if (!value) return "—";
+
+            return new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Africa/Nairobi",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            }).format(new Date(value));
+        }
+
+        function dateText(value) {
+            if (!value) return "—";
+
+            return new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Africa/Nairobi",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }).format(new Date(value + "T12:00:00+03:00"));
+        }
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) value = "";
+            return String(value).replace(/[&<>"']/g, function(c) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                }[c];
+            });
+        }
+
+
+        /* =========================================
+           ATTENDANCE BACKEND REQUEST
+        ========================================= */
+        async function callAttendance(action, payload = {}) {
+            const sessionResult = await supabaseClient.auth.getSession();
+            const session = sessionResult.data.session;
+
+            if (sessionResult.error || !session) {
+                throw new Error("Your session has expired. Please sign in again.");
+            }
+
+            const result = await supabaseClient.functions.invoke(
+                "personal-portal-attendance", {
+                    body: Object.assign({
+                        action: action
+                    }, payload)
+                }
+            );
+
+            if (result.error) {
+                const message = result.data && result.data.error;
+                throw new Error(message || result.error.message || "Attendance request failed.");
+            }
+
+            if (result.data && result.data.error) {
+                throw new Error(result.data.error);
+            }
+
+            return result.data;
+        }
+
+
+        /* =========================================
+           TODAY'S ATTENDANCE
+        ========================================= */
+
+        function renderToday() {
+            const today = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Africa/Nairobi",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }).format(new Date());
+
+            const row = attendanceRows.find(function(x) {
+                return x.date === today;
+            });
+
+            $("todayDate").textContent = dateInKenya();
+            $("checkInTime").textContent = row ? timeText(row.check_in) : "—";
+            $("checkOutTime").textContent = row ? timeText(row.check_out) : "—";
+
+            $("todayStatus").textContent = row ?
+                "Status: " + String(row.status || "pending").replace(/_/g, " ") :
+                "No attendance recorded for today yet.";
+
+            $("checkInBtn").disabled = !!(row && row.check_in);
+            $("checkOutBtn").disabled = !(row && row.check_in) || !!(row && row.check_out);
+        }
+
+
+        /* =========================================
+           ATTENDANCE HISTORY
+        ========================================= */
+
+
+        function renderHistory() {
+            const body = $("historyRows");
+
+            if (!attendanceRows.length) {
+                body.innerHTML = '<tr><td colspan="5" class="empty">No attendance records found.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = attendanceRows.map(r => {
+                const rejected = r.status === "rejected";
+                const displayedNotes = rejected ?
+                    "REJECTION REASON: " + (r.approval_notes || "No reason recorded") :
+                    (r.notes || "—");
+
+                return `
+            <tr>
+                <td>${dateText(r.date)}</td>
+                <td>${timeText(r.check_in)}</td>
+                <td>${timeText(r.check_out)}</td>
+                <td>
+                    <span class="status ${escapeHtml(r.status)}">
+                        ${escapeHtml((r.status || "pending").replaceAll("_"," "))}
+                    </span>
+                </td>
+                <td>${escapeHtml(displayedNotes)}</td>
+            </tr>
+        `;
+            }).join("");
+
+            const select = $("attendanceId");
+            select.innerHTML = '<option value="">Select a date</option>' +
+                attendanceRows.map(r =>
+                    `<option value="${r.id}">${dateText(r.date)} · ${escapeHtml(r.status)}</option>`
+                ).join("");
+        }
+
+
+
+        /* =========================================
+           LOAD ATTENDANCE
+        ========================================= */
+
+        async function loadAttendance() {
+
+            $("refreshBtn").disabled = true;
+
+            try {
+
+                const result = await callAttendance("my_attendance");
+
+                attendanceRows = Array.isArray(result.attendance) ?
+                    result.attendance : [];
+
+                renderToday();
+                renderHistory();
+
+            } catch (e) {
+
+                showMessage(e.message, "error");
+
+            } finally {
+
+                $("refreshBtn").disabled = false;
+
+            }
+        }
+
+
+        /* =========================================
+           CHECK IN / CHECK OUT
+        ========================================= */
+
+        async function runAction(action, button, success) {
+            button.disabled = true;
+
+            const old = button.innerHTML;
+            button.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> Please wait…';
+
+            try {
+                await callAttendance(action);
+
+                showMessage(success);
+
+                await loadAttendance();
+
+            } catch (e) {
+                showMessage(e.message, "error");
+
+            } finally {
+                button.innerHTML = old;
+
+                // Recalculate button states using the latest attendance record.
+                renderToday();
+            }
+        }
+
+        $("checkInBtn").addEventListener("click", () => {
+
+            runAction(
+                "check_in",
+                $("checkInBtn"),
+                "Your check-in has been recorded."
+            );
+
+        });
+
+        $("checkOutBtn").addEventListener("click", () => {
+
+            runAction(
+                "check_out",
+                $("checkOutBtn"),
+                "Your check-out has been recorded."
+            );
+
+        });
+
+        $("refreshBtn").addEventListener("click", loadAttendance);
+
+
+        /* =========================================
+           CORRECTION REQUEST
+        ========================================= */
+
+        $("correctionForm").addEventListener("submit", async e => {
+
+            e.preventDefault();
+
+            const id = Number($("attendanceId").value);
+            const reason = $("reason").value.trim();
+
+            if (!id || !reason) {
+
+                showMessage(
+                    "Select an attendance record and provide a reason.",
+                    "error"
+                );
+
+                return;
+            }
+
+            const localToIso = value => value || null;
+
+            const button = $("submitCorrection");
+
+            button.disabled = true;
+
+            try {
+
+                await callAttendance("submit_correction", {
+
+                    attendance_id: id,
+
+                    reason,
+
+                    requested_check_in: localToIso($("requestedIn").value),
+
+                    requested_check_out: localToIso($("requestedOut").value)
+
+                });
+
+                showMessage(
+                    "Your correction request has been submitted for review."
+                );
+
+                e.target.reset();
+
+            } catch (err) {
+
+                showMessage(err.message, "error");
+
+            } finally {
+
+                button.disabled = false;
+
+            }
+
+        });
+
+
+        /* =========================================
+           INITIALIZE
+        ========================================= */
+
+        (async function initialize() {
+
+            const {
+                data: {
+                    session
+                }
+            } = await supabaseClient.auth.getSession();
+
+            if (!session) {
+                location.href = "../login.html";
+                return;
+            }
+
+            await loadAttendance();
+
+        })();
+    </script>
+
+</body>
+
+</html>

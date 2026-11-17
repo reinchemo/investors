@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Portal Accounts | STARLINK ULTRANET LLC</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            background: #0f111a;
+            color: #e5e7eb;
+            font-family: Arial, sans-serif;
+        }
+        
+        .panel {
+            background: #181c2e;
+            border: 1px solid #2a2f45;
+            border-radius: 14px;
+        }
+        
+        .field {
+            width: 100%;
+            background: #111424;
+            border: 1px solid #343a52;
+            border-radius: 8px;
+            padding: 11px 13px;
+            color: white;
+            outline: none;
+        }
+        
+        .field:focus {
+            border-color: #38bdf8;
+        }
+        
+        .btn {
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .btn-blue {
+            background: #0284c7;
+            color: white;
+        }
+        
+        .btn-green {
+            background: #047857;
+            color: white;
+        }
+        
+        .btn-red {
+            background: #991b1b;
+            color: white;
+        }
+        
+        .btn-gray {
+            background: #30364d;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+        
+        th {
+            text-align: left;
+            color: #94a3b8;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding: 14px;
+            border-bottom: 1px solid #30364d;
+        }
+        
+        td {
+            padding: 15px 14px;
+            border-bottom: 1px solid #272c40;
+            font-size: 13px;
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .badge-active {
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+        
+        .badge-suspended {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+        
+        .badge-unlinked {
+            background: #713f12;
+            color: #fde68a;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .8);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            width: 100%;
+            max-width: 540px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #181c2e;
+            border: 1px solid #343a52;
+            border-radius: 15px;
+            padding: 24px;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+        }
+        
+        #toast {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            max-width: 350px;
+            padding: 14px 18px;
+            border-radius: 9px;
+            background: #047857;
+            color: white;
+        }
+        
+        #toast.error {
+            background: #991b1b;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="border-b border-slate-700 bg-[#151827]">
+        <div class="max-w-7xl mx-auto px-5 py-5 flex flex-wrap justify-between items-center gap-4">
+
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-sky-600 flex items-center justify-center">
+                    <i class="fas fa-users-gear text-xl"></i>
+                </div>
+
+                <div>
+                    <h1 class="font-bold text-lg">Personal Portal Accounts</h1>
+                    <p class="text-xs text-slate-400">
+                        STARLINK ULTRANET LLC · Administration
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a href="admin.html" class="btn btn-gray">
+                    <i class="fas fa-arrow-left mr-2"></i> Admin Dashboard
+                </a>
+
+                <button onclick="refreshData()" class="btn btn-blue">
+                <i class="fas fa-rotate mr-2"></i> Refresh
+            </button>
+            </div>
+
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-5 py-7">
+
+        <div class="mb-7">
+            <h2 class="text-2xl font-bold mb-2">Account Management</h2>
+            <p class="text-sm text-slate-400">
+                Manage existing login accounts and connect them to employee and investor records. One account can have both classifications.
+            </p>
+        </div>
+
+        <!-- STATISTICS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+
+            <div class="panel p-5">
+                <p class="text-xs text-slate-400">Login Accounts</p>
+                <div class="stat-number mt-2" id="totalUsers">0</div>
+                <p class="text-xs text-slate-500 mt-1">Retrieved accounts</p>
+            </div>
+
+            <div class="panel p-5">
+                <p class="text-xs text-slate-400">Linked Accounts</p>
+                <div class="stat-number text-emerald-400 mt-2" id="linkedUsers">0</div>
+                <p class="text-xs text-slate-500 mt-1">Employee or investor linked</p>
+            </div>
+
+            <div class="panel p-5">
+                <p class="text-xs text-slate-400">Unlinked Accounts</p>
+                <div class="stat-number text-amber-400 mt-2" id="unlinkedUsers">0</div>
+                <p class="text-xs text-slate-500 mt-1">Awaiting classification</p>
+            </div>
+
+            <div class="panel p-5">
+                <p class="text-xs text-slate-400">Employee Records</p>
+                <div class="stat-number mt-2" id="totalStaff">0</div>
+                <p class="text-xs text-slate-500 mt-1">Available records</p>
+            </div>
+
+        </div>
+
+        <!-- INFORMATION -->
+        <div class="panel p-4 mb-6 border-l-4 border-sky-500">
+            <h3 class="font-semibold text-sm mb-2">
+                <i class="fas fa-circle-info text-sky-400 mr-2"></i> How account linking works
+            </h3>
+
+            <p class="text-xs text-slate-400 leading-6">
+                Employee and investor classifications are independent. An employee can also be an investor using the same login. Linking does not create a new login, employee, or investor record.
+            </p>
+        </div>
+
+        <!-- SEARCH -->
+        <section class="panel p-5 mb-6">
+            <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
+
+                <div class="flex-1">
+                    <label class="text-xs text-slate-400 block mb-2">
+                    Search login accounts
+                </label>
+
+                    <input type="text" id="searchInput" class="field" placeholder="Search name, email, phone or STARLINK ID...">
+                </div>
+
+                <div class="w-full lg:w-56">
+                    <label class="text-xs text-slate-400 block mb-2">
+                    Account filter
+                </label>
+
+                    <select id="accountFilter" class="field">
+                    <option value="all">All accounts</option>
+                    <option value="linked">Linked accounts</option>
+                    <option value="unlinked">Unlinked accounts</option>
+                    <option value="active">Active portal accounts</option>
+                    <option value="suspended">Suspended portal accounts</option>
+                </select>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ACCOUNT TABLE -->
+        <section class="panel overflow-hidden">
+
+            <div class="p-5 flex flex-wrap justify-between items-center gap-3 border-b border-slate-700">
+                <div>
+                    <h3 class="font-bold">Existing Login Accounts</h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Manage employee and investor access.
+                    </p>
+                </div>
+
+                <span id="recordCount" class="text-xs text-slate-400">
+                0 records
+            </span>
+            </div>
+
+            <div id="loadingMessage" class="p-12 text-center text-slate-400">
+                <i class="fas fa-spinner fa-spin text-2xl mb-3"></i>
+                <p class="text-sm">Loading accounts...</p>
+            </div>
+
+            <div id="tableContainer" class="table-wrap hidden">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>STARLINK ID</th>
+                            <th>Employee</th>
+                            <th>Investor</th>
+                            <th>Portal Status</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+
+            <div id="emptyMessage" class="hidden p-12 text-center text-slate-400">
+                <i class="fas fa-users text-3xl mb-3"></i>
+                <p>No accounts match your search.</p>
+            </div>
+
+            <div id="errorMessage" class="hidden p-8 text-center text-red-400">
+                <i class="fas fa-triangle-exclamation text-2xl mb-3"></i>
+                <p id="errorText">Unable to load accounts.</p>
+
+                <button onclick="refreshData()" class="btn btn-blue mt-4">
+                Try Again
+            </button>
+            </div>
+
+        </section>
+
+        <div class="mt-5 text-xs text-slate-500 flex justify-between gap-3">
+            <span>
+            <i class="fas fa-shield-halved mr-1"></i>
+            Full Administrator access required.
+        </span>
+
+            <span id="pageInformation">Page 1</span>
+        </div>
+
+    </main>
+
+
+    <!-- LINK ACCOUNT MODAL -->
+    <div id="linkModal" class="modal">
+
+        <div class="modal-content">
+
+            <div class="flex justify-between items-center mb-5">
+                <div>
+                    <h3 class="text-xl font-bold">Link Portal Account</h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Connect an existing login to company records.
+                    </p>
+                </div>
+
+                <button onclick="closeModal()" class="text-slate-400 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+            </div>
+
+            <div class="bg-[#111424] rounded-lg p-4 mb-5">
+                <p class="text-xs text-slate-400">Selected login account</p>
+                <p id="selectedUserName" class="font-bold mt-1"></p>
+                <p id="selectedUserEmail" class="text-xs text-slate-400 mt-1"></p>
+            </div>
+
+            <input type="hidden" id="selectedUserId">
+
+            <div class="mb-5">
+                <label class="text-sm font-semibold block mb-2">
+                Employee classification
+            </label>
+
+                <select id="staffSelect" class="field">
+                <option value="">Non-Employee</option>
+            </select>
+            </div>
+
+            <div class="mb-6">
+                <label class="text-sm font-semibold block mb-2">
+                Investor classification
+            </label>
+
+                <select id="investorSelect" class="field">
+                <option value="">Non-Investor</option>
+            </select>
+            </div>
+
+            <div class="bg-amber-950/30 border border-amber-900 rounded-lg p-3 mb-5">
+                <p class="text-xs text-amber-200 leading-5">
+                    <i class="fas fa-triangle-exclamation mr-1"></i> Select at least one employee or investor record. Existing links can be changed here.
+                </p>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal()" class="btn btn-gray">Cancel</button>
+
+                <button id="saveLinkButton" onclick="saveLink()" class="btn btn-blue">
+                <i class="fas fa-link mr-2"></i> Save Account Links
+            </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+
+    <script>
+        "use strict";
+
+        // =====================================================
+        // SUPABASE CONFIGURATION
+        // =====================================================
+
+        var SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+
+        var SUPABASE_KEY =
+            "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        var FUNCTION_NAME = "manage-personal-portal-account";
+
+        var supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        var users = [];
+        var staffRecords = [];
+        var investorRecords = [];
+        var currentPage = 1;
+
+
+        // =====================================================
+        // HTML ESCAPING
+        // =====================================================
+
+        function escapeHtml(value) {
+            return String(value === null || value === undefined ? "" : value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        // =====================================================
+        // NOTIFICATION
+        // =====================================================
+
+        function showToast(message, isError) {
+            var toast = document.getElementById("toast");
+
+            toast.textContent = message;
+            toast.className = isError ? "error" : "";
+            toast.style.display = "block";
+
+            setTimeout(function() {
+                toast.style.display = "none";
+            }, 4500);
+        }
+
+
+        // =====================================================
+        // DATE FORMATTING
+        // =====================================================
+
+        function formatDate(value) {
+            if (!value) return "Never";
+
+            var date = new Date(value);
+
+            if (isNaN(date.getTime())) return "Unknown";
+
+            return date.toLocaleString();
+        }
+
+
+        // =====================================================
+        // ACCOUNT HELPERS
+        // =====================================================
+
+        function getPortalAccount(user) {
+            if (!user || !user.portal_account) {
+                return null;
+            }
+
+            return user.portal_account;
+        }
+
+
+        function getEmployeeName(account) {
+            if (!account || !account.staff_id) {
+                return "Non-Employee";
+            }
+
+            for (var i = 0; i < staffRecords.length; i++) {
+                if (Number(staffRecords[i].id) === Number(account.staff_id)) {
+                    return staffRecords[i].full_name +
+                        " (" + staffRecords[i].employee_number + ")";
+                }
+            }
+
+            return "Employee #" + account.staff_id;
+        }
+
+
+        function getInvestorName(account) {
+            if (!account || !account.investor_id) {
+                return "Non-Investor";
+            }
+
+            for (var i = 0; i < investorRecords.length; i++) {
+                if (Number(investorRecords[i].id) === Number(account.investor_id)) {
+                    return investorRecords[i].name +
+                        " (" + investorRecords[i].investor_number + ")";
+                }
+            }
+
+            return "Investor #" + account.investor_id;
+        }
+
+
+        // =====================================================
+        // AUTHENTICATION
+        // =====================================================
+
+        async function checkAuthentication() {
+            var result = await supabaseClient.auth.getSession();
+
+            if (result.error || !result.data.session) {
+                window.location.href = "login.html";
+                return false;
+            }
+
+            return true;
+        }
+
+
+        // =====================================================
+        // EDGE FUNCTION REQUEST
+        // =====================================================
+
+        async function callAccountFunction(payload) {
+            var result = await supabaseClient.functions.invoke(
+                FUNCTION_NAME, {
+                    body: payload
+                }
+            );
+
+            if (result.error) {
+                console.error("Edge Function error:", result.error);
+
+                var message = result.error.message || "Request failed.";
+
+                if (result.error.context) {
+                    try {
+                        var responseBody = await result.error.context.json();
+
+                        if (responseBody.error) {
+                            message = responseBody.error;
+                        }
+                    } catch (ignored) {
+                        // Keep original error message.
+                    }
+                }
+
+                throw new Error(message);
+            }
+
+            if (!result.data) {
+                throw new Error("The server returned an empty response.");
+            }
+
+            if (result.data.error) {
+                throw new Error(result.data.error);
+            }
+
+            return result.data;
+        }
+
+
+        // =====================================================
+        // PAGE DISPLAY HELPERS
+        // =====================================================
+
+        function showLoading() {
+            document.getElementById("loadingMessage").classList.remove("hidden");
+            document.getElementById("tableContainer").classList.add("hidden");
+            document.getElementById("emptyMessage").classList.add("hidden");
+            document.getElementById("errorMessage").classList.add("hidden");
+        }
+
+
+        function showPageError(message) {
+            document.getElementById("loadingMessage").classList.add("hidden");
+            document.getElementById("tableContainer").classList.add("hidden");
+            document.getElementById("emptyMessage").classList.add("hidden");
+            document.getElementById("errorMessage").classList.remove("hidden");
+
+            document.getElementById("errorText").textContent = message;
+        }
+
+
+        // =====================================================
+        // LOAD DATA
+        // =====================================================
+
+        async function refreshData() {
+            showLoading();
+
+            try {
+                var authenticated = await checkAuthentication();
+
+                if (!authenticated) return;
+
+                var result = await callAccountFunction({
+                    action: "list_users",
+                    page: 1,
+                    per_page: 100
+                });
+
+                users = result.users || [];
+                staffRecords = result.staff || [];
+                investorRecords = result.investors || [];
+
+                currentPage = result.page || 1;
+
+                updateStatistics();
+                populateRecordOptions();
+                renderUsers();
+
+                document.getElementById("pageInformation").textContent =
+                    "Page " + currentPage +
+                    (result.has_more ? " · More accounts available" : "");
+
+                document.getElementById("loadingMessage").classList.add("hidden");
+
+            } catch (error) {
+                console.error("Loading error:", error);
+
+                showPageError(
+                    error.message || "Unable to load portal accounts."
+                );
+            }
+        }
+
+
+        // =====================================================
+        // STATISTICS
+        // =====================================================
+
+        function updateStatistics() {
+            var linked = 0;
+
+            for (var i = 0; i < users.length; i++) {
+                var account = getPortalAccount(users[i]);
+
+                if (
+                    account &&
+                    (account.staff_id !== null || account.investor_id !== null)
+                ) {
+                    linked++;
+                }
+            }
+
+            document.getElementById("totalUsers").textContent = users.length;
+
+            document.getElementById("linkedUsers").textContent = linked;
+
+            document.getElementById("unlinkedUsers").textContent =
+                users.length - linked;
+
+            document.getElementById("totalStaff").textContent =
+                staffRecords.length;
+        }
+
+
+        // =====================================================
+        // POPULATE EMPLOYEE AND INVESTOR SELECTS
+        // =====================================================
+
+        function populateRecordOptions() {
+            var staffSelect = document.getElementById("staffSelect");
+            var investorSelect = document.getElementById("investorSelect");
+
+            staffSelect.innerHTML = '<option value="">Non-Employee</option>';
+
+            investorSelect.innerHTML = '<option value="">Non-Investor</option>';
+
+            for (var i = 0; i < staffRecords.length; i++) {
+                var employee = staffRecords[i];
+                var option = document.createElement("option");
+
+                option.value = employee.id;
+
+                option.textContent =
+                    employee.employee_number + " - " +
+                    employee.full_name + " (" +
+                    (employee.status || "Unknown") + ")";
+
+                staffSelect.appendChild(option);
+            }
+
+            for (var j = 0; j < investorRecords.length; j++) {
+                var investor = investorRecords[j];
+                var investorOption = document.createElement("option");
+
+                investorOption.value = investor.id;
+
+                investorOption.textContent =
+                    investor.investor_number + " - " +
+                    investor.name + " (" +
+                    (investor.status || "Unknown") + ")";
+
+                investorSelect.appendChild(investorOption);
+            }
+        }
+
+
+        // =====================================================
+        // RENDER USERS
+        // =====================================================
+
+        function renderUsers() {
+            var search = document.getElementById("searchInput").value
+                .trim().toLowerCase();
+
+            var filter = document.getElementById("accountFilter").value;
+
+            var tbody = document.getElementById("usersTableBody");
+
+            tbody.innerHTML = "";
+
+            var filtered = [];
+
+            for (var i = 0; i < users.length; i++) {
+                var user = users[i];
+                var account = getPortalAccount(user);
+
+                var linked = account && (
+                    account.staff_id !== null ||
+                    account.investor_id !== null
+                );
+
+                var status = account ? account.account_status : "unlinked";
+
+                var searchValues = [
+                    user.full_name,
+                    user.email,
+                    user.phone,
+                    user.starlink_id,
+                    user.id
+                ];
+
+                var matchesSearch = false;
+
+                for (var j = 0; j < searchValues.length; j++) {
+                    if (
+                        String(searchValues[j] || "")
+                        .toLowerCase()
+                        .indexOf(search) !== -1
+                    ) {
+                        matchesSearch = true;
+                        break;
+                    }
+                }
+
+                var matchesFilter = true;
+
+                if (filter === "linked") matchesFilter = !!linked;
+                if (filter === "unlinked") matchesFilter = !linked;
+                if (filter === "active") matchesFilter = status === "active";
+                if (filter === "suspended") matchesFilter = status === "suspended";
+
+                if (matchesSearch && matchesFilter) {
+                    filtered.push(user);
+                }
+            }
+
+            document.getElementById("recordCount").textContent =
+                filtered.length + " records";
+
+            if (filtered.length === 0) {
+                document.getElementById("tableContainer").classList.add("hidden");
+                document.getElementById("emptyMessage").classList.remove("hidden");
+                return;
+            }
+
+            document.getElementById("emptyMessage").classList.add("hidden");
+            document.getElementById("tableContainer").classList.remove("hidden");
+
+            for (var k = 0; k < filtered.length; k++) {
+                var currentUser = filtered[k];
+                var currentAccount = getPortalAccount(currentUser);
+
+                var isLinked = currentAccount && (
+                    currentAccount.staff_id !== null ||
+                    currentAccount.investor_id !== null
+                );
+
+                var accountStatus = currentAccount ?
+                    currentAccount.account_status :
+                    "unlinked";
+
+                var statusBadge = "";
+
+                if (accountStatus === "active") {
+                    statusBadge = '<span class="badge badge-active">Active</span>';
+                } else if (accountStatus === "suspended") {
+                    statusBadge = '<span class="badge badge-suspended">Suspended</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-unlinked">Not linked</span>';
+                }
+
+                var employeeName = getEmployeeName(currentAccount);
+                var investorName = getInvestorName(currentAccount);
+
+                var actionButtons =
+                    '<button class="btn btn-blue" data-action="link" data-user-id="' +
+                    escapeHtml(currentUser.id) + '">' +
+                    '<i class="fas fa-link mr-1"></i> Link</button>';
+
+                if (isLinked && accountStatus === "active") {
+                    actionButtons +=
+                        ' <button class="btn btn-red" data-action="suspend" data-user-id="' +
+                        escapeHtml(currentUser.id) + '">Suspend</button>';
+                }
+
+                if (isLinked && accountStatus === "suspended") {
+                    actionButtons +=
+                        ' <button class="btn btn-green" data-action="activate" data-user-id="' +
+                        escapeHtml(currentUser.id) + '">Activate</button>';
+                }
+
+                var row = document.createElement("tr");
+
+                row.innerHTML =
+                    '<td>' +
+                    '<div class="font-semibold text-white">' +
+                    escapeHtml(currentUser.full_name || "Unnamed User") +
+                    '</div>' +
+                    '<div class="text-xs text-slate-400 mt-1">' +
+                    escapeHtml(currentUser.email || "No email") +
+                    '</div>' +
+                    '<div class="text-xs text-slate-500 mt-1">' +
+                    escapeHtml(currentUser.phone || "") +
+                    '</div>' +
+                    '</td>' +
+
+                    '<td>' +
+                    escapeHtml(currentUser.starlink_id || "Not assigned") +
+                    '</td>' +
+
+                    '<td class="text-xs text-sky-300">' +
+                    escapeHtml(employeeName) +
+                    '</td>' +
+
+                    '<td class="text-xs text-purple-300">' +
+                    escapeHtml(investorName) +
+                    '</td>' +
+
+                    '<td>' + statusBadge + '</td>' +
+
+                    '<td class="text-xs text-slate-400">' +
+                    escapeHtml(formatDate(currentUser.last_sign_in_at)) +
+                    '</td>' +
+
+                    '<td><div class="flex flex-wrap gap-2">' +
+                    actionButtons +
+                    '</div></td>';
+
+                tbody.appendChild(row);
+            }
+
+            var buttons = tbody.querySelectorAll("button[data-action]");
+
+            for (var b = 0; b < buttons.length; b++) {
+                buttons[b].addEventListener("click", function() {
+                    var userId = this.getAttribute("data-user-id");
+                    var action = this.getAttribute("data-action");
+
+                    if (action === "link") {
+                        openLinkModal(userId);
+                    }
+
+                    if (action === "suspend") {
+                        changeAccountStatus(userId, "suspend");
+                    }
+
+                    if (action === "activate") {
+                        changeAccountStatus(userId, "activate");
+                    }
+                });
+            }
+        }
+
+
+        // =====================================================
+        // OPEN LINK MODAL
+        // =====================================================
+
+        function openLinkModal(userId) {
+            var user = null;
+
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].id === userId) {
+                    user = users[i];
+                    break;
+                }
+            }
+
+            if (!user) {
+                showToast("User account not found.", true);
+                return;
+            }
+
+            var account = getPortalAccount(user);
+
+            document.getElementById("selectedUserId").value = user.id;
+
+            document.getElementById("selectedUserName").textContent =
+                user.full_name || "Unnamed User";
+
+            document.getElementById("selectedUserEmail").textContent =
+                user.email || "No email";
+
+            document.getElementById("staffSelect").value =
+                account && account.staff_id ? String(account.staff_id) : "";
+
+            document.getElementById("investorSelect").value =
+                account && account.investor_id ? String(account.investor_id) : "";
+
+            document.getElementById("linkModal").classList.add("show");
+        }
+
+
+        function closeModal() {
+            document.getElementById("linkModal").classList.remove("show");
+        }
+
+
+        // =====================================================
+        // SAVE ACCOUNT LINKS
+        // =====================================================
+
+        async function saveLink() {
+            var userId = document.getElementById("selectedUserId").value;
+
+            var staffValue = document.getElementById("staffSelect").value;
+
+            var investorValue = document.getElementById("investorSelect").value;
+
+            if (!staffValue && !investorValue) {
+                showToast(
+                    "Select an employee or investor record before saving.",
+                    true
+                );
+                return;
+            }
+
+            var button = document.getElementById("saveLinkButton");
+
+            button.disabled = true;
+            button.innerHTML =
+                '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+            try {
+                var result = await callAccountFunction({
+                    action: "link",
+                    user_id: userId,
+                    staff_id: staffValue ? Number(staffValue) : null,
+                    investor_id: investorValue ? Number(investorValue) : null
+                });
+
+                showToast(result.message || "Account linked successfully.");
+
+                closeModal();
+
+                await refreshData();
+
+            } catch (error) {
+                console.error("Link error:", error);
+
+                showToast(
+                    error.message || "Unable to link account.",
+                    true
+                );
+
+            } finally {
+                button.disabled = false;
+
+                button.innerHTML =
+                    '<i class="fas fa-link mr-2"></i> Save Account Links';
+            }
+        }
+
+
+        // =====================================================
+        // ACTIVATE OR SUSPEND
+        // =====================================================
+
+        async function changeAccountStatus(userId, action) {
+            var user = null;
+
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].id === userId) {
+                    user = users[i];
+                    break;
+                }
+            }
+
+            if (!user) return;
+
+            var label = action === "suspend" ? "suspend" : "activate";
+
+            var confirmed = confirm(
+                "Are you sure you want to " + label +
+                " the portal account for " +
+                (user.full_name || user.email) + "?"
+            );
+
+            if (!confirmed) return;
+
+            try {
+                var result = await callAccountFunction({
+                    action: action,
+                    user_id: userId
+                });
+
+                showToast(result.message || "Account status updated.");
+
+                await refreshData();
+
+            } catch (error) {
+                console.error("Status update error:", error);
+
+                showToast(
+                    error.message || "Unable to update account.",
+                    true
+                );
+            }
+        }
+
+
+        // =====================================================
+        // SEARCH AND FILTER EVENTS
+        // =====================================================
+
+        document.getElementById("searchInput").addEventListener(
+            "input",
+            renderUsers
+        );
+
+        document.getElementById("accountFilter").addEventListener(
+            "change",
+            renderUsers
+        );
+
+
+        // =====================================================
+        // INITIALIZE
+        // =====================================================
+
+        document.addEventListener("DOMContentLoaded", function() {
+            refreshData();
+        });
+    </script>
+
+</body>
+
+</html>

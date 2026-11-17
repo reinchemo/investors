@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Management | STARLINK ULTRANET</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --bg: #080d1b;
+            --surface: #111a2d;
+            --line: rgba(148, 174, 215, .15);
+            --white: #f5f8ff;
+            --muted: #91a3bf;
+            --cyan: #45dfd0;
+            --blue: #459bff;
+            --green: #3ed6a0;
+            --red: #ff7185
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif
+        }
+        
+        main {
+            width: min(1200px, 100%);
+            margin: auto;
+            padding: 24px
+        }
+        
+        .hero,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: linear-gradient(145deg, #192a44, #0f192b);
+            margin-bottom: 18px
+        }
+        
+        .hero {
+            padding: 26px;
+            background: linear-gradient(115deg, #153a59, #172c50 60%, #302552)
+        }
+        
+        .eyebrow {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            color: #a9e9e8
+        }
+        
+        h1 {
+            font: 800 28px Outfit;
+            margin: 12px 0 7px
+        }
+        
+        h2 {
+            font: 700 16px Outfit;
+            margin: 0
+        }
+        
+        p,
+        .muted {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6
+        }
+        
+        .panel-head {
+            padding: 17px 20px;
+            border-bottom: 1px solid var(--line)
+        }
+        
+        .panel-body {
+            padding: 20px
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px
+        }
+        
+        .field-wrap label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--muted);
+            margin-bottom: 7px;
+            text-transform: uppercase
+        }
+        
+        .field {
+            width: 100%;
+            background: #0d192b;
+            color: white;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            padding: 12px;
+            font: inherit;
+            font-size: 12px
+        }
+        
+        .btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 11px 15px;
+            color: white;
+            font-weight: 800;
+            font-size: 11px;
+            cursor: pointer
+        }
+        
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+        
+        .blue {
+            background: #287fe0
+        }
+        
+        .green {
+            background: #079e79
+        }
+        
+        .dark {
+            background: #263752
+        }
+        
+        .alert {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 12px
+        }
+        
+        .alert.show {
+            display: block
+        }
+        
+        .error {
+            background: #4a1e2a;
+            color: #ffb5c0
+        }
+        
+        .ok {
+            background: #103d34;
+            color: #9bdcc7
+        }
+        
+        .table-wrap {
+            overflow-x: auto
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px
+        }
+        
+        th,
+        td {
+            text-align: left;
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--line);
+            font-size: 11px
+        }
+        
+        th {
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .7px
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #263650;
+            font-size: 9px;
+            font-weight: 800
+        }
+        
+        .active {
+            background: rgba(24, 155, 111, .17);
+            color: #73e2b8
+        }
+        
+        .unlinked {
+            background: rgba(214, 145, 40, .17);
+            color: #ffd18b
+        }
+        
+        .linked {
+            background: rgba(24, 155, 111, .17);
+            color: #73e2b8
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+        
+        @media(max-width:700px) {
+            main {
+                padding: 13px
+            }
+            .form-grid {
+                grid-template-columns: 1fr
+            }
+            .hero {
+                padding: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <section class="hero">
+            <div class="eyebrow"><i class="fa-solid fa-users"></i> MANAGEMENT / HUMAN RESOURCES</div>
+            <h1>Staff Management</h1>
+            <p>Add employees, maintain staff records and create secure employee portal accounts.</p>
+        </section>
+
+        <div id="message" class="alert"></div>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2><i class="fa-solid fa-user-plus"></i> Add a new employee</h2>
+            </div>
+            <div class="panel-body">
+                <form id="staffForm">
+                    <div class="form-grid">
+                        <div class="field-wrap">
+                            <label>Full name *</label>
+                            <input class="field" id="fullName" required maxlength="150" placeholder="Employee full name">
+                        </div>
+                        <div class="field-wrap">
+                            <label>Employee number *</label>
+                            <input class="field" id="employeeNumber" required maxlength="40" placeholder="e.g. TEST-002">
+                        </div>
+                        <div class="field-wrap">
+                            <label>Email address</label>
+                            <input class="field" id="email" type="email" placeholder="employee@example.com">
+                        </div>
+                        <div class="field-wrap">
+                            <label>Phone number</label>
+                            <input class="field" id="phone" placeholder="+254...">
+                        </div>
+                        <div class="field-wrap">
+                            <label>Job role</label>
+                            <input class="field" id="jobRole" value="Employee">
+                        </div>
+                        <div class="field-wrap">
+                            <label>Start date</label>
+                            <input class="field" id="startDate" type="date">
+                        </div>
+                    </div>
+                    <p>The employee record is created first. You can then send a separate portal invitation.</p>
+                    <button class="btn green" id="createButton" type="submit">
+<i class="fa-solid fa-plus"></i> Create employee
+</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                <h2><i class="fa-solid fa-address-book"></i> Employee directory</h2>
+                <button class="btn dark" id="refreshButton"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Employee No.</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Portal account</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffRows">
+                        <tr>
+                            <td colspan="7">Loading employees...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <p style="text-align:center">STARLINK ULTRANET LLC · Management Portal</p>
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const $ = id => document.getElementById(id);
+
+        function showMessage(message, type) {
+            $("message").textContent = message;
+            $("message").className = "alert show " + type;
+        }
+
+        function esc(value) {
+            return String(value == null ? "" : value).replace(/[&<>"']/g, function(c) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                }[c];
+            });
+        }
+
+        async function callStaff(action, payload = {}) {
+            const sessionResult = await supabaseClient.auth.getSession();
+            const session = sessionResult.data.session;
+
+            if (sessionResult.error || !session) {
+                throw new Error("Your session has expired. Please sign in again.");
+            }
+
+            const result = await supabaseClient.functions.invoke("staff-management", {
+                body: Object.assign({
+                    action: action
+                }, payload)
+            });
+
+            if (result.error) {
+                const serverMessage = result.data && result.data.error;
+                throw new Error(serverMessage || result.error.message || "Staff request failed.");
+            }
+
+            if (result.data && result.data.error) {
+                throw new Error(result.data.error);
+            }
+
+            return result.data;
+        }
+
+        async function loadStaff() {
+            $("staffRows").innerHTML = '<tr><td colspan="7">Loading employees...</td></tr>';
+
+            try {
+                const result = await callStaff("list_staff");
+                const staff = result.staff || [];
+
+                if (!staff.length) {
+                    $("staffRows").innerHTML = '<tr><td colspan="7">No employees found.</td></tr>';
+                    return;
+                }
+
+                $("staffRows").innerHTML = staff.map(person => {
+                            const linked = person.portal_account_status === "active";
+                            const hasAccount = !!person.portal_account_status;
+
+                            return `
+            <tr>
+                <td><strong>${esc(person.full_name)}</strong></td>
+                <td>${esc(person.employee_number)}</td>
+                <td>${esc(person.email||"—")}</td>
+                <td>${esc(person.role||"Employee")}</td>
+                <td><span class="status active">${esc(person.status)}</span></td>
+                <td>
+                    <span class="status ${linked?"linked":"unlinked"}">
+                    ${linked?"Linked":hasAccount?esc(person.portal_account_status):"Not linked"}
+                    </span>
+                </td>
+                <td>
+                    ${!hasAccount&&person.status==="active"&&person.email?`
+                    <button class="btn blue" data-invite="${person.id}" data-email="${esc(person.email)}">
+                        <i class="fa-solid fa-envelope"></i> Invite
+                    </button>`:"—"}
+                </td>
+            </tr>`;
+        }).join("");
+
+    }catch(error){
+        $("staffRows").innerHTML='<tr><td colspan="7">Unable to load employees.</td></tr>';
+        showMessage(error.message,"error");
+    }
+}
+
+$("staffForm").addEventListener("submit",async function(event){
+    event.preventDefault();
+
+    const button=$("createButton");
+    button.disabled=true;
+
+    try{
+        const result=await callStaff("create_staff",{
+            full_name:$("fullName").value.trim(),
+            employee_number:$("employeeNumber").value.trim(),
+            email:$("email").value.trim(),
+            phone:$("phone").value.trim(),
+            role:$("jobRole").value.trim()||"Employee",
+            start_date:$("startDate").value||null
+        });
+
+        showMessage(
+            "Employee "+result.employee.employee_number+" created successfully. You can now send the portal invitation.",
+            "ok"
+        );
+
+        $("staffForm").reset();
+        $("jobRole").value="Employee";
+        await loadStaff();
+
+    }catch(error){
+        showMessage(error.message,"error");
+    }finally{
+        button.disabled=false;
+    }
+});
+
+$("staffRows").addEventListener("click",async function(event){
+    const button=event.target.closest("button[data-invite]");
+    if(!button)return;
+
+    const staffId=Number(button.dataset.invite);
+    const email=button.dataset.email;
+
+    if(!confirm("Send a portal invitation to "+email+"?"))return;
+
+    button.disabled=true;
+
+    try{
+        const result=await callStaff("invite_staff",{
+            staff_id:staffId,
+            email:email
+        });
+
+        showMessage(result.message||"Portal invitation sent successfully.","ok");
+        await loadStaff();
+
+    }catch(error){
+        showMessage(error.message,"error");
+        button.disabled=false;
+    }
+});
+
+$("refreshButton").addEventListener("click",loadStaff);
+
+async function initialise(){
+    const session=await supabaseClient.auth.getSession();
+
+    if(session.error||!session.data.session){
+        showMessage("Please sign in to access Staff Management.","error");
+        return;
+    }
+
+    await loadStaff();
+}
+
+initialise();
+    </script>
+</body>
+
+</html>

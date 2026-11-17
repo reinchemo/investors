@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | STARLINK ULTRANET LLC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+         :root {
+            --bg: #080f1e;
+            --panel: #111d32;
+            --panel2: #172640;
+            --line: rgba(148, 163, 184, .14);
+            --text: #edf4ff;
+            --muted: #91a4bf;
+            --cyan: #38d5f2;
+            --blue: #638cff;
+            --green: #35d49a;
+            --yellow: #f7c66b;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(ellipse at 10% 0%, rgba(56, 213, 242, .12), transparent 35%), radial-gradient(ellipse at 90% 10%, rgba(99, 140, 255, .12), transparent 30%), var(--bg);
+        }
+        
+        .topbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            border-bottom: 1px solid var(--line);
+            background: rgba(8, 15, 30, .88);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+        
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            color: #06101e;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        .brand-name {
+            font-family: Outfit, sans-serif;
+            font-weight: 800
+        }
+        
+        .brand-sub {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1.5px
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px
+        }
+        
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 10px 15px;
+            color: var(--text);
+            background: var(--panel2);
+            cursor: pointer;
+            transition: .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan)
+        }
+        
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 42px 24px 70px
+        }
+        
+        .back-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px
+        }
+        
+        .heading {
+            margin: 25px 0 28px
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px
+        }
+        
+        h1 {
+            font-family: Outfit, sans-serif;
+            font-size: clamp(30px, 5vw, 43px);
+            margin: 9px 0
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.6
+        }
+        
+        .hero {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            padding: 25px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(120deg, rgba(23, 38, 64, .98), rgba(17, 29, 50, .85));
+            margin: 28px 0;
+            animation: rise .45s ease both;
+        }
+        
+        .avatar {
+            width: 76px;
+            height: 76px;
+            border-radius: 23px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            color: #06101e;
+            font-family: Outfit, sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+        
+        .hero-name {
+            font-family: Outfit, sans-serif;
+            font-size: 25px;
+            font-weight: 800
+        }
+        
+        .hero-email {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 5px;
+            overflow-wrap: anywhere
+        }
+        
+        .pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px
+        }
+        
+        .pill {
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+            background: rgba(56, 213, 242, .12);
+            color: var(--cyan);
+        }
+        
+        .pill.green {
+            background: rgba(53, 212, 154, .12);
+            color: var(--green)
+        }
+        
+        .pill.yellow {
+            background: rgba(247, 198, 107, .12);
+            color: var(--yellow)
+        }
+        
+        .section-title {
+            font-family: Outfit, sans-serif;
+            font-size: 20px;
+            margin: 32px 0 15px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px
+        }
+        
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(17, 29, 50, .9);
+            padding: 22px;
+            animation: rise .5s ease both;
+        }
+        
+        .panel h3 {
+            font-family: Outfit, sans-serif;
+            margin: 0 0 18px;
+            font-size: 17px
+        }
+        
+        .field {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        
+        .field:last-child {
+            border-bottom: 0
+        }
+        
+        .field-label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+        
+        .field-value {
+            font-size: 13px;
+            font-weight: 700;
+            text-align: right;
+            overflow-wrap: anywhere;
+            max-width: 60%;
+        }
+        
+        .notice {
+            margin-top: 20px;
+            padding: 15px 18px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+            background: rgba(56, 213, 242, .05);
+        }
+        
+        .message,
+        .loading {
+            padding: 35px 22px;
+            text-align: center;
+            border: 1px dashed var(--line);
+            border-radius: 18px;
+            color: var(--muted);
+            background: rgba(17, 29, 50, .6);
+        }
+        
+        .error {
+            color: #ff9baa;
+            border-color: rgba(255, 113, 133, .3)
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #33445e;
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            color: #71839e;
+            font-size: 11px;
+            padding: 25px;
+            border-top: 1px solid var(--line)
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+        
+        @media(max-width:700px) {
+            .topbar {
+                padding: 0 15px;
+                height: 68px
+            }
+            .brand-sub {
+                display: none
+            }
+            .top-actions .btn {
+                padding: 9px;
+                font-size: 11px
+            }
+            main {
+                padding: 28px 15px 50px
+            }
+            .hero {
+                align-items: flex-start;
+                padding: 18px;
+                gap: 14px
+            }
+            .avatar {
+                width: 58px;
+                height: 58px;
+                border-radius: 17px;
+                font-size: 22px
+            }
+            .hero-name {
+                font-size: 19px
+            }
+            .grid {
+                grid-template-columns: 1fr
+            }
+            .panel {
+                padding: 18px
+            }
+            .field {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 5px
+            }
+            .field-value {
+                text-align: left;
+                max-width: 100%
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">S</div>
+            <div>
+                <div class="brand-name">STARLINK ULTRANET</div>
+                <div class="brand-sub">PERSONAL PORTAL</div>
+            </div>
+        </div>
+        <div class="top-actions">
+            <a class="btn" href="dashboard.html">← Dashboard</a>
+            <button class="btn" onclick="logout()">Sign out</button>
+        </div>
+    </header>
+
+    <main>
+        <a class="back-link" href="dashboard.html">← Back to my dashboard</a>
+
+        <section class="heading">
+            <div class="eyebrow">ACCOUNT INFORMATION</div>
+            <h1>My Profile</h1>
+            <p class="subtitle">View the personal information linked to your STARLINK account.</p>
+        </section>
+
+        <div id="content">
+            <div class="loading"><span class="spinner"></span> Loading your profile...</div>
+        </div>
+    </main>
+
+    <footer>STARLINK ULTRANET LLC · Secure Personal Portal</footer>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+
+        /* Use the same publishable key as your other portal pages. */
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL, SUPABASE_ANON_KEY
+        );
+
+        const content = document.getElementById("content");
+
+        function safe(value) {
+            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function display(value) {
+            return value === null || value === undefined || value === "" ? "Not provided" : safe(value);
+        }
+
+        function field(label, value) {
+            return `
+  <div class="field">
+   <span class="field-label">${safe(label)}</span>
+   <span class="field-value">${display(value)}</span>
+  </div>`;
+        }
+
+        function initials(name) {
+            const words = String(name || "S").trim().split(/\s+/);
+            return words.slice(0, 2).map(word => word[0] || "").join("").toUpperCase();
+        }
+
+        async function loadProfile() {
+            content.innerHTML = '<div class="loading"><span class="spinner"></span> Loading your profile...</div>';
+
+            try {
+                const {
+                    data: sessionData,
+                    error: sessionError
+                } = await supabaseClient.auth.getSession();
+                if (sessionError) throw sessionError;
+
+                if (!sessionData.session) {
+                    window.location.href = "../login.html";
+                    return;
+                }
+
+                const user = sessionData.session.user;
+
+                const {
+                    data: account,
+                    error: accountError
+                } = await supabaseClient
+                    .from("personal_portal_accounts")
+                    .select("id,staff_id,investor_id,account_status,created_at")
+                    .eq("user_id", user.id)
+                    .maybeSingle();
+
+                if (accountError) throw accountError;
+                if (!account || account.account_status !== "active") {
+                    throw new Error("Your personal portal account is not active.");
+                }
+
+                let staff = null;
+                let investor = null;
+
+                if (account.staff_id) {
+                    const {
+                        data,
+                        error
+                    } = await supabaseClient
+                        .from("staff")
+                        .select("id,employee_number,full_name,role,phone,email,national_id,address,start_date,status,annual_leave_days")
+                        .eq("id", account.staff_id)
+                        .maybeSingle();
+
+                    if (error) throw error;
+                    staff = data;
+                }
+
+                if (account.investor_id) {
+                    const {
+                        data,
+                        error
+                    } = await supabaseClient
+                        .from("investors")
+                        .select("id,name,investor_number,phone,email,id_number,address,equity,status,joined_date")
+                        .eq("id", account.investor_id)
+                        .maybeSingle();
+
+                    if (error) throw error;
+                    investor = data;
+                }
+
+                renderProfile(user, account, staff, investor);
+
+            } catch (error) {
+                console.error("Profile error:", error);
+                content.innerHTML = `
+   <div class="message error">
+    <strong>Unable to load your profile</strong>
+    <p>${safe(error.message||"Please sign in again and retry.")}</p>
+    <button class="btn" onclick="loadProfile()">Try again</button>
+   </div>`;
+            }
+        }
+
+        function renderProfile(user, account, staff, investor) {
+            const displayName = staff ? .full_name || investor ? .name ||
+                user.user_metadata ? .full_name || "Portal User";
+
+            const classifications = [];
+            if (staff) classifications.push("Employee");
+            if (investor) classifications.push("Investor");
+            if (!classifications.length) classifications.push("Personal Account");
+
+            content.innerHTML = `
+  <section class="hero">
+   <div class="avatar">${safe(initials(displayName))}</div>
+   <div>
+    <div class="hero-name">${safe(displayName)}</div>
+    <div class="hero-email">${safe(user.email||"")}</div>
+    <div class="pills">
+     ${classifications.map(item=>`<span class="pill">${safe(item)}</span>`).join("")}
+     <span class="pill green">ACTIVE ACCOUNT</span>
+    </div>
+   </div>
+  </section>
+
+  <div class="grid">
+   <section class="panel">
+    <h3>Account information</h3>
+    ${field("Login email",user.email)}
+    ${field("Account status",account.account_status)}
+    ${field("Account created",account.created_at?new Date(account.created_at).toLocaleDateString("en-KE"):"Not available")}
+    ${field("Employee classification",staff?"Employee":"Not linked")}
+    ${field("Investor classification",investor?"Investor":"Not linked")}
+   </section>
+
+   ${staff?`
+    <section class="panel">
+     <h3>Employment information</h3>
+     ${field("Employee number",staff.employee_number)}
+     ${field("Full name",staff.full_name)}
+     ${field("Department / Position",staff.role)}
+     ${field("Phone",staff.phone)}
+     ${field("Email",staff.email)}
+     ${field("National ID",staff.national_id)}
+     ${field("Address",staff.address)}
+     ${field("Employment start date",staff.start_date)}
+     ${field("Employment status",staff.status)}
+     ${field("Annual leave days",staff.annual_leave_days)}
+    </section>`:""}
+
+   ${investor?`
+    <section class="panel">
+     <h3>Investor information</h3>
+     ${field("Investor number",investor.investor_number)}
+     ${field("Investor name",investor.name)}
+     ${field("Phone",investor.phone)}
+     ${field("Email",investor.email)}
+     ${field("Identification number",investor.id_number)}
+     ${field("Address",investor.address)}
+     ${field("Equity",investor.equity)}
+     ${field("Investor status",investor.status)}
+     ${field("Joined date",investor.joined_date)}
+    </section>`:""}
+
+   ${!staff&&!investor?`
+    <section class="panel">
+     <h3>Account classification</h3>
+     <p class="subtitle">No employee or investor record is currently linked to this account. Please contact an authorized administrator.</p>
+    </section>`:""}
+  </div>
+
+  <div class="notice">
+   <strong>Profile information is read-only.</strong>
+   <br>
+   Your employment and investment records are maintained by authorized STARLINK administrators. If any information is incorrect, contact the appropriate administrator to request a correction.
+  </div>
+ `;
+}
+
+async function logout(){
+ const {error}=await supabaseClient.auth.signOut();
+ if(error){
+  alert("Unable to sign out. Please try again.");
+  return;
+ }
+ window.location.href="../login.html";
+}
+
+loadProfile();
+    </script>
+</body>
+
+</html>

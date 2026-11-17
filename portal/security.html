@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Security | STARLINK ULTRANET LLC</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+         :root {
+            --bg: #080d1b;
+            --panel: #111a2d;
+            --panel2: #17233a;
+            --border: rgba(148, 163, 184, .15);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --green: #34d399;
+            --purple: #a78bfa;
+            --orange: #fb923c;
+            --red: #fb7185;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 0%, rgba(34, 211, 238, .10), transparent 30%), radial-gradient(circle at 90% 10%, rgba(139, 92, 246, .12), transparent 28%), var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", sans-serif;
+        }
+        
+        button,
+        input {
+            font: inherit;
+        }
+        
+        .layout {
+            width: min(1100px, 100%);
+            margin: auto;
+            padding: 28px;
+        }
+        
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            color: #06111e;
+            font-size: 23px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            box-shadow: 0 8px 25px rgba(34, 211, 238, .18);
+        }
+        
+        .brand h2 {
+            margin: 0;
+            font-family: Outfit, sans-serif;
+            font-size: 19px;
+        }
+        
+        .brand small {
+            display: block;
+            color: var(--muted);
+            margin-top: 3px;
+            font-size: 12px;
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: var(--text);
+            border-radius: 11px;
+            padding: 11px 16px;
+            cursor: pointer;
+            transition: .2s ease;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan);
+        }
+        
+        .btn-primary {
+            color: #06111e;
+            border: 0;
+            background: linear-gradient(135deg, var(--cyan), #60a5fa);
+        }
+        
+        .btn-danger {
+            background: rgba(251, 113, 133, .1);
+            color: #fda4af;
+            border-color: rgba(251, 113, 133, .25);
+        }
+        
+        .hero {
+            padding: 30px;
+            border: 1px solid rgba(34, 211, 238, .2);
+            border-radius: 23px;
+            background: linear-gradient( 120deg, rgba(8, 145, 178, .18), rgba(79, 70, 229, .15), var(--panel));
+            margin-bottom: 24px;
+            animation: rise .55s ease both;
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .hero h1 {
+            margin: 12px 0 8px;
+            font: 800 clamp(28px, 5vw, 40px) Outfit, sans-serif;
+        }
+        
+        .hero p {
+            max-width: 650px;
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: linear-gradient( 145deg, rgba(23, 35, 58, .96), rgba(15, 23, 42, .96));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 25px;
+            margin-bottom: 20px;
+            animation: rise .6s ease both;
+        }
+        
+        .card h2 {
+            font: 700 21px Outfit, sans-serif;
+            margin: 0 0 7px;
+        }
+        
+        .card-description {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0 0 22px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .info-row:last-child {
+            border-bottom: 0;
+        }
+        
+        .info-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+        
+        .info-value {
+            text-align: right;
+            font-size: 13px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+        
+        .status {
+            display: inline-block;
+            border-radius: 30px;
+            padding: 6px 11px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        
+        .status-active {
+            background: rgba(52, 211, 153, .12);
+            color: var(--green);
+        }
+        
+        .status-suspended {
+            background: rgba(251, 113, 133, .12);
+            color: var(--red);
+        }
+        
+        .form-group {
+            margin-bottom: 17px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 9px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            color: var(--text);
+            background: #0b1426;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, .08);
+        }
+        
+        .password-hint {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+            margin-top: 7px;
+        }
+        
+        .message {
+            display: none;
+            padding: 13px 15px;
+            border-radius: 11px;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 17px;
+        }
+        
+        .message.success {
+            display: block;
+            color: #a7f3d0;
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .2);
+        }
+        
+        .message.error {
+            display: block;
+            color: #fecdd3;
+            background: rgba(251, 113, 133, .1);
+            border: 1px solid rgba(251, 113, 133, .2);
+        }
+        
+        .security-note {
+            padding: 17px;
+            border-radius: 13px;
+            background: rgba(34, 211, 238, .06);
+            border: 1px solid rgba(34, 211, 238, .2);
+            color: #bae6fd;
+            font-size: 13px;
+            line-height: 1.7;
+            margin-top: 20px;
+        }
+        
+        .logout-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .logout-card h2 {
+            margin-bottom: 6px;
+        }
+        
+        .logout-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .loading {
+            color: var(--muted);
+            padding: 30px 10px;
+            text-align: center;
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media(max-width: 760px) {
+            .layout {
+                padding: 17px;
+            }
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .hero {
+                padding: 24px 20px;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .card {
+                padding: 19px;
+            }
+            .info-row {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .info-value {
+                text-align: left;
+            }
+            .btn {
+                padding: 10px 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="layout">
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">S</div>
+                <div>
+                    <h2>STARLINK ULTRANET LLC</h2>
+                    <small>Personal Finance & Equity Portal</small>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <a class="btn" href="dashboard.html">← Dashboard</a>
+                <button class="btn" id="refreshBtn">↻ Refresh</button>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="eyebrow">Account Protection</div>
+            <h1>Security & Account Settings</h1>
+            <p>
+                Manage your password and review your personal portal account information. Keep your login details private and secure.
+            </p>
+        </section>
+
+        <div id="pageMessage" class="message"></div>
+
+        <div class="grid">
+
+            <section class="card">
+                <h2>Account Information</h2>
+                <p class="card-description">
+                    Details associated with your authenticated portal account.
+                </p>
+
+                <div id="accountInformation">
+                    <div class="loading">Loading account information...</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Change Password</h2>
+                <p class="card-description">
+                    Choose a strong password that you do not use on other websites.
+                </p>
+
+                <form id="passwordForm">
+
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" minlength="10" autocomplete="new-password" placeholder="Enter your new password" required>
+                        <div class="password-hint">
+                            Use at least 10 characters, including uppercase, lowercase, a number and a special character.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" minlength="10" autocomplete="new-password" placeholder="Re-enter your new password" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+            Update Password
+          </button>
+                </form>
+
+                <div class="security-note">
+                    <strong>Security reminder:</strong> Never share your password, verification codes or login credentials with another person.
+                </div>
+            </section>
+
+        </div>
+
+        <section class="card">
+            <div class="logout-card">
+                <div>
+                    <h2>Sign Out</h2>
+                    <p>
+                        End your current portal session, especially when using a shared or public computer.
+                    </p>
+                </div>
+
+                <button class="btn btn-danger" id="logoutBtn">
+          Sign Out Securely
+        </button>
+            </div>
+        </section>
+
+        <footer class="footer">
+            STARLINK ULTRANET LLC · Secure Personal Portal
+        </footer>
+
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        let currentSession = null;
+
+        function escapeHtml(value) {
+            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function showMessage(message, type) {
+            const element = document.getElementById("pageMessage");
+            element.textContent = message;
+            element.className = "message " + type;
+        }
+
+        function clearMessage() {
+            const element = document.getElementById("pageMessage");
+            element.textContent = "";
+            element.className = "message";
+        }
+
+        async function requireSession() {
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.getSession();
+
+            if (error || !data.session) {
+                window.location.href = "../login.html";
+                return null;
+            }
+
+            return data.session;
+        }
+
+        async function loadAccountInformation() {
+            const container = document.getElementById("accountInformation");
+
+            try {
+                currentSession = await requireSession();
+                if (!currentSession) return;
+
+                const user = currentSession.user;
+
+                const {
+                    data: account,
+                    error
+                } = await supabaseClient
+                    .from("personal_portal_accounts")
+                    .select("staff_id, investor_id, account_status, created_at, updated_at")
+                    .eq("user_id", user.id)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (!account || account.account_status !== "active") {
+                    container.innerHTML = `
+            <div class="security-note">
+              Your portal account is unavailable or suspended.
+              Please contact an authorized administrator.
+            </div>
+          `;
+                    return;
+                }
+
+                let accountType = "Personal Portal User";
+
+                if (account.staff_id && account.investor_id) {
+                    accountType = "Employee & Investor";
+                } else if (account.staff_id) {
+                    accountType = "Employee";
+                } else if (account.investor_id) {
+                    accountType = "Investor";
+                }
+
+                const lastLogin = user.last_sign_in_at ?
+                    new Date(user.last_sign_in_at).toLocaleString("en-KE") :
+                    "Not available";
+
+                const createdAt = account.created_at ?
+                    new Date(account.created_at).toLocaleDateString("en-KE") :
+                    "Not available";
+
+                container.innerHTML = `
+          <div class="info-row">
+            <div class="info-label">Registered Email</div>
+            <div class="info-value">${escapeHtml(user.email || "Not available")}</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Account Category</div>
+            <div class="info-value">${accountType}</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Portal Status</div>
+            <div class="info-value">
+              <span class="status status-active">Active</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Last Sign In</div>
+            <div class="info-value">${escapeHtml(lastLogin)}</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Portal Account Created</div>
+            <div class="info-value">${escapeHtml(createdAt)}</div>
+          </div>
+        `;
+
+            } catch (error) {
+                console.error("Account information error:", error);
+
+                container.innerHTML = `
+          <div class="security-note">
+            Unable to retrieve your account information.
+            Please refresh the page or contact support.
+          </div>
+        `;
+            }
+        }
+
+        function validPassword(password) {
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+            return (
+                password.length >= 10 &&
+                hasUppercase &&
+                hasLowercase &&
+                hasNumber &&
+                hasSpecial
+            );
+        }
+
+        document.getElementById("passwordForm").addEventListener(
+            "submit",
+            async event => {
+                event.preventDefault();
+                clearMessage();
+
+                const newPassword = document.getElementById("newPassword").value;
+                const confirmPassword = document.getElementById("confirmPassword").value;
+                const button = document.getElementById("changePasswordBtn");
+
+                if (!validPassword(newPassword)) {
+                    showMessage(
+                        "Use at least 10 characters, including uppercase, lowercase, a number and a special character.",
+                        "error"
+                    );
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    showMessage("The passwords do not match.", "error");
+                    return;
+                }
+
+                if (!currentSession) {
+                    currentSession = await requireSession();
+                    if (!currentSession) return;
+                }
+
+                button.disabled = true;
+                button.textContent = "Updating Password...";
+
+                try {
+                    const {
+                        error
+                    } = await supabaseClient.auth.updateUser({
+                        password: newPassword
+                    });
+
+                    if (error) throw error;
+
+                    document.getElementById("passwordForm").reset();
+
+                    showMessage(
+                        "Your password has been updated successfully.",
+                        "success"
+                    );
+
+                } catch (error) {
+                    console.error("Password update error:", error);
+
+                    showMessage(
+                        error.message || "Unable to update your password. Please try again.",
+                        "error"
+                    );
+
+                } finally {
+                    button.disabled = false;
+                    button.textContent = "Update Password";
+                }
+            }
+        );
+
+        document.getElementById("refreshBtn").addEventListener(
+            "click",
+            async() => {
+                clearMessage();
+                await loadAccountInformation();
+            }
+        );
+
+        document.getElementById("logoutBtn").addEventListener(
+            "click",
+            async() => {
+                const button = document.getElementById("logoutBtn");
+
+                button.disabled = true;
+                button.textContent = "Signing Out...";
+
+                const {
+                    error
+                } = await supabaseClient.auth.signOut();
+
+                if (error) {
+                    showMessage("Unable to sign out. Please try again.", "error");
+                    button.disabled = false;
+                    button.textContent = "Sign Out Securely";
+                    return;
+                }
+
+                window.location.href = "../login.html";
+            }
+        );
+
+        loadAccountInformation();
+    </script>
+</body>
+
+</html>

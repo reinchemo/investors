@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Review | STARLINK ULTRANET</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+         :root {
+            --bg: #080f1d;
+            --panel: #111c2e;
+            --panel2: #16243a;
+            --line: #263750;
+            --text: #edf4ff;
+            --muted: #91a3bd;
+            --cyan: #22d3ee;
+            --green: #22c55e;
+            --red: #ef4444;
+            --orange: #f59e0b;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        
+        .container {
+            max-width: 1250px;
+            margin: auto;
+            padding: 30px 22px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            margin: 0 0 7px;
+            font-size: 25px;
+        }
+        
+        .header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 11px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: var(--cyan);
+            color: #06121e;
+        }
+        
+        .btn-secondary {
+            background: var(--panel2);
+            color: var(--text);
+            border: 1px solid var(--line);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        
+        .stat {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 18px;
+        }
+        
+        .stat small {
+            color: var(--muted);
+        }
+        
+        .stat strong {
+            display: block;
+            font-size: 26px;
+            margin-top: 9px;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .toolbar input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--text);
+        }
+        
+        .task-list {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .task {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            padding: 20px;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .task h3 {
+            margin: 0 0 9px;
+            font-size: 18px;
+        }
+        
+        .description {
+            color: #b6c5da;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: var(--panel2);
+            color: var(--orange);
+            font-size: 11px;
+            text-transform: capitalize;
+            height: fit-content;
+        }
+        
+        .meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 17px 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .employee {
+            background: var(--panel2);
+            border: 1px solid var(--line);
+            padding: 13px;
+            border-radius: 9px;
+            margin: 14px 0;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .employee i {
+            color: var(--cyan);
+            font-size: 22px;
+        }
+        
+        .employee strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .employee small {
+            color: var(--muted);
+        }
+        
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0 7px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .progress {
+            height: 8px;
+            background: #263750;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .progress div {
+            height: 100%;
+            background: var(--cyan);
+        }
+        
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            border-top: 1px solid var(--line);
+            margin-top: 17px;
+            padding-top: 17px;
+        }
+        
+        .details strong {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            margin-bottom: 7px;
+        }
+        
+        .details p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        
+        .review-section {
+            border-top: 1px solid var(--line);
+            margin-top: 18px;
+            padding-top: 18px;
+        }
+        
+        .review-section label {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .review-section textarea {
+            width: 100%;
+            min-height: 85px;
+            resize: vertical;
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--panel2);
+            border: 1px solid var(--line);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+        }
+        
+        .review-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 13px;
+            flex-wrap: wrap;
+        }
+        
+        .approve {
+            background: var(--green);
+            color: #052013;
+        }
+        
+        .reject {
+            background: var(--red);
+            color: white;
+        }
+        
+        .message {
+            padding: 35px;
+            text-align: center;
+            color: var(--muted);
+            background: var(--panel);
+            border: 1px dashed var(--line);
+            border-radius: 12px;
+        }
+        
+        .error {
+            color: #fca5a5;
+        }
+        
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 30px;
+        }
+        
+        @media(max-width:700px) {
+            .container {
+                padding: 20px 13px;
+            }
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            .details {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media(max-width:400px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div>
+                <h1><i class="fa-solid fa-clipboard-check"></i> Task Review</h1>
+                <p>Review employee submissions and record management decisions.</p>
+            </div>
+
+            <div>
+                <button class="btn-secondary" id="refreshButton">
+                <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+
+                <button class="btn-primary" id="dashboardButton">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </button>
+            </div>
+        </header>
+
+        <section class="stats">
+            <div class="stat">
+                <small>Awaiting Review</small>
+                <strong id="total">0</strong>
+            </div>
+
+            <div class="stat">
+                <small>High Priority</small>
+                <strong id="highPriority">0</strong>
+            </div>
+
+            <div class="stat">
+                <small>Overdue</small>
+                <strong id="overdue">0</strong>
+            </div>
+        </section>
+
+        <section class="toolbar">
+            <input type="search" id="search" placeholder="Search task or employee...">
+        </section>
+
+        <div id="message" class="message">
+            <i class="fa-solid fa-spinner fa-spin"></i> Loading review queue...
+        </div>
+
+        <section id="taskList" class="task-list"></section>
+
+        <div class="footer">
+            STARLINK ULTRANET LLC · MANAGEMENT TASK REVIEW
+        </div>
+
+    </div>
+
+    <script>
+        "use strict";
+
+        /* =========================================
+           SUPABASE CONFIGURATION
+        ========================================= */
+
+        const SUPABASE_URL =
+            "https://ujhasodlnduoozlmxdbv.supabase.co";
+
+        const SUPABASE_ANON_KEY =
+            "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const db = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        let reviewTasks = [];
+        let loading = false;
+
+        function el(id) {
+            return document.getElementById(id);
+        }
+
+        /* =========================================
+           HELPERS
+        ========================================= */
+
+        function escapeHTML(value) {
+            return String(value === null || value === undefined ? "" : value)
+                .replace(/[&<>"']/g, function(char) {
+                    const replacements = {
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#039;"
+                    };
+
+                    return replacements[char];
+                });
+        }
+
+        function formatDate(value) {
+            if (!value) return "Not specified";
+
+            const date = new Date(value);
+
+            if (isNaN(date.getTime())) {
+                return "Not specified";
+            }
+
+            return date.toLocaleDateString("en-KE", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            });
+        }
+
+        function isOverdue(task) {
+            if (!task.deadline) return false;
+
+            const deadline = new Date(task.deadline + "T23:59:59");
+
+            return deadline < new Date();
+        }
+
+        function showMessage(message, isError) {
+            el("message").className = isError ?
+                "message error" :
+                "message";
+
+            el("message").textContent = message;
+            el("message").style.display = "block";
+        }
+
+        /* =========================================
+           VERIFY AUTHENTICATION
+        ========================================= */
+
+        async function verifySession() {
+
+            const result = await db.auth.getSession();
+
+            if (
+                result.error ||
+                !result.data.session
+            ) {
+                window.location.href = "../login.html";
+                return false;
+            }
+
+            return true;
+        }
+
+        /* =========================================
+           MANAGEMENT EDGE FUNCTION
+        ========================================= */
+
+        async function managementTaskAction(payload) {
+
+            const sessionResult = await db.auth.getSession();
+
+            if (
+                sessionResult.error ||
+                !sessionResult.data.session
+            ) {
+                window.location.href = "../login.html";
+                return null;
+            }
+
+            const result = await db.functions.invoke(
+                "management-portal-tasks", {
+                    body: payload
+                }
+            );
+
+            if (result.error) {
+                console.error("Management task error:", result.error);
+
+                let message = result.error.message ||
+                    "Management action failed.";
+
+                if (result.data && result.data.error) {
+                    message = result.data.error;
+                }
+
+                throw new Error(message);
+            }
+
+            if (!result.data || !result.data.success) {
+                throw new Error(
+                    result.data && result.data.error ?
+                    result.data.error :
+                    "Unable to complete the operation."
+                );
+            }
+
+            return result.data;
+        }
+
+        /* =========================================
+           LOAD REVIEW QUEUE
+        ========================================= */
+
+        async function loadReviewQueue() {
+
+            if (loading) return;
+
+            loading = true;
+
+            showMessage("Loading tasks awaiting management review...");
+
+            try {
+
+                const allowed = await verifySession();
+
+                if (!allowed) return;
+
+                const result = await managementTaskAction({
+                    action: "list_review_queue"
+                });
+
+                reviewTasks = result.tasks || [];
+
+                updateStatistics();
+                renderTasks();
+
+                if (!reviewTasks.length) {
+                    showMessage(
+                        "There are currently no tasks awaiting review."
+                    );
+                } else {
+                    el("message").style.display = "none";
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                showMessage(
+                    error.message ||
+                    "Unable to load the review queue.",
+                    true
+                );
+
+                el("taskList").innerHTML = "";
+
+            } finally {
+                loading = false;
+            }
+        }
+
+        /* =========================================
+           UPDATE STATISTICS
+        ========================================= */
+
+        function updateStatistics() {
+
+            el("total").textContent = reviewTasks.length;
+
+            el("highPriority").textContent =
+                reviewTasks.filter(function(task) {
+                    return String(task.priority || "").toLowerCase() === "high";
+                }).length;
+
+            el("overdue").textContent =
+                reviewTasks.filter(isOverdue).length;
+        }
+
+        /* =========================================
+           REVIEW TASK
+        ========================================= */
+
+        async function reviewTask(taskId, decision) {
+
+            const noteInput = document.getElementById(
+                "review-note-" + taskId
+            );
+
+            if (!noteInput) return;
+
+            const reviewNote = noteInput.value.trim();
+
+            if (decision === "rejected" && !reviewNote) {
+                alert("Please provide a reason for rejecting this task.");
+                noteInput.focus();
+                return;
+            }
+
+            const confirmation = decision === "approved" ?
+                "Approve this submitted task?" :
+                "Reject this submitted task?";
+
+            if (!confirm(confirmation)) {
+                return;
+            }
+
+            const buttons = document.querySelectorAll(
+                '[data-task-id="' + CSS.escape(String(taskId)) + '"]'
+            );
+
+            buttons.forEach(function(button) {
+                button.disabled = true;
+            });
+
+            try {
+
+                const result = await managementTaskAction({
+                    action: "review_task",
+                    task_id: taskId,
+                    decision: decision,
+                    review_note: reviewNote
+                });
+
+                if (result.warning) {
+                    alert(result.warning);
+                } else {
+                    alert(result.message || "Review decision saved.");
+                }
+
+                await loadReviewQueue();
+
+            } catch (error) {
+
+                alert(error.message);
+
+                buttons.forEach(function(button) {
+                    button.disabled = false;
+                });
+            }
+        }
+
+        /* =========================================
+           RENDER TASKS
+        ========================================= */
+
+        function renderTasks() {
+
+            const search = el("search").value.trim().toLowerCase();
+
+            const filtered = reviewTasks.filter(function(task) {
+
+                const employee = task.employee || {};
+
+                const searchable = [
+                    task.title,
+                    task.description,
+                    task.id,
+                    employee.full_name,
+                    employee.employee_number
+                ].join(" ").toLowerCase();
+
+                return !search || searchable.includes(search);
+            });
+
+            if (!filtered.length) {
+                el("taskList").innerHTML = "";
+
+                if (reviewTasks.length) {
+                    showMessage("No tasks match your search.");
+                } else {
+                    showMessage("There are currently no tasks awaiting review.");
+                }
+
+                return;
+            }
+
+            el("message").style.display = "none";
+
+            el("taskList").innerHTML = filtered.map(function(task) {
+
+                const employee = task.employee || {};
+                const progress = Math.min(
+                    100,
+                    Math.max(0, Number(task.progress_pct || 0))
+                );
+
+                const overdue = isOverdue(task);
+
+                return `
+        <article class="task">
+
+            <div class="task-header">
+
+                <div>
+                    <h3>${escapeHTML(task.title)}</h3>
+
+                    <div class="description">
+                        ${escapeHTML(
+                            task.description ||
+                            "No task description provided."
+                        )}
+                    </div>
+                </div>
+
+                <span class="tag">
+                    ${escapeHTML(task.priority || "Normal")} Priority
+                </span>
+
+            </div>
+
+            <div class="employee">
+
+                <i class="fa-solid fa-user-circle"></i>
+
+                <div>
+                    <strong>
+                        ${escapeHTML(
+                            employee.full_name ||
+                            "Employee information unavailable"
+                        )}
+                    </strong>
+
+                    <small>
+                        ${escapeHTML(employee.employee_number || "No employee number")}
+                        ${employee.email ? " · " + escapeHTML(employee.email) : ""}
+                    </small>
+                </div>
+
+            </div>
+
+            <div class="meta">
+
+                <span>
+                    <i class="fa-regular fa-calendar"></i>
+                    Started: ${escapeHTML(formatDate(task.start_date))}
+                </span>
+
+                <span>
+                    <i class="fa-regular fa-clock"></i>
+                    Deadline: ${escapeHTML(formatDate(task.deadline))}
+                </span>
+
+                <span>
+                    <i class="fa-solid fa-flag"></i>
+                    ${overdue ? "Overdue" : "Awaiting review"}
+                </span>
+
+            </div>
+
+            <div class="progress-row">
+                <span>Submitted progress</span>
+                <strong>${progress}%</strong>
+            </div>
+
+            <div class="progress">
+                <div style="width:${progress}%"></div>
+            </div>
+
+            <div class="details">
+
+                <div>
+                    <strong>INSTRUCTIONS</strong>
+                    <p>${escapeHTML(
+                        task.instructions ||
+                        "No additional instructions."
+                    )}</p>
+                </div>
+
+                <div>
+                    <strong>EXPECTED RESULT</strong>
+                    <p>${escapeHTML(
+                        task.expected_result ||
+                        "Not specified."
+                    )}</p>
+                </div>
+
+                <div>
+                    <strong>EMPLOYEE NOTES</strong>
+                    <p>${escapeHTML(
+                        task.notes ||
+                        "No additional notes."
+                    )}</p>
+                </div>
+
+                <div>
+                    <strong>TASK REFERENCE</strong>
+                    <p>${escapeHTML(task.id)}</p>
+                </div>
+
+            </div>
+
+            <div class="review-section">
+
+                <label for="review-note-${escapeHTML(task.id)}">
+                    Management review note
+                </label>
+
+                <textarea
+                    id="review-note-${escapeHTML(task.id)}"
+                    maxlength="3000"
+                    placeholder="Enter feedback or a reason for rejection..."
+                ></textarea>
+
+                <div class="review-actions">
+
+                    <button
+                        class="approve"
+                        data-task-id="${escapeHTML(task.id)}"
+                        data-decision="approved"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                        Approve Task
+                    </button>
+
+                    <button
+                        class="reject"
+                        data-task-id="${escapeHTML(task.id)}"
+                        data-decision="rejected"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Reject Task
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+        `;
+
+            }).join("");
+
+            el("taskList")
+                .querySelectorAll("[data-decision]")
+                .forEach(function(button) {
+
+                    button.addEventListener("click", async function() {
+
+                        const taskId = button.dataset.taskId;
+                        const decision = button.dataset.decision;
+
+                        await reviewTask(taskId, decision);
+                    });
+
+                });
+        }
+
+        /* =========================================
+           SEARCH
+        ========================================= */
+
+        el("search").addEventListener("input", function() {
+            renderTasks();
+        });
+
+        /* =========================================
+           NAVIGATION
+        ========================================= */
+
+        el("refreshButton").addEventListener("click", function() {
+            loadReviewQueue();
+        });
+
+        el("dashboardButton").addEventListener("click", function() {
+
+            if (
+                window.parent &&
+                window.parent !== window &&
+                typeof window.parent.openPortalPage === "function"
+            ) {
+                window.parent.openPortalPage("dashboard");
+            } else {
+                window.location.href = "dashboard.html";
+            }
+        });
+
+        /* =========================================
+           INITIALISE
+        ========================================= */
+
+        loadReviewQueue();
+    </script>
+
+</body>
+
+</html>

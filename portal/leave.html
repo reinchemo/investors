@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Leave | STARLINK ULTRANET LLC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+         :root {
+            --bg: #080f1e;
+            --panel: #111d32;
+            --panel2: #172640;
+            --line: rgba(148, 163, 184, .14);
+            --text: #edf4ff;
+            --muted: #91a4bf;
+            --cyan: #38d5f2;
+            --blue: #638cff;
+            --green: #35d49a;
+            --red: #ff7185;
+            --yellow: #f7c66b;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(ellipse at 10% 0%, rgba(56, 213, 242, .12), transparent 35%), radial-gradient(ellipse at 90% 10%, rgba(99, 140, 255, .12), transparent 30%), var(--bg);
+        }
+        
+        .topbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            border-bottom: 1px solid var(--line);
+            background: rgba(8, 15, 30, .88);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+        
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            color: #06101e;
+            font-weight: 900;
+            font-size: 18px;
+        }
+        
+        .brand-name {
+            font-family: Outfit, sans-serif;
+            font-weight: 800
+        }
+        
+        .brand-sub {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1.5px
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px
+        }
+        
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 10px 15px;
+            color: var(--text);
+            background: var(--panel2);
+            cursor: pointer;
+            transition: .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan)
+        }
+        
+        .btn-primary {
+            color: #06101e;
+            background: linear-gradient(120deg, var(--cyan), #82e8f6);
+            border: 0;
+            font-weight: 800;
+        }
+        
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none
+        }
+        
+        main {
+            max-width: 1150px;
+            margin: auto;
+            padding: 42px 24px 70px
+        }
+        
+        .back-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px
+        }
+        
+        .heading {
+            margin: 25px 0 28px
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px
+        }
+        
+        h1 {
+            font-family: Outfit, sans-serif;
+            font-size: clamp(30px, 5vw, 43px);
+            margin: 9px 0
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.6
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 28px 0
+        }
+        
+        .stat {
+            padding: 21px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(23, 38, 64, .95), rgba(17, 29, 50, .85));
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+        
+        .stat-value {
+            font-family: Outfit, sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 9px
+        }
+        
+        .cyan {
+            color: var(--cyan)
+        }
+        
+        .green {
+            color: var(--green)
+        }
+        
+        .yellow {
+            color: var(--yellow)
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 32px
+        }
+        
+        .panel {
+            padding: 23px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(17, 29, 50, .9);
+        }
+        
+        .panel h2 {
+            font-family: Outfit, sans-serif;
+            font-size: 20px;
+            margin: 0 0 8px
+        }
+        
+        .panel-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 0 0 22px;
+            line-height: 1.6
+        }
+        
+        .form-group {
+            margin-bottom: 16px
+        }
+        
+        label {
+            display: block;
+            font-size: 12px;
+            color: #b9c8db;
+            margin-bottom: 8px;
+            font-weight: 700
+        }
+        
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: #0b1729;
+            color: var(--text);
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--cyan)
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 105px
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+        
+        .form-message {
+            font-size: 12px;
+            line-height: 1.6;
+            margin-top: 13px
+        }
+        
+        .form-message.error {
+            color: #ff9baa
+        }
+        
+        .form-message.success {
+            color: var(--green)
+        }
+        
+        .leave-list {
+            display: grid;
+            gap: 12px
+        }
+        
+        .leave-item {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 17px;
+            background: rgba(23, 38, 64, .45);
+        }
+        
+        .leave-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center
+        }
+        
+        .leave-type {
+            font-weight: 800;
+            font-size: 14px;
+            text-transform: capitalize
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        
+        .pending {
+            background: rgba(247, 198, 107, .12);
+            color: var(--yellow)
+        }
+        
+        .approved {
+            background: rgba(53, 212, 154, .12);
+            color: var(--green)
+        }
+        
+        .rejected {
+            background: rgba(255, 113, 133, .12);
+            color: var(--red)
+        }
+        
+        .cancelled {
+            background: rgba(148, 163, 184, .12);
+            color: #b5c3d6
+        }
+        
+        .leave-dates {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 11px;
+            line-height: 1.7
+        }
+        
+        .leave-reason {
+            font-size: 12px;
+            color: #c0ccdc;
+            margin-top: 8px;
+            line-height: 1.6
+        }
+        
+        .empty,
+        .message {
+            padding: 30px 20px;
+            text-align: center;
+            border: 1px dashed var(--line);
+            border-radius: 16px;
+            color: var(--muted);
+            background: rgba(17, 29, 50, .6);
+        }
+        
+        .error-box {
+            color: #ff9baa;
+            border-color: rgba(255, 113, 133, .3)
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 35px;
+            color: var(--muted)
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #33445e;
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        
+        .notice {
+            margin-top: 20px;
+            padding: 15px 18px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+            background: rgba(56, 213, 242, .05);
+        }
+        
+        footer {
+            text-align: center;
+            color: #71839e;
+            font-size: 11px;
+            padding: 25px;
+            border-top: 1px solid var(--line)
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @media(max-width:800px) {
+            .content-grid {
+                grid-template-columns: 1fr
+            }
+        }
+        
+        @media(max-width:700px) {
+            .topbar {
+                padding: 0 15px;
+                height: 68px
+            }
+            .brand-sub {
+                display: none
+            }
+            .top-actions .btn {
+                padding: 9px;
+                font-size: 11px
+            }
+            main {
+                padding: 28px 15px 50px
+            }
+            .summary {
+                grid-template-columns: 1fr;
+                gap: 10px
+            }
+            .stat {
+                padding: 16px
+            }
+            .stat-value {
+                font-size: 23px
+            }
+            .panel {
+                padding: 18px
+            }
+            .form-row {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">S</div>
+            <div>
+                <div class="brand-name">STARLINK ULTRANET</div>
+                <div class="brand-sub">PERSONAL PORTAL</div>
+            </div>
+        </div>
+        <div class="top-actions">
+            <a class="btn" href="dashboard.html">← Dashboard</a>
+            <button class="btn" onclick="logout()">Sign out</button>
+        </div>
+    </header>
+
+    <main>
+        <a class="back-link" href="dashboard.html">← Back to my dashboard</a>
+
+        <section class="heading">
+            <div class="eyebrow">EMPLOYEE SERVICES</div>
+            <h1>Leave Management</h1>
+            <p class="subtitle">Review your leave records and submit requests for approval.</p>
+        </section>
+
+        <section class="summary">
+            <div class="stat">
+                <div class="stat-label">Annual Leave Allowance</div>
+                <div class="stat-value cyan" id="allowance">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Approved Leave Days</div>
+                <div class="stat-value green" id="usedDays">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Pending Requests</div>
+                <div class="stat-value yellow" id="pendingCount">—</div>
+            </div>
+        </section>
+
+        <div class="content-grid">
+            <section class="panel">
+                <h2>Submit leave request</h2>
+                <p class="panel-sub">Complete the details below. Your request will be sent for administrator approval.</p>
+
+                <form id="leaveForm">
+                    <div class="form-group">
+                        <label for="leaveType">Leave type</label>
+                        <select id="leaveType" required>
+      <option value="">Select leave type</option>
+      <option value="annual">Annual leave</option>
+      <option value="sick">Sick leave</option>
+      <option value="unpaid">Unpaid leave</option>
+      <option value="maternity">Maternity leave</option>
+      <option value="paternity">Paternity leave</option>
+      <option value="compassionate">Compassionate leave</option>
+      <option value="study">Study leave</option>
+      <option value="other">Other</option>
+     </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate">Start date</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End date</label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Reason for leave</label>
+                        <textarea id="reason" maxlength="2000" required placeholder="Explain why you are requesting leave..."></textarea>
+                    </div>
+
+                    <div class="notice" style="margin:0 0 17px">
+                        The requested duration is calculated using calendar days, including both the start and end dates. HR will confirm the applicable leave days and policy.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitButton">Submit leave request</button>
+                    <div id="formMessage" class="form-message" role="status"></div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <h2>My leave history</h2>
+                <p class="panel-sub">Your submitted and processed leave requests.</p>
+                <div id="leaveHistory">
+                    <div class="loading"><span class="spinner"></span> Loading leave records...</div>
+                </div>
+            </section>
+        </div>
+
+        <div class="notice">
+            <strong>Leave approval and balance information</strong><br> Submitting a request does not mean it has been approved. Only authorized administrators can approve or reject leave requests. The annual allowance shown is the value recorded in your
+            employee profile; it is not necessarily your remaining balance.
+        </div>
+    </main>
+
+    <footer>STARLINK ULTRANET LLC · Secure Personal Employee Portal</footer>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL, SUPABASE_ANON_KEY
+        );
+
+        const historyBox = document.getElementById("leaveHistory");
+        const form = document.getElementById("leaveForm");
+        const formMessage = document.getElementById("formMessage");
+        const submitButton = document.getElementById("submitButton");
+
+        let staffId = null;
+        let annualAllowance = 0;
+        let leaveRecords = [];
+
+        function safe(value) {
+            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function dateText(value) {
+            if (!value) return "Not provided";
+            const date = new Date(value + "T00:00:00");
+            if (Number.isNaN(date.getTime())) return safe(value);
+            return date.toLocaleDateString("en-KE", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            });
+        }
+
+        function titleCase(value) {
+            return String(value || "").replace(/_/g, " ")
+                .replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        function updateSummary() {
+            const approved = leaveRecords
+                .filter(record => record.status === "approved")
+                .reduce((sum, record) => sum + Number(record.days || 0), 0);
+
+            const pending = leaveRecords
+                .filter(record => record.status === "pending").length;
+
+            document.getElementById("allowance").textContent =
+                annualAllowance + " days";
+            document.getElementById("usedDays").textContent = approved + " days";
+            document.getElementById("pendingCount").textContent = pending;
+        }
+
+        function renderHistory() {
+            if (!leaveRecords.length) {
+                historyBox.innerHTML = `
+   <div class="empty">
+    <div style="font-size:30px;margin-bottom:10px">🌴</div>
+    <strong>No leave requests yet</strong>
+    <p>Your submitted leave requests will appear here.</p>
+   </div>`;
+                return;
+            }
+
+            historyBox.innerHTML = `
+  <div class="leave-list">
+   ${leaveRecords.map(record=>`
+    <article class="leave-item">
+     <div class="leave-top">
+      <div class="leave-type">${safe(titleCase(record.leave_type))}</div>
+      <span class="status ${safe(record.status)}">${safe(record.status)}</span>
+     </div>
+     <div class="leave-dates">
+      ${dateText(record.start_date)} – ${dateText(record.end_date)}
+      <br>Requested duration: ${safe(record.days)} calendar day(s)
+     </div>
+     <div class="leave-reason">${safe(record.reason||"No reason provided.")}</div>
+     ${record.notes?`<div class="leave-reason"><strong>Administrator notes:</strong> ${safe(record.notes)}</div>`:""}
+    </article>
+   `).join("")}
+  </div>`;
+}
+
+async function loadLeave(){
+ historyBox.innerHTML='<div class="loading"><span class="spinner"></span> Loading leave records...</div>';
+
+ try{
+  const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
+  if(sessionError)throw sessionError;
+
+  if(!sessionData.session){
+   window.location.href="../login.html";
+   return;
+  }
+
+  const user=sessionData.session.user;
+
+  const {data:account,error:accountError}=await supabaseClient
+   .from("personal_portal_accounts")
+   .select("staff_id,account_status")
+   .eq("user_id",user.id)
+   .maybeSingle();
+
+  if(accountError)throw accountError;
+  if(!account||account.account_status!=="active"){
+   throw new Error("Your personal portal account is not active.");
+  }
+
+  if(!account.staff_id){
+   throw new Error("This account is not linked to an employee record.");
+  }
+
+  staffId=account.staff_id;
+
+  const {data:staff,error:staffError}=await supabaseClient
+   .from("staff")
+   .select("annual_leave_days")
+   .eq("id",staffId)
+   .maybeSingle();
+
+  if(staffError)throw staffError;
+  annualAllowance=Number(staff?.annual_leave_days||0);
+
+  const {data,error}=await supabaseClient
+   .from("leave_requests")
+   .select("id,leave_type,start_date,end_date,days,reason,status,notes,created_at")
+   .eq("staff_id",staffId)
+   .order("created_at",{ascending:false});
+
+  if(error)throw error;
+
+  leaveRecords=data||[];
+  updateSummary();
+  renderHistory();
+
+ }catch(error){
+  console.error("Leave loading error:",error);
+  historyBox.innerHTML=`
+   <div class="message error-box">
+    <strong>Unable to load leave records</strong>
+    <p>${safe(error.message||"Please sign in again and retry.")}</p>
+    <button class="btn" onclick="loadLeave()">Try again</button>
+   </div>`;
+ }
+}
+
+form.addEventListener("submit",async function(event){
+ event.preventDefault();
+
+ formMessage.textContent="";
+ formMessage.className="form-message";
+
+ if(!staffId){
+  formMessage.textContent="Your employee account could not be verified. Reload the page.";
+  formMessage.classList.add("error");
+  return;
+ }
+
+ const leaveType=document.getElementById("leaveType").value;
+ const startDate=document.getElementById("startDate").value;
+ const endDate=document.getElementById("endDate").value;
+ const reason=document.getElementById("reason").value.trim();
+
+ if(!leaveType||!startDate||!endDate||!reason){
+  formMessage.textContent="Please complete all required fields.";
+  formMessage.classList.add("error");
+  return;
+ }
+
+ const start=new Date(startDate+"T00:00:00");
+ const end=new Date(endDate+"T00:00:00");
+
+ if(Number.isNaN(start.getTime())||Number.isNaN(end.getTime())||end<start){
+  formMessage.textContent="The end date must be on or after the start date.";
+  formMessage.classList.add("error");
+  return;
+ }
+
+ const days=Math.round((end-start)/86400000)+1;
+
+ submitButton.disabled=true;
+ submitButton.textContent="Submitting...";
+
+ try{
+  // Recheck the authenticated account immediately before submission.
+  const {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!sessionData.session)throw new Error("Your session has expired. Please sign in again.");
+
+  const {data:account,error:accountError}=await supabaseClient
+   .from("personal_portal_accounts")
+   .select("staff_id,account_status")
+   .eq("user_id",sessionData.session.user.id)
+   .maybeSingle();
+
+  if(accountError)throw accountError;
+  if(!account||account.account_status!=="active"||Number(account.staff_id)!==Number(staffId)){
+   throw new Error("Your employee portal access could not be verified.");
+  }
+
+  const {error}=await supabaseClient
+   .from("leave_requests")
+   .insert({
+    staff_id:staffId,
+    leave_type:leaveType,
+    start_date:startDate,
+    end_date:endDate,
+    days:days,
+    reason:reason,
+    status:"pending"
+   });
+
+  if(error)throw error;
+
+  form.reset();
+  formMessage.textContent="Your leave request has been submitted for approval.";
+  formMessage.classList.add("success");
+
+  await loadLeave();
+
+ }catch(error){
+  console.error("Leave submission error:",error);
+  formMessage.textContent=error.message||"Unable to submit your request.";
+  formMessage.classList.add("error");
+ }finally{
+  submitButton.disabled=false;
+  submitButton.textContent="Submit leave request";
+ }
+});
+
+async function logout(){
+ const {error}=await supabaseClient.auth.signOut();
+ if(error){
+  alert("Unable to sign out. Please try again.");
+  return;
+ }
+ window.location.href="../login.html";
+}
+
+loadLeave();
+    </script>
+</body>
+
+</html>

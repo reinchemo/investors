@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Financial Statement | STARLINK ULTRANET LLC</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+         :root {
+            --bg: #080d1b;
+            --panel: #111a2d;
+            --panel2: #17233a;
+            --border: rgba(148, 163, 184, .15);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --green: #34d399;
+            --purple: #a78bfa;
+            --orange: #fb923c;
+            --red: #fb7185;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at 10% 0%, rgba(34, 211, 238, .10), transparent 30%), radial-gradient(circle at 90% 10%, rgba(139, 92, 246, .12), transparent 28%), var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", sans-serif;
+        }
+        
+        button {
+            font: inherit;
+        }
+        
+        .layout {
+            width: min(1250px, 100%);
+            margin: auto;
+            padding: 28px;
+        }
+        
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            color: #06111e;
+            font-size: 23px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            box-shadow: 0 8px 25px rgba(34, 211, 238, .18);
+        }
+        
+        .brand h2 {
+            margin: 0;
+            font-family: Outfit, sans-serif;
+            font-size: 19px;
+        }
+        
+        .brand small {
+            display: block;
+            color: var(--muted);
+            margin-top: 3px;
+            font-size: 12px;
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: var(--text);
+            border-radius: 11px;
+            padding: 11px 16px;
+            cursor: pointer;
+            transition: .2s ease;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan);
+        }
+        
+        .btn-primary {
+            color: #06111e;
+            border: 0;
+            background: linear-gradient(135deg, var(--cyan), #60a5fa);
+        }
+        
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 32px;
+            border: 1px solid rgba(34, 211, 238, .2);
+            border-radius: 23px;
+            background: linear-gradient( 120deg, rgba(8, 145, 178, .18), rgba(79, 70, 229, .15), var(--panel));
+            margin-bottom: 25px;
+            animation: rise .55s ease both;
+        }
+        
+        .hero::after {
+            content: "▤";
+            position: absolute;
+            right: 35px;
+            top: 0;
+            font-size: 125px;
+            color: rgba(34, 211, 238, .08);
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .hero h1 {
+            margin: 12px 0 8px;
+            font: 800 clamp(28px, 5vw, 42px) Outfit, sans-serif;
+        }
+        
+        .hero p {
+            max-width: 650px;
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card,
+        .section-card {
+            background: linear-gradient( 145deg, rgba(23, 35, 58, .96), rgba(15, 23, 42, .96));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 23px;
+            animation: rise .6s ease both;
+        }
+        
+        .stat-card:nth-child(2) {
+            animation-delay: .08s;
+        }
+        
+        .stat-card:nth-child(3) {
+            animation-delay: .16s;
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            margin-top: 12px;
+            font: 800 clamp(21px, 4vw, 30px) Outfit, sans-serif;
+            overflow-wrap: anywhere;
+        }
+        
+        .cyan {
+            color: var(--cyan);
+        }
+        
+        .green {
+            color: var(--green);
+        }
+        
+        .purple {
+            color: var(--purple);
+        }
+        
+        .section-card {
+            margin-bottom: 22px;
+        }
+        
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .section-heading h2 {
+            margin: 0;
+            font: 700 21px Outfit, sans-serif;
+        }
+        
+        .section-heading p {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 6px 0 0;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        
+        .filters select,
+        .filters input {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 11px 13px;
+            outline: none;
+            font: inherit;
+            font-size: 13px;
+        }
+        
+        .filters select:focus,
+        .filters input:focus {
+            border-color: var(--cyan);
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 14px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        td {
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        
+        tbody tr:hover {
+            background: rgba(34, 211, 238, .045);
+        }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        
+        .investment {
+            color: var(--cyan);
+            background: rgba(34, 211, 238, .12);
+        }
+        
+        .dividend {
+            color: var(--green);
+            background: rgba(52, 211, 153, .12);
+        }
+        
+        .equity {
+            color: var(--purple);
+            background: rgba(167, 139, 250, .12);
+        }
+        
+        .positive {
+            color: var(--green);
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        
+        .negative {
+            color: var(--orange);
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 45px 20px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+        
+        .empty-icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 50px 20px;
+            color: var(--muted);
+        }
+        
+        .spinner {
+            width: 21px;
+            height: 21px;
+            border: 3px solid rgba(34, 211, 238, .2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        
+        .notice {
+            padding: 17px;
+            border: 1px solid rgba(34, 211, 238, .2);
+            border-radius: 13px;
+            background: rgba(34, 211, 238, .06);
+            color: #bae6fd;
+            line-height: 1.7;
+            font-size: 13px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media(max-width: 760px) {
+            .layout {
+                padding: 17px;
+            }
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .hero {
+                padding: 25px 21px;
+            }
+            .hero::after {
+                right: 10px;
+                font-size: 85px;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .stat-card {
+                padding: 19px;
+            }
+            .section-card {
+                padding: 17px;
+            }
+            .section-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            .btn {
+                padding: 10px 13px;
+            }
+            .filters>* {
+                width: 100%;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white !important;
+                color: #111827 !important;
+            }
+            .layout {
+                width: 100%;
+                padding: 10px;
+            }
+            .top-actions,
+            .filters,
+            .no-print {
+                display: none !important;
+            }
+            .hero,
+            .stat-card,
+            .section-card {
+                background: white !important;
+                color: #111827 !important;
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+            }
+            .hero p,
+            .stat-label,
+            .section-heading p,
+            .footer {
+                color: #475569 !important;
+            }
+            .hero h1,
+            .section-heading h2,
+            .stat-value {
+                color: #111827 !important;
+            }
+            table {
+                min-width: 0;
+            }
+            th,
+            td {
+                color: #111827 !important;
+                border-color: #ddd !important;
+            }
+            .type-badge {
+                border: 1px solid #ccc;
+            }
+            .positive,
+            .negative {
+                color: #111827 !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="layout">
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">S</div>
+                <div>
+                    <h2>STARLINK ULTRANET LLC</h2>
+                    <small>Personal Finance & Equity Portal</small>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <a class="btn" href="dashboard.html">← Dashboard</a>
+                <button class="btn" id="refreshBtn">↻ Refresh</button>
+                <button class="btn btn-primary" id="printBtn">Print Statement</button>
+                <button class="btn" id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="eyebrow">Personal Investor Records</div>
+            <h1>My Financial Statement</h1>
+            <p>
+                Review your personal investment contributions, shareholding transactions and dividend distributions in one place.
+            </p>
+        </section>
+
+        <section class="summary-grid">
+            <div class="stat-card">
+                <div class="stat-label">Investment Contributions</div>
+                <div class="stat-value cyan" id="totalInvestments">KES 0.00</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Dividends Paid</div>
+                <div class="stat-value green" id="totalDividends">KES 0.00</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Recorded Activities</div>
+                <div class="stat-value purple" id="activityCount">0</div>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-heading">
+                <div>
+                    <h2>Personal Transaction History</h2>
+                    <p>Investment and dividend activity associated with your investor account.</p>
+                </div>
+            </div>
+
+            <div class="filters no-print">
+                <select id="typeFilter">
+          <option value="all">All Activities</option>
+          <option value="investment">Investments</option>
+          <option value="dividend">Dividends</option>
+          <option value="equity">Shareholding Changes</option>
+        </select>
+
+                <input type="date" id="startDate" aria-label="Start date">
+                <input type="date" id="endDate" aria-label="End date">
+                <button class="btn" id="clearFilters">Clear Filters</button>
+            </div>
+
+            <div id="statementContent">
+                <div class="loading">
+                    <span class="spinner"></span> Loading your financial statement...
+                </div>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <div class="section-heading">
+                <div>
+                    <h2>Statement Information</h2>
+                    <p>Important information about your personal financial records.</p>
+                </div>
+            </div>
+
+            <div class="notice">
+                This statement combines personal investment transactions, recorded shareholding changes and paid dividend allocations available to your account.
+
+                <br><br> Investment contributions and dividends are displayed separately. They are different types of financial activity and are not added together as a single investment balance.
+
+                <br><br> This is a personal activity summary, not an independently audited financial statement or confirmation of bank settlement. For formal company-certified statements, contact the authorized Finance team.
+            </div>
+        </section>
+
+        <footer class="footer">
+            STARLINK ULTRANET LLC · Confidential Personal Investor Records
+        </footer>
+
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        let allActivities = [];
+        let investorAccount = null;
+
+        const money = value =>
+            new Intl.NumberFormat("en-KE", {
+                style: "currency",
+                currency: "KES",
+                minimumFractionDigits: 2
+            }).format(Number(value || 0));
+
+        function escapeHtml(value) {
+            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[char]);
+        }
+
+        function formatDate(value) {
+            if (!value) return "—";
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) return "—";
+
+            return date.toLocaleDateString("en-KE", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            });
+        }
+
+        async function getActiveSession() {
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.getSession();
+
+            if (error || !data.session) {
+                window.location.href = "../login.html";
+                return null;
+            }
+
+            return data.session;
+        }
+
+        async function loadStatement() {
+            const content = document.getElementById("statementContent");
+
+            content.innerHTML = `
+        <div class="loading">
+          <span class="spinner"></span>
+          Loading your financial statement...
+        </div>
+      `;
+
+            try {
+                const session = await getActiveSession();
+                if (!session) return;
+
+                const {
+                    data: account,
+                    error: accountError
+                } = await supabaseClient
+                    .from("personal_portal_accounts")
+                    .select("investor_id, account_status")
+                    .eq("user_id", session.user.id)
+                    .maybeSingle();
+
+                if (accountError) throw accountError;
+
+                if (!account || account.account_status !== "active") {
+                    throw new Error("Your personal portal account is unavailable or suspended.");
+                }
+
+                if (!account.investor_id) {
+                    content.innerHTML = `
+            <div class="empty">
+              <div class="empty-icon">🔒</div>
+              <h3>Investor Access Not Available</h3>
+              <p>This account is not linked to an investor record.</p>
+            </div>
+          `;
+
+                    updateSummary([]);
+                    return;
+                }
+
+                investorAccount = account;
+
+                const investorId = account.investor_id;
+
+                // Read the logged-in investor's own investment records.
+                const {
+                    data: investments,
+                    error: investmentError
+                } =
+                await supabaseClient
+                    .from("investments")
+                    .select("id, date, amount, type, reference, notes")
+                    .eq("investor_id", investorId)
+                    .order("date", {
+                        ascending: false
+                    });
+
+                if (investmentError) throw investmentError;
+
+                // Read the logged-in investor's own shareholding changes.
+                const {
+                    data: shareChanges,
+                    error: shareError
+                } =
+                await supabaseClient
+                    .from("share_transactions")
+                    .select("id, date, action, equity_before, equity_after, delta, pct_before, pct_after, reference, reason, notes")
+                    .eq("investor_id", investorId)
+                    .order("date", {
+                        ascending: false
+                    });
+
+                if (shareError) throw shareError;
+
+                // Retrieve only the logged-in investor's paid dividend allocations.
+                const {
+                    data: dividendResponse,
+                    error: dividendError
+                } =
+                await supabaseClient.functions.invoke(
+                    "portal-personal-data", {
+                        body: {
+                            action: "dividends"
+                        }
+                    }
+                );
+
+                if (dividendError) throw dividendError;
+
+                if (!dividendResponse || dividendResponse.success === false) {
+                    throw new Error(
+                        dividendResponse ? .error || "Unable to load your dividend records."
+                    );
+                }
+
+                const dividends = Array.isArray(dividendResponse.dividends) ?
+                    dividendResponse.dividends :
+                    [];
+
+                allActivities = [];
+
+                (investments || []).forEach(item => {
+                    allActivities.push({
+                        id: `investment-${item.id}`,
+                        date: item.date,
+                        category: "investment",
+                        description: item.type || "Investment contribution",
+                        reference: item.reference || `Investment #${item.id}`,
+                        amount: Number(item.amount || 0),
+                        notes: item.notes || ""
+                    });
+                });
+
+                (shareChanges || []).forEach(item => {
+                    allActivities.push({
+                        id: `equity-${item.id}`,
+                        date: item.date,
+                        category: "equity",
+                        description: item.action || "Shareholding change",
+                        reference: item.reference || `Share transaction #${item.id}`,
+                        amount: Number(item.delta || 0),
+                        notes: item.reason || item.notes || "",
+                        equityBefore: item.equity_before,
+                        equityAfter: item.equity_after
+                    });
+                });
+
+                dividends.forEach((item, index) => {
+                    allActivities.push({
+                        id: `dividend-${item.id || index}`,
+                        date: item.paid_at || item.date,
+                        category: "dividend",
+                        description: item.period_label || "Dividend distribution",
+                        reference: item.reference || "Dividend allocation",
+                        amount: Number(item.amount || 0),
+                        notes: "Paid dividend allocation"
+                    });
+                });
+
+                allActivities.sort((a, b) => {
+                    return new Date(b.date || 0) - new Date(a.date || 0);
+                });
+
+                updateSummary(allActivities);
+                applyFilters();
+
+            } catch (error) {
+                console.error("Statement loading error:", error);
+
+                content.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">⚠️</div>
+            <h3>Unable to Load Your Statement</h3>
+            <p>${escapeHtml(error.message || "Please try again later.")}</p>
+            <button class="btn" onclick="loadStatement()">Try Again</button>
+          </div>
+        `;
+            }
+        }
+
+        function updateSummary(activities) {
+            const investments = activities
+                .filter(item => item.category === "investment")
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            const dividends = activities
+                .filter(item => item.category === "dividend")
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            document.getElementById("totalInvestments").textContent = money(investments);
+            document.getElementById("totalDividends").textContent = money(dividends);
+            document.getElementById("activityCount").textContent = activities.length;
+        }
+
+        function applyFilters() {
+            const type = document.getElementById("typeFilter").value;
+            const start = document.getElementById("startDate").value;
+            const end = document.getElementById("endDate").value;
+
+            let filtered = [...allActivities];
+
+            if (type !== "all") {
+                filtered = filtered.filter(item => item.category === type);
+            }
+
+            if (start) {
+                filtered = filtered.filter(item => {
+                    return item.date && item.date.slice(0, 10) >= start;
+                });
+            }
+
+            if (end) {
+                filtered = filtered.filter(item => {
+                    return item.date && item.date.slice(0, 10) <= end;
+                });
+            }
+
+            renderActivities(filtered);
+        }
+
+        function renderActivities(activities) {
+            const content = document.getElementById("statementContent");
+
+            if (!activities.length) {
+                content.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">📄</div>
+            <h3>No Matching Financial Activities</h3>
+            <p>No records were found for the selected filters.</p>
+          </div>
+        `;
+                return;
+            }
+
+            const categoryLabels = {
+                investment: "Investment",
+                dividend: "Dividend",
+                equity: "Shareholding"
+            };
+
+            content.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Activity</th>
+                <th>Description</th>
+                <th>Reference</th>
+                <th>Amount / Change</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${activities.map(item => {
+                const badgeClass = item.category;
+                const valueClass = item.amount < 0 ? "negative" : "positive";
+
+                let amountText;
+
+                if (item.category === "equity") {
+                  amountText = `${item.amount > 0 ? "+" : ""}${item.amount.toLocaleString("en-KE")}`;
+                } else {
+                  amountText = money(item.amount);
+                }
+
+                return `
+                  <tr>
+                    <td>${formatDate(item.date)}</td>
+
+                    <td>
+                      <span class="type-badge ${badgeClass}">
+                        ${categoryLabels[item.category]}
+                      </span>
+                    </td>
+
+                    <td>
+                      <strong>${escapeHtml(item.description)}</strong>
+                      ${item.notes ? `
+                        <div style="color:var(--muted);font-size:11px;margin-top:5px">
+                          ${escapeHtml(item.notes)}
+                        </div>
+                      ` : ""}
+                    </td>
+
+                    <td>${escapeHtml(item.reference)}</td>
+
+                    <td class="${valueClass}">
+                      ${amountText}
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <p style="color:var(--muted);font-size:12px;margin-top:15px">
+          Showing ${activities.length} personal financial activity record(s).
+        </p>
+      `;
+    }
+
+    document.getElementById("typeFilter").addEventListener("change", applyFilters);
+    document.getElementById("startDate").addEventListener("change", applyFilters);
+    document.getElementById("endDate").addEventListener("change", applyFilters);
+
+    document.getElementById("clearFilters").addEventListener("click", () => {
+      document.getElementById("typeFilter").value = "all";
+      document.getElementById("startDate").value = "";
+      document.getElementById("endDate").value = "";
+      applyFilters();
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", loadStatement);
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+      window.print();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      window.location.href = "../login.html";
+    });
+
+    loadStatement();
+    </script>
+</body>
+
+</html>

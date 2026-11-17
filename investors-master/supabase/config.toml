@@ -1,0 +1,3 @@
+
+[functions.starlink-id-login]
+verify_jwt = false

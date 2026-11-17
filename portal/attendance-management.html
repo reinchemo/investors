@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Attendance Management | STARLINK ULTRANET</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --bg: #080d1b;
+            --surface: #111a2d;
+            --line: rgba(148, 174, 215, .14);
+            --white: #f5f8ff;
+            --muted: #91a3bf;
+            --cyan: #45dfd0;
+            --blue: #459bff;
+            --green: #3ed6a0;
+            --orange: #ffbd69;
+            --red: #ff7185
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif
+        }
+        
+        main {
+            width: min(1250px, 100%);
+            margin: auto;
+            padding: 24px
+        }
+        
+        .hero,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: linear-gradient(145deg, #192a44, #0f192b);
+            margin-bottom: 18px
+        }
+        
+        .hero {
+            padding: 25px;
+            background: linear-gradient(115deg, #153a59, #172c50 60%, #302552)
+        }
+        
+        .eyebrow {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            color: #a9e9e8
+        }
+        
+        h1 {
+            font: 800 28px Outfit;
+            margin: 12px 0 7px
+        }
+        
+        h2 {
+            font: 700 16px Outfit;
+            margin: 0
+        }
+        
+        p,
+        .muted {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6
+        }
+        
+        .panel-head {
+            padding: 17px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px
+        }
+        
+        .panel-body {
+            padding: 18px 20px
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 18px
+        }
+        
+        .metric {
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: var(--surface)
+        }
+        
+        .metric strong {
+            display: block;
+            font: 800 25px Outfit;
+            margin-top: 8px
+        }
+        
+        .metric span {
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 800;
+            letter-spacing: .7px
+        }
+        
+        .btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 14px;
+            color: white;
+            font-weight: 800;
+            font-size: 11px;
+            cursor: pointer
+        }
+        
+        .btn:disabled {
+            opacity: .45;
+            cursor: not-allowed
+        }
+        
+        .blue {
+            background: #287fe0
+        }
+        
+        .green {
+            background: #079e79
+        }
+        
+        .red {
+            background: #bd4359
+        }
+        
+        .dark {
+            background: #263752
+        }
+        
+        .field {
+            background: #0d192b;
+            color: white;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            padding: 10px;
+            font: inherit;
+            font-size: 12px
+        }
+        
+        .table-wrap {
+            overflow-x: auto
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px
+        }
+        
+        th,
+        td {
+            text-align: left;
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--line);
+            font-size: 11px
+        }
+        
+        th {
+            font-size: 9px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .7px
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #263650;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: capitalize
+        }
+        
+        .pending {
+            background: rgba(214, 145, 40, .17);
+            color: #ffd18b
+        }
+        
+        .approved {
+            background: rgba(24, 155, 111, .17);
+            color: #73e2b8
+        }
+        
+        .rejected {
+            background: rgba(220, 75, 95, .17);
+            color: #ff9eaa
+        }
+        
+        .alert {
+            display: none;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 12px
+        }
+        
+        .alert.show {
+            display: block
+        }
+        
+        .error {
+            background: #4a1e2a;
+            color: #ffb5c0
+        }
+        
+        .ok {
+            background: #103d34;
+            color: #9bdcc7
+        }
+        
+        .request {
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            margin-bottom: 12px;
+            background: #0d192b
+        }
+        
+        .request h3 {
+            font: 700 14px Outfit;
+            margin: 0 0 8px
+        }
+        
+        .request p {
+            margin: 5px 0
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 13px
+        }
+        
+        @media(max-width:750px) {
+            main {
+                padding: 13px
+            }
+            .grid {
+                grid-template-columns: 1fr
+            }
+            .hero {
+                padding: 20px
+            }
+            .panel-head {
+                align-items: flex-start;
+                flex-direction: column
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <section class="hero">
+            <div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> MANAGEMENT / EMPLOYEE SERVICES</div>
+            <h1>Attendance Management</h1>
+            <p>Review employee attendance, monitor daily records and process correction requests.</p>
+        </section>
+
+        <div id="message" class="alert"></div>
+
+        <section class="grid">
+            <div class="metric"><span>TEAM RECORDS</span><strong id="totalRecords">—</strong></div>
+            <div class="metric"><span>PENDING ATTENDANCE</span><strong id="pendingRecords">—</strong></div>
+            <div class="metric"><span>CORRECTION REQUESTS</span><strong id="correctionCount">—</strong></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2><i class="fa-solid fa-calendar-day"></i> Daily team attendance</h2>
+                <div>
+                    <input type="date" class="field" id="attendanceDate">
+                    <button class="btn blue" id="loadTeam"><i class="fa-solid fa-rotate"></i> Load</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Employee No.</th>
+                            <th>Check in</th>
+                            <th>Check out</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamRows">
+                        <tr>
+                            <td colspan="6">Loading attendance...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2><i class="fa-solid fa-file-circle-check"></i> Pending correction requests</h2>
+                <button class="btn dark" id="refreshCorrections">Refresh requests</button>
+            </div>
+            <div class="panel-body" id="correctionList">
+                <p>Loading correction requests...</p>
+            </div>
+        </section>
+
+        <p style="text-align:center">STARLINK ULTRANET LLC · Management Portal</p>
+    </main>
+
+    <script>
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const $ = id => document.getElementById(id);
+
+        function showMessage(message, type) {
+            $("message").textContent = message;
+            $("message").className = "alert show " + type;
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? "" : value).replace(/[&<>"']/g, function(c) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                }[c];
+            });
+        }
+
+        function timeText(value) {
+            if (!value) return "—";
+            return new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Africa/Nairobi",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            }).format(new Date(value));
+        }
+
+        function dateText(value) {
+            if (!value) return "—";
+            return new Intl.DateTimeFormat("en-GB", {
+                timeZone: "Africa/Nairobi",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }).format(new Date(value));
+        }
+
+        async function callAttendance(action, payload = {}) {
+            const sessionResult = await supabaseClient.auth.getSession();
+            const session = sessionResult.data.session;
+
+            if (sessionResult.error || !session) {
+                throw new Error("Please sign in again.");
+            }
+
+            const result = await supabaseClient.functions.invoke(
+                "personal-portal-attendance", {
+                    body: Object.assign({
+                        action: action
+                    }, payload)
+                }
+            );
+
+            if (result.error) {
+                const message = result.data && result.data.error;
+                throw new Error(message || result.error.message || "Request failed.");
+            }
+
+            if (result.data && result.data.error) {
+                throw new Error(result.data.error);
+            }
+
+            return result.data;
+        }
+
+        async function loadTeam() {
+            const button = $("loadTeam");
+            button.disabled = true;
+
+            try {
+                const result = await callAttendance("team_attendance", {
+                    date: $("attendanceDate").value
+                });
+
+                const rows = result.attendance || [];
+
+                $("totalRecords").textContent = rows.length;
+                $("pendingRecords").textContent = rows.filter(
+                    r => r.status === "pending" || r.status === "late_pending_approval"
+                ).length;
+
+                if (!rows.length) {
+                    $("teamRows").innerHTML =
+                        '<tr><td colspan="7">No attendance records for this date.</td></tr>';
+                    return;
+                }
+
+                $("teamRows").innerHTML = rows.map(r => {
+                            const staff = r.staff || {};
+                            return `
+            <tr>
+                <td>${escapeHtml(staff.full_name||"Unknown employee")}</td>
+                <td>${escapeHtml(staff.employee_number||"—")}</td>
+                <td>${timeText(r.check_in)}</td>
+                <td>${timeText(r.check_out)}</td>
+                <td><span class="status ${escapeHtml(r.status)}">${escapeHtml(String(r.status||"pending").replace(/_/g," "))}</span></td>
+                
+                <td>${escapeHtml(r.notes||"—")}</td>
+<td>
+    ${
+        r.status === "pending" || r.status === "late_pending_approval"
+        ? `
+            <button class="btn green"
+                data-attendance-review="approved"
+                data-id="${r.id}">Approve</button>
+
+            <button class="btn red"
+                data-attendance-review="rejected"
+                data-id="${r.id}">Reject</button>
+        `
+        : "Reviewed"
+    }
+</td>
+            </tr>`;
+                }).join("");
+
+            } catch (error) {
+                showMessage(error.message, "error");
+                $("teamRows").innerHTML =
+                    '<tr><td colspan="7">Unable to load attendance.</td></tr>';
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function loadCorrections() {
+            const list = $("correctionList");
+            list.innerHTML = "<p>Loading requests...</p>";
+
+            try {
+                const result = await callAttendance("pending_corrections");
+                const requests = result.corrections || [];
+
+                $("correctionCount").textContent = requests.length;
+
+                if (!requests.length) {
+                    list.innerHTML = '<p>No pending correction requests.</p>';
+                    return;
+                }
+
+                list.innerHTML = requests.map(r => {
+                    const staff = r.staff || {};
+                    return `
+            <article class="request">
+                <h3>${escapeHtml(staff.full_name||"Employee")} · ${escapeHtml(staff.employee_number||"")}</h3>
+                <p><strong>Attendance date:</strong> ${dateText(r.requested_check_in||r.requested_check_out||r.created_at)}</p>
+                <p><strong>Requested check-in:</strong> ${timeText(r.requested_check_in)}</p>
+                <p><strong>Requested check-out:</strong> ${timeText(r.requested_check_out)}</p>
+                <p><strong>Reason:</strong> ${escapeHtml(r.reason)}</p>
+                <p><strong>Submitted:</strong> ${dateText(r.created_at)}</p>
+                <div class="actions">
+                    <button class="btn green" data-review="approved" data-id="${r.id}">
+                        <i class="fa-solid fa-check"></i> Approve
+                    </button>
+                    <button class="btn red" data-review="rejected" data-id="${r.id}">
+                        <i class="fa-solid fa-xmark"></i> Reject
+                    </button>
+                </div>
+            </article>`;
+                }).join("");
+
+            } catch (error) {
+                list.innerHTML = "<p>Unable to load correction requests.</p>";
+                showMessage(error.message, "error");
+            }
+        }
+
+        async function reviewCorrection(id, decision) {
+            const label = decision === "approved" ? "approve" : "reject";
+
+            if (!confirm("Are you sure you want to " + label + " this correction request?")) {
+                return;
+            }
+
+            const notes = prompt("Enter review notes (optional):") || "";
+
+            try {
+                await callAttendance("review_correction", {
+                    request_id: Number(id),
+                    decision: decision,
+                    review_notes: notes
+                });
+
+                showMessage("Correction request " + decision + " successfully.", "ok");
+
+                await Promise.all([loadCorrections(), loadTeam()]);
+
+            } catch (error) {
+                showMessage(error.message, "error");
+            }
+        }
+
+        $("correctionList").addEventListener("click", function(event) {
+            const button = event.target.closest("button[data-review]");
+            if (!button) return;
+
+            reviewCorrection(button.dataset.id, button.dataset.review);
+        });
+
+        async function reviewAttendance(id, decision) {
+    let notes = "";
+
+    if (decision === "rejected") {
+        notes = prompt("Enter the reason for rejecting attendance:");
+
+        if (!notes || !notes.trim()) {
+            alert("A rejection reason is required.");
+            return;
+        }
+    } else {
+        if (!confirm("Approve this attendance record?")) return;
+        notes = prompt("Optional approval notes:") || "";
+    }
+
+    try {
+        await callAttendance("review_attendance", {
+            attendance_id: Number(id),
+            decision: decision,
+            review_notes: notes
+        });
+
+        showMessage("Attendance " + decision + " successfully.", "ok");
+        await loadTeam();
+
+    } catch (error) {
+        showMessage(error.message, "error");
+    }
+}
+
+$("teamRows").addEventListener("click", function(event) {
+    const button = event.target.closest("button[data-attendance-review]");
+
+    if (!button) return;
+
+    reviewAttendance(
+        button.dataset.id,
+        button.dataset.attendanceReview
+    );
+});
+
+        $("loadTeam").addEventListener("click", loadTeam);
+        $("refreshCorrections").addEventListener("click", loadCorrections);
+
+        function kenyaDateInput() {
+            const parts = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Africa/Nairobi",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }).format(new Date());
+
+            $("attendanceDate").value = parts;
+        }
+
+        async function initialise() {
+            const result = await supabaseClient.auth.getSession();
+
+            if (result.error || !result.data.session) {
+                location.href = "../login.html";
+                return;
+            }
+
+            kenyaDateInput();
+            await Promise.all([loadTeam(), loadCorrections()]);
+        }
+
+        initialise();
+    </script>
+</body>
+
+</html>

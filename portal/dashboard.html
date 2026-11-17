@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080d1b">
+    <title>Personal Portal | STARLINK ULTRANET LLC</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+         :root {
+            --bg: #080d1b;
+            --surface: #111a2d;
+            --surface2: #17243b;
+            --surface3: #1d2d48;
+            --line: rgba(148, 174, 215, .14);
+            --white: #f5f8ff;
+            --muted: #91a3bf;
+            --cyan: #45dfd0;
+            --blue: #459bff;
+            --purple: #a78bfa;
+            --green: #3ed6a0;
+            --orange: #ffbd69;
+            --red: #ff7185;
+            --sidebar: 260px;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        html {
+            scroll-behavior: smooth
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--white);
+            background: radial-gradient(ellipse at 15% 0%, rgba(32, 139, 190, .16), transparent 34%), radial-gradient(ellipse at 90% 15%, rgba(115, 76, 220, .13), transparent 32%), var(--bg);
+            font-family: 'DM Sans', sans-serif
+        }
+        
+        button,
+        a,
+        input,
+        select,
+        textarea {
+            font: inherit
+        }
+        
+        button {
+            cursor: pointer
+        }
+        
+        a {
+            color: inherit
+        }
+        
+        .hidden {
+            display: none!important
+        }
+        
+        .app {
+            min-height: 100vh
+        }
+        
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--sidebar);
+            padding: 24px 17px;
+            background: rgba(11, 19, 35, .96);
+            border-right: 1px solid var(--line);
+            backdrop-filter: blur(22px);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform .3s ease;
+            overflow-y: auto
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 3px 8px 27px;
+            border-bottom: 1px solid var(--line)
+        }
+        
+        .brand-icon {
+            width: 47px;
+            height: 47px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #20c7d4, #386df2 65%, #8057e8);
+            box-shadow: 0 8px 28px rgba(45, 142, 240, .28);
+            font-size: 21px
+        }
+        
+        .brand h1 {
+            margin: 0;
+            font: 800 14px Outfit, sans-serif;
+            letter-spacing: .5px
+        }
+        
+        .brand p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 10px
+        }
+        
+        .nav-label {
+            margin: 25px 10px 10px;
+            color: #7185a5;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase
+        }
+        
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+        
+        .nav-links a {
+            min-height: 47px;
+            padding: 0 13px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            border: 1px solid transparent;
+            border-radius: 13px;
+            color: #aebed5;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all .22s ease
+        }
+        
+        .nav-links a i {
+            width: 20px;
+            text-align: center;
+            color: #7f9bbd;
+            font-size: 15px
+        }
+        
+        .nav-links a:hover {
+            background: rgba(65, 157, 255, .10);
+            color: #fff;
+            transform: translateX(3px)
+        }
+        
+        .nav-links a.active {
+            color: #fff;
+            border-color: rgba(69, 155, 255, .25);
+            background: linear-gradient(100deg, rgba(44, 137, 224, .24), rgba(95, 87, 211, .13));
+            box-shadow: inset 3px 0 var(--cyan)
+        }
+        
+        .nav-links a.active i {
+            color: var(--cyan)
+        }
+        
+        .sidebar-bottom {
+            margin-top: auto;
+            padding-top: 25px
+        }
+        
+        .secure-note {
+            padding: 14px;
+            border: 1px solid rgba(62, 214, 160, .17);
+            border-radius: 14px;
+            background: rgba(35, 155, 119, .08);
+            color: #9bdcc7;
+            font-size: 11px;
+            line-height: 1.6
+        }
+        
+        .secure-note i {
+            margin-right: 6px;
+            color: var(--green)
+        }
+        
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 17px 5px 3px
+        }
+        
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #2d9fe8, #7558e9);
+            font-weight: 800
+        }
+        
+        .user-mini strong {
+            display: block;
+            font-size: 12px
+        }
+        
+        .user-mini small {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 3px
+        }
+        
+        .main {
+            margin-left: var(--sidebar);
+            min-height: 100vh
+        }
+        
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 80;
+            height: 76px;
+            padding: 0 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            background: rgba(8, 13, 27, .88);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(20px)
+        }
+        
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+        
+        .menu-toggle {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: white;
+            background: var(--surface)
+        }
+        
+        .page-heading h2 {
+            margin: 0;
+            font: 700 18px Outfit, sans-serif
+        }
+        
+        .page-heading p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 11px
+        }
+        
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+        
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: #c9d8ee;
+            background: var(--surface);
+            transition: .2s
+        }
+        
+        .icon-btn:hover {
+            background: var(--surface3);
+            transform: translateY(-2px)
+        }
+        
+        .btn {
+            border: 0;
+            border-radius: 12px;
+            padding: 12px 17px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+            transition: .2s
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1)
+        }
+        
+        .btn-primary {
+            background: linear-gradient(120deg, #168fdf, #5265ed);
+            box-shadow: 0 8px 22px rgba(53, 119, 231, .22)
+        }
+        
+        .btn-success {
+            background: linear-gradient(120deg, #079e79, #27c990)
+        }
+        
+        .btn-dark {
+            background: #263752;
+            border: 1px solid var(--line)
+        }
+        
+        .content {
+            width: min(1450px, 100%);
+            margin: auto;
+            padding: 30px 34px 60px
+        }
+        
+        @keyframes pageIn {
+            from {
+                opacity: 0;
+                transform: translateY(13px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        
+        @keyframes floatIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px)
+            }
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+        
+        @keyframes glow {
+            0%,
+            100% {
+                opacity: .5
+            }
+            50% {
+                opacity: 1
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 31px 33px;
+            border: 1px solid rgba(88, 166, 232, .22);
+            border-radius: 25px;
+            background: radial-gradient(circle at 85% 10%, rgba(90, 112, 244, .25), transparent 30%), linear-gradient(115deg, #153a59, #172c50 52%, #302552);
+            box-shadow: 0 18px 48px rgba(0, 0, 0, .18);
+            margin-bottom: 24px
+        }
+        
+        .hero:before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -85px;
+            top: -160px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 50%;
+            box-shadow: 0 0 0 28px rgba(255, 255, 255, .025), 0 0 0 58px rgba(255, 255, 255, .02)
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1
+        }
+        
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #a9e9e8;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase
+        }
+        
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green);
+            animation: glow 1.7s infinite
+        }
+        
+        .hero h1 {
+            margin: 13px 0 8px;
+            font: 800 clamp(27px, 4vw, 39px) Outfit, sans-serif;
+            letter-spacing: -1px
+        }
+        
+        .hero p {
+            margin: 0;
+            color: #c0d1e9;
+            font-size: 14px;
+            line-height: 1.7
+        }
+        
+        .classification {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+            margin-top: 19px
+        }
+        
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 13px;
+            border-radius: 30px;
+            color: #8be5dc;
+            background: rgba(37, 192, 177, .12);
+            border: 1px solid rgba(69, 223, 208, .23);
+            font-size: 10px;
+            font-weight: 800
+        }
+        
+        .tag.investor {
+            color: #cbb9ff;
+            background: rgba(153, 111, 244, .13);
+            border-color: rgba(167, 139, 250, .25)
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 28px 0 15px
+        }
+        
+        .section-title h2 {
+            margin: 0;
+            font: 700 19px Outfit, sans-serif
+        }
+        
+        .section-title p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 11px
+        }
+        
+        .title-icon {
+            width: 39px;
+            height: 39px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(69, 155, 255, .12);
+            color: var(--blue)
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px
+        }
+        
+        .stat-card {
+            min-width: 0;
+            position: relative;
+            overflow: hidden;
+            padding: 21px;
+            border: 1px solid var(--line);
+            border-radius: 19px;
+            background: linear-gradient(145deg, rgba(25, 42, 68, .98), rgba(15, 25, 43, .98));
+            box-shadow: 0 10px 28px rgba(0, 0, 0, .12);
+            animation: floatIn .55s ease both;
+            transition: .25s
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(69, 223, 208, .4);
+            box-shadow: 0 18px 35px rgba(0, 0, 0, .2)
+        }
+        
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            font-size: 16px
+        }
+        
+        .ic-cyan {
+            color: var(--cyan);
+            background: rgba(69, 223, 208, .12)
+        }
+        
+        .ic-blue {
+            color: var(--blue);
+            background: rgba(69, 155, 255, .13)
+        }
+        
+        .ic-purple {
+            color: var(--purple);
+            background: rgba(167, 139, 250, .13)
+        }
+        
+        .ic-green {
+            color: var(--green);
+            background: rgba(62, 214, 160, .12)
+        }
+        
+        .ic-orange {
+            color: var(--orange);
+            background: rgba(255, 189, 105, .12)
+        }
+        
+        .stat-value {
+            margin-top: 16px;
+            font: 800 clamp(23px, 2.5vw, 31px) Outfit, sans-serif;
+            letter-spacing: -.7px;
+            overflow-wrap: anywhere
+        }
+        
+        .stat-note {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 11px
+        }
+        
+        .panel {
+            margin-bottom: 19px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(20, 33, 55, .98), rgba(14, 23, 40, .98));
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .12)
+        }
+        
+        .panel-head {
+            min-height: 66px;
+            padding: 17px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, .018)
+        }
+        
+        .panel-head h3 {
+            margin: 0;
+            font: 700 15px Outfit, sans-serif
+        }
+        
+        .panel-head h3 i {
+            margin-right: 9px;
+            color: var(--cyan)
+        }
+        
+        .panel-body {
+            padding: 22px
+        }
+        
+        .readonly {
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: rgba(69, 155, 255, .11);
+            color: #91c9ff;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase
+        }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px
+        }
+        
+        .profile-item label {
+            display: block;
+            margin-bottom: 7px;
+            color: #8095b3;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .8px;
+            text-transform: uppercase
+        }
+        
+        .profile-item strong {
+            display: block;
+            font-size: 13px;
+            overflow-wrap: anywhere
+        }
+        
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px
+        }
+        
+        th {
+            padding: 14px 15px;
+            text-align: left;
+            color: #8ea2c0;
+            background: rgba(255, 255, 255, .025);
+            font-size: 10px;
+            letter-spacing: .8px;
+            text-transform: uppercase
+        }
+        
+        td {
+            padding: 15px;
+            border-top: 1px solid rgba(148, 174, 215, .10);
+            color: #dce6f5;
+            font-size: 12px
+        }
+        
+        tbody tr:hover {
+            background: rgba(69, 155, 255, .055)
+        }
+        
+        .status {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 30px;
+            background: #263650;
+            color: #d4e3f6;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: capitalize
+        }
+        
+        .status.good {
+            background: rgba(24, 155, 111, .17);
+            color: #73e2b8
+        }
+        
+        .status.pending {
+            background: rgba(214, 145, 40, .17);
+            color: #ffd18b
+        }
+        
+        .status.bad {
+            background: rgba(220, 75, 95, .17);
+            color: #ff9eaa
+        }
+        
+        .empty {
+            padding: 30px 15px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px
+        }
+        
+        .empty i {
+            display: block;
+            margin-bottom: 12px;
+            color: #58708f;
+            font-size: 25px
+        }
+        
+        .notice {
+            margin-bottom: 20px;
+            padding: 15px 18px;
+            border: 1px solid rgba(69, 155, 255, .2);
+            border-radius: 15px;
+            background: rgba(42, 116, 190, .09);
+            color: #b8d7f3;
+            font-size: 12px;
+            line-height: 1.7
+        }
+        
+        .notice i {
+            margin-right: 8px;
+            color: var(--blue)
+        }
+        
+        .error-box {
+            display: none;
+            margin-bottom: 18px;
+            padding: 15px 17px;
+            border: 1px solid rgba(255, 113, 133, .3);
+            border-radius: 13px;
+            background: rgba(160, 42, 62, .16);
+            color: #ffb5c0;
+            font-size: 12px;
+            line-height: 1.6
+        }
+        
+        .loading {
+            padding: 30px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px
+        }
+        
+        .spinner {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 12px;
+            border: 3px solid rgba(69, 155, 255, .15);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite
+        }
+        
+        .field {
+            width: 100%;
+            padding: 13px 14px;
+            color: var(--white);
+            background: #0d192b;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            outline: none;
+            font-size: 13px
+        }
+        
+        .field:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(69, 223, 208, .09)
+        }
+        
+        .field option {
+            background: #14233a
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px
+        }
+        
+        .form-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #9eb0ca;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .6px;
+            text-transform: uppercase
+        }
+        
+        .form-actions {
+            margin-top: 17px
+        }
+        
+        .footer {
+            padding: 28px 12px;
+            text-align: center;
+            color: #667d9c;
+            font-size: 10px;
+            letter-spacing: .6px
+        }
+        
+        .module-frame {
+            display: block;
+            width: 100%;
+            min-height: 850px;
+            height: 850px;
+            border: 0;
+            background: transparent;
+            animation: pageIn .35s ease both
+        }
+        
+        .module-frame[hidden] {
+            display: none!important
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            background: rgba(0, 0, 0, .58);
+            backdrop-filter: blur(3px)
+        }
+        
+        @media(max-width:1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+        }
+        
+        @media(max-width:800px) {
+             :root {
+                --sidebar: 270px
+            }
+            .sidebar {
+                transform: translateX(-105%)
+            }
+            .sidebar.open {
+                transform: translateX(0)
+            }
+            .overlay.show {
+                display: block
+            }
+            .main {
+                margin-left: 0
+            }
+            .menu-toggle {
+                display: grid;
+                place-items: center
+            }
+            .topbar {
+                height: 68px;
+                padding: 0 17px
+            }
+            .content {
+                padding: 22px 17px 45px
+            }
+            .module-frame {
+                min-height: 850px
+            }
+        }
+        
+        @media(max-width:600px) {
+            .topbar {
+                padding: 0 12px
+            }
+            .page-heading p {
+                display: none
+            }
+            .top-actions {
+                gap: 7px
+            }
+            .top-actions .btn {
+                padding: 11px 12px;
+                font-size: 11px
+            }
+            .content {
+                padding: 17px 12px 35px
+            }
+            .hero {
+                padding: 24px 20px;
+                border-radius: 19px
+            }
+            .hero h1 {
+                font-size: 27px
+            }
+            .hero p {
+                font-size: 12px
+            }
+            .stats-grid {
+                gap: 10px
+            }
+            .stat-card {
+                padding: 15px 13px;
+                border-radius: 15px
+            }
+            .stat-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 14px
+            }
+            .stat-label {
+                font-size: 9px;
+                letter-spacing: .5px
+            }
+            .stat-value {
+                font-size: 21px;
+                margin-top: 13px
+            }
+            .stat-note {
+                font-size: 10px
+            }
+            .panel {
+                border-radius: 16px
+            }
+            .panel-head {
+                padding: 15px
+            }
+            .panel-head h3 {
+                font-size: 13px
+            }
+            .panel-body {
+                padding: 16px
+            }
+            .profile-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 18px 12px
+            }
+            .profile-item strong {
+                font-size: 12px
+            }
+            .form-grid {
+                grid-template-columns: 1fr
+            }
+            .section-title h2 {
+                font-size: 17px
+            }
+        }
+        
+        @media(max-width:360px) {
+            .stats-grid,
+            .profile-grid {
+                grid-template-columns: 1fr
+            }
+        }
+        
+        @media(prefers-reduced-motion:reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms!important;
+                animation-iteration-count: 1!important;
+                transition-duration: .01ms!important;
+                scroll-behavior: auto!important
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+
+        <div class="overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-satellite-dish"></i></div>
+                <div>
+                    <h1>STARLINK ULTRANET</h1>
+                    <p>PERSONAL FINANCE PORTAL</p>
+                </div>
+            </div>
+
+            <div class="nav-label">Workspace</div>
+            <nav class="nav-links">
+                <a href="dashboard.html" data-page="dashboard" class="active">
+                    <i class="fas fa-house"></i> Overview
+                </a>
+            </nav>
+
+            <div class="nav-label" id="employeeNavLabel">Employee services</div>
+            <nav class="nav-links" id="employeeNavigation">
+                <a href="profile.html" data-page="profile" data-access="employee"><i class="fas fa-user"></i> My Profile</a>
+                <a href="attendance.html" data-page="attendance" data-access="employee"><i class="fas fa-calendar-check"></i> Attendance</a>
+                <a href="tasks.html" data-page="tasks" data-access="employee"><i class="fas fa-list-check"></i> My Tasks</a>
+                <a href="payments.html" data-page="payments" data-access="employee"><i class="fas fa-wallet"></i> Payments</a>
+                <a href="payslips.html" data-page="payslips" data-access="employee"><i class="fas fa-file-invoice-dollar"></i> Payslips</a>
+                <a href="leave.html" data-page="leave" data-access="employee"><i class="fas fa-calendar-minus"></i> Leave requests</a>
+            </nav>
+
+            <div class="nav-label" id="investorNavLabel">Investment services</div>
+            <nav class="nav-links" id="investorNavigation">
+                <a href="investments.html" data-page="investments" data-access="investor"><i class="fas fa-chart-line"></i> My Investments</a>
+                <a href="dividends.html" data-page="dividends" data-access="investor"><i class="fas fa-chart-pie"></i> Dividends</a>
+                <a href="statements.html" data-page="statements" data-access="investor"><i class="fas fa-file-lines"></i> Statements</a>
+            </nav>
+
+
+            <div class="nav-label">Management services</div>
+            <nav class="nav-links">
+                <a href="staff-management.html" data-page="staff-management">
+                    <i class="fas fa-users"></i> Staff Management
+                </a>
+
+                <a href="attendance-management.html" data-page="attendance-management">
+                    <i class="fas fa-calendar-check"></i> Attendance Management
+                </a>
+            </nav>
+
+
+            <div class="nav-label" id="managementNavLabel" style="display:none;">
+                Management
+            </div>
+
+            <nav class="nav-links" id="managementNavigation" style="display:none;">
+
+                <a href="task-review.html" data-page="task-review" id="taskReviewNavLink" style="display:none;">
+                    <i class="fas fa-clipboard-check"></i> Task Review
+                </a>
+
+            </nav>
+
+            <div class="nav-label">Account</div>
+
+            <nav class="nav-links">
+                <a href="notifications.html" data-page="notifications">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+
+                <a href="security.html" data-page="security">
+                    <i class="fas fa-shield-halved"></i> Security
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="secure-note">
+                    <i class="fas fa-lock"></i> Your personal information is protected by account-level access controls.
+                </div>
+                <div class="user-mini">
+                    <div class="avatar" id="userAvatar">S</div>
+                    <div>
+                        <strong id="sidebarUserName">My Account</strong>
+                        <small id="sidebarUserType">Personal portal</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div class="top-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+                    <div class="page-heading">
+                        <h2 id="pageHeadingTitle">Personal Dashboard</h2>
+                        <p id="pageHeadingSubtitle">Your STARLINK account at a glance</p>
+                    </div>
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-btn" onclick="loadDashboard()" title="Refresh dashboard">
+            <i class="fas fa-rotate"></i>
+        </button>
+                    <button class="btn btn-primary" onclick="logout()">
+            <i class="fas fa-right-from-bracket"></i> Logout
+        </button>
+                </div>
+            </header>
+
+            <div class="content">
+
+                <!-- ORIGINAL DASHBOARD VIEW -->
+                <div id="dashboardView">
+
+                    <div id="errorBox" class="error-box"></div>
+
+                    <section class="hero">
+                        <div class="hero-content">
+                            <div class="eyebrow"><span class="live-dot"></span> PERSONAL ACCOUNT OVERVIEW</div>
+                            <h1 id="welcomeName">Welcome to your portal</h1>
+                            <p>Manage your personal employee and investment information in one secure place.</p>
+                            <div class="classification" id="classificationTags"></div>
+                        </div>
+                    </section>
+
+                    <div class="notice">
+                        <i class="fas fa-shield-halved"></i> This dashboard displays information linked to your own account. Employee and investor records remain separate, and access is controlled by your account permissions.
+                    </div>
+
+                    <!-- EMPLOYEE DASHBOARD -->
+                    <section id="employeeArea" class="hidden">
+                        <div class="section-title">
+                            <div>
+                                <h2>Employee overview</h2>
+                                <p>Your employment information and activity</p>
+                            </div>
+                            <div class="title-icon"><i class="fas fa-briefcase"></i></div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-top">
+                                    <span class="stat-label">EMPLOYEE NUMBER</span>
+                                    <span class="stat-icon ic-cyan"><i class="fas fa-id-badge"></i></span>
+                                </div>
+                                <div class="stat-value" id="employeeNumber">—</div>
+                                <div class="stat-note">Your staff identification</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-top">
+                                    <span class="stat-label">ATTENDANCE RECORDS</span>
+                                    <span class="stat-icon ic-blue"><i class="fas fa-calendar-check"></i></span>
+                                </div>
+                                <div class="stat-value" id="attendanceCount">0</div>
+                                <div class="stat-note">Available records</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-top">
+                                    <span class="stat-label">ASSIGNED TASKS</span>
+                                    <span class="stat-icon ic-purple"><i class="fas fa-list-check"></i></span>
+                                </div>
+                                <div class="stat-value" id="taskCount">0</div>
+                                <div class="stat-note">Your assigned tasks</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-top">
+                                    <span class="stat-label">LEAVE REQUESTS</span>
+                                    <span class="stat-icon ic-orange"><i class="fas fa-plane-departure"></i></span>
+                                </div>
+                                <div class="stat-value" id="leaveCount">0</div>
+                                <div class="stat-note">Submitted requests</div>
+                            </div>
+                        </div>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-user"></i> My employee profile</h3>
+                                <span class="readonly">Personal record</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="profile-grid">
+                                    <div class="profile-item"><label>Full name</label><strong id="staffName">—</strong></div>
+                                    <div class="profile-item"><label>Employee number</label><strong id="staffNumber">—</strong></div>
+                                    <div class="profile-item"><label>Position</label><strong id="staffRole">—</strong></div>
+                                    <div class="profile-item"><label>Employment status</label><strong id="staffStatus">—</strong></div>
+                                    <div class="profile-item"><label>Phone</label><strong id="staffPhone">—</strong></div>
+                                    <div class="profile-item"><label>Email</label><strong id="staffEmail">—</strong></div>
+                                    <div class="profile-item"><label>Start date</label><strong id="staffStartDate">—</strong></div>
+                                    <div class="profile-item"><label>Annual leave allowance</label><strong id="staffLeaveAllowance">—</strong></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-calendar-check"></i> Recent attendance</h3>
+                                <span class="readonly">Read only</span>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Check in</th>
+                                            <th>Check out</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendanceRows"></tbody>
+                                </table>
+                            </div>
+                            <div id="attendanceEmpty" class="empty hidden"><i class="fas fa-calendar-xmark"></i>No attendance records are currently available.</div>
+                        </section>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-list-check"></i> My assigned tasks</h3>
+                                <span class="readonly">Read only</span>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Task</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                            <th>Deadline</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="taskRows"></tbody>
+                                </table>
+                            </div>
+                            <div id="taskEmpty" class="empty hidden"><i class="fas fa-clipboard-check"></i>No tasks have been assigned to you.</div>
+                        </section>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-wallet"></i> My posted payroll</h3>
+                                <a href="payslips.html" data-page="payslips" class="readonly" style="text-decoration:none">View payslips <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Payroll period</th>
+                                            <th>Gross</th>
+                                            <th>Deductions</th>
+                                            <th>Net pay</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="payrollRows"></tbody>
+                                </table>
+                            </div>
+                            <div id="payrollEmpty" class="empty hidden"><i class="fas fa-file-invoice-dollar"></i>No posted payslips are currently available.</div>
+                        </section>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-plane-departure"></i> Leave requests</h3>
+                                <span class="readonly">Management approval required</span>
+                            </div>
+                            <div class="panel-body">
+                                <form id="leaveForm">
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <label for="leaveType">Leave type</label>
+                                            <select id="leaveType" class="field" required>
+                                <option value="">Select leave type</option>
+                                <option value="annual">Annual</option>
+                                <option value="sick">Sick</option>
+                                <option value="unpaid">Unpaid</option>
+                                <option value="maternity">Maternity</option>
+                                <option value="paternity">Paternity</option>
+                                <option value="compassionate">Compassionate</option>
+                                <option value="study">Study</option>
+                                <option value="other">Other</option>
+                            </select>
+                                        </div>
+                                        <div class="form-field">
+                                            <label for="leaveStart">Start date</label>
+                                            <input type="date" id="leaveStart" class="field" required>
+                                        </div>
+                                        <div class="form-field">
+                                            <label for="leaveEnd">End date</label>
+                                            <input type="date" id="leaveEnd" class="field" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-field" style="margin-top:16px">
+                                        <label for="leaveReason">Reason for leave</label>
+                                        <textarea id="leaveReason" class="field" rows="3" maxlength="1000" placeholder="Explain your leave request..." required></textarea>
+                                    </div>
+                                    <p class="stat-note">Your request will be submitted as pending until reviewed by management.</p>
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-success" id="leaveSubmit">
+                            <i class="fas fa-paper-plane"></i> Submit leave request
+                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Leave type</th>
+                                            <th>Start</th>
+                                            <th>End</th>
+                                            <th>Days</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaveRows"></tbody>
+                                </table>
+                            </div>
+                            <div id="leaveEmpty" class="empty hidden"><i class="fas fa-calendar-minus"></i>No leave requests have been submitted.</div>
+                        </section>
+                    </section>
+
+                    <!-- INVESTOR DASHBOARD -->
+                    <section id="investorArea" class="hidden">
+                        <div class="section-title">
+                            <div>
+                                <h2>Investor overview</h2>
+                                <p>Your personal investment and shareholding information</p>
+                            </div>
+                            <div class="title-icon" style="background:rgba(167,139,250,.13);color:var(--purple)">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-top"><span class="stat-label">INVESTOR NUMBER</span><span class="stat-icon ic-purple"><i class="fas fa-id-card"></i></span></div>
+                                <div class="stat-value" id="investorNumber">—</div>
+                                <div class="stat-note">Your investor identification</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-top"><span class="stat-label">RECORDED SHAREHOLDING</span><span class="stat-icon ic-blue"><i class="fas fa-chart-pie"></i></span></div>
+                                <div class="stat-value" id="investorEquity">—</div>
+                                <div class="stat-note">Recorded equity value</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-top"><span class="stat-label">INVESTMENT RECORDS</span><span class="stat-icon ic-green"><i class="fas fa-arrow-trend-up"></i></span></div>
+                                <div class="stat-value" id="investmentCount">0</div>
+                                <div class="stat-note">Your recent contributions</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-top"><span class="stat-label">INVESTOR STATUS</span><span class="stat-icon ic-orange"><i class="fas fa-circle-check"></i></span></div>
+                                <div class="stat-value" id="investorStatus">—</div>
+                                <div class="stat-note">Account classification</div>
+                            </div>
+                        </div>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-chart-pie"></i> My investment profile</h3><span class="readonly">Personal record</span></div>
+                            <div class="panel-body">
+                                <div class="profile-grid">
+                                    <div class="profile-item"><label>Investor name</label><strong id="investorName">—</strong></div>
+                                    <div class="profile-item"><label>Investor number</label><strong id="investorProfileNumber">—</strong></div>
+                                    <div class="profile-item"><label>Joined date</label><strong id="investorJoined">—</strong></div>
+                                    <div class="profile-item"><label>Recorded equity</label><strong id="investorProfileEquity">—</strong></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-money-bill-transfer"></i> My investment history</h3>
+                                <a href="investments.html" data-page="investments" class="readonly" style="text-decoration:none">View all <i class="fas fa-arrow-right"></i></a>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Reference</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="investmentRows"></tbody>
+                                </table>
+                            </div>
+                            <div id="investmentEmpty" class="empty hidden"><i class="fas fa-coins"></i>No investment records are currently available.</div>
+                        </section>
+
+                        <section class="panel">
+                            <div class="panel-head">
+                                <h3><i class="fas fa-scale-balanced"></i> My share transactions</h3>
+                            </div>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                            <th>Change</th>
+                                            <th>Equity after</th>
+                                            <th>Reference</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="shareRows"></tbody>
+                                </table>
+                            </div>
+                            <div id="shareEmpty" class="empty hidden"><i class="fas fa-chart-simple"></i>No share transactions are currently available.</div>
+                        </section>
+
+                        <div class="notice">
+                            <i class="fas fa-circle-info"></i> Your dividend allocations and statements are available through the dedicated investor pages. The original company dividend calculation remains managed by the finance system.
+                        </div>
+                    </section>
+
+                    <div class="footer">STARLINK ULTRANET LLC · PERSONAL PORTAL · SECURE ACCESS</div>
+                </div>
+
+                <!-- OTHER MODULES OPEN HERE. THE SIDEBAR AND TOP BAR REMAIN VISIBLE. -->
+                <iframe id="moduleFrame" class="module-frame" title="Portal module" src="about:blank" hidden></iframe>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        "use strict";
+
+        /* =========================================
+           SUPABASE CONFIGURATION
+        ========================================= */
+
+        const SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        let currentUser = null;
+        let portalAccount = null;
+        let staffRecord = null;
+        let investorRecord = null;
+        let dashboardLoading = false;
+        let canReviewTasks = false;
+
+        const portalPages = {
+            dashboard: "Overview",
+            profile: "My Profile",
+            attendance: "Attendance",
+            tasks: "My Tasks",
+            payments: "Payments",
+            payslips: "Payslips",
+            leave: "Leave Requests",
+            investments: "My Investments",
+            dividends: "Dividends",
+            statements: "Statements",
+            notifications: "Notifications",
+            security: "Security",
+            "task-review": "Task Review"
+        };
+
+        const employeePages = [
+            "profile",
+            "attendance",
+            "tasks",
+            "payments",
+            "payslips",
+            "leave"
+        ];
+
+        const investorPages = [
+            "investments",
+            "dividends",
+            "statements"
+        ];
+
+        /* =========================================
+           HELPERS
+        ========================================= */
+
+        function byId(id) {
+            return document.getElementById(id)
+        }
+
+        function safeText(value) {
+            return String(value === null || value === undefined ? "" : value)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function displayValue(value) {
+            return value === null || value === undefined || value === "" ? "Not provided" : safeText(value);
+        }
+
+        function formatDate(value) {
+            if (!value) return "—";
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return safeText(value);
+            return date.toLocaleDateString("en-KE", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            });
+        }
+
+        function formatDateTime(value) {
+            if (!value) return "—";
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return "—";
+            return date.toLocaleString("en-KE", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+        function money(value) {
+            return "KSh " + Number(value || 0).toLocaleString("en-KE", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function showError(message) {
+            byId("errorBox").textContent = message;
+            byId("errorBox").style.display = "block";
+        }
+
+        function clearError() {
+            byId("errorBox").textContent = "";
+            byId("errorBox").style.display = "none";
+        }
+
+        function showEmpty(id, show) {
+            byId(id).classList.toggle("hidden", !show)
+        }
+
+        function statusClass(value) {
+            const status = String(value || "").toLowerCase();
+            if (["active", "approved", "completed", "paid", "posted"].includes(status)) return "status good";
+            if (["pending", "in progress", "processing"].includes(status)) return "status pending";
+            if (["rejected", "cancelled", "overdue", "suspended"].includes(status)) return "status bad";
+            return "status";
+        }
+
+        function setTableMessage(id, columns, message) {
+            byId(id).innerHTML = `<tr><td colspan="${columns}">${safeText(message)}</td></tr>`;
+        }
+
+        /* =========================================
+           SIDEBAR
+        ========================================= */
+
+        function toggleSidebar() {
+            byId("sidebar").classList.toggle("open");
+            byId("sidebarOverlay").classList.toggle("show");
+        }
+
+        function closeSidebar() {
+            byId("sidebar").classList.remove("open");
+            byId("sidebarOverlay").classList.remove("show");
+        }
+
+        function setActiveNavigation(page) {
+            document.querySelectorAll(".nav-links a[data-page]").forEach(link => {
+                link.classList.toggle("active", link.dataset.page === page);
+            });
+        }
+
+        /* =========================================
+           SINGLE-PAGE NAVIGATION
+        ========================================= */
+
+
+
+        function openPortalPage(page) {
+            if (!Object.prototype.hasOwnProperty.call(portalPages, page)) {
+                return;
+            }
+
+            if (!currentUser || !portalAccount || portalAccount.account_status !== "active") {
+                showError("Your session is not authorised. Please sign in again.");
+                return;
+            }
+
+            const isEmployee = Boolean(portalAccount.staff_id);
+            const isInvestor = Boolean(portalAccount.investor_id);
+
+            if (employeePages.includes(page) && !isEmployee) {
+                showError("This employee section is not available for your account.");
+                return;
+            }
+
+            if (investorPages.includes(page) && !isInvestor) {
+                showError("This investor section is not available for your account.");
+                return;
+            }
+
+            if (page === "task-review" && canReviewTasks !== true) {
+                showError("You are not authorised to access Task Review.");
+                return;
+            }
+
+            clearError();
+            closeSidebar();
+            setActiveNavigation(page);
+
+            const dashboardView = byId("dashboardView");
+            const frame = byId("moduleFrame");
+
+            if (page === "dashboard") {
+                frame.hidden = true;
+                frame.src = "about:blank";
+                dashboardView.classList.remove("hidden");
+
+                byId("pageHeadingTitle").textContent = "Personal Dashboard";
+                byId("pageHeadingSubtitle").textContent =
+                    "Your STARLINK account at a glance";
+
+                return;
+            }
+
+            const target = page + ".html";
+
+            if (!frame.hidden && frame.getAttribute("src") === target) {
+                return;
+            }
+
+            dashboardView.classList.add("hidden");
+            frame.hidden = false;
+
+            byId("pageHeadingTitle").textContent = portalPages[page];
+            byId("pageHeadingSubtitle").textContent =
+                "Your personal STARLINK account";
+
+            frame.src = target;
+        }
+
+
+
+        window.openPortalPage = openPortalPage;
+
+
+
+        window.openPortalPage = openPortalPage;
+
+        document.querySelectorAll(".nav-links a[data-page]").forEach(link => {
+            link.addEventListener("click", event => {
+                event.preventDefault();
+                openPortalPage(link.dataset.page);
+            });
+        });
+
+        /* =========================================
+           MODULE FRAME INTEGRATION
+        ========================================= */
+
+        byId("moduleFrame").addEventListener("load", function() {
+            const frame = this;
+            if (frame.src.endsWith("about:blank")) return;
+
+            try {
+                const doc = frame.contentDocument || frame.contentWindow.document;
+                if (!doc || !doc.body) return;
+
+                const style = doc.createElement("style");
+                style.textContent = `
+            html,body{min-height:0!important;margin:0!important;background:transparent!important}
+            .topbar{display:none!important}
+            .layout{
+                width:100%!important;max-width:none!important;min-height:0!important;
+                margin:0!important;padding:20px 4px 30px!important
+            }
+            .footer{padding-bottom:15px!important}
+        `;
+                doc.head.appendChild(style);
+
+                // Route module links back through the main dashboard shell.
+
+                doc.addEventListener("click", event => {
+                    const logoutButton = event.target.closest("#logoutBtn");
+                    if (logoutButton) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                        window.parent.logout();
+                        return;
+                    }
+
+                    const link = event.target.closest("a");
+                    if (!link || link.target === "_blank") return;
+
+                    const url = new URL(link.href, doc.baseURI);
+                    if (url.origin !== window.location.origin) return;
+
+                    const match = url.pathname.match(/\/portal\/([a-z-]+)\.html$/i);
+                    if (!match) return;
+
+                    const page = match[1].toLowerCase();
+                    if (!Object.prototype.hasOwnProperty.call(portalPages, page)) return;
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    window.parent.openPortalPage(page);
+                }, true);
+
+                const resize = () => {
+                    frame.style.height = Math.max(
+                        850,
+                        doc.body.scrollHeight,
+                        doc.documentElement.scrollHeight
+                    ) + "px";
+                };
+
+                resize();
+
+                if (frame.contentWindow.ResizeObserver) {
+                    const observer = new frame.contentWindow.ResizeObserver(resize);
+                    observer.observe(doc.body);
+                    observer.observe(doc.documentElement);
+                }
+
+                if (doc.fonts && doc.fonts.ready) {
+                    doc.fonts.ready.then(resize);
+                }
+
+            } catch (error) {
+                console.error("Module display error:", error);
+            }
+        });
+
+        /* =========================================
+           AUTHENTICATION
+        ========================================= */
+
+        async function verifyPortalAccess() {
+            const sessionResult = await supabaseClient.auth.getSession();
+
+            if (sessionResult.error || !sessionResult.data.session) {
+                window.location.href = "../login.html";
+                return false;
+            }
+
+            const userResult = await supabaseClient.auth.getUser();
+
+            if (userResult.error || !userResult.data.user) {
+                await supabaseClient.auth.signOut();
+                window.location.href = "../login.html";
+                return false;
+            }
+
+            currentUser = userResult.data.user;
+
+            const accountResult = await supabaseClient
+                .from("personal_portal_accounts")
+                .select("id,user_id,staff_id,investor_id,account_status")
+                .eq("user_id", currentUser.id)
+                .maybeSingle();
+
+            if (accountResult.error) throw new Error("Unable to verify your personal portal account.");
+
+            portalAccount = accountResult.data;
+
+            if (!portalAccount) throw new Error("No personal portal account is linked to this login.");
+
+            if (portalAccount.account_status !== "active") {
+                await supabaseClient.auth.signOut();
+                window.location.href = "../login.html";
+                return false;
+            }
+
+            if (!portalAccount.staff_id && !portalAccount.investor_id) {
+                throw new Error("Your account has no employee or investor classification.");
+            }
+
+            return true;
+        }
+
+        /* =========================================
+           NAVIGATION VISIBILITY
+        ========================================= */
+
+
+        async function configurePortalNavigation() {
+            const employeeAccount = Boolean(
+                portalAccount && portalAccount.staff_id
+            );
+
+            const investorAccount = Boolean(
+                portalAccount && portalAccount.investor_id
+            );
+
+            // Employee navigation
+            document.querySelectorAll('[data-access="employee"]').forEach(function(link) {
+                if (employeeAccount) {
+                    link.style.display = "flex";
+                } else {
+                    link.style.display = "none";
+                }
+            });
+
+            if (employeeAccount) {
+                byId("employeeNavLabel").style.display = "block";
+                byId("employeeNavigation").style.display = "flex";
+            } else {
+                byId("employeeNavLabel").style.display = "none";
+                byId("employeeNavigation").style.display = "none";
+            }
+
+            // Investor navigation
+            document.querySelectorAll('[data-access="investor"]').forEach(function(link) {
+                if (investorAccount) {
+                    link.style.display = "flex";
+                } else {
+                    link.style.display = "none";
+                }
+            });
+
+            if (investorAccount) {
+                byId("investorNavLabel").style.display = "block";
+                byId("investorNavigation").style.display = "flex";
+            } else {
+                byId("investorNavLabel").style.display = "none";
+                byId("investorNavigation").style.display = "none";
+            }
+
+            // Hide management navigation until permission is confirmed
+            canReviewTasks = false;
+
+            byId("managementNavLabel").style.display = "none";
+            byId("managementNavigation").style.display = "none";
+            byId("taskReviewNavLink").style.display = "none";
+
+            // Check management Tasks edit permission
+            const permissionResult = await supabaseClient.rpc(
+                "portal_management_can_edit", {
+                    p_module: "Tasks"
+                }
+            );
+
+            if (permissionResult.error) {
+                console.error(
+                    "Task management permission check failed:",
+                    permissionResult.error
+                );
+                return;
+            }
+
+            if (permissionResult.data === true) {
+                canReviewTasks = true;
+
+                byId("managementNavLabel").style.display = "block";
+                byId("managementNavigation").style.display = "flex";
+                byId("taskReviewNavLink").style.display = "flex";
+            }
+        }
+
+
+        /* =========================================
+           EMPLOYEE PROFILE
+        ========================================= */
+
+        async function loadEmployee() {
+            const result = await supabaseClient
+                .from("staff")
+                .select("id,employee_number,full_name,role,phone,email,status,start_date,annual_leave_days")
+                .eq("id", portalAccount.staff_id)
+                .maybeSingle();
+
+            if (result.error) throw new Error("Unable to load your employee profile. Check the staff access policy.");
+            if (!result.data) throw new Error("Your linked employee record could not be found.");
+
+            staffRecord = result.data;
+
+            byId("welcomeName").textContent = "Welcome, " + staffRecord.full_name;
+            byId("sidebarUserName").textContent = staffRecord.full_name || "My Account";
+            byId("userAvatar").textContent = (staffRecord.full_name || "S").charAt(0).toUpperCase();
+            byId("sidebarUserType").textContent = "Employee account";
+
+            byId("employeeNumber").textContent = staffRecord.employee_number || "—";
+            byId("staffName").textContent = staffRecord.full_name || "—";
+            byId("staffNumber").textContent = staffRecord.employee_number || "—";
+            byId("staffRole").textContent = staffRecord.role || "Not assigned";
+            byId("staffStatus").textContent = staffRecord.status || "—";
+            byId("staffPhone").textContent = staffRecord.phone || "Not provided";
+            byId("staffEmail").textContent = staffRecord.email || "Not provided";
+            byId("staffStartDate").textContent = formatDate(staffRecord.start_date);
+            byId("staffLeaveAllowance").textContent = Number(staffRecord.annual_leave_days || 0) + " days";
+
+            byId("employeeArea").classList.remove("hidden");
+
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.innerHTML = '<i class="fas fa-briefcase"></i> EMPLOYEE';
+            byId("classificationTags").appendChild(tag);
+
+            await Promise.all([loadAttendance(), loadTasks(), loadPayroll(), loadLeave()]);
+        }
+
+        /* =========================================
+           ATTENDANCE
+        ========================================= */
+
+        async function loadAttendance() {
+            const result = await supabaseClient
+                .from("attendance")
+                .select("id,date,check_in,check_out,notes")
+                .eq("staff_id", staffRecord.id)
+                .order("date", {
+                    ascending: false
+                })
+                .limit(10);
+
+            if (result.error) {
+                console.error("Attendance:", result.error);
+                setTableMessage("attendanceRows", 4, "Unable to load attendance.");
+                return;
+            }
+
+            const rows = result.data || [];
+            byId("attendanceCount").textContent = rows.length;
+
+            if (!rows.length) {
+                showEmpty("attendanceEmpty", true);
+                return;
+            }
+            showEmpty("attendanceEmpty", false);
+
+            byId("attendanceRows").innerHTML = rows.map(item => `
+        <tr>
+            <td>${formatDate(item.date)}</td>
+            <td>${formatDateTime(item.check_in)}</td>
+            <td>${formatDateTime(item.check_out)}</td>
+            <td>${displayValue(item.notes)}</td>
+        </tr>
+    `).join("");
+        }
+
+        /* =========================================
+           ASSIGNED TASKS
+        ========================================= */
+
+        async function loadTasks() {
+            const result = await supabaseClient
+                .from("tasks")
+                .select("id,title,priority,status,progress_pct,deadline")
+                .eq("assignee_staff_id", staffRecord.id)
+                .is("deleted_at", null)
+                .order("created_at", {
+                    ascending: false
+                })
+                .limit(10);
+
+            if (result.error) {
+                console.error("Tasks:", result.error);
+                setTableMessage("taskRows", 5, "Unable to load assigned tasks.");
+                return;
+            }
+
+            const rows = result.data || [];
+            byId("taskCount").textContent = rows.length;
+
+            if (!rows.length) {
+                showEmpty("taskEmpty", true);
+                return;
+            }
+            showEmpty("taskEmpty", false);
+
+            byId("taskRows").innerHTML = rows.map(item => `
+        <tr>
+            <td>${displayValue(item.title)}</td>
+            <td>${displayValue(item.priority)}</td>
+            <td><span class="${statusClass(item.status)}">${displayValue(item.status)}</span></td>
+            <td>${Number(item.progress_pct||0)}%</td>
+            <td>${formatDate(item.deadline)}</td>
+        </tr>
+    `).join("");
+        }
+
+        /* =========================================
+           POSTED PAYSLIPS
+        ========================================= */
+
+        async function loadPayroll() {
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: {
+                    action: "payslips"
+                }
+            });
+
+            if (result.error) {
+                console.error("Personal payslips:", result.error);
+                setTableMessage("payrollRows", 4, "Unable to load posted payslips.");
+                return;
+            }
+
+            const rows = result.data && Array.isArray(result.data.payslips) ? result.data.payslips : [];
+
+            if (!rows.length) {
+                showEmpty("payrollEmpty", true);
+                return;
+            }
+            showEmpty("payrollEmpty", false);
+
+            byId("payrollRows").innerHTML = rows.slice(0, 8).map(item => `
+        <tr>
+            <td>${displayValue(item.period)}</td>
+            <td>${money(item.gross)}</td>
+            <td>${money(item.deductions)}</td>
+            <td><strong>${money(item.net)}</strong></td>
+        </tr>
+    `).join("");
+        }
+
+        /* =========================================
+           LEAVE REQUESTS
+        ========================================= */
+
+        async function loadLeave() {
+            const result = await supabaseClient
+                .from("leave_requests")
+                .select("id,leave_type,start_date,end_date,days,status")
+                .eq("staff_id", staffRecord.id)
+                .order("created_at", {
+                    ascending: false
+                })
+                .limit(15);
+
+            if (result.error) {
+                console.error("Leave:", result.error);
+                setTableMessage("leaveRows", 5, "Unable to load leave requests.");
+                return;
+            }
+
+            const rows = result.data || [];
+            byId("leaveCount").textContent = rows.length;
+
+            if (!rows.length) {
+                showEmpty("leaveEmpty", true);
+                return;
+            }
+            showEmpty("leaveEmpty", false);
+
+            byId("leaveRows").innerHTML = rows.map(item => `
+        <tr>
+            <td>${displayValue(item.leave_type)}</td>
+            <td>${formatDate(item.start_date)}</td>
+            <td>${formatDate(item.end_date)}</td>
+            <td>${Number(item.days||0)}</td>
+            <td><span class="${statusClass(item.status)}">${displayValue(item.status)}</span></td>
+        </tr>
+    `).join("");
+        }
+
+        /* =========================================
+           SUBMIT LEAVE REQUEST
+        ========================================= */
+
+        byId("leaveForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            if (!staffRecord) {
+                alert("Your employee profile is not available.");
+                return;
+            }
+
+            const leaveType = byId("leaveType").value;
+            const startDate = byId("leaveStart").value;
+            const endDate = byId("leaveEnd").value;
+            const reason = byId("leaveReason").value.trim();
+
+            if (!leaveType || !startDate || !endDate || !reason) {
+                alert("Please complete all leave request fields.");
+                return;
+            }
+
+            if (endDate < startDate) {
+                alert("End date cannot be before start date.");
+                return;
+            }
+
+            const start = new Date(startDate + "T00:00:00");
+            const end = new Date(endDate + "T00:00:00");
+            const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+
+            const button = byId("leaveSubmit");
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            try {
+                const result = await supabaseClient.from("leave_requests").insert({
+                    staff_id: staffRecord.id,
+                    leave_type: leaveType,
+                    start_date: startDate,
+                    end_date: endDate,
+                    days: days,
+                    reason: reason,
+                    status: "pending"
+                });
+
+                if (result.error) throw result.error;
+
+                alert("Your leave request has been submitted for management approval.");
+                byId("leaveForm").reset();
+                await loadLeave();
+
+            } catch (error) {
+                console.error("Leave submission:", error);
+                alert("Unable to submit your leave request. Please contact your administrator.");
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-paper-plane"></i> Submit leave request';
+            }
+        });
+
+        /* =========================================
+           INVESTOR PROFILE
+        ========================================= */
+
+        async function loadInvestor() {
+            const result = await supabaseClient
+                .from("investors")
+                .select("id,name,investor_number,equity,status,joined_date")
+                .eq("id", portalAccount.investor_id)
+                .maybeSingle();
+
+            if (result.error) throw new Error("Unable to load your investor profile.");
+            if (!result.data) throw new Error("Your linked investor record could not be found.");
+
+            investorRecord = result.data;
+
+            byId("investorNumber").textContent = investorRecord.investor_number || "—";
+            byId("investorEquity").textContent = money(investorRecord.equity);
+            byId("investorStatus").textContent = investorRecord.status || "—";
+            byId("investorName").textContent = investorRecord.name || "—";
+            byId("investorProfileNumber").textContent = investorRecord.investor_number || "—";
+            byId("investorJoined").textContent = formatDate(investorRecord.joined_date);
+            byId("investorProfileEquity").textContent = money(investorRecord.equity);
+
+            byId("investorArea").classList.remove("hidden");
+
+            const tag = document.createElement("span");
+            tag.className = "tag investor";
+            tag.innerHTML = '<i class="fas fa-chart-line"></i> INVESTOR';
+            byId("classificationTags").appendChild(tag);
+
+            if (!staffRecord) {
+                byId("welcomeName").textContent = "Welcome, " + investorRecord.name;
+                byId("sidebarUserName").textContent = investorRecord.name || "My Account";
+                byId("userAvatar").textContent = (investorRecord.name || "S").charAt(0).toUpperCase();
+                byId("sidebarUserType").textContent = "Investor account";
+            } else {
+                byId("sidebarUserType").textContent = "Employee & investor";
+            }
+
+            await Promise.all([loadInvestments(), loadShareTransactions()]);
+        }
+
+        /* =========================================
+           INVESTMENT HISTORY
+        ========================================= */
+
+        async function loadInvestments() {
+            const result = await supabaseClient
+                .from("investments")
+                .select("id,date,amount,type,reference")
+                .eq("investor_id", investorRecord.id)
+                .is("deleted_at", null)
+                .order("date", {
+                    ascending: false
+                })
+                .limit(10);
+
+            if (result.error) {
+                console.error("Investments:", result.error);
+                setTableMessage("investmentRows", 4, "Unable to load investment history.");
+                return;
+            }
+
+            const rows = result.data || [];
+            byId("investmentCount").textContent = rows.length;
+
+            if (!rows.length) {
+                showEmpty("investmentEmpty", true);
+                return;
+            }
+            showEmpty("investmentEmpty", false);
+
+            byId("investmentRows").innerHTML = rows.map(item => `
+        <tr>
+            <td>${formatDate(item.date)}</td>
+            <td>${displayValue(item.type)}</td>
+            <td>${money(item.amount)}</td>
+            <td>${displayValue(item.reference)}</td>
+        </tr>
+    `).join("");
+        }
+
+        /* =========================================
+           SHARE TRANSACTIONS
+        ========================================= */
+
+        async function loadShareTransactions() {
+            const result = await supabaseClient
+                .from("share_transactions")
+                .select("id,date,action,delta,equity_after,reference")
+                .eq("investor_id", investorRecord.id)
+                .order("date", {
+                    ascending: false
+                })
+                .limit(10);
+
+            if (result.error) {
+                console.error("Share transactions:", result.error);
+                setTableMessage("shareRows", 5, "Unable to load share transactions.");
+                return;
+            }
+
+            const rows = result.data || [];
+
+            if (!rows.length) {
+                showEmpty("shareEmpty", true);
+                return;
+            }
+            showEmpty("shareEmpty", false);
+
+            byId("shareRows").innerHTML = rows.map(item => `
+        <tr>
+            <td>${formatDate(item.date)}</td>
+            <td>${displayValue(item.action)}</td>
+            <td>${money(item.delta)}</td>
+            <td>${money(item.equity_after)}</td>
+            <td>${displayValue(item.reference)}</td>
+        </tr>
+    `).join("");
+        }
+
+        /* =========================================
+           LOAD DASHBOARD
+        ========================================= */
+
+        async function loadDashboard() {
+            if (dashboardLoading) return;
+
+            dashboardLoading = true;
+            clearError();
+
+            const refreshButton = document.querySelector(".top-actions .icon-btn");
+            if (refreshButton) refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                const allowed = await verifyPortalAccess();
+                if (!allowed) return;
+
+                await configurePortalNavigation();
+                byId("classificationTags").innerHTML = "";
+
+                if (portalAccount.staff_id) {
+                    await loadEmployee();
+                } else {
+                    byId("employeeArea").classList.add("hidden");
+                }
+
+                if (portalAccount.investor_id) {
+                    await loadInvestor();
+                } else {
+                    byId("investorArea").classList.add("hidden");
+                }
+
+            } catch (error) {
+                console.error("Portal loading error:", error);
+                showError(error.message || "Unable to load your personal portal. Please refresh the page.");
+            } finally {
+                dashboardLoading = false;
+                if (refreshButton) refreshButton.innerHTML = '<i class="fas fa-rotate"></i>';
+            }
+        }
+
+        /* =========================================
+           LOGOUT
+        ========================================= */
+
+        async function logout() {
+
+            const result = await supabaseClient.auth.signOut();
+
+            if (result.error) {
+                alert("Unable to sign out. Please try again.");
+                return;
+            }
+
+            window.location.replace("../login.html");
+        }
+
+        /* =========================================
+           INITIALIZE
+        ========================================= */
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadDashboard();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Payslips | STARLINK ULTRANET LLC</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+         :root {
+            --bg: #080f1e;
+            --panel: #111d32;
+            --panel2: #172640;
+            --line: rgba(148, 163, 184, .14);
+            --text: #edf4ff;
+            --muted: #91a4bf;
+            --cyan: #38d5f2;
+            --blue: #638cff;
+            --green: #35d49a;
+            --red: #ff7185;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 10% 0%, rgba(56, 213, 242, .12), transparent 35%), radial-gradient(ellipse at 90% 10%, rgba(99, 140, 255, .12), transparent 30%), var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        button,
+        a {
+            font: inherit;
+        }
+        
+        .topbar {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            border-bottom: 1px solid var(--line);
+            background: rgba(8, 15, 30, .85);
+            backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            color: #06101e;
+            font-weight: 900;
+            font-size: 18px;
+            box-shadow: 0 6px 25px rgba(56, 213, 242, .2);
+        }
+        
+        .brand-name {
+            font-family: Outfit, sans-serif;
+            font-weight: 800;
+            letter-spacing: .4px;
+        }
+        
+        .brand-sub {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1.5px;
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 10px 15px;
+            color: var(--text);
+            background: var(--panel2);
+            cursor: pointer;
+            transition: .2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan);
+        }
+        
+        .btn-primary {
+            color: #06101e;
+            background: linear-gradient(120deg, var(--cyan), #82e8f6);
+            border: 0;
+            font-weight: 800;
+        }
+        
+        main {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 42px 24px 70px;
+        }
+        
+        .back-link {
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 13px;
+        }
+        
+        .heading {
+            margin: 25px 0 28px;
+        }
+        
+        .eyebrow {
+            color: var(--cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        
+        h1 {
+            font-family: Outfit, sans-serif;
+            font-size: clamp(30px, 5vw, 43px);
+            margin: 9px 0;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 28px 0;
+        }
+        
+        .stat {
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(23, 38, 64, .95), rgba(17, 29, 50, .85));
+            animation: rise .5s ease both;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+        
+        .stat-value {
+            font-family: Outfit, sans-serif;
+            font-size: 27px;
+            font-weight: 800;
+            margin-top: 10px;
+        }
+        
+        .stat-value.cyan {
+            color: var(--cyan);
+        }
+        
+        .stat-value.green {
+            color: var(--green);
+        }
+        
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin: 35px 0 17px;
+        }
+        
+        .section-head h2 {
+            font-family: Outfit, sans-serif;
+            margin: 0;
+            font-size: 21px;
+        }
+        
+        .payslip-list {
+            display: grid;
+            gap: 14px;
+        }
+        
+        .payslip {
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            background: rgba(17, 29, 50, .9);
+            padding: 22px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 18px;
+            align-items: center;
+            transition: .2s;
+            animation: rise .45s ease both;
+        }
+        
+        .payslip:hover {
+            border-color: rgba(56, 213, 242, .45);
+            transform: translateY(-2px);
+        }
+        
+        .period {
+            font-family: Outfit, sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .meta {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 7px;
+            line-height: 1.7;
+        }
+        
+        .net-label {
+            font-size: 11px;
+            color: var(--muted);
+        }
+        
+        .net-value {
+            font-family: Outfit, sans-serif;
+            font-size: 23px;
+            font-weight: 800;
+            color: var(--green);
+            margin-top: 5px;
+        }
+        
+        .slip-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 13px;
+            flex-wrap: wrap;
+        }
+        
+        .status {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            background: rgba(53, 212, 154, .12);
+            color: var(--green);
+        }
+        
+        .empty,
+        .message {
+            padding: 35px 22px;
+            text-align: center;
+            border: 1px dashed var(--line);
+            border-radius: 18px;
+            color: var(--muted);
+            background: rgba(17, 29, 50, .6);
+        }
+        
+        .empty-icon {
+            font-size: 35px;
+            margin-bottom: 12px;
+        }
+        
+        .message {
+            margin-top: 20px;
+        }
+        
+        .error {
+            color: #ff9baa;
+            border-color: rgba(255, 113, 133, .3);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 50px;
+            color: var(--muted);
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #33445e;
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        
+        footer {
+            text-align: center;
+            color: #71839e;
+            font-size: 11px;
+            padding: 25px;
+            border-top: 1px solid var(--line);
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media(max-width:700px) {
+            .topbar {
+                padding: 0 16px;
+                height: 68px;
+            }
+            .brand-sub {
+                display: none;
+            }
+            .top-actions .btn {
+                padding: 9px 10px;
+                font-size: 12px;
+            }
+            main {
+                padding: 28px 16px 50px;
+            }
+            .summary {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .stat {
+                padding: 17px;
+            }
+            .stat-value {
+                font-size: 23px;
+            }
+            .payslip {
+                grid-template-columns: 1fr;
+                padding: 18px;
+            }
+            .slip-right {
+                border-top: 1px solid var(--line);
+                padding-top: 13px;
+            }
+            .section-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+        
+        @media print {
+            body {
+                background: #fff !important;
+                color: #111 !important;
+            }
+            .topbar,
+            .back-link,
+            .top-actions,
+            .slip-actions,
+            footer,
+            .section-head button {
+                display: none !important;
+            }
+            main {
+                max-width: 100%;
+                padding: 10px;
+            }
+            .heading {
+                margin: 10px 0 20px;
+            }
+            .eyebrow,
+            .subtitle,
+            .stat-label,
+            .net-label,
+            .meta {
+                color: #555 !important;
+            }
+            h1,
+            .period,
+            .stat-value,
+            .net-value {
+                color: #111 !important;
+            }
+            .summary {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stat,
+            .payslip {
+                background: #fff !important;
+                border: 1px solid #ddd !important;
+                break-inside: avoid;
+            }
+            .payslip-list {
+                gap: 10px;
+            }
+            .status {
+                border: 1px solid #999;
+                color: #111 !important;
+                background: #fff !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">S</div>
+            <div>
+                <div class="brand-name">STARLINK ULTRANET</div>
+                <div class="brand-sub">PERSONAL PORTAL</div>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <a class="btn" href="dashboard.html">← Dashboard</a>
+            <button class="btn" onclick="logout()">Sign out</button>
+        </div>
+    </header>
+
+    <main>
+        <a class="back-link" href="dashboard.html">← Back to my dashboard</a>
+
+        <section class="heading">
+            <div class="eyebrow">EMPLOYEE FINANCE</div>
+            <h1>My Payslips</h1>
+            <p class="subtitle">Access your approved and posted salary records securely.</p>
+        </section>
+
+        <section class="summary">
+            <div class="stat">
+                <div class="stat-label">Available Payslips</div>
+                <div class="stat-value cyan" id="slipCount">—</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">Latest Net Payment</div>
+                <div class="stat-value green" id="latestNet">—</div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">Latest Pay Period</div>
+                <div class="stat-value" id="latestPeriod" style="font-size:19px">—</div>
+            </div>
+        </section>
+
+        <div class="section-head">
+            <div>
+                <h2>Salary statements</h2>
+                <p class="subtitle" style="font-size:12px;margin-top:6px">Your personal payroll history</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="window.print()">Print all payslips</button>
+        </div>
+
+        <div id="content">
+            <div class="loading">
+                <span class="spinner"></span> Loading your payslips...
+            </div>
+        </div>
+    </main>
+
+    <footer>STARLINK ULTRANET LLC · Secure Personal Employee Portal</footer>
+
+    <script>
+        // ==========================================
+        // SUPABASE CONFIGURATION
+        // ==========================================
+
+        var SUPABASE_URL = "https://ujhasodlnduoozlmxdbv.supabase.co";
+        var SUPABASE_ANON_KEY = "sb_publishable_DK0i6IuTFcE6_g1P6gG_-A_IkwguvIL";
+
+        var supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
+
+        var content = document.getElementById("content");
+        window.currentPayslips = [];
+
+        // ==========================================
+        // FORMATTING FUNCTIONS
+        // ==========================================
+
+        function money(value) {
+            return new Intl.NumberFormat("en-KE", {
+                style: "currency",
+                currency: "KES",
+                maximumFractionDigits: 2
+            }).format(Number(value || 0));
+        }
+
+        function safe(value) {
+            if (value === undefined || value === null) {
+                return "";
+            }
+
+            return String(value).replace(/[&<>"']/g, function(char) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[char];
+            });
+        }
+
+        function dateText(value) {
+            if (!value) return "Not recorded";
+
+            var date = new Date(value);
+
+            if (isNaN(date.getTime())) {
+                return safe(value);
+            }
+
+            return date.toLocaleDateString("en-KE", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            });
+        }
+
+        function periodText(run) {
+            if (!run) return "Salary statement";
+            if (run.period) return run.period;
+            if (run.period_label) return run.period_label;
+            if (run.run_date) return dateText(run.run_date);
+
+            return "Salary statement";
+        }
+
+        // ==========================================
+        // ERROR DISPLAY
+        // ==========================================
+
+        function showError(message) {
+            content.innerHTML =
+                '<div class="message error">' +
+                '<strong>Unable to load payslips</strong>' +
+                '<p>' + safe(message) + '</p>' +
+                '<button class="btn" onclick="loadPayslips()">Try again</button>' +
+                '</div>';
+        }
+
+        // ==========================================
+        // LOAD PAYSLIPS
+        // ==========================================
+
+        async function loadPayslips() {
+            content.innerHTML =
+                '<div class="loading"><span class="spinner"></span> Loading your payslips...</div>';
+
+            try {
+                var sessionRes = await supabaseClient.auth.getSession();
+
+                if (sessionRes.error) {
+                    throw sessionRes.error;
+                }
+
+                if (!sessionRes.data || !sessionRes.data.session) {
+                    window.location.href = "../login.html";
+                    return;
+                }
+
+                var res = await supabaseClient.functions.invoke(
+                    "personal-portal-payslips"
+                );
+
+                if (res.error) {
+                    throw res.error;
+                }
+
+                if (res.data && res.data.error) {
+                    throw new Error(res.data.error);
+                }
+
+                var records = [];
+
+                if (Array.isArray(res.data)) {
+                    records = res.data;
+                } else if (res.data && Array.isArray(res.data.payslips)) {
+                    records = res.data.payslips;
+                } else if (res.data && Array.isArray(res.data.data)) {
+                    records = res.data.data;
+                }
+
+                renderPayslips(records);
+
+            } catch (error) {
+                console.error("Payslip loading error:", error);
+                showError(error.message || "Please sign in again and retry.");
+            }
+        }
+
+        // ==========================================
+        // DISPLAY PAYSLIPS
+        // ==========================================
+
+        function renderPayslips(records) {
+            document.getElementById("slipCount").textContent = records.length;
+
+            window.currentPayslips = records;
+
+            if (records.length === 0) {
+                document.getElementById("latestNet").textContent = "—";
+                document.getElementById("latestPeriod").textContent = "—";
+
+                content.innerHTML =
+                    '<div class="empty">' +
+                    '<div class="empty-icon">📄</div>' +
+                    '<strong>No payslips available yet</strong>' +
+                    '<p>Your approved or posted salary statements will appear here.</p>' +
+                    '</div>';
+
+                return;
+            }
+
+            records.sort(function(a, b) {
+                var dateA = (a.payroll_runs && a.payroll_runs.run_date) ?
+                    a.payroll_runs.run_date :
+                    a.created_at;
+
+                var dateB = (b.payroll_runs && b.payroll_runs.run_date) ?
+                    b.payroll_runs.run_date :
+                    b.created_at;
+
+                return new Date(dateB || 0) - new Date(dateA || 0);
+            });
+
+            var latest = records[0];
+            var latestRun = latest.payroll_runs || {};
+
+            document.getElementById("latestNet").textContent = money(latest.net);
+            document.getElementById("latestPeriod").textContent = periodText(latestRun);
+
+            var listHTML = '<div class="payslip-list">';
+
+            for (var i = 0; i < records.length; i++) {
+                var record = records[i];
+                var run = record.payroll_runs || {};
+                var period = periodText(run);
+                var status = run.status || "Available";
+                var date = run.run_date || record.created_at;
+
+                listHTML +=
+                    '<article class="payslip">' +
+                    '<div>' +
+                    '<div class="period">' + safe(period) + '</div>' +
+                    '<div class="meta">' +
+                    'Payment date: ' + safe(dateText(date)) + '<br>' +
+                    'Payslip reference: #' + safe(record.id) + '<br>' +
+                    '<span class="status">' + safe(String(status).toUpperCase()) + '</span>' +
+                    '</div>' +
+                    '<div class="slip-actions">' +
+                    '<button class="btn btn-primary" onclick="printPayslip(' + i + ')">Print payslip</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="slip-right">' +
+                    '<div class="net-label">NET PAY</div>' +
+                    '<div class="net-value">' + money(record.net) + '</div>' +
+                    '</div>' +
+                    '</article>';
+            }
+
+            listHTML += '</div>';
+
+            content.innerHTML = listHTML;
+        }
+
+        // ==========================================
+        // PRINT INDIVIDUAL PAYSLIP
+        // No nested script tags or template literals.
+        // ==========================================
+
+        function printPayslip(index) {
+            if (!window.currentPayslips || !window.currentPayslips[index]) {
+                return;
+            }
+
+            var record = window.currentPayslips[index];
+            var run = record.payroll_runs || {};
+
+            var printWindow = window.open("", "_blank");
+
+            if (!printWindow) {
+                alert("Please allow pop-ups for this site to print your payslip.");
+                return;
+            }
+
+            var html = "";
+
+            html += "<!DOCTYPE html>";
+            html += "<html><head>";
+            html += "<title>STARLINK ULTRANET - Payslip</title>";
+            html += '<meta charset="UTF-8">';
+
+            html += "<style>";
+            html += "body{font-family:Arial,sans-serif;color:#172033;padding:35px;}";
+            html += ".header{border-bottom:3px solid #159fc1;padding-bottom:18px;}";
+            html += "h1{margin:0;color:#12314d;}";
+            html += ".muted{color:#64748b;font-size:12px;}";
+            html += ".box{border:1px solid #d8e0ea;padding:18px;margin-top:22px;border-radius:8px;}";
+            html += ".row{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #e5eaf0;}";
+            html += ".total{font-size:20px;font-weight:bold;color:#087c62;}";
+            html += ".footer{margin-top:35px;font-size:11px;color:#64748b;}";
+            html += "@media print{body{padding:10px;}}";
+            html += "</style>";
+
+            html += "</head><body>";
+
+            html += '<div class="header">';
+            html += "<h1>STARLINK ULTRANET LLC</h1>";
+            html += '<p class="muted">EMPLOYEE PAYSLIP</p>';
+            html += "</div>";
+
+            html += '<div class="box">';
+
+            html += '<div class="row"><span>Pay period</span><strong>';
+            html += safe(periodText(run));
+            html += "</strong></div>";
+
+            html += '<div class="row"><span>Payment date</span><strong>';
+            html += safe(dateText(run.run_date || record.created_at));
+            html += "</strong></div>";
+
+            html += '<div class="row"><span>Payslip reference</span><strong>#';
+            html += safe(record.id);
+            html += "</strong></div>";
+
+            html += '<div class="row"><span>Payroll status</span><strong>';
+            html += safe(run.status || "Available");
+            html += "</strong></div>";
+
+            html += "</div>";
+
+            html += '<div class="box">';
+
+            html += '<div class="row"><span>Gross pay</span><strong>';
+            html += money(record.gross);
+            html += "</strong></div>";
+
+            html += '<div class="row"><span>Deductions</span><strong>';
+            html += money(record.deductions);
+            html += "</strong></div>";
+
+            html += '<div class="row total"><span>Net pay</span><strong>';
+            html += money(record.net);
+            html += "</strong></div>";
+
+            html += "</div>";
+
+            if (record.notes) {
+                html += '<div class="box"><strong>Notes</strong><p>';
+                html += safe(record.notes);
+                html += "</p></div>";
+            }
+
+            html += '<div class="footer">';
+            html += "This statement is provided for the employee's personal records. ";
+            html += "Generated from the STARLINK ULTRANET LLC personal portal.";
+            html += "</div>";
+
+            // Build closing tags without placing literal closing tags in this script.
+            html += "<" + "/body>";
+            html += "<" + "/html>";
+
+            try {
+                printWindow.document.open();
+                printWindow.document.write(html);
+                printWindow.document.close();
+
+                printWindow.focus();
+
+                setTimeout(function() {
+                    if (!printWindow.closed) {
+                        printWindow.print();
+                    }
+                }, 700);
+
+            } catch (error) {
+                console.error("Payslip printing error:", error);
+
+                if (!printWindow.closed) {
+                    printWindow.close();
+                }
+
+                alert("Unable to prepare the payslip for printing.");
+            }
+        }
+
+        // ==========================================
+        // LOGOUT
+        // ==========================================
+
+        async function logout() {
+            try {
+                var res = await supabaseClient.auth.signOut();
+
+                if (res.error) {
+                    throw res.error;
+                }
+
+                window.location.href = "../login.html";
+
+            } catch (error) {
+                console.error("Logout error:", error);
+                alert("Unable to sign out. Please try again.");
+            }
+        }
+
+        // ==========================================
+        // INITIALIZE PAGE
+        // ==========================================
+
+        loadPayslips();
+    </script>
+
+</body>
+
+</html>
