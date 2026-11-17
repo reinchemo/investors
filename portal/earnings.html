@@ -37,10 +37,10 @@ table{width:100%;border-collapse:collapse;min-width:570px}th,td{text-align:left;
 <div class="cols">
 <div>
 <section class="panel"><div class="panel-head"><div><h2>Daily attendance ledger</h2><p class="sub">Approved attendance only; pending or rejected records are excluded.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Check in</th><th>Check out</th><th>Status</th></tr></thead><tbody id="attendanceRows"><tr><td colspan="4" class="loading">Loading attendance…</td></tr></tbody></table></div></section>
-<section class="panel"><div class="panel-head"><div><h2>Payroll payment history</h2><p class="sub">Posted payroll items linked to your employee record.</p></div></div><div class="table-wrap"><table><thead><tr><th>Period</th><th>Gross</th><th>Deductions</th><th>Net</th></tr></thead><tbody id="payrollRows"><tr><td colspan="4" class="loading">Loading payroll…</td></tr></tbody></table></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Payroll payment history</h2><p class="sub">Salary and payment records linked to your employee record.</p></div></div><div class="table-wrap"><table><thead><tr><th>Period</th><th>Gross</th><th>Deductions</th><th>Net</th></tr></thead><tbody id="payrollRows"><tr><td colspan="4" class="loading">Loading payroll…</td></tr></tbody></table></div></section>
 </div>
 <div>
-<section class="panel"><div class="panel-head"><div><h2>Monthly breakdown</h2><p class="sub">Approved records in the selected period.</p></div></div><div class="list" id="breakdown"><div class="loading">Loading breakdown…</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Cap-table equity history</h2><p class="sub">Investor contributions and recorded shareholding changes.</p></div></div><div id="equitySummary" class="list"><div class="loading">Loading cap-table history…</div></div></section>\n<section class="panel"><div class="panel-head"><div><h2>Monthly breakdown</h2><p class="sub">Approved records in the selected period.</p></div></div><div class="list" id="breakdown"><div class="loading">Loading breakdown…</div></div></section>
 <section class="panel"><div class="panel-head"><div><h2>Overtime records</h2><p class="sub">Overtime is separate from normal salary earnings.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date / period</th><th>Hours</th><th>Amount</th><th>Status</th></tr></thead><tbody id="overtimeRows"><tr><td colspan="4" class="loading">Loading overtime…</td></tr></tbody></table></div></section>
 <section class="panel"><div class="panel-head"><div><h2>Approved leave</h2><p class="sub">Paid/unpaid treatment follows approved entitlement and policy.</p></div></div><div id="leaveRows" class="list"><div class="loading">Loading leave…</div></div></section>
 </div></div>
@@ -107,7 +107,27 @@ async function loadPeriod(){
 }
 $("refreshBtn").addEventListener("click",()=>loadPeriod().catch(e=>$("message").textContent=e.message));
 $("period").addEventListener("change",()=>loadPeriod().catch(e=>$("message").textContent=e.message));
-init().catch(e=>{$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to initialise your employee earnings dashboard.")+'</span>';});
+
+async function loadEquityHistory(){
+ const box=$("equitySummary");
+ try{
+  const {data,error}=await db.functions.invoke("portal-personal-data",{body:{action:"equity_earnings"}});
+  if(error)throw error;
+  if(!data?.success)throw new Error(data?.error||"Unable to load cap-table history.");
+  if(!data.investor){box.innerHTML='<div class="empty">No investor classification is linked to this account.</div>';return;}
+  const history=data.share_history||[], contributions=data.contributions||[];
+  box.innerHTML='<div class="rowitem"><span>Investor</span><strong>'+safe(data.investor.name)+'</strong></div>'+
+   '<div class="rowitem"><span>Investor number</span><strong>'+safe(data.investor.investor_number)+'</strong></div>'+
+   '<div class="rowitem"><span>Current recorded equity</span><strong class="good">'+money(data.total_equity)+'</strong></div>'+
+   '<div class="rowitem"><span>Contribution entries</span><strong>'+contributions.length+'</strong></div>'+
+   '<div class="rowitem"><span>Shareholding entries</span><strong>'+history.length+'</strong></div>'+
+   '<div style="margin-top:12px;font-weight:800">Shareholding movement</div>'+
+   (history.length?history.map(x=>'<div class="rowitem"><span>'+dateText(x.date)+' · '+safe(x.action)+'<br><small>'+safe(x.reference||x.notes||"")+'</small></span><strong>'+money(x.delta)+'<br><small>Balance '+money(x.equity_after)+'</small></strong></div>').join(""):'<div class="empty">No cap-table movements recorded.</div>')+
+   '<div style="margin-top:12px;font-weight:800">Capital contributions</div>'+
+   (contributions.length?contributions.map(x=>'<div class="rowitem"><span>'+dateText(x.date)+' · '+safe(x.type)+'<br><small>'+safe(x.reference||x.notes||"")+'</small></span><strong>'+money(x.amount)+'</strong></div>').join(""):'<div class="empty">No investment contributions recorded.</div>');
+ }catch(e){box.innerHTML='<div class="empty error">'+safe(e.message||"Unable to load cap-table history.")+'</div>';}
+}
+loadEquityHistory();\ninit().catch(e=>{$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to initialise your employee earnings dashboard.")+'</span>';});
 </script>
 </body>
 </html>
