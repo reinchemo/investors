@@ -10045,6 +10045,15 @@ async function openNewTemplateModal() {
 .starlink-fullpage-modal .employee-table{width:100%;min-width:760px}
 @media(min-width:1100px){.starlink-fullpage-modal>.modal-card{padding:2rem 2.25rem!important}.starlink-fullpage-modal .employee-table{min-width:0}}
 @media(max-width:760px){.starlink-fullpage-modal,.starlink-fullpage-modal.show,.starlink-fullpage-modal>.modal-card{min-height:calc(100dvh - 78px)!important}.starlink-fullpage-modal>.modal-card{padding:.85rem!important}.starlink-fullpage-modal .employee-table{min-width:680px}}
+/* Sidebar-selected modules use a true full-viewport workspace, not a centered dialog */
+.starlink-shell-main{width:100%;max-width:none;min-width:0;min-height:100dvh;box-sizing:border-box}
+.starlink-fullpage-modal,.starlink-fullpage-modal.show{position:fixed!important;inset:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;overflow:auto!important;background:#0a0e1a!important;backdrop-filter:none!important;z-index:10050!important;box-sizing:border-box}
+.starlink-fullpage-modal>.modal-card{width:100%!important;max-width:none!important;min-width:0!important;max-height:none!important;height:auto!important;min-height:100dvh!important;margin:0!important;padding:clamp(1rem,2vw,2rem)!important;border:0!important;border-radius:0!important;overflow:visible!important;box-sizing:border-box}
+.starlink-fullpage-modal .employee-table-wrap{width:100%;max-width:100%;overflow-x:auto}
+.starlink-fullpage-modal .employee-table{width:100%;min-width:760px}
+@media(min-width:1100px){.starlink-fullpage-modal>.modal-card{padding:2rem 2.5rem!important}.starlink-fullpage-modal .employee-table{min-width:0}}
+@media(max-width:760px){.starlink-fullpage-modal,.starlink-fullpage-modal.show,.starlink-fullpage-modal>.modal-card{min-height:100dvh!important}.starlink-fullpage-modal>.modal-card{padding:.85rem!important}.starlink-fullpage-modal .employee-table{min-width:680px}}
+.dashboard[hidden]{display:none!important}
 </style>
 <script id="starlink-index-sidebar">
 (function(){
@@ -10094,13 +10103,12 @@ async function openNewTemplateModal() {
   const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
   frame.addEventListener('load',()=>{try{frame.contentDocument.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const u=new URL(a.href,frame.contentWindow.location.href);if(u.pathname.endsWith('/index.html')||u.pathname==='/'&&u.origin===location.origin){e.preventDefault();showHome();}}); }catch(err){console.warn('Workspace navigation hook unavailable',err);}});
   workspacePane.appendChild(frame);main.appendChild(workspacePane);
-  let activeModal=null, activeModalParent=null, activeModalNext=null, modalObserver=null;
+  let activeModal=null, modalObserver=null;
   const restoreModal=()=>{
    if(!activeModal)return;
    if(modalObserver)modalObserver.disconnect();
    activeModal.classList.remove('starlink-fullpage-modal');
-   if(activeModalParent)activeModalParent.insertBefore(activeModal,activeModalNext&&activeModalNext.parentNode===activeModalParent?activeModalNext:null);
-   activeModal=null;activeModalParent=null;activeModalNext=null;modalObserver=null;
+   activeModal=null;modalObserver=null;
    workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';
    side.querySelectorAll('a,button').forEach(a=>a.classList.remove('starlink-current'));
   };
@@ -10115,12 +10123,11 @@ async function openNewTemplateModal() {
    if(!modal||!modal.classList.contains('show'))return;
    if(activeModal===modal)return;
    if(activeModal)restoreModal();
-   activeModal=modal;activeModalParent=modal.parentNode;activeModalNext=modal.nextSibling;
+   activeModal=modal;
    const heading=modal.querySelector('.modal-card h3');
    title.textContent=(heading?.innerText||button.innerText||'Workspace').trim().replace(/\\s+/g,' ');
-   dashboard.hidden=true;workspacePane.hidden=false;
+   dashboard.hidden=true;workspacePane.hidden=true;
    modal.classList.add('starlink-fullpage-modal');
-   workspacePane.appendChild(modal);
    modalObserver=new MutationObserver(()=>{
     if(activeModal&&!activeModal.classList.contains('show'))restoreModal();
    });
