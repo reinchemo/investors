@@ -9396,9 +9396,10 @@ async function openNewTemplateModal() {
 
             // Investor transactions
             document.getElementById('investorTxnBtn').addEventListener('click', async () => {
+                const modal = document.getElementById('investorTxnModal');
+                modal.classList.add('show');
                 await loadInvestorTxns();
                 renderInvestorTxns();
-                document.getElementById('investorTxnModal').classList.add('show');
             });
             document.getElementById('investorTxnClose').addEventListener('click', () => {
                 document.getElementById('investorTxnModal').classList.remove('show');
@@ -9805,9 +9806,10 @@ async function openNewTemplateModal() {
         }
 
         async function openReserveModal() {
+            const modal = document.getElementById('reserveModal');
+            modal.classList.add('show');
             await fetchReserveLedger();
             renderReserveDashboard();
-            document.getElementById('reserveModal').classList.add('show');
         }
 
         function closeReserveModal() {
@@ -10083,6 +10085,12 @@ async function openNewTemplateModal() {
 .starlink-shell-main>.dashboard[hidden]{display:none!important}
 @media(min-width:1100px){.starlink-fullpage-modal .employee-table{min-width:0}}
 @media(max-width:760px){.starlink-module-frame{min-height:calc(100dvh - 75px)!important}.starlink-module-frame iframe{height:calc(100dvh - 75px)!important;min-height:calc(100dvh - 75px)!important}.starlink-fullpage-modal>.modal-card{padding:.8rem!important}.starlink-fullpage-modal .employee-table{min-width:680px}}
+/* Quick close control for full-page module workspaces */
+.starlink-fullpage-modal{position:relative!important}
+.starlink-workspace-close{position:fixed!important;top:14px!important;right:18px!important;z-index:10050!important;width:42px!important;height:42px!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.2)!important;border-radius:50%!important;background:rgba(13,25,43,.96)!important;color:#f2f0eb!important;font-size:18px!important;box-shadow:0 8px 24px rgba(0,0,0,.35)!important;cursor:pointer!important;transition:background .2s ease,transform .2s ease!important}
+.starlink-workspace-close:hover{background:#b94b50!important;transform:scale(1.06)!important}
+.starlink-fullpage-modal>.modal-card{padding-top:clamp(1.5rem,3vw,2.5rem)!important}
+@media(max-width:760px){.starlink-workspace-close{top:9px!important;right:10px!important;width:38px!important;height:38px!important;font-size:16px!important}}
 </style>
 <script id="starlink-index-sidebar">
 (function(){
@@ -10142,7 +10150,7 @@ async function openNewTemplateModal() {
    workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';
    side.querySelectorAll('a,button').forEach(a=>a.classList.remove('starlink-current'));
   };
-  const modalByButton={capTableBtn:'capTableModal',proposalsBtn:'proposalsModal',dilutionBtn:'dilutionModal',investorTxnBtn:'investorTxnModal',paymentsBtn:'paymentsModal',dividendsBtn:'dividendModal',reconBtn:'reconModal',reserveBtn:'reserveModal',auditBtn:'auditModal',addInvestorBtn:'investorModal'};
+  const modalByButton={capTableBtn:'capTableModal',proposalsBtn:'proposalsModal',dilutionBtn:'dilutionModal',investorTxnBtn:'investorTxnModal',paymentsBtn:'paymentsModal',dividendsBtn:'dividendsHistoryModal',reconBtn:'reconModal',reserveBtn:'reserveModal',auditBtn:'auditModal',addInvestorBtn:'investorModal'};
   const promoteModal=(button,modal)=>{
    if(!modal||!modal.classList.contains('show'))return;
    if(activeModal&&activeModal!==modal)restoreModal();
@@ -10152,6 +10160,14 @@ async function openNewTemplateModal() {
    title.textContent=(heading?.innerText||button.innerText||'Workspace').trim();
    dashboard.hidden=true;workspacePane.hidden=false;
    modal.classList.add('starlink-fullpage-modal');workspacePane.appendChild(modal);
+   let closeButton=modal.querySelector('.starlink-workspace-close');
+   if(!closeButton){
+    closeButton=document.createElement('button');closeButton.type='button';closeButton.className='starlink-workspace-close';
+    closeButton.setAttribute('aria-label','Close workspace');closeButton.title='Close and return to Equity Overview';
+    closeButton.innerHTML='<i class="fas fa-times" aria-hidden="true"></i>';
+    closeButton.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();modal.classList.remove('show');});
+    modal.appendChild(closeButton);
+   }
    if(modalObserver)modalObserver.disconnect();
    modalObserver=new MutationObserver(()=>{if(activeModal===modal&&!modal.classList.contains('show'))restoreModal();});
    modalObserver.observe(modal,{attributes:true,attributeFilter:['class']});
@@ -10164,7 +10180,7 @@ async function openNewTemplateModal() {
     if(link.dataset.workspace==='home'||href==='#starlink-home'||href.endsWith('/index.html')){
      e.preventDefault();e.stopPropagation();frame.removeAttribute('src');showHome();close();return;
     }
-    const routes={'finance.html':'Finance Workspace','communication.html':'Communications','admin.html':'Admin Roles'};
+    const routes={'communication.html':'Communications','admin.html':'Admin Roles'};
     const route=Object.keys(routes).find(key=>href.includes(key));
     if(route){e.preventDefault();e.stopPropagation();if(activeModal)restoreModal();dashboard.hidden=true;workspacePane.hidden=false;frame.src=route;title.textContent=routes[route];side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
     return;
