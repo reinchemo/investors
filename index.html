@@ -7359,7 +7359,7 @@ async function openSecurePdf(investorId) {
             const {
                 data,
                 error
-            } = await supabaseClient.rpc('record_capital_injection', {
+            } = await supabaseClient.rpc('record_capital_injection_authorized', {
                 p_investor_id: investorId,
                 p_amount: amount,
                 p_date: date,
