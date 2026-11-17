@@ -1657,6 +1657,13 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
 .starlink-module-frame[hidden]{display:none!important}
 .starlink-module-frame iframe{display:block;width:100%;height:100%;min-height:calc(100dvh - 90px);border:0;background:#0a0e1a}
 @media(max-width:760px){.starlink-module-frame{height:calc(100dvh - 64px);min-height:calc(100dvh - 64px)}.starlink-module-frame iframe{min-height:calc(100dvh - 64px)}}
+/* Finance module canvas uses the same full available workspace as Equity */
+.starlink-shell-main{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:100dvh!important;box-sizing:border-box!important}
+.starlink-shell-main>.dashboard[hidden]{display:none!important}
+.starlink-module-frame{position:relative!important;display:block;flex:1 1 auto!important;width:100%!important;max-width:none!important;min-width:0!important;height:auto!important;min-height:calc(100dvh - 100px)!important;margin:0!important;padding:0!important;overflow:auto!important;background:#0a0e1a!important;box-sizing:border-box!important}
+.starlink-module-frame[hidden]{display:none!important}
+.starlink-module-frame iframe{display:block!important;width:100%!important;height:calc(100dvh - 100px)!important;min-height:calc(100dvh - 100px)!important;min-width:0!important;border:0!important;background:#0a0e1a!important}
+@media(max-width:760px){.starlink-module-frame{min-height:calc(100dvh - 75px)!important}.starlink-module-frame iframe{height:calc(100dvh - 75px)!important;min-height:calc(100dvh - 75px)!important}}
 </style>
 </head>
 
@@ -13944,25 +13951,30 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   toggle.addEventListener('click',()=>document.body.classList.toggle('starlink-sidebar-open'));
   overlay.addEventListener('click',close);
   const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
-  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
+  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='eager';frame.setAttribute('allow','clipboard-read; clipboard-write');
   workspacePane.appendChild(frame);main.appendChild(workspacePane);
   const titleNode=top.querySelector('.shell-title');
   const routes={'index.html':'Equity Management','communication.html':'Communications','admin.html':'Admin Roles','finance.html':'Finance Workspace'};
-  const openWorkspace=(file,label)=>{dashboard.hidden=true;workspacePane.hidden=false;frame.src=file;titleNode.textContent=label;};
+  const openWorkspace=(file,label)=>{
+   dashboard.hidden=true;workspacePane.hidden=false;
+   if(frame.dataset.page!==file){frame.src=file;frame.dataset.page=file;}
+   titleNode.textContent=label;close();
+  };
   side.addEventListener('click',e=>{
-   const link=e.target.closest('a[href]');
-   if(!link)return;
-   const url=new URL(link.href,location.href),file=url.pathname.split('/').pop().toLowerCase();
-   if(routes[file]){e.preventDefault();openWorkspace(file,routes[file]);side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
-   else close();
-  });
+   const link=e.target.closest('a[href]');if(!link)return;
+   const url=new URL(link.getAttribute('href'),location.href),file=url.pathname.split('/').pop().toLowerCase();
+   if(routes[file]){e.preventDefault();e.stopPropagation();openWorkspace(file,routes[file]);side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));}
+  },true);
   finance.addEventListener('click',e=>{if(e.target.closest('.tab'))close()});
   frame.addEventListener('load',()=>{
-   try{frame.contentDocument.addEventListener('click',e=>{
-    const link=e.target.closest('a[href]');if(!link)return;
-    const url=new URL(link.href,frame.contentWindow.location.href),file=url.pathname.split('/').pop().toLowerCase();
-    if(routes[file]){e.preventDefault();openWorkspace(file,routes[file]);}
-   });}catch(err){console.warn('Workspace link handler unavailable',err);}
+   try{
+    const doc=frame.contentDocument;if(!doc)return;
+    doc.addEventListener('click',e=>{
+     const link=e.target.closest('a[href]');if(!link)return;
+     const url=new URL(link.getAttribute('href'),frame.contentWindow.location.href),file=url.pathname.split('/').pop().toLowerCase();
+     if(routes[file]){e.preventDefault();e.stopPropagation();openWorkspace(file,routes[file]);}
+    },true);
+   }catch(err){console.warn('Workspace link handler unavailable',err);}
   });
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
