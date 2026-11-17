@@ -10100,7 +10100,7 @@ async function openNewTemplateModal() {
    if(activeModal===modal)return;
    if(activeModal)restoreModal();
    activeModal=modal;activeModalParent=modal.parentNode;activeModalNext=modal.nextSibling;
-   title.textContent=(button.getAttribute('aria-label')||button.innerText||'Workspace').trim().replace(/\\s+/g,' ');
+   title.textContent=(button.getAttribute('aria-label')||button.innerText||'Workspace').trim().replace(/\s+/g,' ');
    dashboard.hidden=true;workspacePane.hidden=false;
    modal.classList.add('starlink-fullpage-modal');workspacePane.appendChild(modal);
    modalObserver=new MutationObserver(()=>{if(activeModal&&!activeModal.classList.contains('show'))restoreModal();});
@@ -10125,24 +10125,6 @@ async function openNewTemplateModal() {
     side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a===button));
     window.setTimeout(()=>openFullPageModal(button),0);
    }
-  });
-  const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.remove('starlink-current');
-  const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
-  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
-  frame.addEventListener('load',()=>{try{frame.contentDocument.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const u=new URL(a.href,frame.contentWindow.location.href);if(u.pathname.endsWith('/index.html')||u.pathname==='/'&&u.origin===location.origin){e.preventDefault();showHome();}}); }catch(err){console.warn('Workspace navigation hook unavailable',err);}});
-  workspacePane.appendChild(frame);
-  main.appendChild(workspacePane);
-  const showHome=()=>{workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';side.querySelectorAll('a').forEach(a=>a.classList.remove('starlink-current'));};
-  side.addEventListener('click',e=>{
-   const link=e.target.closest('a');if(!link)return;
-   const href=(link.getAttribute('href')||'').toLowerCase();
-   if(link.dataset.workspace==='home'||href==='#starlink-home'||href.endsWith('/index.html')){
-    e.preventDefault();frame.removeAttribute('src');showHome();close();return;
-   }
-   const financeLink=side.querySelector('a[href*="finance.html"]');if(financeLink){financeLink.removeAttribute('target');financeLink.removeAttribute('rel');}
-  const routes={'communication.html':'Communications','admin.html':'Admin Roles'};
-   const route=Object.keys(routes).find(key=>href.includes(key));
-   if(route){e.preventDefault();dashboard.hidden=true;workspacePane.hidden=false;frame.src=route;title.textContent=routes[route];side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
   });
   const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.remove('starlink-current');
  };
