@@ -3443,7 +3443,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     <summary><i class="fas fa-bars"></i></summary>
                     <div class="mobile-menu-content">
                         <!-- Duplicate your buttons here for mobile -->
-                        <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank"><i class="fas fa-arrow-left"></i> Back Home</a>
+                        <a href="#starlink-home" class="btn btn-home" target="_blank"><i class="fas fa-arrow-left"></i> Back Home</a>
                         <a href="finance.html" class="btn btn-primary"><i class="fas fa-coins"></i> Finance</a>
                         <a href="communication.html" class="btn btn-primary"><i class="fas fa-comments"></i> Communications</a>
                         <button class="btn btn-ghost" onclick="openCapTable()"><i class="fas fa-layer-group"></i> Cap Table</button>
@@ -3456,7 +3456,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                         <button class="btn btn-ghost" onclick="openReserveModal()"><i class="fas fa-piggy-bank"></i> Reserve</button>
                         <button class="btn btn-ghost" onclick="openAuditModal()"><i class="fas fa-history"></i> Audit Log</button>
                         <button class="btn btn-ghost" onclick="openInvestorModal(null)"><i class="fas fa-plus"></i> Add Investor</button>
-                        <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank"><i class="fas fa-external-link-alt"></i> Login Expenditures</a>
+                        
                         <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1);"><i class="fas fa-sign-out-alt"></i> Logout</button>
                         <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15);"><i class="fas fa-shield-alt"></i> Admin Roles</a>
                     </div>
@@ -3465,7 +3465,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
 
             <!-- DESKTOP NAVIGATION (Hidden on Mobile) -->
             <div class="nav-actions" id="navActions">
-                <a href="https://starlinkultranet.co.ke" class="btn btn-home" target="_blank" rel="noopener noreferrer">
+                <a href="#starlink-home" class="btn btn-home" target="_blank" rel="noopener noreferrer">
                     <i class="fas fa-arrow-left"></i><span>Back Home</span>
                 </a>
                 <a href="finance.html" class="btn btn-primary">
@@ -3484,7 +3484,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 <button class="btn btn-ghost" id="reserveBtn"><i class="fas fa-piggy-bank"></i> Reserve <span id="reserveBalanceNav" style="display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:rgba(200,154,91,0.3); color:#f4c98d; border-radius:20px; font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:700; margin-left:2px;"></span></button>
                 <button class="btn btn-ghost" id="auditBtn"><i class="fas fa-history"></i> Audit Log</button>
                 <button class="btn btn-ghost" id="addInvestorBtn"><i class="fas fa-plus"></i> Add Investor</button>
-                <a href="https://starlink-one-iota.vercel.app/" class="btn btn-ghost" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i><span>Login Expenditures</span></a>
+                
                 <button class="btn" id="navLogoutBtn" style="color: #f0a89f; border: 1px solid rgba(226,104,91,0.4); background: rgba(226,104,91,0.1);"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
                 <a href="admin.html" class="btn" style="color: #b8a0ff; border: 1px solid rgba(122,90,248,0.5); background: rgba(122,90,248,0.15);"><i class="fas fa-shield-alt"></i><span>Admin Roles</span></a>
             </div>
@@ -10021,6 +10021,12 @@ async function openNewTemplateModal() {
     <script src="router.js"></script>
 
 
+<style id="starlink-workspace-frame">
+.starlink-module-frame{width:100%;height:calc(100vh - 90px);min-height:650px;border:1px solid rgba(133,174,210,.15);border-radius:18px;overflow:hidden;background:#0a0e1a}
+.starlink-module-frame[hidden]{display:none!important}
+.starlink-module-frame iframe{display:block;width:100%;height:100%;border:0;background:#0a0e1a}
+.dashboard[hidden]{display:none!important}
+</style>
 <script id="starlink-index-sidebar">
 (function(){
  const init=()=>{
@@ -10037,9 +10043,9 @@ async function openNewTemplateModal() {
   const items=[...actions.children];
   items.forEach(el=>{
    const href=(el.getAttribute('href')||'').toLowerCase();
-   if(href.includes('finance.html')||href.includes('communication.html')||href.includes('admin.html')||href.includes('starlinkultranet.co.ke')||href.includes('starlink-one-iota')){
+   if(href.includes('finance.html')||href.includes('communication.html')||href.includes('admin.html')||href.includes('#starlink-home')){
     workspace.appendChild(el);
-    if(href.includes('starlinkultranet.co.ke'))el.innerHTML='<i class="fas fa-house"></i><span>Company Home</span>';
+    if(href.includes('#starlink-home')){el.innerHTML='<i class="fas fa-house"></i><span>Company Home</span>';el.dataset.workspace='home';}
     if(href.includes('finance.html'))el.innerHTML='<i class="fas fa-coins"></i><span>Finance Workspace</span>';
     if(href.includes('communication.html'))el.innerHTML='<i class="fas fa-comments"></i><span>Communications</span>';
     if(href.includes('admin.html'))el.innerHTML='<i class="fas fa-shield-alt"></i><span>Admin Roles</span>';
@@ -10065,7 +10071,23 @@ async function openNewTemplateModal() {
   overlay.addEventListener('click',close);
   side.addEventListener('click',e=>{if(e.target.closest('a'))close()});
   actions.addEventListener('click',e=>{if(e.target.closest('button'))close()},{capture:true});
-  const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.add('starlink-current');
+  const workspacePane=document.createElement('section');workspacePane.className='starlink-module-frame';workspacePane.hidden=true;
+  const frame=document.createElement('iframe');frame.title='STARLINK workspace';frame.loading='lazy';frame.setAttribute('allow','clipboard-read; clipboard-write');
+  frame.addEventListener('load',()=>{try{frame.contentDocument.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;const u=new URL(a.href,frame.contentWindow.location.href);if(u.pathname.endsWith('/index.html')||u.pathname==='/'&&u.origin===location.origin){e.preventDefault();showHome();}}); }catch(err){console.warn('Workspace navigation hook unavailable',err);}});
+  workspacePane.appendChild(frame);
+  main.appendChild(workspacePane);
+  const showHome=()=>{workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';side.querySelectorAll('a').forEach(a=>a.classList.remove('starlink-current'));};
+  side.addEventListener('click',e=>{
+   const link=e.target.closest('a');if(!link)return;
+   const href=(link.getAttribute('href')||'').toLowerCase();
+   if(link.dataset.workspace==='home'||href==='#starlink-home'||href.endsWith('/index.html')){
+    e.preventDefault();frame.removeAttribute('src');showHome();close();return;
+   }
+   const routes={'finance.html':'Finance Workspace','communication.html':'Communications','admin.html':'Admin Roles'};
+   const route=Object.keys(routes).find(key=>href.includes(key));
+   if(route){e.preventDefault();dashboard.hidden=true;workspacePane.hidden=false;frame.src=route;title.textContent=routes[route];side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
+  });
+  const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.remove('starlink-current');
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
