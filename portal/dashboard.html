@@ -1771,22 +1771,21 @@
         ========================================= */
 
         async function loadEmployee() {
-            const result = await supabaseClient
-                .from("staff")
-                .select("id,employee_number,full_name,role,phone,email,status,start_date,annual_leave_days")
-                .eq("id", portalAccount.staff_id)
-                .maybeSingle();
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "employee_dashboard" }
+            });
+            if (result.error) throw new Error("Unable to load your employee dashboard.");
+            if (!result.data || result.data.success === false || !result.data.staff) {
+                throw new Error(result.data?.error || "Your linked employee record could not be found.");
+            }
 
-            if (result.error) throw new Error("Unable to load your employee profile. Check the staff access policy.");
-            if (!result.data) throw new Error("Your linked employee record could not be found.");
-
-            staffRecord = result.data;
+            const payload = result.data;
+            staffRecord = payload.staff;
 
             byId("welcomeName").textContent = "Welcome, " + staffRecord.full_name;
             byId("sidebarUserName").textContent = staffRecord.full_name || "My Account";
             byId("userAvatar").textContent = (staffRecord.full_name || "S").charAt(0).toUpperCase();
             byId("sidebarUserType").textContent = "Employee account";
-
             byId("employeeNumber").textContent = staffRecord.employee_number || "—";
             byId("staffName").textContent = staffRecord.full_name || "—";
             byId("staffNumber").textContent = staffRecord.employee_number || "—";
@@ -1796,7 +1795,6 @@
             byId("staffEmail").textContent = staffRecord.email || "Not provided";
             byId("staffStartDate").textContent = formatDate(staffRecord.start_date);
             byId("staffLeaveAllowance").textContent = Number(staffRecord.annual_leave_days || 0) + " days";
-
             byId("employeeArea").classList.remove("hidden");
 
             const tag = document.createElement("span");
@@ -1804,92 +1802,70 @@
             tag.innerHTML = '<i class="fas fa-briefcase"></i> EMPLOYEE';
             byId("classificationTags").appendChild(tag);
 
-            await Promise.all([loadAttendance(), loadTasks(), loadPayroll(), loadLeave()]);
+            renderAttendance(payload.attendance || []);
+            renderTasks(payload.tasks || []);
+            renderLeave(payload.leave_requests || []);
+            await loadPayroll();
         }
 
-        /* =========================================
-           ATTENDANCE
-        ========================================= */
-
         async function loadAttendance() {
-            const result = await supabaseClient
-                .from("attendance")
-                .select("id,date,check_in,check_out,notes")
-                .eq("staff_id", staffRecord.id)
-                .order("date", {
-                    ascending: false
-                })
-                .limit(10);
-
-            if (result.error) {
-                console.error("Attendance:", result.error);
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "employee_dashboard" }
+            });
+            if (result.error || !result.data?.success) {
+                console.error("Attendance:", result.error || result.data?.error);
                 setTableMessage("attendanceRows", 4, "Unable to load attendance.");
                 return;
             }
+            renderAttendance(result.data.attendance || []);
+        }
 
-            const rows = result.data || [];
+        function renderAttendance(rows) {
             byId("attendanceCount").textContent = rows.length;
-
             if (!rows.length) {
                 showEmpty("attendanceEmpty", true);
                 return;
             }
             showEmpty("attendanceEmpty", false);
-
             byId("attendanceRows").innerHTML = rows.map(item => `
-        <tr>
-            <td>${formatDate(item.date)}</td>
-            <td>${formatDateTime(item.check_in)}</td>
-            <td>${formatDateTime(item.check_out)}</td>
-            <td>${displayValue(item.notes)}</td>
-        </tr>
-    `).join("");
+                <tr>
+                    <td>${formatDate(item.date)}</td>
+                    <td>${formatDateTime(item.check_in)}</td>
+                    <td>${formatDateTime(item.check_out)}</td>
+                    <td>${displayValue(item.notes)}</td>
+                </tr>
+            `).join("");
         }
 
-        /* =========================================
-           ASSIGNED TASKS
-        ========================================= */
-
         async function loadTasks() {
-            const result = await supabaseClient
-                .from("tasks")
-                .select("id,title,priority,status,progress_pct,deadline")
-                .eq("assignee_staff_id", staffRecord.id)
-                .is("deleted_at", null)
-                .order("created_at", {
-                    ascending: false
-                })
-                .limit(10);
-
-            if (result.error) {
-                console.error("Tasks:", result.error);
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "employee_dashboard" }
+            });
+            if (result.error || !result.data?.success) {
+                console.error("Tasks:", result.error || result.data?.error);
                 setTableMessage("taskRows", 5, "Unable to load assigned tasks.");
                 return;
             }
+            renderTasks(result.data.tasks || []);
+        }
 
-            const rows = result.data || [];
+        function renderTasks(rows) {
             byId("taskCount").textContent = rows.length;
-
             if (!rows.length) {
                 showEmpty("taskEmpty", true);
                 return;
             }
             showEmpty("taskEmpty", false);
-
             byId("taskRows").innerHTML = rows.map(item => `
-        <tr>
-            <td>${displayValue(item.title)}</td>
-            <td>${displayValue(item.priority)}</td>
-            <td><span class="${statusClass(item.status)}">${displayValue(item.status)}</span></td>
-            <td>${Number(item.progress_pct||0)}%</td>
-            <td>${formatDate(item.deadline)}</td>
-        </tr>
-    `).join("");
+                <tr>
+                    <td>${displayValue(item.title)}</td>
+                    <td>${displayValue(item.priority)}</td>
+                    <td><span class="${statusClass(item.status)}">${displayValue(item.status)}</span></td>
+                    <td>${Number(item.progress_pct || 0)}%</td>
+                    <td>${formatDate(item.deadline)}</td>
+                </tr>
+            `).join("");
         }
-
-        /* =========================================
-           POSTED PAYSLIPS
-        ========================================= */
 
         async function loadPayroll() {
             const result = await supabaseClient.functions.invoke("portal-personal-data", {
@@ -1927,118 +1903,46 @@
         ========================================= */
 
         async function loadLeave() {
-            const result = await supabaseClient
-                .from("leave_requests")
-                .select("id,leave_type,start_date,end_date,days,status")
-                .eq("staff_id", staffRecord.id)
-                .order("created_at", {
-                    ascending: false
-                })
-                .limit(15);
-
-            if (result.error) {
-                console.error("Leave:", result.error);
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "employee_dashboard" }
+            });
+            if (result.error || !result.data?.success) {
+                console.error("Leave:", result.error || result.data?.error);
                 setTableMessage("leaveRows", 5, "Unable to load leave requests.");
                 return;
             }
+            renderLeave(result.data.leave_requests || []);
+        }
 
-            const rows = result.data || [];
+        function renderLeave(rows) {
             byId("leaveCount").textContent = rows.length;
-
             if (!rows.length) {
                 showEmpty("leaveEmpty", true);
                 return;
             }
             showEmpty("leaveEmpty", false);
-
             byId("leaveRows").innerHTML = rows.map(item => `
-        <tr>
-            <td>${displayValue(item.leave_type)}</td>
-            <td>${formatDate(item.start_date)}</td>
-            <td>${formatDate(item.end_date)}</td>
-            <td>${Number(item.days||0)}</td>
-            <td><span class="${statusClass(item.status)}">${displayValue(item.status)}</span></td>
-        </tr>
-    `).join("");
+                <tr>
+                    <td>${displayValue(item.leave_type)}</td>
+                    <td>${formatDate(item.start_date)}</td>
+                    <td>${formatDate(item.end_date)}</td>
+                    <td>${Number(item.days || 0)}</td>
+                    <td><span class="${statusClass(item.status)}">${displayValue(item.status)}</span></td>
+                </tr>
+            `).join("");
         }
 
-        /* =========================================
-           SUBMIT LEAVE REQUEST
-        ========================================= */
-
-        byId("leaveForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            if (!staffRecord) {
-                alert("Your employee profile is not available.");
-                return;
-            }
-
-            const leaveType = byId("leaveType").value;
-            const startDate = byId("leaveStart").value;
-            const endDate = byId("leaveEnd").value;
-            const reason = byId("leaveReason").value.trim();
-
-            if (!leaveType || !startDate || !endDate || !reason) {
-                alert("Please complete all leave request fields.");
-                return;
-            }
-
-            if (endDate < startDate) {
-                alert("End date cannot be before start date.");
-                return;
-            }
-
-            const start = new Date(startDate + "T00:00:00");
-            const end = new Date(endDate + "T00:00:00");
-            const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
-
-            const button = byId("leaveSubmit");
-            button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-
-            try {
-                const result = await supabaseClient.from("leave_requests").insert({
-                    staff_id: staffRecord.id,
-                    leave_type: leaveType,
-                    start_date: startDate,
-                    end_date: endDate,
-                    days: days,
-                    reason: reason,
-                    status: "pending"
-                });
-
-                if (result.error) throw result.error;
-
-                alert("Your leave request has been submitted for management approval.");
-                byId("leaveForm").reset();
-                await loadLeave();
-
-            } catch (error) {
-                console.error("Leave submission:", error);
-                alert("Unable to submit your leave request. Please contact your administrator.");
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-paper-plane"></i> Submit leave request';
-            }
-        });
-
-        /* =========================================
-           INVESTOR PROFILE
-        ========================================= */
-
         async function loadInvestor() {
-            const result = await supabaseClient
-                .from("investors")
-                .select("id,name,investor_number,equity,status,joined_date")
-                .eq("id", portalAccount.investor_id)
-                .maybeSingle();
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "investor_dashboard" }
+            });
+            if (result.error) throw new Error("Unable to load your investor dashboard.");
+            if (!result.data || result.data.success === false || !result.data.investor) {
+                throw new Error(result.data?.error || "Your linked investor record could not be found.");
+            }
 
-            if (result.error) throw new Error("Unable to load your investor profile.");
-            if (!result.data) throw new Error("Your linked investor record could not be found.");
-
-            investorRecord = result.data;
-
+            const payload = result.data;
+            investorRecord = payload.investor;
             byId("investorNumber").textContent = investorRecord.investor_number || "—";
             byId("investorEquity").textContent = money(investorRecord.equity);
             byId("investorStatus").textContent = investorRecord.status || "—";
@@ -2046,7 +1950,6 @@
             byId("investorProfileNumber").textContent = investorRecord.investor_number || "—";
             byId("investorJoined").textContent = formatDate(investorRecord.joined_date);
             byId("investorProfileEquity").textContent = money(investorRecord.equity);
-
             byId("investorArea").classList.remove("hidden");
 
             const tag = document.createElement("span");
@@ -2063,91 +1966,67 @@
                 byId("sidebarUserType").textContent = "Employee & investor";
             }
 
-            await Promise.all([loadInvestments(), loadShareTransactions()]);
+            renderInvestments(payload.investments || []);
+            renderShareTransactions(payload.transactions || []);
         }
 
-        /* =========================================
-           INVESTMENT HISTORY
-        ========================================= */
-
         async function loadInvestments() {
-            const result = await supabaseClient
-                .from("investments")
-                .select("id,date,amount,type,reference")
-                .eq("investor_id", investorRecord.id)
-                .is("deleted_at", null)
-                .order("date", {
-                    ascending: false
-                })
-                .limit(10);
-
-            if (result.error) {
-                console.error("Investments:", result.error);
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "investor_dashboard" }
+            });
+            if (result.error || !result.data?.success) {
+                console.error("Investments:", result.error || result.data?.error);
                 setTableMessage("investmentRows", 4, "Unable to load investment history.");
                 return;
             }
+            renderInvestments(result.data.investments || []);
+        }
 
-            const rows = result.data || [];
+        function renderInvestments(rows) {
             byId("investmentCount").textContent = rows.length;
-
             if (!rows.length) {
                 showEmpty("investmentEmpty", true);
                 return;
             }
             showEmpty("investmentEmpty", false);
-
             byId("investmentRows").innerHTML = rows.map(item => `
-        <tr>
-            <td>${formatDate(item.date)}</td>
-            <td>${displayValue(item.type)}</td>
-            <td>${money(item.amount)}</td>
-            <td>${displayValue(item.reference)}</td>
-        </tr>
-    `).join("");
+                <tr>
+                    <td>${formatDate(item.date)}</td>
+                    <td>${displayValue(item.type)}</td>
+                    <td>${money(item.amount)}</td>
+                    <td>${displayValue(item.reference)}</td>
+                </tr>
+            `).join("");
         }
 
-        /* =========================================
-           SHARE TRANSACTIONS
-        ========================================= */
-
         async function loadShareTransactions() {
-            const result = await supabaseClient
-                .from("share_transactions")
-                .select("id,date,action,delta,equity_after,reference")
-                .eq("investor_id", investorRecord.id)
-                .order("date", {
-                    ascending: false
-                })
-                .limit(10);
-
-            if (result.error) {
-                console.error("Share transactions:", result.error);
+            const result = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "investor_dashboard" }
+            });
+            if (result.error || !result.data?.success) {
+                console.error("Share transactions:", result.error || result.data?.error);
                 setTableMessage("shareRows", 5, "Unable to load share transactions.");
                 return;
             }
+            renderShareTransactions(result.data.transactions || []);
+        }
 
-            const rows = result.data || [];
-
+        function renderShareTransactions(rows) {
             if (!rows.length) {
                 showEmpty("shareEmpty", true);
                 return;
             }
             showEmpty("shareEmpty", false);
-
             byId("shareRows").innerHTML = rows.map(item => `
-        <tr>
-            <td>${formatDate(item.date)}</td>
-            <td>${displayValue(item.action)}</td>
-            <td>${money(item.delta)}</td>
-            <td>${money(item.equity_after)}</td>
-            <td>${displayValue(item.reference)}</td>
-        </tr>
-    `).join("");
+                <tr>
+                    <td>${formatDate(item.date)}</td>
+                    <td>${displayValue(item.action)}</td>
+                    <td>${money(item.delta)}</td>
+                    <td>${money(item.equity_after)}</td>
+                    <td>${displayValue(item.reference)}</td>
+                </tr>
+            `).join("");
         }
-
-        /* =========================================
-           LOAD DASHBOARD
-        ========================================= */
 
         async function loadDashboard() {
             if (dashboardLoading) return;
