@@ -553,6 +553,7 @@
                     throw new Error(data?.error || "Unable to retrieve your payment records.");
                 }
                 const payments = Array.isArray(data.payments) ? data.payments : [];
+                renderPayments(payments);
 
 
             } catch (error) {
