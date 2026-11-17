@@ -4068,24 +4068,31 @@
                 warning: !!isWarning
             };
 
-            // Optimistically add to local state
-            auditLogs.push({
-                id: row.id,
-                timestamp: row.timestamp,
-                user: row.user_name,
-                action: row.action,
-                target: row.target,
-                details: row.details,
-                oldValue: row.old_value,
-                newValue: row.new_value,
-                warning: row.warning
-            });
+            if (!supabaseClient) {
+                console.warn('Audit save skipped: Supabase client is unavailable.');
+                return false;
+            }
 
-            if (!supabaseClient) return;
             try {
-                await supabaseClient.from('audit_logs').insert(row);
+                const { error } = await supabaseClient.from('audit_logs').insert(row);
+                if (error) throw error;
+
+                // Add to the visible log only after the database confirms the insert.
+                auditLogs.push({
+                    id: row.id,
+                    timestamp: row.timestamp,
+                    user: row.user_name,
+                    action: row.action,
+                    target: row.target,
+                    details: row.details,
+                    oldValue: row.old_value,
+                    newValue: row.new_value,
+                    warning: row.warning
+                });
+                return true;
             } catch (e) {
-                console.warn('Audit save failed:', e.message);
+                console.error('Audit save failed:', e.message || e);
+                return false;
             }
         }
 
@@ -9873,10 +9880,11 @@ async function openNewTemplateModal() {
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 
                 if (!session) {
-                    // Temporarily disabled to allow local testing
-                    // window.location.href = 'login.html'; 
-                    // return;
+                    window.location.href = 'login.html';
+                    return;
                 }
+
+                CURRENT_USER = session.user.email || session.user.id;
 
                 const { data: ur } = await supabaseClient
                     .from('user_roles')

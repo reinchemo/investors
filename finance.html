@@ -7829,7 +7829,7 @@
         async function logAudit(action, target, details, oldVal = '', newVal = '', isWarning = false) {
             if (!supabaseClient) return;
             try {
-                await supabaseClient.from('audit_logs').insert({
+                const { error } = await supabaseClient.from('audit_logs').insert({
                     id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
                     timestamp: new Date().toISOString(),
                     user_name: CURRENT_USER,
@@ -7840,8 +7840,12 @@
                     new_value: newVal !== undefined && newVal !== null ? String(newVal) : '',
                     warning: !!isWarning
                 });
+                if (error) throw error;
+                return true;
             } catch (e) {
-                console.warn('Audit log failed:', e.message);
+                console.error('Audit log failed:', e.message || e);
+                showToast('The action was saved, but its audit entry could not be recorded. Contact an administrator.', 'error');
+                return false;
             }
         }
 
@@ -13745,6 +13749,8 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
                     window.location.href = 'login.html';
                     return;
                 }
+
+                CURRENT_USER = session.user.email || session.user.id;
 
                 const { data: ur } = await supabaseClient
                     .from('user_roles')
