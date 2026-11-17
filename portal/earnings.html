@@ -40,7 +40,8 @@ table{width:100%;border-collapse:collapse;min-width:570px}th,td{text-align:left;
 <section class="panel"><div class="panel-head"><div><h2>Payroll payment history</h2><p class="sub">Salary and payment records linked to your employee record.</p></div></div><div class="table-wrap"><table><thead><tr><th>Period</th><th>Gross</th><th>Deductions</th><th>Net</th></tr></thead><tbody id="payrollRows"><tr><td colspan="4" class="loading">Loading payroll…</td></tr></tbody></table></div></section>
 </div>
 <div>
-<section class="panel"><div class="panel-head"><div><h2>Cap-table equity history</h2><p class="sub">Investor contributions and recorded shareholding changes.</p></div></div><div id="equitySummary" class="list"><div class="loading">Loading cap-table history…</div></div></section>\n<section class="panel"><div class="panel-head"><div><h2>Monthly breakdown</h2><p class="sub">Approved records in the selected period.</p></div></div><div class="list" id="breakdown"><div class="loading">Loading breakdown…</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Cap-table equity history</h2><p class="sub">Investor contributions and recorded shareholding changes.</p></div></div><div id="equitySummary" class="list"><div class="loading">Loading cap-table history…</div></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Monthly breakdown</h2><p class="sub">Approved records in the selected period.</p></div></div><div class="list" id="breakdown"><div class="loading">Loading breakdown…</div></div></section>
 <section class="panel"><div class="panel-head"><div><h2>Overtime records</h2><p class="sub">Overtime is separate from normal salary earnings.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date / period</th><th>Hours</th><th>Amount</th><th>Status</th></tr></thead><tbody id="overtimeRows"><tr><td colspan="4" class="loading">Loading overtime…</td></tr></tbody></table></div></section>
 <section class="panel"><div class="panel-head"><div><h2>Approved leave</h2><p class="sub">Paid/unpaid treatment follows approved entitlement and policy.</p></div></div><div id="leaveRows" class="list"><div class="loading">Loading leave…</div></div></section>
 </div></div>
@@ -127,7 +128,8 @@ async function loadEquityHistory(){
    (contributions.length?contributions.map(x=>'<div class="rowitem"><span>'+dateText(x.date)+' · '+safe(x.type)+'<br><small>'+safe(x.reference||x.notes||"")+'</small></span><strong>'+money(x.amount)+'</strong></div>').join(""):'<div class="empty">No investment contributions recorded.</div>');
  }catch(e){box.innerHTML='<div class="empty error">'+safe(e.message||"Unable to load cap-table history.")+'</div>';}
 }
-loadEquityHistory();\ninit().catch(e=>{$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to initialise your employee earnings dashboard.")+'</span>';});
+loadEquityHistory();
+init().catch(e=>{$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to initialise your employee earnings dashboard.")+'</span>';});
 </script>
 </body>
 </html>
