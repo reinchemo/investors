@@ -102,14 +102,30 @@ async function loadPeriod(){
  ].map(([k,v])=>'<div class="rowitem"><span>'+safe(k)+'</span><strong>'+safe(v)+'</strong></div>').join("");
  $("leaveRows").innerHTML=approvedLeave.length?approvedLeave.map(x=>'<div class="rowitem"><span><strong>'+safe(x.leave_type)+'</strong><br>'+dateText(x.start_date)+' – '+dateText(x.end_date)+'</span>'+statusBadge(x.status)+'</div>').join(""):'<div class="empty">No approved leave in this period.</div>';
  $("overtimeRows").innerHTML=(o.data||[]).length?(o.data||[]).map(x=>'<tr><td>'+safe(x.period)+'</td><td>'+safe(x.hours)+'</td><td>'+money(x.amount)+'</td><td>'+statusBadge(x.status)+'</td></tr>').join(""):'<tr><td colspan="4" class="empty">No overtime records found for this period.</td></tr>';
- $("payrollRows").innerHTML='<tr><td colspan="4" class="empty">For confirmed posted payroll payments and payslips, open <a href="payments.html" style="color:var(--cyan)">Payments</a> or <a href="payslips.html" style="color:var(--cyan)">Payslips</a>. Payroll run visibility is provided through the existing server-verified portal service.</td></tr>';
+ await loadPaymentHistory();
  $("calculationNotice").innerHTML='<strong>Calculation note:</strong> The figure above is an attendance-based indicative subtotal using approved attendance records only. Approved leave is displayed separately and is not assumed paid or unpaid. Sunday/public-holiday treatment and paid-leave categories are not automatically calculated because the company policy configuration has not been verified. Pending attendance is excluded. Final payroll remains subject to authorised review.';
- }catch(e){console.error(e);$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to load your earnings records.")+'</span>';}
+ }catch(e){console.error(e);$("message").innerHTML='<span class="error">'+safe(e.message||"Unable to load your earnings records.")+'</span>';$("breakdown").innerHTML='<div class="empty error">Monthly breakdown could not load: '+safe(e.message||"Request failed")+'</div>';$("attendanceRows").innerHTML='<tr><td colspan="4" class="empty error">Attendance could not load.</td></tr>';$("overtimeRows").innerHTML='<tr><td colspan="4" class="empty error">Overtime could not load.</td></tr>';$("leaveRows").innerHTML='<div class="empty error">Leave records could not load.</div>';}
 }
 $("refreshBtn").addEventListener("click",()=>loadPeriod().catch(e=>$("message").textContent=e.message));
 $("period").addEventListener("change",()=>loadPeriod().catch(e=>$("message").textContent=e.message));
 
-async function loadEquityHistory(){
+
+async function loadPaymentHistory(){
+ const box=$("payrollRows");
+ box.innerHTML='<tr><td colspan="4" class="loading">Loading personal payments…</td></tr>';
+ try{
+  const {data,error}=await db.functions.invoke("portal-personal-data",{body:{action:"payments"}});
+  if(error)throw error;
+  if(!data?.success)throw new Error(data?.error||"Unable to load personal payments.");
+  const rows=data.payments||[];
+  if(!rows.length){box.innerHTML='<tr><td colspan="4" class="empty">No paid or posted employee payments are recorded for this account.</td></tr>';return;}
+  box.innerHTML=rows.map(x=>'<tr><td>'+dateText(x.date)+'<br><small>'+safe(x.description||"Employee payment")+'</small></td><td>'+money(x.amount)+'</td><td>'+money(x.fee)+'</td><td>'+statusBadge(x.status)+'</td></tr>').join("");
+ }catch(e){
+  console.error("Personal payment history:",e);
+  box.innerHTML='<tr><td colspan="4" class="empty error">Payment history could not load: '+safe(e.message||"Request failed")+'</td></tr>';
+ }
+}
+\nasync function loadEquityHistory(){
  const box=$("equitySummary");
  try{
   const {data,error}=await db.functions.invoke("portal-personal-data",{body:{action:"equity_earnings"}});
