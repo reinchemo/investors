@@ -417,7 +417,7 @@
 
         <section class="summary-grid">
             <div class="stat-card">
-                <div class="stat-label">Total Net Payments</div>
+                <div class="stat-label">Total Paid Amountments</div>
                 <div class="stat-value green" id="totalNet">KES 0.00</div>
             </div>
 
@@ -456,11 +456,11 @@
             </div>
 
             <div class="notice">
-                <strong>Gross Pay:</strong> Your recorded earnings before deductions.
+                <strong>Amount:</strong> Your recorded earnings before deductions.
 
                 <br><br>
 
-                <strong>Deductions:</strong> The deductions recorded in the payroll system for the relevant payroll period.
+                <strong>Fee:</strong> The deductions recorded in the payroll system for the relevant payroll period.
 
                 <br><br>
 
@@ -507,7 +507,7 @@
         }
 
         function escapeHtml(value) {
-            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
                 "&": "&amp;",
                 "<": "&lt;",
                 ">": "&gt;",
@@ -544,61 +544,16 @@
                 const session = await getActiveSession();
                 if (!session) return;
 
-                // Confirm the logged-in user has an active employee portal account.
-                const {
-                    data: account,
-                    error: accountError
-                } = await supabaseClient
-                    .from("personal_portal_accounts")
-                    .select("staff_id, account_status")
-                    .eq("user_id", session.user.id)
-                    .maybeSingle();
-
-                if (accountError) throw accountError;
-
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is unavailable or suspended.");
-                }
-
-                if (!account.staff_id) {
-                    document.getElementById("totalNet").textContent = "KES 0.00";
-                    document.getElementById("paymentCount").textContent = "0";
-                    document.getElementById("latestPayment").textContent = "KES 0.00";
-
-                    content.innerHTML = `
-            <div class="empty">
-              <div class="empty-icon">🔒</div>
-              <h3>Employee Access Not Available</h3>
-              <p>This account is not linked to an employee record.</p>
-            </div>
-          `;
-
-                    return;
-                }
-
-                // The server filters payroll records to the linked employee
-                // and returns only posted, non-cancelled payroll runs.
-                const {
-                    data,
-                    error
-                } = await supabaseClient.functions.invoke(
-                    "portal-personal-data", {
-                        body: {
-                            action: "payslips"
-                        }
-                    }
+                const { data, error } = await supabaseClient.functions.invoke(
+                    "portal-personal-data",
+                    { body: { action: "payments" } }
                 );
-
                 if (error) throw error;
-
                 if (!data || data.success === false) {
-                    throw new Error(data ? .error || "Unable to retrieve your payment records.");
+                    throw new Error(data?.error || "Unable to retrieve your payment records.");
                 }
+                const payments = Array.isArray(data.payments) ? data.payments : [];
 
-                const payments = Array.isArray(data.payslips) ?
-                    data.payslips : [];
-
-                renderPayments(payments);
 
             } catch (error) {
                 console.error("Payment history error:", error);
@@ -618,7 +573,7 @@
             const content = document.getElementById("paymentContent");
 
             const totalNet = payments.reduce(
-                (sum, item) => sum + Number(item.net || 0),
+                (sum, item) => sum + Number(item.amount || 0),
                 0
             );
 
@@ -634,7 +589,7 @@
                 content.innerHTML = `
           <div class="empty">
             <div class="empty-icon">💼</div>
-            <h3>No Posted Salary Payments Yet</h3>
+            <h3>No Recorded Payments Yet</h3>
             <p>
               Your salary payment history will appear here after
               payroll records have been posted.
@@ -649,7 +604,7 @@
           <table>
             <thead>
               <tr>
-                <th>Payroll Period</th>
+                <th>Payment Description</th>
                 <th>Payment Date</th>
                 <th>Gross Pay</th>
                 <th>Deductions</th>
@@ -662,21 +617,21 @@
               ${payments.map(item => `
                 <tr>
                   <td>
-                    <strong>${escapeHtml(item.period || "Payroll")}</strong>
+                    <strong>${escapeHtml(item.description || "Employee payment")}</strong>
                     <div style="color:var(--muted);font-size:12px;margin-top:5px">
-                      Reference: ${escapeHtml(item.id ?? "—")}
+                      Reference: ${escapeHtml(item.reference || item.id || "—")}
                     </div>
                   </td>
 
-                  <td>${formatDate(item.run_date || item.posted_at)}</td>
+                  <td>${formatDate(item.date)}</td>
 
-                  <td class="gross">${money(item.gross)}</td>
+                  <td class="gross">${money(item.amount)}</td>
 
-                  <td class="deduction">${money(item.deductions)}</td>
+                  <td class="deduction">${money(item.fee)}</td>
 
-                  <td class="amount">${money(item.net)}</td>
+                  <td class="amount">${money(item.amount)}</td>
 
-                  <td><span class="badge">Posted</span></td>
+                  <td><span class="badge">${escapeHtml(item.status || "Recorded")}</span></td>
                 </tr>
               `).join("")}
             </tbody>
@@ -684,7 +639,7 @@
         </div>
 
         <p style="color:var(--muted);font-size:12px;margin-top:15px">
-          Showing ${payments.length} posted personal payroll record(s).
+          Showing ${payments.length} personal payment record(s).
         </p>
       `;
     }
