@@ -10054,6 +10054,11 @@ async function openNewTemplateModal() {
 @media(min-width:1100px){.starlink-fullpage-modal>.modal-card{padding:2rem 2.5rem!important}.starlink-fullpage-modal .employee-table{min-width:0}}
 @media(max-width:760px){.starlink-fullpage-modal,.starlink-fullpage-modal.show,.starlink-fullpage-modal>.modal-card{min-height:100dvh!important}.starlink-fullpage-modal>.modal-card{padding:.85rem!important}.starlink-fullpage-modal .employee-table{min-width:680px}}
 .dashboard[hidden]{display:none!important}
+
+/* Keep the active module overlay above the shell and use the full desktop canvas */
+.starlink-shell-main{width:auto;max-width:none;min-width:0;box-sizing:border-box}
+.starlink-fullpage-modal{z-index:1300!important}
+.starlink-fullpage-modal>.modal-card{flex:1 1 auto;box-sizing:border-box}
 </style>
 <script id="starlink-index-sidebar">
 (function(){
@@ -10125,7 +10130,7 @@ async function openNewTemplateModal() {
    if(activeModal)restoreModal();
    activeModal=modal;
    const heading=modal.querySelector('.modal-card h3');
-   title.textContent=(heading?.innerText||button.innerText||'Workspace').trim().replace(/\\s+/g,' ');
+   title.textContent=(heading?.innerText||button.innerText||'Workspace').trim().replace(/\s+/g,' ');
    dashboard.hidden=true;workspacePane.hidden=true;
    modal.classList.add('starlink-fullpage-modal');
    modalObserver=new MutationObserver(()=>{
@@ -10148,9 +10153,9 @@ async function openNewTemplateModal() {
     return;
    }
    const button=e.target.closest('button');
-   if(button&&actions.contains(button)){
+   if(button&&side.contains(button)&&modalByButton[button.id]){
     side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a===button));
-    window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>openFullPageModal(button)));
+    window.requestAnimationFrame(()=>openFullPageModal(button));
    }
   });
   const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.remove('starlink-current');

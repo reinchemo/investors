@@ -456,6 +456,22 @@ body{display:block;overflow-x:hidden}
 .data-table{width:100%;min-width:800px;table-layout:auto}
 @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.main-content{padding:.65rem}.stats-grid{grid-template-columns:minmax(0,1fr);gap:.65rem}.stat-card{padding:.9rem}.data-table{min-width:720px}.comm-topbar{max-width:100%}}
+
+/* Final width containment: include padding in width calculations and prevent viewport overflow */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0!important;padding:0!important;width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+body{display:block!important}
+.main-content{display:flex;flex-direction:column;flex:1 1 auto;width:100%;max-width:100%;min-width:0;margin:0!important;padding:clamp(.75rem,2vw,2rem);overflow-x:hidden;overflow-y:visible}
+.comm-topbar,.top-nav,.stats-grid,.table-container{width:100%;max-width:100%;min-width:0;margin-left:0;margin-right:0}
+.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat-card{min-width:0;width:100%;overflow:hidden}
+.stat-info{min-width:0;overflow-wrap:anywhere}
+.table-container{overflow-x:auto;overscroll-behavior-x:contain}
+.data-table{width:100%;min-width:800px;table-layout:fixed}
+.data-table th:first-child,.data-table td:first-child{width:58%;white-space:normal;overflow-wrap:anywhere}
+.data-table th:not(:first-child),.data-table td:not(:first-child){white-space:nowrap}
+@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.main-content{padding:.65rem}.stats-grid{grid-template-columns:minmax(0,1fr)}.data-table{min-width:760px}.comm-topbar{gap:.45rem}.comm-nav{max-width:100%}}
 </style>
 </head>
 
