@@ -13935,8 +13935,7 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   const overlay=document.createElement('div');overlay.className='starlink-shell-overlay';
   document.body.insertBefore(side,document.body.firstChild);document.body.insertBefore(overlay,side.nextSibling);
   oldNav.remove();tabs.remove();main.appendChild(top);
-  while(dashboard.firstChild)main.appendChild(dashboard.firstChild);
-  dashboard.remove();main.appendChild(dashboard);document.body.appendChild(main);
+  main.appendChild(dashboard);document.body.appendChild(main);
   const close=()=>document.body.classList.remove('starlink-sidebar-open');
   toggle.addEventListener('click',()=>document.body.classList.toggle('starlink-sidebar-open'));
   overlay.addEventListener('click',close);
