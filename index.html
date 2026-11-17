@@ -10035,6 +10035,16 @@ async function openNewTemplateModal() {
 .starlink-fullpage-modal .employee-table-wrap{max-width:100%;overflow-x:auto}
 @media(max-width:760px){.starlink-module-frame{height:calc(100dvh - 78px);min-height:calc(100dvh - 78px)}.starlink-fullpage-modal{min-height:calc(100dvh - 78px)!important}.starlink-fullpage-modal .modal-card{min-height:calc(100dvh - 78px)!important}}
 .dashboard[hidden]{display:none!important}
+
+/* Full-page module workspace: use the desktop viewport, not a centered phone-sized modal */
+.starlink-shell-main{width:100%;max-width:none;min-width:0}
+.starlink-module-frame{width:100%;max-width:none;min-width:0;min-height:calc(100dvh - 90px);overflow:auto}
+.starlink-fullpage-modal,.starlink-fullpage-modal.show{position:relative!important;inset:auto!important;display:block!important;flex:none!important;width:100%!important;max-width:none!important;height:auto!important;min-height:calc(100dvh - 90px)!important;margin:0!important;padding:0!important;overflow:visible!important;background:transparent!important;backdrop-filter:none!important;z-index:1!important}
+.starlink-fullpage-modal>.modal-card{display:block;width:100%!important;max-width:none!important;min-width:0;max-height:none!important;height:auto!important;min-height:calc(100dvh - 90px)!important;margin:0!important;padding:clamp(1rem,2vw,2rem)!important;border-radius:16px!important;overflow:visible!important;box-sizing:border-box}
+.starlink-fullpage-modal .employee-table-wrap{width:100%;max-width:100%;overflow-x:auto}
+.starlink-fullpage-modal .employee-table{width:100%;min-width:760px}
+@media(min-width:1100px){.starlink-fullpage-modal>.modal-card{padding:2rem 2.25rem!important}.starlink-fullpage-modal .employee-table{min-width:0}}
+@media(max-width:760px){.starlink-fullpage-modal,.starlink-fullpage-modal.show,.starlink-fullpage-modal>.modal-card{min-height:calc(100dvh - 78px)!important}.starlink-fullpage-modal>.modal-card{padding:.85rem!important}.starlink-fullpage-modal .employee-table{min-width:680px}}
 </style>
 <script id="starlink-index-sidebar">
 (function(){
@@ -10094,16 +10104,26 @@ async function openNewTemplateModal() {
    workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';
    side.querySelectorAll('a,button').forEach(a=>a.classList.remove('starlink-current'));
   };
+  const modalByButton={
+   capTableBtn:'capTableModal',proposalsBtn:'proposalsModal',dilutionBtn:'dilutionModal',
+   investorTxnBtn:'investorTxnModal',paymentsBtn:'paymentsModal',dividendsBtn:'dividendModal',
+   reconBtn:'reconModal',reserveBtn:'reserveModal',auditBtn:'auditModal',addInvestorBtn:'investorModal'
+  };
   const openFullPageModal=(button)=>{
-   const modals=[...document.querySelectorAll('.modal-overlay.show')];
-   const modal=modals[modals.length-1];if(!modal)return;
+   const modalId=modalByButton[button.id];
+   const modal=(modalId&&document.getElementById(modalId))||[...document.querySelectorAll('.modal-overlay.show')].at(-1);
+   if(!modal||!modal.classList.contains('show'))return;
    if(activeModal===modal)return;
    if(activeModal)restoreModal();
    activeModal=modal;activeModalParent=modal.parentNode;activeModalNext=modal.nextSibling;
-   title.textContent=(button.getAttribute('aria-label')||button.innerText||'Workspace').trim().replace(/\s+/g,' ');
+   const heading=modal.querySelector('.modal-card h3');
+   title.textContent=(heading?.innerText||button.innerText||'Workspace').trim().replace(/\\s+/g,' ');
    dashboard.hidden=true;workspacePane.hidden=false;
-   modal.classList.add('starlink-fullpage-modal');workspacePane.appendChild(modal);
-   modalObserver=new MutationObserver(()=>{if(activeModal&&!activeModal.classList.contains('show'))restoreModal();});
+   modal.classList.add('starlink-fullpage-modal');
+   workspacePane.appendChild(modal);
+   modalObserver=new MutationObserver(()=>{
+    if(activeModal&&!activeModal.classList.contains('show'))restoreModal();
+   });
    modalObserver.observe(modal,{attributes:true,attributeFilter:['class']});
   };
   const showHome=()=>{if(activeModal)restoreModal();workspacePane.hidden=true;dashboard.hidden=false;title.textContent='Equity Management';side.querySelectorAll('a,button').forEach(a=>a.classList.remove('starlink-current'));};
@@ -10123,7 +10143,7 @@ async function openNewTemplateModal() {
    const button=e.target.closest('button');
    if(button&&actions.contains(button)){
     side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a===button));
-    window.setTimeout(()=>openFullPageModal(button),0);
+    window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>openFullPageModal(button)));
    }
   });
   const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.remove('starlink-current');
