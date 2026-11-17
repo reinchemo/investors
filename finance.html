@@ -7829,16 +7829,13 @@
         async function logAudit(action, target, details, oldVal = '', newVal = '', isWarning = false) {
             if (!supabaseClient) return;
             try {
-                const { error } = await supabaseClient.from('audit_logs').insert({
-                    id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-                    timestamp: new Date().toISOString(),
-                    user_name: CURRENT_USER,
-                    action: action,
-                    target: target || '',
-                    details: details || '',
-                    old_value: oldVal !== undefined && oldVal !== null ? String(oldVal) : '',
-                    new_value: newVal !== undefined && newVal !== null ? String(newVal) : '',
-                    warning: !!isWarning
+                const { error } = await supabaseClient.rpc('write_management_audit_log', {
+                    p_action: action,
+                    p_target: target || '',
+                    p_details: details || '',
+                    p_old_value: oldVal !== undefined && oldVal !== null ? String(oldVal) : '',
+                    p_new_value: newVal !== undefined && newVal !== null ? String(newVal) : '',
+                    p_warning: !!isWarning
                 });
                 if (error) throw error;
                 return true;
