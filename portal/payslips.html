@@ -748,6 +748,8 @@
 
             html += '<div class="box">';
 
+            html += '<div class="row"><span>Employee</span><strong>' + safe(record.employee_name) + '</strong></div>';
+            html += '<div class="row"><span>Employee number</span><strong>' + safe(record.employee_number) + '</strong></div>';
             html += '<div class="row"><span>Pay period</span><strong>';
             html += safe(periodText(run));
             html += "</strong></div>";
