@@ -10130,7 +10130,7 @@ async function openNewTemplateModal() {
    if(activeModal)restoreModal();
    activeModal=modal;
    const heading=modal.querySelector('.modal-card h3');
-   title.textContent=(heading?.innerText||button.innerText||'Workspace').trim().replace(/\\s+/g,' ');
+   title.textContent=(heading?.innerText||button.innerText||'Workspace').trim().replace(/\s+/g,' ');
    dashboard.hidden=true;workspacePane.hidden=true;
    modal.classList.add('starlink-fullpage-modal');
    modalObserver=new MutationObserver(()=>{
