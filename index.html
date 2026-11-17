@@ -10022,9 +10022,11 @@ async function openNewTemplateModal() {
 
 
 <style id="starlink-workspace-frame">
-.starlink-module-frame{width:100%;height:calc(100vh - 90px);min-height:650px;border:1px solid rgba(133,174,210,.15);border-radius:18px;overflow:hidden;background:#0a0e1a}
+.starlink-shell-main{display:flex;flex-direction:column;width:auto;min-width:0;box-sizing:border-box}
+.starlink-module-frame{display:block;flex:1 1 auto;width:100%;max-width:none;min-width:0;height:calc(100vh - 90px);height:calc(100dvh - 90px);min-height:calc(100vh - 90px);min-height:calc(100dvh - 90px);border:0;border-radius:0;overflow:hidden;background:#0a0e1a;box-sizing:border-box}
 .starlink-module-frame[hidden]{display:none!important}
-.starlink-module-frame iframe{display:block;width:100%;height:100%;border:0;background:#0a0e1a}
+.starlink-module-frame iframe{display:block;width:100%;min-width:0;height:100%;border:0;background:#0a0e1a;box-sizing:border-box}
+@media(max-width:760px){.starlink-module-frame{height:calc(100vh - 78px);height:calc(100dvh - 78px);min-height:calc(100vh - 78px);min-height:calc(100dvh - 78px)}.starlink-shell-main{padding:10px 8px 16px}.starlink-shell-topbar{flex-shrink:0}}
 .dashboard[hidden]{display:none!important}
 </style>
 <script id="starlink-index-sidebar">
@@ -10083,7 +10085,8 @@ async function openNewTemplateModal() {
    if(link.dataset.workspace==='home'||href==='#starlink-home'||href.endsWith('/index.html')){
     e.preventDefault();frame.removeAttribute('src');showHome();close();return;
    }
-   const routes={'finance.html':'Finance Workspace','communication.html':'Communications','admin.html':'Admin Roles'};
+   const financeLink=side.querySelector('a[href*="finance.html"]');if(financeLink){financeLink.removeAttribute('target');financeLink.removeAttribute('rel');}
+  const routes={'communication.html':'Communications','admin.html':'Admin Roles'};
    const route=Object.keys(routes).find(key=>href.includes(key));
    if(route){e.preventDefault();dashboard.hidden=true;workspacePane.hidden=false;frame.src=route;title.textContent=routes[route];side.querySelectorAll('a').forEach(a=>a.classList.toggle('starlink-current',a===link));close();}
   });
