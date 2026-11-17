@@ -1672,14 +1672,12 @@
 
         async function verifyPortalAccess() {
             const sessionResult = await supabaseClient.auth.getSession();
-
             if (sessionResult.error || !sessionResult.data.session) {
                 window.location.href = "../login.html";
                 return false;
             }
 
             const userResult = await supabaseClient.auth.getUser();
-
             if (userResult.error || !userResult.data.user) {
                 await supabaseClient.auth.signOut();
                 window.location.href = "../login.html";
@@ -1687,29 +1685,15 @@
             }
 
             currentUser = userResult.data.user;
+            const accessResult = await supabaseClient.functions.invoke("portal-personal-data", {
+                body: { action: "portal_access" }
+            });
 
-            const accountResult = await supabaseClient
-                .from("personal_portal_accounts")
-                .select("id,user_id,staff_id,investor_id,account_status")
-                .eq("user_id", currentUser.id)
-                .maybeSingle();
-
-            if (accountResult.error) throw new Error("Unable to verify your personal portal account.");
-
-            portalAccount = accountResult.data;
-
-            if (!portalAccount) throw new Error("No personal portal account is linked to this login.");
-
-            if (portalAccount.account_status !== "active") {
-                await supabaseClient.auth.signOut();
-                window.location.href = "../login.html";
-                return false;
+            if (accessResult.error || !accessResult.data?.success || !accessResult.data.account) {
+                throw new Error(accessResult.data?.error || "Unable to verify your personal portal access.");
             }
 
-            if (!portalAccount.staff_id && !portalAccount.investor_id) {
-                throw new Error("Your account has no employee or investor classification.");
-            }
-
+            portalAccount = accessResult.data.account;
             return true;
         }
 
