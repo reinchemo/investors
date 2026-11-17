@@ -2451,6 +2451,52 @@
             }
         }
     </style>
+
+<style id="starlink-sidebar-shell">
+:root{--shell-sidebar:286px;--shell-bg:#091321;--shell-line:rgba(133,174,210,.15)}
+body.starlink-shell{display:block!important;min-height:100vh;padding:0!important;align-items:stretch!important;justify-content:flex-start!important}
+.starlink-sidebar{position:fixed;inset:0 auto 0 0;width:var(--shell-sidebar);z-index:1200;display:flex;flex-direction:column;gap:18px;padding:22px 16px;background:rgba(8,16,31,.97);border-right:1px solid var(--shell-line);backdrop-filter:blur(24px);overflow-y:auto;transition:transform .28s ease}
+.starlink-side-brand{display:flex;align-items:center;gap:12px;padding:4px 8px 20px;border-bottom:1px solid var(--shell-line);font:700 15px 'Space Grotesk',sans-serif;color:#edf6ff}
+.starlink-side-brand i{font-size:23px;color:#55d5cb}
+.starlink-side-kicker{margin:4px 9px 8px;color:#718ba8;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.starlink-side-group{display:flex;flex-direction:column;gap:5px}
+.starlink-side-group a,.starlink-side-group button{width:100%;min-height:43px;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:#b6c8dc;text-align:left;text-decoration:none;font:600 12px 'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:.2s}
+.starlink-side-group a i,.starlink-side-group button i{width:18px;text-align:center;color:#7f9fbd}
+.starlink-side-group a:hover,.starlink-side-group button:hover{background:rgba(64,153,220,.12);color:#fff;transform:translateX(2px)}
+.starlink-side-group .starlink-current{background:linear-gradient(100deg,rgba(45,139,220,.24),rgba(100,83,210,.13));border-color:rgba(69,155,255,.24);color:#fff}
+.starlink-side-group .starlink-current i{color:#56ded2}
+.starlink-side-footer{margin-top:auto;padding:14px 10px;border-top:1px solid var(--shell-line);color:#7f96b2;font-size:10px;line-height:1.6}
+.starlink-shell-main{margin-left:var(--shell-sidebar);min-height:100vh;min-width:0;padding:18px 22px 30px}
+.starlink-shell-topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:54px;margin:0 auto 16px;max-width:1600px}
+.starlink-shell-topbar .shell-title{font:700 15px 'Space Grotesk',sans-serif;color:#eaf3ff}
+.starlink-shell-top-actions{display:flex;align-items:center;gap:8px}
+.starlink-menu-toggle{display:none;width:42px;height:42px;border:1px solid var(--shell-line);border-radius:12px;background:#13223a;color:#eaf3ff}
+.starlink-shell-overlay{display:none}
+body.starlink-shell .dashboard{max-width:none!important;width:100%!important;margin:0!important}
+body.starlink-shell .dashboard>.nav{display:none!important}
+body.starlink-shell .nav-actions{display:flex!important;flex-direction:column;gap:5px;width:100%}
+body.starlink-shell .nav-actions>.btn,body.starlink-shell .nav-actions>a.btn{width:100%;justify-content:flex-start;border-radius:12px;min-height:43px}
+body.starlink-shell .nav-actions>.btn-home{margin-top:6px}
+body.starlink-shell .tabs.sidebar-tabs{display:flex;flex-direction:column;flex-wrap:nowrap;gap:5px;padding:0;background:transparent;border:0;margin:0;width:100%}
+body.starlink-shell .sidebar-tabs .tab{width:100%;min-height:42px;justify-content:flex-start;padding:10px 12px;border:1px solid transparent;border-radius:12px;text-align:left;font-size:12px}
+body.starlink-shell .sidebar-tabs .tab.active{border-color:rgba(69,155,255,.25);box-shadow:inset 3px 0 #45dfd0}
+body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
+.starlink-nav-subgroup{display:flex;flex-direction:column;gap:4px;margin:0 0 12px}
+.starlink-nav-subgroup .starlink-side-kicker{margin-top:12px}
+.starlink-nav-subgroup .tab{margin:0}
+@media(max-width:1050px){:root{--shell-sidebar:250px}.starlink-shell-main{padding:15px}}
+@media(max-width:760px){
+ .starlink-sidebar{width:min(300px,86vw);transform:translateX(-105%);box-shadow:20px 0 50px rgba(0,0,0,.35)}
+ body.starlink-sidebar-open .starlink-sidebar{transform:translateX(0)}
+ .starlink-shell-main{margin-left:0;padding:12px 10px 24px}
+ .starlink-menu-toggle{display:inline-grid;place-items:center}
+ .starlink-shell-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1190}
+ body.starlink-sidebar-open .starlink-shell-overlay{display:block}
+ body.starlink-shell .dashboard{border-radius:20px;padding:1rem .75rem 1.5rem}
+ .starlink-shell-topbar{margin-bottom:12px}
+}
+@media(min-width:761px){.starlink-shell-overlay{display:none!important}}
+</style>
 </head>
 
 <body>
@@ -9974,6 +10020,57 @@ async function openNewTemplateModal() {
     <script src="mpesa-parser.js"></script>
     <script src="router.js"></script>
 
+
+<script id="starlink-index-sidebar">
+(function(){
+ const init=()=>{
+  const dashboard=document.querySelector('.dashboard'), oldNav=dashboard&&dashboard.querySelector(':scope > .nav');
+  const actions=document.getElementById('navActions');
+  if(!dashboard||!oldNav||!actions||document.querySelector('.starlink-sidebar'))return;
+  document.body.classList.add('starlink-shell');
+  const brand=oldNav.querySelector('.brand');
+  const side=document.createElement('aside');side.className='starlink-sidebar';side.setAttribute('aria-label','Main navigation');
+  const brandBox=document.createElement('div');brandBox.className='starlink-side-brand';brandBox.innerHTML='<i class="fas fa-satellite-dish"></i><span>STARLINK ULTRANET</span>';side.appendChild(brandBox);
+  const makeGroup=(title)=>{const wrap=document.createElement('section');wrap.className='starlink-side-group';const label=document.createElement('div');label.className='starlink-side-kicker';label.textContent=title;wrap.appendChild(label);side.appendChild(wrap);return wrap};
+  const workspace=makeGroup('Workspace');
+  const equity=makeGroup('Equity & Investors');
+  const items=[...actions.children];
+  items.forEach(el=>{
+   const href=(el.getAttribute('href')||'').toLowerCase();
+   if(href.includes('finance.html')||href.includes('communication.html')||href.includes('admin.html')||href.includes('starlinkultranet.co.ke')||href.includes('starlink-one-iota')){
+    workspace.appendChild(el);
+    if(href.includes('starlinkultranet.co.ke'))el.innerHTML='<i class="fas fa-house"></i><span>Company Home</span>';
+    if(href.includes('finance.html'))el.innerHTML='<i class="fas fa-coins"></i><span>Finance Workspace</span>';
+    if(href.includes('communication.html'))el.innerHTML='<i class="fas fa-comments"></i><span>Communications</span>';
+    if(href.includes('admin.html'))el.innerHTML='<i class="fas fa-shield-alt"></i><span>Admin Roles</span>';
+    el.classList.remove('btn','btn-primary','btn-home','btn-ghost');
+   }else equity.appendChild(el);
+  });
+  actions.className='starlink-side-group';actions.style.width='100%';
+  equity.appendChild(actions);
+  const logout=actions.querySelector('#navLogoutBtn');if(logout)logout.style.marginTop='12px';
+  const footer=document.createElement('div');footer.className='starlink-side-footer';footer.innerHTML='<i class="fas fa-lock"></i> Secure management workspace';side.appendChild(footer);
+  const main=document.createElement('main');main.className='starlink-shell-main';
+  const top=document.createElement('div');top.className='starlink-shell-topbar';
+  const left=document.createElement('div');left.style.cssText='display:flex;align-items:center;gap:12px';
+  const toggle=document.createElement('button');toggle.className='starlink-menu-toggle';toggle.type='button';toggle.setAttribute('aria-label','Open navigation');toggle.innerHTML='<i class="fas fa-bars"></i>';
+  const title=document.createElement('div');title.className='shell-title';title.textContent='Equity Management';
+  left.append(toggle,title);top.append(left);
+  const overlay=document.createElement('div');overlay.className='starlink-shell-overlay';
+  document.body.insertBefore(side,document.body.firstChild);document.body.insertBefore(overlay,side.nextSibling);
+  oldNav.remove();main.appendChild(top);
+  while(dashboard.firstChild)main.appendChild(dashboard.firstChild);
+  dashboard.remove();main.appendChild(dashboard);document.body.appendChild(main);
+  const close=()=>document.body.classList.remove('starlink-sidebar-open');
+  toggle.addEventListener('click',()=>document.body.classList.toggle('starlink-sidebar-open'));
+  overlay.addEventListener('click',close);
+  side.addEventListener('click',e=>{if(e.target.closest('a'))close()});
+  actions.addEventListener('click',e=>{if(e.target.closest('button'))close()});
+  const active=side.querySelector('a[href="finance.html"]');if(active)active.classList.add('starlink-current');
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
 </body>
 
 </html>
