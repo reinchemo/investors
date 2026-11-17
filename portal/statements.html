@@ -491,7 +491,7 @@
             <div class="top-actions">
                 <a class="btn" href="dashboard.html">← Dashboard</a>
                 <button class="btn" id="refreshBtn">↻ Refresh</button>
-                <button class="btn btn-primary" id="printBtn">Print Statement</button>
+                <button class="btn btn-primary" id="printBtn">Export PDF / Print</button>
                 <button class="btn" id="logoutBtn">Logout</button>
             </div>
         </header>
@@ -642,36 +642,6 @@
             try {
                 const session = await getActiveSession();
                 if (!session) return;
-
-                const {
-                    data: account,
-                    error: accountError
-                } = await supabaseClient
-                    .from("personal_portal_accounts")
-                    .select("investor_id, account_status")
-                    .eq("user_id", session.user.id)
-                    .maybeSingle();
-
-                if (accountError) throw accountError;
-
-                if (!account || account.account_status !== "active") {
-                    throw new Error("Your personal portal account is unavailable or suspended.");
-                }
-
-                if (!account.investor_id) {
-                    content.innerHTML = `
-            <div class="empty">
-              <div class="empty-icon">🔒</div>
-              <h3>Investor Access Not Available</h3>
-              <p>This account is not linked to an investor record.</p>
-            </div>
-          `;
-
-                    updateSummary([]);
-                    return;
-                }
-
-                investorAccount = account;
 
                 // Personal finance data is read through the authenticated backend.
                 // The server derives investor_id from the signed-in user.
