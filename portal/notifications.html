@@ -491,7 +491,7 @@
         let currentFilter = "all";
 
         function safe(value) {
-            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
                 "&": "&amp;",
                 "<": "&lt;",
                 ">": "&gt;",
@@ -559,9 +559,9 @@
                 );
 
                 if (error) throw error;
-                if (data ? .error) throw new Error(data.error);
+                if (data?.error) throw new Error(data.error);
 
-                notifications = Array.isArray(data ? .notifications) ? data.notifications : [];
+                notifications = Array.isArray(data?.notifications) ? data.notifications : [];
                 updateSummary();
                 renderNotifications();
 
