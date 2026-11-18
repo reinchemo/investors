@@ -2575,8 +2575,8 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                         <tbody id="pwLineItemsBody"></tbody>
                         <tfoot>
                             <tr class="payroll-total-row">
-                                <td colspan="4" style="text-align:right; padding-right:1rem;">TOTAL</td>
-                                <td style="text-align:right;" id="pwLineTotal">KSh 0</td>
+                                <td colspan="4" style="text-align:right; padding-right:1rem;">TOTAL GROSS</td>
+                                <td style="text-align:right;" id="pwLineTotal">KSh 0</td><td style="text-align:right;" id="pwDeductionTotal">KSh 0</td><td style="text-align:right;" id="pwNetTotal">KSh 0</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -2887,7 +2887,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Reference</th>
                                 <th>Location</th>
                                 <th>Status</th>
-                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Gross</th><th style="text-align:right;">Deductions</th><th style="text-align:right;">Net</th>
                                 <th style="text-align:right;">Fee</th>
                                 <th style="text-align:right;">Net</th>
                                 <th style="text-align:right;">Actions</th>
@@ -10106,6 +10106,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                         <input type="number" class="payroll-line-input pw-line-amount" data-idx="${idx}" value="${line.amount}" min="0" step="1">
                         ${line.overtime > 0 ? `<div style="font-size:0.68rem; color:#7fded1; margin-top:4px; font-family:'JetBrains Mono',monospace;">incl. OT: +KSh ${fmt(line.overtime)} (${line.overtimeHours.toFixed(2)}h)</div>` : ''}
                     </td>
+                    <td><input type="number" class="payroll-line-input pw-line-deduction" data-idx="${idx}" value="${safeNum(line.deductions)}" min="0" max="${safeNum(line.amount)}" step="1"></td>
+                    <td style="text-align:right;">KSh ${fmt(Math.max(0,safeNum(line.amount)-safeNum(line.deductions)))}</td>
                 </tr>`;
             }).join('');
 
@@ -10118,15 +10120,24 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     renderWizardLines();
                 });
             });
-            body.querySelectorAll('.pw-line-amount').forEach(inp => {
-                inp.addEventListener('input', () => {
-                    const idx = parseInt(inp.dataset.idx, 10);
-                    wizardLines[idx].amount = safeNum(inp.value);
-                    let newTotal = 0;
-                    wizardLines.forEach(l => { if (l.include) newTotal += safeNum(l.amount); });
-                    document.getElementById('pwLineTotal').textContent = 'KSh ' + fmt(newTotal);
-                });
-            });
+            const refreshTotals = () => {
+                let gross = 0, deductions = 0, net = 0;
+                wizardLines.forEach(l => { if (l.include) { gross += safeNum(l.amount); deductions += safeNum(l.deductions); net += Math.max(0,safeNum(l.amount)-safeNum(l.deductions)); } });
+                document.getElementById('pwLineTotal').textContent = 'KSh ' + fmt(gross);
+                document.getElementById('pwDeductionTotal').textContent = 'KSh ' + fmt(deductions);
+                document.getElementById('pwNetTotal').textContent = 'KSh ' + fmt(net);
+            };
+            body.querySelectorAll('.pw-line-amount').forEach(inp => inp.addEventListener('input', () => {
+                const idx = parseInt(inp.dataset.idx, 10);
+                wizardLines[idx].amount = safeNum(inp.value);
+                wizardLines[idx].deductions = Math.min(safeNum(wizardLines[idx].deductions),safeNum(inp.value));
+                refreshTotals();
+            }));
+            body.querySelectorAll('.pw-line-deduction').forEach(inp => inp.addEventListener('input', () => {
+                const idx = parseInt(inp.dataset.idx, 10);
+                wizardLines[idx].deductions = Math.min(safeNum(inp.value),safeNum(wizardLines[idx].amount));
+                refreshTotals();
+            }));
         }
 
         function renderWizardReview() {
@@ -10134,12 +10145,16 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const runDate = document.getElementById('pwRunDate').value;
             const included = wizardLines.filter(l => l.include);
             const total = included.reduce((s, l) => s + safeNum(l.amount), 0);
+            const totalDeductions = included.reduce((s, l) => s + safeNum(l.deductions), 0);
+            const totalNet = included.reduce((s, l) => s + Math.max(0,safeNum(l.amount)-safeNum(l.deductions)), 0);
 
             const lines = included.map(l => `
                 <tr>
                     <td>${escapeHTML(l.fullName)}</td>
                     <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#7f9bb8;">${escapeHTML(l.employeeNumber)}</td>
-                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#f0a89f; font-weight:700;">KSh ${fmt(l.amount)}</td>
+                    <td style="text-align:right;">KSh ${fmt(l.amount)}</td>
+                    <td style="text-align:right;">KSh ${fmt(l.deductions)}</td>
+                    <td style="text-align:right;font-weight:700;">KSh ${fmt(Math.max(0,safeNum(l.amount)-safeNum(l.deductions)))}</td>
                 </tr>
             `).join('');
 
@@ -10159,7 +10174,9 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     </div>
                     <div class="detail-cell">
                         <div class="lbl">Total Net</div>
-                        <div class="val" style="font-family:'JetBrains Mono',monospace; color:#f0a89f; font-weight:700;">KSh ${fmt(total)}</div>
+                        <div class="val" style="font-family:'JetBrains Mono',monospace; color:#7fded1; font-weight:700;">KSh ${fmt(totalNet)}</div>
+                    </div>
+                    <div class="detail-cell"><div class="lbl">Manual Deductions</div><div class="val">KSh ${fmt(totalDeductions)}</div>
                     </div>
                 </div>
                 <div class="table-section" style="max-height:300px; overflow-y:auto;">
@@ -10255,8 +10272,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     run_date: runDate,
                     status: 'draft',
                     total_gross: total,
-                    total_deductions: 0,
-                    total_net: total,
+                    total_deductions: totalDeductions,
+                    total_net: totalNet,
                     notes: notes || null,
                     created_by: CURRENT_USER
                 })
@@ -10278,8 +10295,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 run_id: runId,
                 staff_id: l.staffId,
                 gross: safeNum(l.amount),
-                deductions: 0,
-                net: safeNum(l.amount),
+                deductions: safeNum(l.deductions),
+                net: Math.max(0,safeNum(l.amount)-safeNum(l.deductions)),
                 notes: null
             }));
 
