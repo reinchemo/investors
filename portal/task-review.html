@@ -747,6 +747,18 @@
             </div>
 
             <div class="meta">
+                <span>
+                    <i class="fa-solid fa-user-check"></i>
+                    Reviewer:
+                    ${escapeHTML(
+                        task.designatedReviewer && task.designatedReviewer.full_name
+                            ? task.designatedReviewer.full_name
+                            : "Default management queue"
+                    )}
+                </span>
+            </div>
+
+            <div class="meta">
 
                 <span>
                     <i class="fa-regular fa-calendar"></i>
