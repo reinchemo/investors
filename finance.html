@@ -10224,6 +10224,61 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             openPayrollDetail(runId);
         }
 
+        // Record an actual employee payment separately from posting payroll.
+        async function recordPayrollPayment(paymentId) {
+            const payment = payrollPayments.find(p => String(p.id) === String(paymentId));
+            if (!payment) return showToast('Payment record not found. Refresh and try again.', 'error');
+
+            const run = payrollRuns.find(r => String(r.id) === String(payment.payroll_run_id));
+            if (!run || run.status !== 'posted') {
+                return showToast('Post and approve the payroll run before recording payment.', 'error');
+            }
+            if (payment.status === 'paid') {
+                return showToast('This employee payment is already marked as paid.', 'error');
+            }
+
+            const method = prompt('Payment method (e.g. Bank, M-Pesa, Cash):', payment.payment_method || '');
+            if (method === null) return;
+            if (!method.trim()) return showToast('Enter the payment method.', 'error');
+
+            const reference = prompt('Payment reference / transaction code (if available):', payment.reference || '');
+            if (reference === null) return;
+
+            const paidDate = prompt('Actual payment date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+            if (paidDate === null) return;
+            if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(paidDate) || Number.isNaN(Date.parse(paidDate))) {
+                return showToast('Enter a valid payment date in YYYY-MM-DD format.', 'error');
+            }
+
+            if (!confirm('Record this employee payment as PAID? Only do this after the money has actually been sent.')) return;
+
+            const now = new Date().toISOString();
+            const { error } = await supabaseClient
+                .from('payroll_payments')
+                .update({
+                    status: 'paid',
+                    txn_date: paidDate,
+                    payment_method: method.trim(),
+                    reference: reference.trim() || null,
+                    status_updated_at: now,
+                    status_updated_by: CURRENT_USER,
+                    updated_at: now,
+                    updated_by: CURRENT_USER
+                })
+                .eq('id', paymentId)
+                .eq('status', 'pending');
+
+            if (error) {
+                showToast('Payment record failed: ' + error.message, 'error');
+                return;
+            }
+
+            await loadPayrollFromCloud();
+            openPayrollDetail(run.id);
+            showToast('Employee payment recorded.', 'success');
+        }
+        window.recordPayrollPayment = recordPayrollPayment;
+
         // ==================================================
         // PAYROLL DETAIL
         // ==================================================
@@ -10253,10 +10308,26 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 const s = staffMap[item.staffId];
                 const name = s ? s.fullName : ('Staff #' + item.staffId);
                 const num = s ? (s.employeeNumber || '') : '';
+                const payment = payrollPayments.find(p =>
+                    String(p.payroll_run_id) === String(runId) &&
+                    String(p.employee_id) === String(item.staffId)
+                );
+                const paid = payment && payment.status === 'paid';
+                const paymentLabel = paid
+                    ? 'Paid' + (payment.txn_date ? ' · ' + escapeHTML(payment.txn_date) : '')
+                    : (payment ? 'Pending payment' : 'Payment record missing');
+                const paymentAction = payment && !paid && r.status === 'posted'
+                    ? `<button class="btn btn-primary" style="padding:.35rem .55rem;font-size:.7rem;" onclick="recordPayrollPayment('${escapeHTML(payment.id)}')">Record payment</button>`
+                    : '';
+                const paymentMeta = paid
+                    ? `<div style="font-size:.68rem;color:#7f9bb8;">${escapeHTML(payment.payment_method || 'Method not entered')}${payment.reference ? ' · ' + escapeHTML(payment.reference) : ''}</div>`
+                    : '';
                 return `<tr>
                     <td>${escapeHTML(name)}${num ? ` <span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:#7f9bb8;">${escapeHTML(num)}</span>` : ''}</td>
                     <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#f0a89f;">KSh ${fmt(item.net)}</td>
                     <td style="text-align:right; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#7f9bb8;">${item.transactionId ? escapeHTML(item.transactionId) : '—'}</td>
+                    <td><span class="status-pill ${paid ? 'paid' : 'pending'}">${paymentLabel}</span>${paymentMeta}</td>
+                    <td>${paymentAction}</td>
                 </tr>`;
             }).join('');
 
@@ -10299,6 +10370,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                                 <th>Staff</th>
                                 <th style="text-align:right;">Amount</th>
                                 <th style="text-align:right;">Ledger Ref</th>
+                                <th>Payment Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>${rowsHtml}</tbody>
@@ -10306,7 +10379,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                             <tr class="payroll-total-row">
                                 <td style="text-align:right; padding-right:1rem;">TOTAL</td>
                                 <td style="text-align:right; font-family:'JetBrains Mono',monospace;">KSh ${fmt(totalItems)}</td>
-                                <td></td>
+                                <td colspan="3"></td>
                             </tr>
                         </tfoot>
                     </table>
