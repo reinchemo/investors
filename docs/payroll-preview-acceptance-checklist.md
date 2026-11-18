@@ -129,3 +129,21 @@ These are source checks, not payroll-adviser sign-off. Do not use the existing h
 - SHIF: KSh 5,999 gives KSh 300; KSh 6,000 gives KSh 165 under the 2.75% rule; KSh 6,001 gives KSh 165.03. Confirm KRA's calculator's boundary treatment before production use.
 - Housing Levy: KSh 30,000 eligible gross monthly pay gives KSh 450 employee and KSh 450 employer.
 - PAYE must be calculated after only the deductions allowed by current KRA guidance and with resident/non-resident relief eligibility handled separately. Do not apply KSh 2,400 personal relief to every employee by default.
+
+## Safe UI integration status
+
+The Finance payroll wizard now includes a **Preview proposal-based pay** action in the period step. It calls only `payroll_month_preview_v2(p_period)` and renders employee, paid days, basic pay and calculation status. It does not insert/update payroll runs or items, invoke statutory deductions, approve payroll, create ledger transactions, or mark overtime as paid.
+
+Manual smoke-test procedure once the migration is installed in an isolated test database:
+1. Open Finance → Run Payroll and enter a valid YYYY-MM period.
+2. Click **Preview proposal-based pay**.
+3. Confirm rows and totals match the SQL acceptance vectors.
+4. Confirm missing/overlapping policy and salary cases show a blocked status.
+5. Confirm no rows are added to `payroll_runs`, `payroll_items`, `transactions`, or `overtime_entries`.
+6. Confirm an unavailable RPC produces an explicit message and no writes.
+
+Until the RPC is installed, the Finance UI is expected to display an unavailable-preview message. This is a safe failure state, not a successful integration test.
+
+## Locally checked arithmetic vectors
+
+Independent decimal arithmetic checks returned the expected basic-pay values for the seven fixed examples above: KSh 30,000; 28,000; 27,000; 20,000; 31,000; 28,000; and 29,000 respectively. This validates the examples' arithmetic only; it does not execute the SQL function or prove database behavior.
