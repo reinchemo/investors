@@ -2864,6 +2864,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 </select>
                 <select id="ldgFilterStatus">
                     <option value="">All Statuses</option>
+            <option value="__overdue__">Overdue</option>
                     <option value="draft">Draft</option>
                     <option value="pending">Pending</option>
                     <option value="approved">Approved</option>
@@ -12368,7 +12369,12 @@ function openTxnModal(txn = null) {
             const q = (document.getElementById('taskFilterSearch').value || '').toLowerCase();
 
             let filtered = [...tasks];
-            if (statusF) filtered = filtered.filter(t => t.status === statusF);
+            if (statusF === '__overdue__') {
+                const today = todayISO();
+                filtered = filtered.filter(t => t.deadline && t.deadline < today && !['completed', 'cancelled', 'rejected'].includes(t.status));
+            } else if (statusF) {
+                filtered = filtered.filter(t => t.status === statusF);
+            }
             if (prioF) filtered = filtered.filter(t => t.priority === prioF);
             if (catF) filtered = filtered.filter(t => t.categoryCode === catF);
             if (asgF) filtered = filtered.filter(t => String(t.assigneeStaffId) === asgF);
@@ -12760,7 +12766,12 @@ function openTxnModal(txn = null) {
             const q = (document.getElementById('taskFilterSearch')?.value || '').trim().toLowerCase();
 
             let rows = [...tasks];
-            if (statusF) rows = rows.filter(t => t.status === statusF);
+            if (statusF === '__overdue__') {
+                const today = todayISO();
+                rows = rows.filter(t => t.deadline && t.deadline < today && !['completed', 'cancelled', 'rejected'].includes(t.status));
+            } else if (statusF) {
+                rows = rows.filter(t => t.status === statusF);
+            }
             if (prioF) rows = rows.filter(t => t.priority === prioF);
             if (catF) rows = rows.filter(t => t.categoryCode === catF);
             if (asgF) rows = rows.filter(t => String(t.assigneeStaffId || '') === asgF);
