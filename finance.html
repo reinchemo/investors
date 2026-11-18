@@ -2546,6 +2546,13 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 </div>
                 <label>Notes (optional)</label>
                 <textarea id="pwNotes" placeholder="Any notes about this run..." maxlength="500"></textarea>
+                <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:0.8rem;">
+                    <button type="button" class="cancel" id="pwDetailedPreviewBtn" onclick="loadDetailedPayrollPreview()">
+                        <i class="fas fa-calculator"></i> Preview proposal-based pay
+                    </button>
+                    <span style="font-size:0.72rem;color:#8fa9c4;">Read-only · Does not create a payroll run or calculate statutory deductions</span>
+                </div>
+                <div id="pwDetailedPreview" style="display:none;margin-top:0.9rem;"></div>
                 <div class="modal-error" id="pwError1"></div>
             </div>
 
@@ -9913,6 +9920,66 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
         function getDefaultPeriod() {
             const now = new Date();
             return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+
+        // Read-only proposal-aligned preview. It deliberately does not create
+        // payroll_runs/payroll_items or invoke statutory deductions/posting.
+        async function loadDetailedPayrollPreview() {
+            const period = (document.getElementById('pwPeriod')?.value || '').trim();
+            const panel = document.getElementById('pwDetailedPreview');
+            const button = document.getElementById('pwDetailedPreviewBtn');
+            if (!/^\\d{4}-(0[1-9]|1[0-2])$/.test(period)) {
+                showToast('Enter the payroll period in YYYY-MM format first.', 'error');
+                return;
+            }
+            if (!panel || !button) return;
+            panel.style.display = 'block';
+            panel.innerHTML = '<div style="padding:0.8rem;color:#9bb4ce;">Loading read-only payroll preview…</div>';
+            button.disabled = true;
+            try {
+                const { data, error } = await supabaseClient.rpc('payroll_month_preview_v2', { p_period: period });
+                if (error) throw error;
+                const rows = Array.isArray(data) ? data : (data ? [data] : []);
+                if (!rows.length) {
+                    panel.innerHTML = '<div style="padding:0.8rem;color:#e8b879;">No eligible employees were returned for this period.</div>';
+                    return;
+                }
+                const blocked = rows.filter(r => r.calculation_status !== 'preview_only');
+                const total = rows.reduce((sum, r) => sum + (r.calculation_status === 'preview_only' ? safeNum(r.calculated_basic_pay) : 0), 0);
+                const body = rows.map(r => {
+                    const ready = r.calculation_status === 'preview_only';
+                    return `<tr>
+                        <td>${escapeHTML(r.employee_name || 'Unknown')}<div style="font-size:0.68rem;color:#829bb5;">${escapeHTML(r.employee_number || '')}</div></td>
+                        <td style="text-align:right;">${ready ? fmt(r.paid_days) : '—'}</td>
+                        <td style="text-align:right;">${ready ? 'KSh ' + fmt(r.calculated_basic_pay) : '—'}</td>
+                        <td style="color:${ready ? '#7fded1' : '#e8b879'};">${escapeHTML(r.calculation_status || 'unknown')}</td>
+                    </tr>`;
+                }).join('');
+                panel.innerHTML = `
+                    <div style="padding:0.9rem;border:1px solid rgba(95,199,188,.25);border-radius:10px;background:rgba(10,25,39,.55);">
+                        <div style="display:flex;justify-content:space-between;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.6rem;">
+                            <strong style="color:#d9e8f5;">Proposal-based basic-pay preview · ${escapeHTML(period)}</strong>
+                            <strong style="color:#7fded1;">Ready basic pay: KSh ${fmt(total)}</strong>
+                        </div>
+                        <div style="font-size:0.72rem;color:#e8b879;margin-bottom:0.7rem;">
+                            ${blocked.length ? blocked.length + ' employee row(s) need correction before calculation.' : 'All returned rows passed preview checks.'}
+                            This is not a net-pay figure and cannot be used to pay employees.
+                        </div>
+                        <div style="max-height:260px;overflow:auto;">
+                            <table class="data-table" style="min-width:540px;">
+                                <thead><tr><th>Employee</th><th style="text-align:right;">Paid days</th><th style="text-align:right;">Basic pay</th><th>Status</th></tr></thead>
+                                <tbody>${body}</tbody>
+                            </table>
+                        </div>
+                    </div>`;
+            } catch (error) {
+                const message = error?.message || 'Unable to load the preview.';
+                panel.innerHTML = `<div style="padding:0.8rem;border:1px solid rgba(232,131,122,.35);border-radius:8px;color:#e8b879;">
+                    Preview unavailable: ${escapeHTML(message)}<div style="font-size:0.72rem;margin-top:0.35rem;">The preview migration/RPC may not yet be installed. No payroll data was changed.</div>
+                </div>`;
+            } finally {
+                button.disabled = false;
+            }
         }
 
                function openPayrollWizard(editRunId = null) {
