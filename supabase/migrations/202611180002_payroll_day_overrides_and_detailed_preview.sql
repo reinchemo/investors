@@ -35,6 +35,7 @@ create policy payroll_day_overrides_insert on public.payroll_day_overrides
   for insert to authenticated
   with check (portal_management_can_create('Payroll'));
 drop policy if exists payroll_day_overrides_update on public.payroll_day_overrides;
+drop policy if exists payroll_day_overrides_delete on public.payroll_day_overrides;
 create policy payroll_day_overrides_update on public.payroll_day_overrides
   for update to authenticated
   using (portal_management_can_edit('Payroll'))
