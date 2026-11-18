@@ -2995,7 +2995,9 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Reference</th>
                                 <th>Location</th>
                                 <th>Status</th>
-                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Gross</th>
+                                <th style="text-align:right;">Deductions</th>
+                                <th style="text-align:right;">Net pay</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
@@ -10128,6 +10130,12 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 document.getElementById('pwLineTotal').textContent = 'KSh ' + fmt(gross);
                 document.getElementById('pwDeductionTotal').textContent = 'KSh ' + fmt(deductions);
                 document.getElementById('pwNetTotal').textContent = 'KSh ' + fmt(net);
+                body.querySelectorAll('.pw-line-deduction').forEach(input => {
+                    const idx = parseInt(input.dataset.idx, 10);
+                    input.max = safeNum(wizardLines[idx].amount);
+                    const netCell = input.closest('td').nextElementSibling;
+                    if (netCell) netCell.textContent = 'KSh ' + fmt(Math.max(0,safeNum(wizardLines[idx].amount)-safeNum(wizardLines[idx].deductions)));
+                });
             };
             body.querySelectorAll('.pw-line-amount').forEach(inp => inp.addEventListener('input', () => {
                 const idx = parseInt(inp.dataset.idx, 10);
