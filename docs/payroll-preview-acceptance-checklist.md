@@ -58,3 +58,11 @@ Do not connect this preview to payroll preparation until:
 ## Known boundaries
 
 This preview is not a statutory net-pay calculator, payslip generator, payroll run creator, or finance posting function. It is a read-only basic-pay preview. The legacy `payroll_prepare_run` still uses the legacy preview and the existing hard-coded statutory function; it must not be treated as using this v2 logic.
+
+
+## Additional leave/calendar regression cases
+- A Sunday inside an approved leave interval remains an ordinary paid Sunday unless an approved day override marks it unpaid.
+- A configured public holiday inside an approved leave interval remains an ordinary paid public holiday unless an approved day override marks it unpaid.
+- Sundays and public holidays do not consume a paid-leave day limit.
+- Paid-leave totals count only paid leave dates that are not Sundays or configured public holidays.
+- An unpaid leave policy on a weekday does not turn a Sunday or public holiday into an unpaid day.
