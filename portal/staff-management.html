@@ -304,6 +304,28 @@
                 </table>
             </div>
         </section>
+        <section class="panel" id="editPanel" style="display:none">
+            <div class="panel-head" style="display:flex;justify-content:space-between;align-items:center">
+                <h2><i class="fa-solid fa-user-pen"></i> Edit employee record</h2>
+                <button class="btn dark" id="cancelEdit" type="button">Close</button>
+            </div>
+            <div class="panel-body">
+                <form id="editStaffForm">
+                    <input type="hidden" id="editStaffId">
+                    <div class="form-grid">
+                        <div class="field-wrap"><label>Full name *</label><input class="field" id="editFullName" required maxlength="150"></div>
+                        <div class="field-wrap"><label>Employee number</label><input class="field" id="editEmployeeNumber" disabled></div>
+                        <div class="field-wrap"><label>Email address</label><input class="field" id="editEmail" type="email"></div>
+                        <div class="field-wrap"><label>Phone number</label><input class="field" id="editPhone"></div>
+                        <div class="field-wrap"><label>Job role</label><input class="field" id="editRole"></div>
+                        <div class="field-wrap"><label>Employment start date</label><input class="field" id="editStartDate" type="date"></div>
+                        <div class="field-wrap"><label>Employment status</label><select class="field" id="editStatus"><option value="active">Active</option><option value="inactive">Inactive / departed</option></select></div>
+                    </div>
+                    <p>Inactive employees remain in the system for historical payroll and attendance records. Records are not permanently deleted.</p>
+                    <button class="btn green" id="saveEdit" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+                </form>
+            </div>
+        </section>
         <p style="text-align:center">STARLINK ULTRANET LLC · Management Portal</p>
     </main>
 
@@ -386,6 +408,7 @@
                     </span>
                 </td>
                 <td>
+                    <button class="btn dark" data-edit="${person.id}"><i class="fa-solid fa-pen"></i> Edit</button>
                     ${!hasAccount&&person.status==="active"&&person.email?`
                     <button class="btn blue" data-invite="${person.id}" data-email="${esc(person.email)}">
                         <i class="fa-solid fa-envelope"></i> Invite
@@ -455,6 +478,61 @@ $("staffRows").addEventListener("click",async function(event){
     }catch(error){
         showMessage(error.message,"error");
         button.disabled=false;
+    }
+});
+
+
+function openEdit(person) {
+    $("editStaffId").value = person.id;
+    $("editFullName").value = person.full_name || "";
+    $("editEmployeeNumber").value = person.employee_number || "";
+    $("editEmail").value = person.email || "";
+    $("editPhone").value = person.phone || "";
+    $("editRole").value = person.role || "Employee";
+    $("editStartDate").value = person.start_date || "";
+    $("editStatus").value = person.status === "inactive" ? "inactive" : "active";
+    $("editPanel").style.display = "block";
+    $("editPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("staffRows").addEventListener("click", async function(event) {
+    const editButton = event.target.closest("button[data-edit]");
+    if (!editButton) return;
+    try {
+        const result = await callStaff("list_staff");
+        const person = (result.staff || []).find(item => String(item.id) === editButton.dataset.edit);
+        if (!person) throw new Error("Employee record could not be found. Refresh the directory.");
+        openEdit(person);
+    } catch (error) {
+        showMessage(error.message, "error");
+    }
+});
+
+$("cancelEdit").addEventListener("click", () => {
+    $("editPanel").style.display = "none";
+});
+
+$("editStaffForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const button = $("saveEdit");
+    button.disabled = true;
+    try {
+        const result = await callStaff("update_staff", {
+            staff_id: Number($("editStaffId").value),
+            full_name: $("editFullName").value.trim(),
+            email: $("editEmail").value.trim(),
+            phone: $("editPhone").value.trim(),
+            role: $("editRole").value.trim(),
+            start_date: $("editStartDate").value || null,
+            status: $("editStatus").value
+        });
+        showMessage(result.message || "Employee record updated.", "ok");
+        $("editPanel").style.display = "none";
+        await loadStaff();
+    } catch (error) {
+        showMessage(error.message, "error");
+    } finally {
+        button.disabled = false;
     }
 });
 
