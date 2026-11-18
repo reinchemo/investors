@@ -198,3 +198,70 @@ $function$;
 
 comment on function public.payroll_month_preview_v2(text) is
 'Detailed proposal-aligned payroll preview. Monday-Saturday require approved attendance; Sundays and configured public holidays are paid unless an approved unpaid_absence override exists. Approved paid leave follows effective-dated policy and paid-day limits. No statutory deductions or ledger posting are performed.';
+
+-- Approval is performed through a controlled RPC, not direct table updates.
+drop policy if exists payroll_day_overrides_update on public.payroll_day_overrides;
+drop policy if exists payroll_day_overrides_insert on public.payroll_day_overrides;
+create policy payroll_day_overrides_insert on public.payroll_day_overrides
+  for insert to authenticated
+  with check (
+    portal_management_can_create('Payroll')
+    and created_by = auth.uid()
+    and status = 'pending'
+    and approved_by is null
+    and approved_at is null
+  );
+
+create or replace function public.review_payroll_day_override(
+  p_override_id bigint,
+  p_decision text
+)
+returns public.payroll_day_overrides
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+declare
+  v_override public.payroll_day_overrides;
+  v_user uuid := auth.uid();
+begin
+  if v_user is null then
+    raise exception 'Authentication required';
+  end if;
+  if p_decision not in ('approved','rejected') then
+    raise exception 'Decision must be approved or rejected';
+  end if;
+  if not public.portal_management_can_edit('Payroll') then
+    raise exception 'You do not have permission to review payroll overrides';
+  end if;
+
+  select * into v_override
+  from public.payroll_day_overrides
+  where id = p_override_id
+  for update;
+
+  if not found then
+    raise exception 'Payroll day override not found';
+  end if;
+  if v_override.status <> 'pending' then
+    raise exception 'Only pending overrides can be reviewed';
+  end if;
+  if v_override.created_by = v_user then
+    raise exception 'Maker-checker rule: the creator cannot review their own override';
+  end if;
+
+  update public.payroll_day_overrides
+  set status = p_decision,
+      approved_by = case when p_decision = 'approved' then v_user else null end,
+      approved_at = case when p_decision = 'approved' then now() else null end,
+      updated_by = v_user,
+      updated_at = now()
+  where id = p_override_id
+  returning * into v_override;
+
+  return v_override;
+end;
+$function$;
+
+revoke all on function public.review_payroll_day_override(bigint,text) from public;
+grant execute on function public.review_payroll_day_override(bigint,text) to authenticated;
