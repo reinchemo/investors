@@ -110,6 +110,9 @@ begin
         where lr.staff_id=s.id and lr.status='approved' and lr.cancelled_at is null
           and d::date between lr.start_date and lr.end_date
         order by lr.created_at desc,lr.id desc limit 1) leave_type,
+      ((select count(*) from public.leave_requests lr
+        where lr.staff_id=s.id and lr.status='approved' and lr.cancelled_at is null
+          and d::date between lr.start_date and lr.end_date)>1) leave_overlap,
       (select o.treatment from public.payroll_day_overrides o
         where o.staff_id=s.id and o.pay_date=d::date and o.status='approved'
         limit 1) override_treatment,
@@ -164,6 +167,7 @@ begin
       count(*) filter(where d.override_treatment='unpaid_absence')::bigint unpaid_absence,
       bool_or(d.day_salary is null or d.day_salary<=0) missing_salary,
       bool_or(d.missing_leave_policy) missing_leave_policy,
+      bool_or(d.leave_overlap) overlapping_leave_requests,
       sum(case when d.is_paid_day then coalesce(d.day_salary,0)/v_days else 0 end) earned
     from day_calc d group by d.staff_id
   ),
@@ -177,9 +181,12 @@ begin
   )
   select s.id,s.employee_number,s.full_name,m.salary,v_days,t.paid_days,
     t.attendance_days,t.paid_sundays,t.paid_holidays,t.paid_leave,t.unpaid_absence,
-    case when coalesce(t.missing_salary,true) or coalesce(t.missing_leave_policy,false)
+    case when coalesce(t.missing_salary,true)
+        or coalesce(t.missing_leave_policy,false)
+        or coalesce(t.overlapping_leave_requests,false)
       then null else round(coalesce(t.earned,0),0) end,
-    case when coalesce(t.missing_salary,true) then 'salary_required'
+    case when coalesce(t.overlapping_leave_requests,false) then 'overlapping_leave_requests'
+      when coalesce(t.missing_salary,true) then 'salary_required'
       when coalesce(t.missing_leave_policy,false) then 'leave_policy_required'
       when t.paid_days=0 then 'no_eligible_paid_days'
       else 'preview_only' end
