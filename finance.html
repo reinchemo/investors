@@ -3416,6 +3416,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 <button class="tab active" data-report="pnl"><i class="fas fa-chart-line"></i> Profit &amp; Loss</button>
                 <button class="tab" data-report="cashflow"><i class="fas fa-water"></i> Cash Flow</button>
                 <button class="tab" data-report="locations"><i class="fas fa-map-marker-alt"></i> Locations</button>
+                <button class="tab" data-report="operations"><i class="fas fa-users-cog"></i> People &amp; Operations</button>
             </div>
 
             <div class="report-section" data-report-section="pnl">
@@ -3677,6 +3678,53 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     </div>
                 </div>
             </div>
+
+            <div class="report-section" data-report-section="operations" style="display:none;">
+                <div class="headline">
+                    <h1><i class="fas fa-users-cog" style="color:#5fc7bc;"></i> People &amp; Operations <small id="opsRangeLabel">This month</small></h1>
+                    <div style="display:flex;gap:.45rem;flex-wrap:wrap;">
+                        <button class="btn btn-ghost" type="button" onclick="renderOperationsReport()"><i class="fas fa-sync"></i> Refresh</button>
+                        <button class="btn btn-ghost" type="button" onclick="exportOperationsReportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        <button class="btn btn-ghost" type="button" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <label style="font-size:.68rem;font-weight:700;color:#7f9bb8;text-transform:uppercase;">From</label>
+                    <input type="date" id="opsFrom" onchange="renderOperationsReport()">
+                    <label style="font-size:.68rem;font-weight:700;color:#7f9bb8;text-transform:uppercase;">To</label>
+                    <input type="date" id="opsTo" onchange="renderOperationsReport()">
+                </div>
+                <div id="opsReportNotice" class="reconcile-note" style="margin-bottom:1rem;">
+                    Reports use the selected date range and only include modules your role is permitted to view.
+                </div>
+                <div class="summary-row">
+                    <div class="summary-card"><div class="summary-label"><i class="fas fa-tasks"></i> TASKS IN PERIOD</div><div class="summary-value" id="opsTaskTotal">—</div><div class="summary-sub">Assigned task records</div></div>
+                    <div class="summary-card"><div class="summary-label"><i class="fas fa-clipboard-check"></i> AWAITING REVIEW</div><div class="summary-value" id="opsTaskReview">—</div><div class="summary-sub">Submitted by employees</div></div>
+                    <div class="summary-card"><div class="summary-label"><i class="fas fa-clock"></i> ATTENDANCE RECORDS</div><div class="summary-value" id="opsAttendanceTotal">—</div><div class="summary-sub">Records in selected period</div></div>
+                    <div class="summary-card income"><div class="summary-label"><i class="fas fa-money-check-alt"></i> PAYROLL NET</div><div class="summary-value" id="opsPayrollNet">—</div><div class="summary-sub">Runs dated in selected period</div></div>
+                </div>
+                <div class="table-section" style="margin-bottom:1rem;">
+                    <div class="table-section-header"><h4><i class="fas fa-tasks" style="color:#5fc7bc;margin-right:.4rem;"></i> Task Assignment &amp; Review</h4></div>
+                    <div class="table-wrap"><table class="data-table">
+                        <thead><tr><th>Employee</th><th style="text-align:right;">Assigned</th><th style="text-align:right;">In progress</th><th style="text-align:right;">Awaiting review</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Rejected</th><th style="text-align:right;">Overdue</th></tr></thead>
+                        <tbody id="opsTaskBody"><tr><td colspan="7">Open this report to load data.</td></tr></tbody>
+                    </table></div>
+                </div>
+                <div class="table-section" style="margin-bottom:1rem;">
+                    <div class="table-section-header"><h4><i class="fas fa-user-clock" style="color:#5fc7bc;margin-right:.4rem;"></i> Attendance Summary</h4></div>
+                    <div class="table-wrap"><table class="data-table">
+                        <thead><tr><th>Employee</th><th style="text-align:right;">Records</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Pending</th><th style="text-align:right;">Rejected</th><th style="text-align:right;">With Check-in</th></tr></thead>
+                        <tbody id="opsAttendanceBody"><tr><td colspan="6">Open this report to load data.</td></tr></tbody>
+                    </table></div>
+                </div>
+                <div class="table-section">
+                    <div class="table-section-header"><h4><i class="fas fa-money-check-alt" style="color:#5fc7bc;margin-right:.4rem;"></i> Payroll Run Summary</h4></div>
+                    <div class="table-wrap"><table class="data-table">
+                        <thead><tr><th>Period</th><th>Run date</th><th>Status</th><th style="text-align:right;">Employees</th><th style="text-align:right;">Gross</th><th style="text-align:right;">Deductions</th><th style="text-align:right;">Net</th><th>Payments</th></tr></thead>
+                        <tbody id="opsPayrollBody"><tr><td colspan="8">Open this report to load data.</td></tr></tbody>
+                    </table></div>
+                </div>
+            </div>
         </div>
 
         <!-- ============================================================ -->
@@ -3685,7 +3733,10 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
         <div class="view" data-view="tasks">
             <div class="headline">
                 <h1><i class="fas fa-tasks" style="color:#5fc7bc;"></i> Tasks</h1>
-                <button class="btn btn-primary" id="newTaskBtn"><i class="fas fa-plus"></i> New Task</button>
+                <div style="display:flex;gap:.55rem;flex-wrap:wrap;">
+                    <a class="btn btn-ghost" href="portal/task-review.html" target="_blank" rel="noopener"><i class="fas fa-clipboard-check"></i> Review Queue</a>
+                    <button class="btn btn-primary" id="newTaskBtn"><i class="fas fa-plus"></i> New Task</button>
+                </div>
             </div>
 
             <!-- Dashboard summary cards -->
@@ -4876,6 +4927,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 if (view === 'overtime') moduleName = 'Overtime';
                 if (view === 'leave') moduleName = 'Leave';
                 if (view === 'health') moduleName = 'System Health';
+                if (view === 'reports') moduleName = 'Reports';
 
                 if (!can('view', moduleName)) {
                     tab.style.display = 'none';
@@ -9315,7 +9367,192 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             </tr>`;
         }
 
+        
         // ==================================================
+        // PEOPLE & OPERATIONS REPORT — read-only summaries
+        // ==================================================
+        let operationsReportSnapshot = { tasks: [], attendance: [], payrollRuns: [], payrollItems: [], payrollPayments: [] };
+
+        function operationsDateRange() {
+            const fromEl = document.getElementById('opsFrom');
+            const toEl = document.getElementById('opsTo');
+            const today = todayISO();
+            const monthStart = today.slice(0, 8) + '01';
+            if (fromEl && !fromEl.value) fromEl.value = monthStart;
+            if (toEl && !toEl.value) toEl.value = today;
+            return { from: fromEl ? fromEl.value : monthStart, to: toEl ? toEl.value : today };
+        }
+
+        function operationsStaffLabel(id, mayShowNames) {
+            if (!id) return 'Unassigned';
+            if (mayShowNames) {
+                const person = staff.find(x => String(x.id) === String(id));
+                if (person) return person.fullName || ('Staff #' + id);
+            }
+            return 'Staff #' + id;
+        }
+
+        async function renderOperationsReport() {
+            const notice = document.getElementById('opsReportNotice');
+            if (!notice) return;
+            const range = operationsDateRange();
+            if (range.from && range.to && range.from > range.to) {
+                notice.textContent = 'The start date must be on or before the end date.';
+                return;
+            }
+            const mayTasks = can('view', 'Tasks');
+            const mayAttendance = can('view', 'Attendance');
+            const mayPayroll = can('view', 'Payroll');
+            const mayNames = can('view', 'Staff');
+            const rangeLabel = (range.from || 'All time') + ' → ' + (range.to || 'Today');
+            document.getElementById('opsRangeLabel').textContent = rangeLabel;
+            notice.textContent = 'Read-only report. Only data permitted by your assigned module permissions is included.';
+
+            let taskRows = [];
+            let attendanceRows = [];
+            let runRows = [];
+            let itemRows = [];
+            let paymentRows = [];
+
+            if (mayTasks) {
+                const ok = await fetchTasksFromCloud();
+                if (ok) {
+                    taskRows = tasks.filter(task => {
+                        const date = (task.createdAt || '').slice(0, 10);
+                        return (!range.from || date >= range.from) && (!range.to || date <= range.to);
+                    });
+                }
+            }
+
+            if (mayAttendance) {
+                let query = supabaseClient.from('attendance')
+                    .select('id,staff_id,date,status,check_in,check_out,approved_at')
+                    .order('date', { ascending: false })
+                    .limit(2000);
+                if (range.from) query = query.gte('date', range.from);
+                if (range.to) query = query.lte('date', range.to);
+                const result = await query;
+                if (result.error) {
+                    console.warn('Operations attendance report failed:', result.error.message);
+                } else {
+                    attendanceRows = result.data || [];
+                }
+            }
+
+            if (mayPayroll) {
+                const ok = await loadPayrollFromCloud();
+                if (ok) {
+                    const runIds = new Set();
+                    runRows = payrollRuns.filter(run => {
+                        const date = run.runDate || '';
+                        const inRange = (!range.from || date >= range.from) && (!range.to || date <= range.to);
+                        if (inRange) runIds.add(String(run.id));
+                        return inRange;
+                    });
+                    itemRows = payrollItems.filter(item => runIds.has(String(item.runId)));
+                    paymentRows = payrollPayments.filter(payment => runIds.has(String(payment.payroll_run_id)));
+                }
+            }
+
+            operationsReportSnapshot = { tasks: taskRows, attendance: attendanceRows, payrollRuns: runRows, payrollItems: itemRows, payrollPayments: paymentRows };
+
+            const taskGroups = {};
+            taskRows.forEach(task => {
+                const key = task.assigneeStaffId ? String(task.assigneeStaffId) : 'unassigned';
+                if (!taskGroups[key]) taskGroups[key] = { assigned: 0, inProgress: 0, review: 0, approved: 0, rejected: 0, overdue: 0 };
+                const g = taskGroups[key];
+                g.assigned++;
+                if (task.status === 'in_progress') g.inProgress++;
+                if (task.status === 'awaiting_review') g.review++;
+                if (task.status === 'approved' || task.status === 'completed') g.approved++;
+                if (task.status === 'rejected') g.rejected++;
+                if (task.deadline && task.deadline < range.to && !['approved','completed','cancelled','rejected'].includes(task.status)) g.overdue++;
+            });
+            const taskGroupHtml = Object.keys(taskGroups).sort().map(id => {
+                const g = taskGroups[id];
+                return '<tr><td>' + escapeHTML(id === 'unassigned' ? 'Unassigned' : operationsStaffLabel(id, mayNames)) + '</td>' +
+                    '<td style="text-align:right;">' + g.assigned + '</td><td style="text-align:right;">' + g.inProgress +
+                    '</td><td style="text-align:right;">' + g.review + '</td><td style="text-align:right;">' + g.approved +
+                    '</td><td style="text-align:right;">' + g.rejected + '</td><td style="text-align:right;">' + g.overdue + '</td></tr>';
+            }).join('');
+            document.getElementById('opsTaskBody').innerHTML = mayTasks && taskGroupHtml ? taskGroupHtml : '<tr><td colspan="7" class="empty-row">No task records in this period, or Tasks access is not assigned.</td></tr>';
+
+            const attendanceGroups = {};
+            attendanceRows.forEach(row => {
+                const key = String(row.staff_id || 'unassigned');
+                if (!attendanceGroups[key]) attendanceGroups[key] = { total: 0, approved: 0, pending: 0, rejected: 0, checkIn: 0 };
+                const g = attendanceGroups[key];
+                g.total++;
+                const status = String(row.status || '').toLowerCase();
+                if (status === 'approved') g.approved++;
+                else if (status === 'pending' || status === 'submitted' || status === 'late-pending-approval') g.pending++;
+                else if (status === 'rejected') g.rejected++;
+                if (row.check_in) g.checkIn++;
+            });
+            const attendanceHtml = Object.keys(attendanceGroups).sort().map(id => {
+                const g = attendanceGroups[id];
+                return '<tr><td>' + escapeHTML(operationsStaffLabel(id, mayNames)) + '</td><td style="text-align:right;">' + g.total +
+                    '</td><td style="text-align:right;">' + g.approved + '</td><td style="text-align:right;">' + g.pending +
+                    '</td><td style="text-align:right;">' + g.rejected + '</td><td style="text-align:right;">' + g.checkIn + '</td></tr>';
+            }).join('');
+            document.getElementById('opsAttendanceBody').innerHTML = mayAttendance && attendanceHtml ? attendanceHtml : '<tr><td colspan="6" class="empty-row">No attendance records in this period, or Attendance access is not assigned.</td></tr>';
+
+            const payrollHtml = runRows.map(run => {
+                const runItems = itemRows.filter(item => String(item.runId) === String(run.id));
+                const runPayments = paymentRows.filter(payment => String(payment.payroll_run_id) === String(run.id));
+                const paid = runPayments.filter(payment => payment.status === 'paid' || payment.status === 'reconciled').length;
+                const pending = runPayments.filter(payment => payment.status === 'pending' || payment.status === 'approved').length;
+                return '<tr><td>' + escapeHTML(run.period || '—') + '</td><td>' + escapeHTML(run.runDate || '—') +
+                    '</td><td>' + escapeHTML(run.status || '—') + '</td><td style="text-align:right;">' + runItems.length +
+                    '</td><td style="text-align:right;">KSh ' + fmt(run.totalGross) + '</td><td style="text-align:right;">KSh ' + fmt(run.totalDeductions) +
+                    '</td><td style="text-align:right;">KSh ' + fmt(run.totalNet) + '</td><td>' + paid + ' paid / ' + pending + ' pending</td></tr>';
+            }).join('');
+            document.getElementById('opsPayrollBody').innerHTML = mayPayroll && payrollHtml ? payrollHtml : '<tr><td colspan="8" class="empty-row">No payroll runs in this period, or Payroll access is not assigned.</td></tr>';
+
+            document.getElementById('opsTaskTotal').textContent = mayTasks ? taskRows.length : '—';
+            document.getElementById('opsTaskReview').textContent = mayTasks ? taskRows.filter(task => task.status === 'awaiting_review').length : '—';
+            document.getElementById('opsAttendanceTotal').textContent = mayAttendance ? attendanceRows.length : '—';
+            document.getElementById('opsPayrollNet').textContent = mayPayroll
+                ? 'KSh ' + fmt(runRows.reduce((sum, run) => sum + safeNum(run.totalNet), 0))
+                : '—';
+            if (!mayTasks && !mayAttendance && !mayPayroll) {
+                notice.textContent = 'Your account can open Reports, but it does not currently have view permission for Tasks, Attendance or Payroll data.';
+            }
+        }
+
+        function exportOperationsReportCSV() {
+            if (!(can('export', 'Reports') || window.IS_FULL_ADMIN)) {
+                showToast('Your role does not have Reports export permission.', 'error');
+                return;
+            }
+            const snap = operationsReportSnapshot;
+            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Rejected','Overdue','Attendance Records','Gross','Deductions','Net']];
+            const taskGroups = {};
+            snap.tasks.forEach(task => {
+                const key = task.assigneeStaffId ? String(task.assigneeStaffId) : 'Unassigned';
+                if (!taskGroups[key]) taskGroups[key] = { assigned:0, inProgress:0, review:0, approved:0, rejected:0, overdue:0 };
+                const g = taskGroups[key]; g.assigned++;
+                if (task.status === 'in_progress') g.inProgress++;
+                if (task.status === 'awaiting_review') g.review++;
+                if (task.status === 'approved' || task.status === 'completed') g.approved++;
+                if (task.status === 'rejected') g.rejected++;
+                if (task.deadline && task.deadline < todayISO() && !['approved','completed','cancelled','rejected'].includes(task.status)) g.overdue++;
+            });
+            Object.keys(taskGroups).forEach(name => { const g=taskGroups[name]; rows.push(['Tasks',name,'',g.assigned,g.inProgress,g.review,g.approved,g.rejected,g.overdue,'','','','']); });
+            const attendance = {};
+            snap.attendance.forEach(row => { const key=String(row.staff_id); attendance[key]=(attendance[key]||0)+1; });
+            Object.keys(attendance).forEach(name => rows.push(['Attendance','Staff #'+name,'', '', '', '', '', '', '',attendance[name],'','','']));
+            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
+            const csv = rows.map(row => row.map(value => '"' + String(value == null ? '' : value).replace(/"/g,'""') + '"').join(',')).join('\r\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'starlink-people-operations-report-' + todayISO() + '.csv';
+            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        }
+
+// ==================================================
         // LOCATION PROFITABILITY REPORT (Phase 4c)
         // ==================================================
         function renderLocationReport() {
@@ -10544,6 +10781,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     if (r === 'pnl')       renderPnL();
                     if (r === 'cashflow')  renderCashFlow();
                     if (r === 'locations') renderLocationReport();
+                    if (r === 'operations') renderOperationsReport();
                 }
             }
         }
@@ -11999,6 +12237,7 @@ function openTxnModal(txn = null) {
                         if (sub === 'pnl') renderPnL();
                         if (sub === 'cashflow') renderCashFlow();
                         if (sub === 'locations') renderLocationReport();
+                        if (sub === 'operations') renderOperationsReport();
                         return;
                     }
 
