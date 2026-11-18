@@ -150,7 +150,8 @@ begin
         when p.has_attendance then true
         else false
       end is_paid_day,
-      (p.leave_id is not null and p.leave_policy_id is null) missing_leave_policy
+      (p.leave_id is not null and p.leave_policy_id is null
+        and not p.is_sunday and not p.is_holiday) missing_leave_policy
     from policy_days p
   ),
   totals as (
