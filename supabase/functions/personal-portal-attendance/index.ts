@@ -125,13 +125,11 @@ Deno.serve(async (req) => {
 
       // Do not allow a second shift to start while a recent shift is still open.
       // This also prevents an overnight shift from being abandoned at midnight.
-      const openShiftSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data: openShift, error: openShiftError } = await admin
         .from("attendance")
         .select("id, date, check_in")
         .eq("staff_id", staffId)
         .is("check_out", null)
-        .gte("check_in", openShiftSince)
         .order("check_in", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -195,13 +193,11 @@ Deno.serve(async (req) => {
       // Check-out is allowed after midnight for a valid overnight shift.
       // The daily 11:59 PM submission cut-off applies to starting today's
       // attendance, not to closing a shift that began before midnight.
-      const openShiftSince = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data: record, error: lookupError } = await admin
         .from("attendance")
         .select("*")
         .eq("staff_id", staffId)
         .is("check_out", null)
-        .gte("check_in", openShiftSince)
         .order("check_in", { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -209,7 +205,7 @@ Deno.serve(async (req) => {
       if (lookupError) throw lookupError;
 
       if (!record || !record.check_in) {
-        return response({ error: "No open shift was found in the last 24 hours. Check in before checking out." }, 400);
+        return response({ error: "No open shift was found. Check in before checking out." }, 400);
       }
 
       if (new Date(now.timestamp).getTime() <= new Date(record.check_in).getTime()) {
