@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portal-ui.css">
     <style>
          :root {
             --bg: #080d1b;
@@ -225,11 +226,33 @@
                 padding: 20px
             }
         }
+
+        .management-nav { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 15px; margin:0 0 18px; border:1px solid var(--line); border-radius:14px; background:rgba(17,26,45,.92); }
+        .management-brand { display:flex; align-items:center; gap:10px; min-width:0; color:var(--white); text-decoration:none; }
+        .management-brand-mark { width:38px; height:38px; flex:0 0 38px; display:grid; place-items:center; border-radius:11px; color:#071522; font:800 17px Outfit,sans-serif; background:linear-gradient(135deg,var(--cyan),var(--blue)); }
+        .management-brand strong { display:block; font:800 12px Outfit,sans-serif; letter-spacing:.04em; }
+        .management-brand small { display:block; margin-top:2px; color:var(--muted); font-size:9px; letter-spacing:.12em; }
+        .management-links { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+        .management-links a { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:38px; padding:0 12px; border:1px solid var(--line); border-radius:9px; color:#dce8f8; background:#17243b; text-decoration:none; font-size:11px; font-weight:800; }
+        .management-links a:hover, .management-links a[aria-current="page"] { border-color:rgba(69,223,208,.5); color:var(--cyan); background:rgba(69,223,208,.07); }
+        @media(max-width:620px) { .management-nav { align-items:flex-start; flex-direction:column; } .management-links { width:100%; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); } .management-links a { padding:0 7px; font-size:10px; } }
+
     </style>
 </head>
 
 <body>
     <main>
+        <nav class="management-nav" aria-label="Management navigation">
+            <a class="management-brand" href="../finance.html">
+                <span class="management-brand-mark"><i class="fa-solid fa-satellite-dish"></i></span>
+                <span><strong>STARLINK ULTRANET</strong><small>MANAGEMENT WORKSPACE</small></span>
+            </a>
+            <div class="management-links">
+                <a href="../finance.html"><i class="fa-solid fa-house"></i> Finance</a>
+                <a href="staff-management.html" aria-current="page"><i class="fa-solid fa-users"></i> Staff</a>
+                <a href="attendance-management.html"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+            </div>
+        </nav>
         <section class="hero">
             <div class="eyebrow"><i class="fa-solid fa-users"></i> MANAGEMENT / HUMAN RESOURCES</div>
             <h1>Staff Management</h1>
