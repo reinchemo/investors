@@ -66,3 +66,4 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - Sundays and public holidays do not consume a paid-leave day limit.
 - Paid-leave totals count only paid leave dates that are not Sundays or configured public holidays.
 - An unpaid leave policy on a weekday does not turn a Sunday or public holiday into an unpaid day.
+- An approved leave interval containing only Sundays/public holidays does not require a leave-pay policy for those calendar dates and does not block the preview.
