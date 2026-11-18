@@ -70,10 +70,19 @@ select p.proname,
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
-  and p.proname in ('review_payroll_day_override', 'cancel_payroll_day_override')
+  and p.proname in ('review_payroll_day_override', 'cancel_payroll_day_override',
+                    'payroll_month_preview_v2')
 order by p.proname;
 
+-- 7) Direct UPDATE/DELETE policies must not exist for day overrides.
+select policyname, cmd
+from pg_policies
+where schemaname = 'public'
+  and tablename = 'payroll_day_overrides'
+  and cmd in ('UPDATE','DELETE')
+order by cmd, policyname;
+
 -- Expected: queries 2-5 return zero rows; query 6 returns authenticated=true,
--- public=false. Any non-zero anomaly requires review before payroll preview
--- is enabled. This script does not prove RLS isolation; test with separate
--- authenticated user sessions in staging.
+-- public=false for all three RPCs; query 7 returns zero rows. Any anomaly
+-- requires review before preview is enabled. This script does not prove RLS
+-- isolation; test with separate authenticated user sessions in staging.
