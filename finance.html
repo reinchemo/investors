@@ -4950,6 +4950,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
         let staff = [];
         let payrollRuns = [];
         let payrollItems = [];
+        let payrollPayments = [];
         let assets = [];
         let assetMovements = [];
         let editingAssetId = null;
@@ -8115,6 +8116,13 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     createdAt: row.created_at
                 }));
 
+                const { data: paymentData, error: paymentError } = await supabaseClient
+                    .from('payroll_payments')
+                    .select('id,payroll_run_id,employee_id,employee_name,txn_date,gross_amount,payment_method,reference,status,status_updated_at,status_updated_by')
+                    .order('txn_date', { ascending: false });
+                if (paymentError) throw paymentError;
+
+                payrollPayments = paymentData || [];
                 return true;
             } catch (e) {
                 console.warn('Payroll fetch failed:', e.message);
@@ -10374,18 +10382,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 p_user: CURRENT_USER
             });
 
-            if (!error) {
-                // NEW: Sync the unified payments table to 'paid'
-                // This makes them show up as PAID in the Equity App's Payments tab
-                await supabaseClient
-                    .from('payroll_payments')
-                    .update({ 
-                        status: 'paid', 
-                        status_updated_at: new Date().toISOString(),
-                        status_updated_by: CURRENT_USER
-                    })
-                    .eq('payroll_run_id', runId);
-            }
+            // Posting creates the payroll ledger entries; it does NOT prove
+            // that employees have received their money. Payment is recorded separately.
 
             if (error) {
                 showToast('Post failed: ' + error.message, 'error');
