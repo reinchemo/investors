@@ -72,3 +72,5 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - Only a different Payroll editor can approve/reject a pending override through `review_payroll_day_override`; the creator cannot approve their own request.
 - Direct authenticated table updates and deletes are denied so approval metadata and audit history cannot be rewritten or erased through the table API.
 - The review RPC rejects invalid decisions and attempts to review an override that is no longer pending.
+- Overlapping effective-dated salary-history rows for the same employee/date block the preview with `overlapping_salary_history`; the newest row must not be silently selected.
+- Overlapping active leave-pay policy rows for the same leave type/date block the preview with `overlapping_leave_policies`; policy precedence must be corrected by management rather than guessed.
