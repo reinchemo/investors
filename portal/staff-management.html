@@ -320,6 +320,11 @@
                         <div class="field-wrap"><label>Job role</label><input class="field" id="editRole"></div>
                         <div class="field-wrap"><label>Employment start date</label><input class="field" id="editStartDate" type="date"></div>
                         <div class="field-wrap"><label>Employment status</label><select class="field" id="editStatus"><option value="active">Active</option><option value="inactive">Inactive / departed</option></select></div>
+                        <div class="field-wrap"><label>Monthly salary (KSh)</label><input class="field" id="editSalary" type="number" min="0" step="0.01" placeholder="0.00"></div>
+                        <div class="field-wrap"><label>Salary effective date</label><input class="field" id="editSalaryDate" type="date"></div>
+                        <div class="field-wrap"><label>Payment method</label><select class="field" id="editPaymentMethod"><option value="">Not set</option><option value="M-Pesa">M-Pesa</option><option value="Bank">Bank transfer</option><option value="Cash">Cash</option></select></div>
+                        <div class="field-wrap"><label>Address / location</label><input class="field" id="editAddress" maxlength="250"></div>
+                        <div class="field-wrap" style="grid-column:1/-1"><label>Reason for salary change</label><input class="field" id="editSalaryReason" maxlength="250" placeholder="Required only when changing salary"></div>
                     </div>
                     <p>Inactive employees remain in the system for historical payroll and attendance records. Records are not permanently deleted.</p>
                     <button class="btn green" id="saveEdit" type="submit"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
@@ -491,6 +496,11 @@ function openEdit(person) {
     $("editRole").value = person.role || "Employee";
     $("editStartDate").value = person.start_date || "";
     $("editStatus").value = person.status === "inactive" ? "inactive" : "active";
+    $("editSalary").value = person.salary == null ? "" : person.salary;
+    $("editSalaryDate").value = new Date().toISOString().slice(0, 10);
+    $("editPaymentMethod").value = person.payment_method || "";
+    $("editAddress").value = person.address || "";
+    $("editSalaryReason").value = "";
     $("editPanel").style.display = "block";
     $("editPanel").scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -524,7 +534,12 @@ $("editStaffForm").addEventListener("submit", async function(event) {
             phone: $("editPhone").value.trim(),
             role: $("editRole").value.trim(),
             start_date: $("editStartDate").value || null,
-            status: $("editStatus").value
+            status: $("editStatus").value,
+            salary: $("editSalary").value === "" ? null : Number($("editSalary").value),
+            salary_effective_from: $("editSalaryDate").value,
+            salary_reason: $("editSalaryReason").value.trim(),
+            payment_method: $("editPaymentMethod").value,
+            address: $("editAddress").value.trim()
         });
         showMessage(result.message || "Employee record updated.", "ok");
         $("editPanel").style.display = "none";
