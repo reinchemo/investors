@@ -67,3 +67,4 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - Paid-leave totals count only paid leave dates that are not Sundays or configured public holidays.
 - An unpaid leave policy on a weekday does not turn a Sunday or public holiday into an unpaid day.
 - An approved leave interval containing only Sundays/public holidays does not require a leave-pay policy for those calendar dates and does not block the preview.
+- Two overlapping approved leave requests for the same employee/date block the preview with `overlapping_leave_requests`; the system must not silently choose one request.
