@@ -9928,7 +9928,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const period = (document.getElementById('pwPeriod')?.value || '').trim();
             const panel = document.getElementById('pwDetailedPreview');
             const button = document.getElementById('pwDetailedPreviewBtn');
-            if (!/^\\d{4}-(0[1-9]|1[0-2])$/.test(period)) {
+            if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) {
                 showToast('Enter the payroll period in YYYY-MM format first.', 'error');
                 return;
             }
