@@ -554,13 +554,6 @@
                 }
                 const payments = Array.isArray(data.payments) ? data.payments : [];
                 renderPayments(payments);
-                if (data.legacy_history_not_linked) {
-                    const warning = document.createElement("div");
-                    warning.className = "notice";
-                    warning.style.marginTop = "14px";
-                    warning.textContent = data.message || "Some older imported payment records are not linked to your employee record and are therefore hidden.";
-                    content.prepend(warning);
-                }
 
 
             } catch (error) {
@@ -586,7 +579,7 @@
             );
 
             const latestNet = payments.length ?
-                Number(payments[0].amount || 0) :
+                Number(payments[0].net || 0) :
                 0;
 
             document.getElementById("totalNet").textContent = money(totalNet);
