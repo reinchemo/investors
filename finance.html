@@ -2559,7 +2559,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             <!-- Step 2 -->
             <div class="wizard-body" data-pw-body="2">
                 <p style="color:#7f9bb8; font-size:0.82rem; margin-bottom:0.8rem;">
-                    Active staff are pre-filled with their salary. Adjust the amount for anyone whose pay differs this period. Uncheck anyone you're not paying this month.
+                    Enter gross pay and any approved manual deductions for each employee. Net pay is calculated automatically. Statutory deductions are not calculated by this simple manual-entry option.
                 </p>
                 <div class="table-section" style="max-height:400px; overflow-y:auto;">
                     <table class="data-table" style="min-width:600px;">
@@ -2569,7 +2569,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Employee</th>
                                 <th>Role</th>
                                 <th>Location</th>
-                                <th style="text-align:right;">Amount (KSh)</th>
+                                <th style="text-align:right;">Gross pay (KSh)</th><th style="text-align:right;">Manual deductions (KSh)</th><th style="text-align:right;">Net pay (KSh)</th>
                             </tr>
                         </thead>
                         <tbody id="pwLineItemsBody"></tbody>
@@ -10012,6 +10012,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                         locationId: s.locationId,
                         salary: safeNum(item.gross),
                         amount: safeNum(item.gross),
+                        deductions: safeNum(item.deductions),
                         include: true,
                         hasSalary: true
                     };
@@ -10041,6 +10042,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                         overtime: otAmount,
                         overtimeHours: otHours,
                         amount: baseSalary + otAmount,
+                        deductions: 0,
                         include: true,
                         hasSalary: baseSalary > 0
                     };
