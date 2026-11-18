@@ -79,3 +79,22 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - Cancelling a pending override records the authenticated actor and timestamp; cancelled overrides do not affect preview earnings.
 - A pending override with a missing creator is rejected by both review and cancellation RPCs and requires manual audit.
 - Run `docs/payroll-preview-readonly-preflight.sql` in isolated staging after both payroll migrations; resolve all overlap/date anomalies and confirm the RPC grants before functional tests.
+
+## Finance workflow integration findings (must be resolved before release)
+
+- The finance page must call `approve_payroll_run(p_run_id)`; direct browser updates to `payroll_runs.status/approved_by/approved_at` bypass the database maker-checker control. The current branch changes the approval action to the RPC.
+- The database `payroll_prepare_run(p_period)` still calls the legacy `payroll_month_preview(p_period)`, not `payroll_month_preview_v2(p_period)`. Do not assume the new proposal-aligned calculation is used by the existing payroll preparation path.
+- The current browser wizard still creates payroll rows directly and does not populate `salary_snapshot`, `period_calendar_days`, `paid_days`, or the calculation breakdown. The database approval RPC rejects rows with missing salary snapshots.
+- The existing preparation function still calls `kenya_payroll_statutory(p_gross)`, whose tax/NSSF/SHIF/AHL values are hard-coded. These rates and employee-specific tax settings have not been independently verified for the target payroll period.
+- The new detailed preview calculates basic pay only. It does not calculate statutory deductions, overtime, allowances, advances, loans, or ledger entries. It must not be treated as a complete net-pay calculation.
+- Therefore the existing finance wizard and posting workflow must not be switched to the new preview until a server-side preparation RPC is designed to consume v2, apply approved overtime and verified statutory configuration, store immutable snapshots, and preserve the existing approval/posting maker-checker controls.
+
+## Independent arithmetic acceptance vectors
+
+For a fixed monthly salary of KSh 30,000 and a 30-calendar-day month, the proposal's daily rate is KSh 1,000:
+- 30 eligible paid days: KSh 30,000.
+- 28 eligible paid days after two unpaid absences: KSh 28,000.
+- 27 eligible paid days after two unpaid absences plus one approved unpaid Sunday override: KSh 27,000.
+- Employment beginning on the 11th, with 20 eligible days remaining: KSh 20,000.
+
+These are arithmetic reference vectors only; they do not validate PostgreSQL execution, statutory deductions, RLS, or ledger posting.
