@@ -280,3 +280,48 @@ $function$;
 
 revoke all on function public.review_payroll_day_override(bigint,text) from public;
 grant execute on function public.review_payroll_day_override(bigint,text) to authenticated;
+
+-- A creator may withdraw a pending request without rewriting its history.
+create or replace function public.cancel_payroll_day_override(p_override_id bigint)
+returns public.payroll_day_overrides
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+declare
+  v_override public.payroll_day_overrides;
+  v_user uuid := auth.uid();
+begin
+  if v_user is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select * into v_override
+  from public.payroll_day_overrides
+  where id = p_override_id
+  for update;
+
+  if not found then
+    raise exception 'Payroll day override not found';
+  end if;
+  if v_override.status <> 'pending' then
+    raise exception 'Only pending overrides can be cancelled';
+  end if;
+  if v_override.created_by <> v_user
+     and not public.portal_management_can_edit('Payroll') then
+    raise exception 'Only the creator or a Payroll editor can cancel a pending override';
+  end if;
+
+  update public.payroll_day_overrides
+  set status = 'cancelled',
+      updated_by = v_user,
+      updated_at = now()
+  where id = p_override_id
+  returning * into v_override;
+
+  return v_override;
+end;
+$function$;
+
+revoke all on function public.cancel_payroll_day_override(bigint) from public;
+grant execute on function public.cancel_payroll_day_override(bigint) to authenticated;
