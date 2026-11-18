@@ -109,24 +109,53 @@ Deno.serve(async (req: Request) => {
       const role = String(body.role || "Employee").trim();
       const status = String(body.status || "active").toLowerCase();
       const startDate = body.start_date ? String(body.start_date) : null;
+      const salaryProvided = body.salary !== undefined && body.salary !== null && body.salary !== "";
+      const newSalary = salaryProvided ? Number(body.salary) : null;
+      const salaryEffectiveFrom = body.salary_effective_from ? String(body.salary_effective_from) : new Date().toISOString().slice(0, 10);
+      const salaryReason = String(body.salary_reason || "").trim();
+      if (salaryProvided && (!Number.isFinite(newSalary) || newSalary < 0)) return reply({ error: "Enter a valid non-negative monthly salary." }, 400);
       if (!Number.isSafeInteger(staffId) || staffId <= 0) return reply({ error: "Select a valid employee." }, 400);
       if (!fullName || fullName.length > 150) return reply({ error: "Enter the employee's full name (maximum 150 characters)." }, 400);
       if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return reply({ error: "Enter a valid email address." }, 400);
       if (!["active", "inactive"].includes(status)) return reply({ error: "Choose active or inactive employment status." }, 400);
       const { data: current, error: currentError } = await admin.from("staff")
-        .select("id,status,deleted_at").eq("id", staffId).is("deleted_at", null).maybeSingle();
+        .select("id,status,deleted_at,salary").eq("id", staffId).is("deleted_at", null).maybeSingle();
       if (currentError) throw currentError;
       if (!current) return reply({ error: "Employee record not found." }, 404);
       const update: Record<string, unknown> = {
         full_name: fullName, email: email || null, phone: phone || null, role: role || "Employee",
-        status, start_date: startDate, updated_at: new Date().toISOString(), updated_by: authData.user.id,
+        status, start_date: startDate,
+        payment_method: body.payment_method ? String(body.payment_method) : null,
+        address: body.address ? String(body.address).trim().slice(0, 250) : null,
+        updated_at: new Date().toISOString(), updated_by: authData.user.id,
       };
+      const salaryChanged = salaryProvided && Number(current.salary || 0) !== newSalary;
+      if (salaryChanged && (!salaryReason || salaryReason.length > 250)) {
+        return reply({ error: "A short reason is required when changing an employee's salary." }, 400);
+      }
+      if (salaryChanged && !/^\\d{4}-\\d{2}-\\d{2}$/.test(salaryEffectiveFrom)) {
+        return reply({ error: "Choose a valid salary effective date." }, 400);
+      }
+      if (salaryChanged) update.salary = newSalary;
       if (status === "inactive" && current.status === "active") update.end_date = new Date().toISOString().slice(0, 10);
       if (status === "active" && current.status !== "active") update.end_date = null;
       const { data, error } = await admin.from("staff").update(update).eq("id", staffId)
         .select("id,employee_number,full_name,email,phone,role,status,start_date,end_date").single();
       if (error) throw error;
-      return reply({ success: true, employee: data, message: "Employee record updated." });
+      if (salaryChanged) {
+        const { error: historyError } = await admin.from("staff_salary_history").insert({
+          staff_id: staffId,
+          monthly_salary: newSalary,
+          effective_from: salaryEffectiveFrom,
+          reason: salaryReason,
+          created_by: authData.user.id,
+        });
+        if (historyError) {
+          await admin.from("staff").update({ salary: current.salary }).eq("id", staffId);
+          throw new Error("Salary history could not be saved; the previous salary was restored. " + historyError.message);
+        }
+      }
+      return reply({ success: true, employee: data, message: salaryChanged ? "Employee record and salary history updated." : "Employee record updated." });
     }
 
     if (action === "invite_staff") {
