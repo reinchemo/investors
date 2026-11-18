@@ -3734,7 +3734,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             <div class="headline">
                 <h1><i class="fas fa-tasks" style="color:#5fc7bc;"></i> Tasks</h1>
                 <div style="display:flex;gap:.55rem;flex-wrap:wrap;">
-                    <a class="btn btn-ghost" href="portal/task-review.html" target="_blank" rel="noopener"><i class="fas fa-clipboard-check"></i> Review Queue</a>
+                    <a id="taskReviewQueueBtn" class="btn btn-ghost" href="portal/task-review.html" target="_blank" rel="noopener"><i class="fas fa-clipboard-check"></i> Review Queue</a>
                     <button class="btn btn-primary" id="newTaskBtn"><i class="fas fa-plus"></i> New Task</button>
                 </div>
             </div>
@@ -4906,6 +4906,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             // 1. Hide Tabs they don't have access to view
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => {
+                if (tab.dataset.report) return;
                 const view = tab.dataset.view;
                 let moduleName = view;
                 if (view === 'ledger') moduleName = 'Central Ledger';
@@ -4940,6 +4941,8 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
+            const taskReviewLink = document.getElementById('taskReviewQueueBtn');
+            if (taskReviewLink && !can('edit', 'Tasks')) taskReviewLink.style.display = 'none';
 
             // Hide Admin Roles link
             document.querySelectorAll('a[href="admin.html"]').forEach(a => a.style.display = 'none');
@@ -9545,8 +9548,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             Object.keys(taskGroups).forEach(name => { const g=taskGroups[name]; rows.push(['Tasks',name,'',g.assigned,g.inProgress,g.review,g.approved,g.completed,g.rejected,g.overdue,'','','','']); });
             const attendance = {};
             snap.attendance.forEach(row => { const key=String(row.staff_id); attendance[key]=(attendance[key]||0)+1; });
-            Object.keys(attendance).forEach(name => rows.push(['Attendance','Staff #'+name,'', '', '', '', '', '', '',attendance[name],'','','']));
-            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
+            Object.keys(attendance).forEach(name => rows.push(['Attendance','Staff #'+name,'', '', '', '', '', '', '', '',attendance[name],'','','']));
+            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
             const csv = rows.map(row => row.map(value => '"' + String(value == null ? '' : value).replace(/"/g,'""') + '"').join(',')).join('\r\n');
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
