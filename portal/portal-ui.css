@@ -63,3 +63,188 @@ img, svg { max-width: 100%; }
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Shared layout refinements for the small STARLINK team. */
+:root {
+  --portal-radius: 16px;
+  --portal-border: rgba(148, 174, 215, .16);
+  --portal-surface: rgba(17, 26, 45, .92);
+}
+body {
+  line-height: 1.55;
+}
+.layout {
+  width: min(1200px, 100%);
+  margin-inline: auto;
+}
+h1, h2, h3, h4 {
+  letter-spacing: -.025em;
+}
+button, .btn, .submit, .action-btn, a.button {
+  min-height: 40px;
+}
+.card, .panel, .stat-card, .stat, .notice {
+  border-radius: var(--portal-radius);
+  border-color: var(--portal-border);
+}
+input, select, textarea {
+  max-width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+}
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+table th {
+  white-space: nowrap;
+}
+table td {
+  vertical-align: middle;
+}
+.tablewrap, .table-wrap, .table-responsive {
+  border-radius: 12px;
+  overscroll-behavior-x: contain;
+}
+.badge, .pill, .status, .status-badge {
+  white-space: nowrap;
+}
+.empty, .empty-state {
+  padding: 24px 16px;
+  text-align: center;
+  color: #a6b6cc;
+}
+:focus-visible {
+  scroll-margin-block: 100px;
+}
+@media (max-width: 900px) {
+  .layout {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+@media (max-width: 640px) {
+  .layout {
+    padding: 16px 12px 28px;
+  }
+  .hero, .header, .page-header {
+    border-radius: 16px;
+  }
+  .hero {
+    padding: 20px 17px;
+  }
+  .hero h1, .header h1 {
+    font-size: clamp(21px, 6vw, 28px);
+  }
+  .grid, .stats, .stat-grid, .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .card, .panel, .stat-card, .stat {
+    min-width: 0;
+    padding: 14px;
+  }
+  .actions, .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .actions > button, .header-actions > button {
+    flex: 1 1 auto;
+  }
+  .topbar {
+    padding-inline: 14px;
+    min-height: 64px;
+    height: auto;
+    gap: 10px;
+  }
+  .tablewrap, .table-wrap, .table-responsive {
+    margin-inline: 0;
+  }
+  table {
+    min-width: 560px;
+  }
+  .modal, .modal-card, .dialog {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+}
+@media (max-width: 380px) {
+  .grid, .stats, .stat-grid, .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Shared page header for portal screens that are opened directly. */
+.portal-page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--portal-border);
+}
+.portal-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  min-width: 0;
+}
+.portal-brand-mark {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #06121e;
+  font: 800 18px Outfit, sans-serif;
+  background: linear-gradient(135deg, #45dfd0, #459bff);
+}
+.portal-brand strong, .portal-brand small {
+  display: block;
+}
+.portal-brand strong {
+  color: #f5f8ff;
+  font: 800 13px Outfit, sans-serif;
+  letter-spacing: .04em;
+}
+.portal-brand small {
+  margin-top: 2px;
+  color: #91a3bf;
+  font-size: 9px;
+  letter-spacing: .12em;
+}
+.portal-home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--portal-border);
+  border-radius: 10px;
+  background: rgba(23, 36, 59, .85);
+  color: #dce8f8;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.portal-home-link:hover {
+  border-color: rgba(69, 223, 208, .45);
+  color: #45dfd0;
+}
+@media (max-width: 420px) {
+  .portal-page-nav { gap: 8px; }
+  .portal-brand strong { font-size: 11px; }
+  .portal-home-link { padding-inline: 10px; font-size: 11px; }
+}
