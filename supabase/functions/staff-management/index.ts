@@ -116,7 +116,7 @@ Deno.serve(async (req: Request) => {
       if (salaryProvided && (!Number.isFinite(newSalary) || newSalary < 0)) return reply({ error: "Enter a valid non-negative monthly salary." }, 400);
       if (!Number.isSafeInteger(staffId) || staffId <= 0) return reply({ error: "Select a valid employee." }, 400);
       if (!fullName || fullName.length > 150) return reply({ error: "Enter the employee's full name (maximum 150 characters)." }, 400);
-      if (email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return reply({ error: "Enter a valid email address." }, 400);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return reply({ error: "Enter a valid email address." }, 400);
       if (!["active", "inactive"].includes(status)) return reply({ error: "Choose active or inactive employment status." }, 400);
       const { data: current, error: currentError } = await admin.from("staff")
         .select("id,status,deleted_at,salary").eq("id", staffId).is("deleted_at", null).maybeSingle();
@@ -133,7 +133,7 @@ Deno.serve(async (req: Request) => {
       if (salaryChanged && (!salaryReason || salaryReason.length > 250)) {
         return reply({ error: "A short reason is required when changing an employee's salary." }, 400);
       }
-      if (salaryChanged && !/^\\d{4}-\\d{2}-\\d{2}$/.test(salaryEffectiveFrom)) {
+      if (salaryChanged && !/^\d{4}-\d{2}-\d{2}$/.test(salaryEffectiveFrom)) {
         return reply({ error: "Choose a valid salary effective date." }, 400);
       }
       if (salaryChanged) update.salary = newSalary;
