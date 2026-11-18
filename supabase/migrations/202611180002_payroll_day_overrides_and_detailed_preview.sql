@@ -127,7 +127,7 @@ begin
         when pol.id is null then false
         when not pol.is_paid then false
         when pol.paid_day_limit is null then true
-        else row_number() over(partition by r.leave_id order by r.pay_date)<=pol.paid_day_limit
+        else count(*) filter (where pol.is_paid) over(partition by r.leave_id order by r.pay_date rows between unbounded preceding and current row)<=pol.paid_day_limit
       end leave_day_paid
     from raw_days r
     left join lateral (
