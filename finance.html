@@ -6359,68 +6359,24 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
 
         async function approveOvertime(id) {
             const e = overtimeEntries.find(x => x.id === id);
-            if (!e) return;
-            if (e.status !== 'pending') {
-                showToast('Only pending overtime entries can be approved.', 'error');
-                return;
-            }
-            if (!Number.isFinite(Number(e.hours)) || e.hours <= 0 ||
-                !Number.isFinite(Number(e.ratePerHour)) || e.ratePerHour <= 0 ||
-                !Number.isFinite(Number(e.amount)) || e.amount <= 0) {
-                showToast('Cannot approve overtime without valid positive hours, hourly rate and amount. Edit the pending entry first.', 'error');
-                return;
-            }
+            if (!e || e.status !== "pending") return showToast("Only pending overtime entries can be approved.", "error");
+            if (!Number.isFinite(Number(e.hours)) || e.hours <= 0 || !Number.isFinite(Number(e.ratePerHour)) || e.ratePerHour <= 0 || !Number.isFinite(Number(e.amount)) || e.amount <= 0) return showToast("Enter valid positive hours, hourly rate and amount first.", "error");
             if (!confirm(`Approve ${e.hours}h overtime for KSh ${fmt(e.amount)}?`)) return;
-
-            const {
-                error
-            } = await supabaseClient
-                .from('overtime_entries')
-                .update({
-                    status: 'approved',
-                    approved_at: new Date().toISOString(),
-                    approved_by: CURRENT_USER,
-                    updated_at: new Date().toISOString(),
-                    updated_by: CURRENT_USER
-                })
-                .eq('id', id);
-
-            if (error) {
-                showToast('Approve failed: ' + error.message, 'error');
-                return;
-            }
-            await logAudit('APPROVE', `Overtime #${id}`, `Approved ${e.hours}h — KSh ${fmt(e.amount)}`, 'pending', 'approved');
-            await fetchOvertime();
-            renderOvertime();
-            showToast('✅ Overtime approved', 'success');
+            try {
+                const result = await submitStaffApproval("overtime", "approve", id);
+                await fetchOvertime(); renderOvertime(); showToast(result.message || "Overtime approved.", "success");
+            } catch (error) { showToast("Approval failed: " + error.message, "error"); }
         }
 
         async function rejectOvertime(id) {
             const e = overtimeEntries.find(x => x.id === id);
-            if (!e) return;
-            const reason = prompt('Reason for rejection:', '');
+            if (!e || e.status !== "pending") return showToast("Only pending overtime entries can be rejected.", "error");
+            const reason = prompt("Reason for rejection:", "");
             if (reason === null) return;
-            const {
-                error
-            } = await supabaseClient
-                .from('overtime_entries')
-                .update({
-                    status: 'rejected',
-                    rejected_at: new Date().toISOString(),
-                    rejected_by: CURRENT_USER,
-                    rejection_reason: reason || 'No reason provided',
-                    updated_at: new Date().toISOString(),
-                    updated_by: CURRENT_USER
-                })
-                .eq('id', id);
-            if (error) {
-                showToast('Reject failed: ' + error.message, 'error');
-                return;
-            }
-            await logAudit('UPDATE', `Overtime #${id}`, `Rejected: ${reason || 'no reason'}`, 'pending', 'rejected');
-            await fetchOvertime();
-            renderOvertime();
-            showToast('Overtime rejected', 'info');
+            try {
+                const result = await submitStaffApproval("overtime", "reject", id, reason.trim());
+                await fetchOvertime(); renderOvertime(); showToast(result.message || "Overtime rejected.", "info");
+            } catch (error) { showToast("Rejection failed: " + error.message, "error"); }
         }
 
         async function revertOvertime(id) {
@@ -6895,87 +6851,36 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             renderLeave();
         }
 
+        async function submitStaffApproval(kind, action, id, reason = "") {
+            const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+            if (sessionError || !sessionData?.session) throw new Error("Your session has expired. Please sign in again.");
+            const { data, error } = await supabaseClient.functions.invoke("staff-approval-workflows", {
+                body: { kind, action, id, reason }
+            });
+            if (error) throw new Error(data?.error || error.message || "Approval request failed.");
+            if (data?.error) throw new Error(data.error);
+            return data;
+        }
+
         async function approveLeave(id) {
             const l = leaveRequests.find(x => x.id === id);
-            if (!l) return;
-            if (l.status !== 'pending') {
-                showToast('Only pending leave requests can be approved.', 'error');
-                return;
-            }
-
-            // Recheck against the database immediately before approval. The local
-            // list may be stale if another manager approved overlapping leave.
-            const { data: conflicts, error: conflictError } = await supabaseClient
-                .from('leave_requests')
-                .select('id, start_date, end_date')
-                .eq('staff_id', l.staffId)
-                .eq('status', 'approved')
-                .is('cancelled_at', null)
-                .neq('id', id)
-                .lte('start_date', l.endDate)
-                .gte('end_date', l.startDate)
-                .limit(1);
-
-            if (conflictError) {
-                showToast('Could not verify overlapping leave: ' + conflictError.message, 'error');
-                return;
-            }
-            if (conflicts && conflicts.length) {
-                showToast('Cannot approve: this employee already has approved leave overlapping these dates.', 'error');
-                return;
-            }
-
+            if (!l || l.status !== "pending") return showToast("Only pending leave requests can be approved.", "error");
             if (!confirm(`Approve ${l.days}-day ${leaveTypeLabel(l.leaveType)} leave?`)) return;
-
-            const {
-                error
-            } = await supabaseClient
-                .from('leave_requests')
-                .update({
-                    status: 'approved',
-                    approved_at: new Date().toISOString(),
-                    approved_by: CURRENT_USER,
-                    updated_at: new Date().toISOString(),
-                    updated_by: CURRENT_USER
-                })
-                .eq('id', id);
-
-            if (error) {
-                showToast('Approve failed: ' + error.message, 'error');
-                return;
-            }
-            await logAudit('APPROVE', `Leave #${id}`, `Approved ${l.days}d leave`, 'pending', 'approved');
-            await fetchLeave();
-            renderLeave();
-            showToast('✅ Leave approved', 'success');
+            try {
+                const result = await submitStaffApproval("leave", "approve", id);
+                await fetchLeave(); renderLeave(); showToast(result.message || "Leave approved.", "success");
+            } catch (error) { showToast("Approval failed: " + error.message, "error"); }
         }
 
         async function rejectLeave(id) {
             const l = leaveRequests.find(x => x.id === id);
-            if (!l) return;
-            const reason = prompt('Reason for rejection:', '');
+            if (!l || l.status !== "pending") return showToast("Only pending leave requests can be rejected.", "error");
+            const reason = prompt("Reason for rejection:", "");
             if (reason === null) return;
-            const {
-                error
-            } = await supabaseClient
-                .from('leave_requests')
-                .update({
-                    status: 'rejected',
-                    rejected_at: new Date().toISOString(),
-                    rejected_by: CURRENT_USER,
-                    rejection_reason: reason || 'No reason provided',
-                    updated_at: new Date().toISOString(),
-                    updated_by: CURRENT_USER
-                })
-                .eq('id', id);
-            if (error) {
-                showToast('Reject failed: ' + error.message, 'error');
-                return;
-            }
-            await logAudit('UPDATE', `Leave #${id}`, `Rejected: ${reason || 'no reason'}`, 'pending', 'rejected');
-            await fetchLeave();
-            renderLeave();
-            showToast('Leave rejected', 'info');
+            try {
+                const result = await submitStaffApproval("leave", "reject", id, reason.trim());
+                await fetchLeave(); renderLeave(); showToast(result.message || "Leave rejected.", "info");
+            } catch (error) { showToast("Rejection failed: " + error.message, "error"); }
         }
 
         async function cancelLeave(id) {
