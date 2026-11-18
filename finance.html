@@ -6358,6 +6358,16 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
         async function approveOvertime(id) {
             const e = overtimeEntries.find(x => x.id === id);
             if (!e) return;
+            if (e.status !== 'pending') {
+                showToast('Only pending overtime entries can be approved.', 'error');
+                return;
+            }
+            if (!Number.isFinite(Number(e.hours)) || e.hours <= 0 ||
+                !Number.isFinite(Number(e.ratePerHour)) || e.ratePerHour <= 0 ||
+                !Number.isFinite(Number(e.amount)) || e.amount <= 0) {
+                showToast('Cannot approve overtime without valid positive hours, hourly rate and amount. Edit the pending entry first.', 'error');
+                return;
+            }
             if (!confirm(`Approve ${e.hours}h overtime for KSh ${fmt(e.amount)}?`)) return;
 
             const {
@@ -6444,8 +6454,8 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
         async function deleteOvertime(id) {
             const e = overtimeEntries.find(x => x.id === id);
             if (!e) return;
-            if (e.status === 'paid') {
-                showToast('⚠️ Cannot delete a paid overtime entry.', 'error');
+            if (e.status === 'paid' || e.payrollRunId || e.transactionId) {
+                showToast('Cannot delete overtime that has been paid or linked to a payroll run/ledger transaction.', 'error');
                 return;
             }
             if (!confirm(`Delete this overtime entry (${e.hours}h — KSh ${fmt(e.amount)})?`)) return;
@@ -6886,6 +6896,33 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
         async function approveLeave(id) {
             const l = leaveRequests.find(x => x.id === id);
             if (!l) return;
+            if (l.status !== 'pending') {
+                showToast('Only pending leave requests can be approved.', 'error');
+                return;
+            }
+
+            // Recheck against the database immediately before approval. The local
+            // list may be stale if another manager approved overlapping leave.
+            const { data: conflicts, error: conflictError } = await supabaseClient
+                .from('leave_requests')
+                .select('id, start_date, end_date')
+                .eq('staff_id', l.staffId)
+                .eq('status', 'approved')
+                .is('cancelled_at', null)
+                .neq('id', id)
+                .lte('start_date', l.endDate)
+                .gte('end_date', l.startDate)
+                .limit(1);
+
+            if (conflictError) {
+                showToast('Could not verify overlapping leave: ' + conflictError.message, 'error');
+                return;
+            }
+            if (conflicts && conflicts.length) {
+                showToast('Cannot approve: this employee already has approved leave overlapping these dates.', 'error');
+                return;
+            }
+
             if (!confirm(`Approve ${l.days}-day ${leaveTypeLabel(l.leaveType)} leave?`)) return;
 
             const {
