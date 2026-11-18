@@ -35,6 +35,7 @@ create policy payroll_day_overrides_insert on public.payroll_day_overrides
   for insert to authenticated
   with check (portal_management_can_create('Payroll'));
 drop policy if exists payroll_day_overrides_update on public.payroll_day_overrides;
+drop policy if exists payroll_day_overrides_delete on public.payroll_day_overrides;
 create policy payroll_day_overrides_update on public.payroll_day_overrides
   for update to authenticated
   using (portal_management_can_edit('Payroll'))
@@ -110,28 +111,39 @@ begin
         where lr.staff_id=s.id and lr.status='approved' and lr.cancelled_at is null
           and d::date between lr.start_date and lr.end_date
         order by lr.created_at desc,lr.id desc limit 1) leave_type,
+      ((select count(*) from public.leave_requests lr
+        where lr.staff_id=s.id and lr.status='approved' and lr.cancelled_at is null
+          and d::date between lr.start_date and lr.end_date)>1) leave_overlap,
       (select o.treatment from public.payroll_day_overrides o
         where o.staff_id=s.id and o.pay_date=d::date and o.status='approved'
         limit 1) override_treatment,
       coalesce((select h.monthly_salary from public.staff_salary_history h
         where h.staff_id=s.id and h.effective_from<=d::date
           and (h.effective_to is null or h.effective_to>=d::date)
-        order by h.effective_from desc,h.id desc limit 1),s.salary) day_salary
+        order by h.effective_from desc,h.id desc limit 1),s.salary) day_salary,
+      (select count(*) from public.staff_salary_history h
+        where h.staff_id=s.id and h.effective_from<=d::date
+          and (h.effective_to is null or h.effective_to>=d::date))>1 salary_history_overlap
     from eligible_staff s
     cross join lateral generate_series(s.eligible_from,s.eligible_to,interval '1 day') d
   ),
   policy_days as (
     select r.*,
       pol.id leave_policy_id,pol.is_paid leave_is_paid,pol.paid_day_limit,
+      coalesce(pol.policy_match_count,0)>1 leave_policy_overlap,
       case when r.leave_id is null then false
         when pol.id is null then false
         when not pol.is_paid then false
         when pol.paid_day_limit is null then true
-        else row_number() over(partition by r.leave_id order by r.pay_date)<=pol.paid_day_limit
+        else count(*) filter (where pol.is_paid and not r.is_sunday and not r.is_holiday) over(partition by r.leave_id order by r.pay_date rows between unbounded preceding and current row)<=pol.paid_day_limit
       end leave_day_paid
     from raw_days r
     left join lateral (
-      select p.id,p.is_paid,p.paid_day_limit
+      select p.id,p.is_paid,p.paid_day_limit,
+        (select count(*) from public.payroll_leave_pay_policies px
+          where px.is_active and lower(px.leave_type)=lower(r.leave_type)
+            and px.effective_from<=r.pay_date
+            and (px.effective_to is null or px.effective_to>=r.pay_date)) policy_match_count
       from public.payroll_leave_pay_policies p
       where r.leave_id is not null and p.is_active
         and lower(p.leave_type)=lower(r.leave_type)
@@ -145,12 +157,13 @@ begin
       case
         when p.override_treatment='unpaid_absence' then false
         when p.override_treatment='paid' then true
-        when p.leave_id is not null then p.leave_day_paid
         when p.is_sunday or p.is_holiday then true
+        when p.leave_id is not null then p.leave_day_paid
         when p.has_attendance then true
         else false
       end is_paid_day,
-      (p.leave_id is not null and p.leave_policy_id is null) missing_leave_policy
+      (p.leave_id is not null and p.leave_policy_id is null
+        and not p.is_sunday and not p.is_holiday) missing_leave_policy
     from policy_days p
   ),
   totals as (
@@ -159,10 +172,13 @@ begin
       count(*) filter(where d.has_attendance)::bigint attendance_days,
       count(*) filter(where d.is_paid_day and d.is_sunday)::bigint paid_sundays,
       count(*) filter(where d.is_paid_day and d.is_holiday)::bigint paid_holidays,
-      count(*) filter(where d.is_paid_day and d.leave_id is not null)::bigint paid_leave,
+      count(*) filter(where d.is_paid_day and d.leave_id is not null and not d.is_sunday and not d.is_holiday)::bigint paid_leave,
       count(*) filter(where d.override_treatment='unpaid_absence')::bigint unpaid_absence,
       bool_or(d.day_salary is null or d.day_salary<=0) missing_salary,
       bool_or(d.missing_leave_policy) missing_leave_policy,
+      bool_or(d.leave_overlap) overlapping_leave_requests,
+      bool_or(d.leave_policy_overlap) overlapping_leave_policies,
+      bool_or(d.salary_history_overlap) overlapping_salary_history,
       sum(case when d.is_paid_day then coalesce(d.day_salary,0)/v_days else 0 end) earned
     from day_calc d group by d.staff_id
   ),
@@ -176,9 +192,16 @@ begin
   )
   select s.id,s.employee_number,s.full_name,m.salary,v_days,t.paid_days,
     t.attendance_days,t.paid_sundays,t.paid_holidays,t.paid_leave,t.unpaid_absence,
-    case when coalesce(t.missing_salary,true) or coalesce(t.missing_leave_policy,false)
+    case when coalesce(t.missing_salary,true)
+        or coalesce(t.missing_leave_policy,false)
+        or coalesce(t.overlapping_leave_requests,false)
+        or coalesce(t.overlapping_leave_policies,false)
+        or coalesce(t.overlapping_salary_history,false)
       then null else round(coalesce(t.earned,0),0) end,
-    case when coalesce(t.missing_salary,true) then 'salary_required'
+    case when coalesce(t.overlapping_leave_requests,false) then 'overlapping_leave_requests'
+      when coalesce(t.overlapping_leave_policies,false) then 'overlapping_leave_policies'
+      when coalesce(t.overlapping_salary_history,false) then 'overlapping_salary_history'
+      when coalesce(t.missing_salary,true) then 'salary_required'
       when coalesce(t.missing_leave_policy,false) then 'leave_policy_required'
       when t.paid_days=0 then 'no_eligible_paid_days'
       else 'preview_only' end
@@ -188,5 +211,128 @@ begin
 end;
 $function$;
 
+revoke all on function public.payroll_month_preview_v2(text) from public;
+grant execute on function public.payroll_month_preview_v2(text) to authenticated;
+
 comment on function public.payroll_month_preview_v2(text) is
 'Detailed proposal-aligned payroll preview. Monday-Saturday require approved attendance; Sundays and configured public holidays are paid unless an approved unpaid_absence override exists. Approved paid leave follows effective-dated policy and paid-day limits. No statutory deductions or ledger posting are performed.';
+
+-- Only controlled RPCs may change or cancel overrides. Direct table
+-- UPDATE/DELETE would bypass the audit and maker-checker workflow.
+drop policy if exists payroll_day_overrides_update on public.payroll_day_overrides;
+drop policy if exists payroll_day_overrides_delete on public.payroll_day_overrides;
+drop policy if exists payroll_day_overrides_insert on public.payroll_day_overrides;
+create policy payroll_day_overrides_insert on public.payroll_day_overrides
+  for insert to authenticated
+  with check (
+    portal_management_can_create('Payroll')
+    and created_by = auth.uid()
+    and status = 'pending'
+    and approved_by is null
+    and approved_at is null
+  );
+
+create or replace function public.review_payroll_day_override(
+  p_override_id bigint,
+  p_decision text
+)
+returns public.payroll_day_overrides
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+declare
+  v_override public.payroll_day_overrides;
+  v_user uuid := auth.uid();
+begin
+  if v_user is null then
+    raise exception 'Authentication required';
+  end if;
+  if p_decision is null or p_decision not in ('approved','rejected') then
+    raise exception 'Decision must be approved or rejected';
+  end if;
+  if not public.portal_management_can_edit('Payroll') then
+    raise exception 'You do not have permission to review payroll overrides';
+  end if;
+
+  select * into v_override
+  from public.payroll_day_overrides
+  where id = p_override_id
+  for update;
+
+  if not found then
+    raise exception 'Payroll day override not found';
+  end if;
+  if v_override.status <> 'pending' then
+    raise exception 'Only pending overrides can be reviewed';
+  end if;
+  if v_override.created_by is null then
+    raise exception 'Override has no recorded creator; manual audit is required';
+  end if;
+  if v_override.created_by = v_user then
+    raise exception 'Maker-checker rule: the creator cannot review their own override';
+  end if;
+
+  update public.payroll_day_overrides
+  set status = p_decision,
+      approved_by = case when p_decision = 'approved' then v_user else null end,
+      approved_at = case when p_decision = 'approved' then now() else null end,
+      updated_by = v_user,
+      updated_at = now()
+  where id = p_override_id
+  returning * into v_override;
+
+  return v_override;
+end;
+$function$;
+
+revoke all on function public.review_payroll_day_override(bigint,text) from public;
+grant execute on function public.review_payroll_day_override(bigint,text) to authenticated;
+
+-- A creator may withdraw a pending request without rewriting its history.
+create or replace function public.cancel_payroll_day_override(p_override_id bigint)
+returns public.payroll_day_overrides
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $function$
+declare
+  v_override public.payroll_day_overrides;
+  v_user uuid := auth.uid();
+begin
+  if v_user is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select * into v_override
+  from public.payroll_day_overrides
+  where id = p_override_id
+  for update;
+
+  if not found then
+    raise exception 'Payroll day override not found';
+  end if;
+  if v_override.status <> 'pending' then
+    raise exception 'Only pending overrides can be cancelled';
+  end if;
+  if v_override.created_by is null then
+    raise exception 'Override has no recorded creator; manual audit is required';
+  end if;
+  if v_override.created_by is distinct from v_user
+     and not public.portal_management_can_edit('Payroll') then
+    raise exception 'Only the creator or a Payroll editor can cancel a pending override';
+  end if;
+
+  update public.payroll_day_overrides
+  set status = 'cancelled',
+      updated_by = v_user,
+      updated_at = now()
+  where id = p_override_id
+  returning * into v_override;
+
+  return v_override;
+end;
+$function$;
+
+revoke all on function public.cancel_payroll_day_override(bigint) from public;
+grant execute on function public.cancel_payroll_day_override(bigint) to authenticated;

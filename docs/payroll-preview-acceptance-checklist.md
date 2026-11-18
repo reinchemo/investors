@@ -58,3 +58,92 @@ Do not connect this preview to payroll preparation until:
 ## Known boundaries
 
 This preview is not a statutory net-pay calculator, payslip generator, payroll run creator, or finance posting function. It is a read-only basic-pay preview. The legacy `payroll_prepare_run` still uses the legacy preview and the existing hard-coded statutory function; it must not be treated as using this v2 logic.
+
+
+## Additional leave/calendar regression cases
+- A Sunday inside an approved leave interval remains an ordinary paid Sunday unless an approved day override marks it unpaid.
+- A configured public holiday inside an approved leave interval remains an ordinary paid public holiday unless an approved day override marks it unpaid.
+- Sundays and public holidays do not consume a paid-leave day limit.
+- Paid-leave totals count only paid leave dates that are not Sundays or configured public holidays.
+- An unpaid leave policy on a weekday does not turn a Sunday or public holiday into an unpaid day.
+- An approved leave interval containing only Sundays/public holidays does not require a leave-pay policy for those calendar dates and does not block the preview.
+- Two overlapping approved leave requests for the same employee/date block the preview with `overlapping_leave_requests`; the system must not silently choose one request.
+- Override creation records the authenticated creator and starts in pending status; clients cannot submit pre-approved overrides.
+- Only a different Payroll editor can approve/reject a pending override through `review_payroll_day_override`; the creator cannot approve their own request.
+- Direct authenticated table updates and deletes are denied (no UPDATE or DELETE policy); only controlled RPCs may change pending override status, so approval metadata and audit history cannot be rewritten or erased through the table API.
+- The preview RPC is executable by authenticated users only; PUBLIC/anon execution is revoked.
+- The review RPC rejects invalid decisions and attempts to review an override that is no longer pending.
+- Overlapping effective-dated salary-history rows for the same employee/date block the preview with `overlapping_salary_history`; the newest row must not be silently selected.
+- Overlapping active leave-pay policy rows for the same leave type/date block the preview with `overlapping_leave_policies`; policy precedence must be corrected by management rather than guessed.
+- The creator can cancel their own pending override through `cancel_payroll_day_override`; a Payroll editor can cancel another user's pending request.
+- The cancellation RPC rejects missing IDs and any request that has already been approved, rejected or cancelled.
+- Cancelling a pending override records the authenticated actor and timestamp; cancelled overrides do not affect preview earnings.
+- A pending override with a missing creator is rejected by both review and cancellation RPCs and requires manual audit.
+- Run `docs/payroll-preview-readonly-preflight.sql` in isolated staging after both payroll migrations; resolve all overlap/date anomalies and confirm the RPC grants before functional tests.
+
+## Finance workflow integration findings (must be resolved before release)
+
+- The finance page must call `approve_payroll_run(p_run_id)`; direct browser updates to `payroll_runs.status/approved_by/approved_at` bypass the database maker-checker control. The current branch changes the approval action to the RPC.
+- The database `payroll_prepare_run(p_period)` still calls the legacy `payroll_month_preview(p_period)`, not `payroll_month_preview_v2(p_period)`. Do not assume the new proposal-aligned calculation is used by the existing payroll preparation path.
+- The current browser wizard still creates payroll rows directly and does not populate `salary_snapshot`, `period_calendar_days`, `paid_days`, or the calculation breakdown. The database approval RPC rejects rows with missing salary snapshots.
+- The existing preparation function still calls `kenya_payroll_statutory(p_gross)`, whose tax/NSSF/SHIF/AHL values are hard-coded. These rates and employee-specific tax settings have not been independently verified for the target payroll period.
+- The new detailed preview calculates basic pay only. It does not calculate statutory deductions, overtime, allowances, advances, loans, or ledger entries. It must not be treated as a complete net-pay calculation.
+- Therefore the existing finance wizard and posting workflow must not be switched to the new preview until a server-side preparation RPC is designed to consume v2, apply approved overtime and verified statutory configuration, store immutable snapshots, and preserve the existing approval/posting maker-checker controls.
+
+## Independent arithmetic acceptance vectors
+
+For a fixed monthly salary of KSh 30,000 and a 30-calendar-day month, the proposal's daily rate is KSh 1,000:
+- 30 eligible paid days: KSh 30,000.
+- 28 eligible paid days after two unpaid absences: KSh 28,000.
+- 27 eligible paid days after two unpaid absences plus one approved unpaid Sunday override: KSh 27,000.
+- Employment beginning on the 11th, with 20 eligible days remaining: KSh 20,000.
+
+These are arithmetic reference vectors only; they do not validate PostgreSQL execution, statutory deductions, RLS, or ledger posting.
+
+## Verified statutory configuration blockers (18 Nov 2026)
+
+The existing production function `kenya_payroll_statutory(numeric)` is not approved for the new payroll path yet. Read-only inspection found that it:
+- Applies 6% to gross pay capped at KSh 108,000. This produces a maximum employee contribution of KSh 6,480 (Tier 1: KSh 540 on KSh 9,000; Tier 2: KSh 5,940 on the next KSh 99,000) and the same employer contribution under the NSSF Year 4 notice effective February 2026. The arithmetic is equivalent for ordinary monthly pensionable pay within the limits, but the implementation should make the tiers, pensionable-pay basis, partial-period handling and pay-below-limit treatment explicit and testable.
+- Applies a KSh 300 SHIF minimum to every positive gross amount. The applicable minimum/threshold treatment must be confirmed against the current authoritative SHA/KRA guidance before changing the formula; secondary summaries are inconsistent. Do not assume that KSh 6,000 is a threshold without validating the official calculator and applicable legal instrument.
+- Does not accept employee-specific tax reliefs/deductions or a dated statutory configuration, so the output must not be treated as a final payslip/tax liability.
+
+Before enabling statutory net pay, add effective-dated configuration and tests for:
+- NSSF Year 4 (2026) Tier 1 lower limit KSh 9,000, Tier 2 upper limit KSh 108,000, 6% employee and employer rates, and the exact treatment of earnings below the lower limit.
+- SHIF: confirm the statutory minimum and calculation threshold from current authoritative SHA/KRA guidance before implementation. Once verified, test values immediately below, at, and above the confirmed threshold.
+- PAYE bands: 10% on first KSh 24,000; 25% on next KSh 8,333; 30% on next KSh 467,667; 32.5% on next KSh 300,000; 35% above KSh 800,000. Personal relief KSh 2,400/month applies to resident individuals. Apply eligible deductions (including SHIF and AHL) and employee-specific insurance/pension/mortgage relief only where supported by verified payroll records.
+- Affordable Housing Levy: 1.5% employee and 1.5% employer contribution.
+- Effective dates, rounding, taxable benefit/allowance treatment, and employee tax-residency/relief profile.
+
+Official reference points checked:
+- NSSF, Notice to Employers — Year 4 (2026): https://www.nssf.or.ke/notice-to-employers-year-4-2026-nssf-contribution-rates/
+- KRA, PAYE rates and relief: https://www.kra.go.ke/individual/filing-paying/types-of-taxes/paye
+- KRA, SHIF calculator: https://ecitizen.kra.go.ke/calculators/nhif-shif-calculators
+- KRA, Affordable Housing Levy: https://www.kra.go.ke/news-center/public-notices/2099-collection-of-the-affordable-housing-levy
+
+These are source checks, not payroll-adviser sign-off. Do not use the existing hard-coded statutory function to create or approve live payroll until the configuration and test cases above are implemented and reviewed.
+
+
+## Statutory boundary test vectors
+
+- NSSF Year 4: KSh 9,000 pensionable earnings gives KSh 540 employee and KSh 540 employer; KSh 15,000 gives KSh 900 each; KSh 108,000 or more gives KSh 6,480 each (subject to the current official framework and pensionable-pay rules).
+- SHIF boundary vectors remain unresolved. Do not encode the KSh 5,999 / KSh 6,000 / KSh 6,001 expected amounts until the authoritative minimum/threshold treatment is confirmed.
+- Housing Levy: KSh 30,000 eligible gross monthly pay gives KSh 450 employee and KSh 450 employer.
+- PAYE must be calculated after only the deductions allowed by current KRA guidance and with resident/non-resident relief eligibility handled separately. Do not apply KSh 2,400 personal relief to every employee by default.
+
+## Safe UI integration status
+
+The Finance payroll wizard now includes a **Preview proposal-based pay** action in the period step. It calls only `payroll_month_preview_v2(p_period)` and renders employee, paid days, basic pay and calculation status. It does not insert/update payroll runs or items, invoke statutory deductions, approve payroll, create ledger transactions, or mark overtime as paid.
+
+Manual smoke-test procedure once the migration is installed in an isolated test database:
+1. Open Finance → Run Payroll and enter a valid YYYY-MM period.
+2. Click **Preview proposal-based pay**.
+3. Confirm rows and totals match the SQL acceptance vectors.
+4. Confirm missing/overlapping policy and salary cases show a blocked status.
+5. Confirm no rows are added to `payroll_runs`, `payroll_items`, `transactions`, or `overtime_entries`.
+6. Confirm an unavailable RPC produces an explicit message and no writes.
+
+Until the RPC is installed, the Finance UI is expected to display an unavailable-preview message. This is a safe failure state, not a successful integration test.
+
+## Locally checked arithmetic vectors
+
+Independent decimal arithmetic checks returned the expected basic-pay values for the seven fixed examples above: KSh 30,000; 28,000; 27,000; 20,000; 31,000; 28,000; and 29,000 respectively. This validates the examples' arithmetic only; it does not execute the SQL function or prove database behavior.
