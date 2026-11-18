@@ -120,13 +120,17 @@ begin
       coalesce((select h.monthly_salary from public.staff_salary_history h
         where h.staff_id=s.id and h.effective_from<=d::date
           and (h.effective_to is null or h.effective_to>=d::date)
-        order by h.effective_from desc,h.id desc limit 1),s.salary) day_salary
+        order by h.effective_from desc,h.id desc limit 1),s.salary) day_salary,
+      (select count(*) from public.staff_salary_history h
+        where h.staff_id=s.id and h.effective_from<=d::date
+          and (h.effective_to is null or h.effective_to>=d::date))>1 salary_history_overlap
     from eligible_staff s
     cross join lateral generate_series(s.eligible_from,s.eligible_to,interval '1 day') d
   ),
   policy_days as (
     select r.*,
       pol.id leave_policy_id,pol.is_paid leave_is_paid,pol.paid_day_limit,
+      coalesce(pol.policy_match_count,0)>1 leave_policy_overlap,
       case when r.leave_id is null then false
         when pol.id is null then false
         when not pol.is_paid then false
@@ -135,7 +139,11 @@ begin
       end leave_day_paid
     from raw_days r
     left join lateral (
-      select p.id,p.is_paid,p.paid_day_limit
+      select p.id,p.is_paid,p.paid_day_limit,
+        (select count(*) from public.payroll_leave_pay_policies px
+          where px.is_active and lower(px.leave_type)=lower(r.leave_type)
+            and px.effective_from<=r.pay_date
+            and (px.effective_to is null or px.effective_to>=r.pay_date)) policy_match_count
       from public.payroll_leave_pay_policies p
       where r.leave_id is not null and p.is_active
         and lower(p.leave_type)=lower(r.leave_type)
@@ -169,6 +177,8 @@ begin
       bool_or(d.day_salary is null or d.day_salary<=0) missing_salary,
       bool_or(d.missing_leave_policy) missing_leave_policy,
       bool_or(d.leave_overlap) overlapping_leave_requests,
+      bool_or(d.leave_policy_overlap) overlapping_leave_policies,
+      bool_or(d.salary_history_overlap) overlapping_salary_history,
       sum(case when d.is_paid_day then coalesce(d.day_salary,0)/v_days else 0 end) earned
     from day_calc d group by d.staff_id
   ),
@@ -185,8 +195,12 @@ begin
     case when coalesce(t.missing_salary,true)
         or coalesce(t.missing_leave_policy,false)
         or coalesce(t.overlapping_leave_requests,false)
+        or coalesce(t.overlapping_leave_policies,false)
+        or coalesce(t.overlapping_salary_history,false)
       then null else round(coalesce(t.earned,0),0) end,
     case when coalesce(t.overlapping_leave_requests,false) then 'overlapping_leave_requests'
+      when coalesce(t.overlapping_leave_policies,false) then 'overlapping_leave_policies'
+      when coalesce(t.overlapping_salary_history,false) then 'overlapping_salary_history'
       when coalesce(t.missing_salary,true) then 'salary_required'
       when coalesce(t.missing_leave_policy,false) then 'leave_policy_required'
       when t.paid_days=0 then 'no_eligible_paid_days'
