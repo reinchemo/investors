@@ -454,6 +454,7 @@
             <select id="statusFilter">
             <option value="">All statuses</option>
             <option value="assigned">Assigned</option>
+            <option value="pending">Pending</option>
             <option value="accepted">Accepted</option>
             <option value="in_progress">In Progress</option>
             <option value="awaiting_review">Awaiting Review</option>
@@ -981,7 +982,7 @@
 
                 let controls = "";
 
-                if (taskStatus === "assigned") {
+                if (taskStatus === "assigned" || taskStatus === "pending") {
 
                     controls = `
                 <button data-action="accept" data-id="${escapeHTML(taskId)}">
