@@ -2363,6 +2363,10 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     <select id="tskAssignee"></select>
                 </div>
                 <div>
+                    <label>Reviewer (Management)</label>
+                    <select id="tskReviewer"></select>
+                </div>
+                <div>
                     <label>Location</label>
                     <select id="tskLocation"></select>
                 </div>
@@ -12334,6 +12338,12 @@ function openTxnModal(txn = null) {
                     staff.filter(s => s.status === 'active').map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
             }
 
+            const reviewerSel = document.getElementById('tskReviewer');
+            if (reviewerSel) {
+                reviewerSel.innerHTML = '<option value="">— Default management review —</option>' +
+                    staff.filter(s => s.status === 'active').map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
+            }
+
             const locSel = document.getElementById('tskLocation');
             if (locSel) {
                 const active = locations.filter(l => l.active);
@@ -12371,6 +12381,7 @@ function openTxnModal(txn = null) {
                 setVal('tskCategory', t.categoryCode);
                 setVal('tskPriority', t.priority || 'normal');
                 setVal('tskAssignee', t.assigneeStaffId);
+                setVal('tskReviewer', t.reviewerStaffId);
                 setVal('tskLocation', t.locationId);
                 setVal('tskStartDate', t.startDate);
                 setVal('tskDeadline', t.deadline);
@@ -12383,6 +12394,7 @@ function openTxnModal(txn = null) {
                 setVal('tskCategory', '');
                 setVal('tskPriority', 'normal');
                 setVal('tskAssignee', '');
+                setVal('tskReviewer', '');
                 setVal('tskLocation', '');
                 setVal('tskStartDate', todayISO());
                 setVal('tskDeadline', '');
@@ -12407,6 +12419,8 @@ function openTxnModal(txn = null) {
             const priority = document.getElementById('tskPriority').value;
             const assigneeRaw = document.getElementById('tskAssignee').value;
             const assigneeStaffId = assigneeRaw ? parseInt(assigneeRaw, 10) : null;
+            const reviewerRaw = document.getElementById('tskReviewer').value;
+            const reviewerStaffId = reviewerRaw ? parseInt(reviewerRaw, 10) : null;
             const locationRaw = document.getElementById('tskLocation').value;
             const locationId = locationRaw ? parseInt(locationRaw, 10) : null;
             const startDate = document.getElementById('tskStartDate').value || null;
@@ -12443,7 +12457,7 @@ function openTxnModal(txn = null) {
                 const t = tasks.find(x => x.id === editingTaskId);
                 const upd = {
                     title, description: description || null, category_code: categoryCode,
-                    priority, assignee_staff_id: assigneeStaffId, location_id: locationId,
+                    priority, assignee_staff_id: assigneeStaffId, reviewer_staff_id: reviewerStaffId, location_id: locationId,
                     start_date: startDate, deadline,
                     instructions: instructions || null, expected_result: expectedResult || null,
                     notes: notes || null, updated_at: new Date().toISOString(),
@@ -12467,6 +12481,7 @@ function openTxnModal(txn = null) {
                     progress_pct: 0,
                     created_by: CURRENT_USER,
                     assignee_staff_id: assigneeStaffId,
+                    reviewer_staff_id: reviewerStaffId,
                     location_id: locationId,
                     start_date: startDate, deadline,
                     instructions: instructions || null,
