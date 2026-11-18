@@ -78,3 +78,4 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - The cancellation RPC rejects missing IDs and any request that has already been approved, rejected or cancelled.
 - Cancelling a pending override records the authenticated actor and timestamp; cancelled overrides do not affect preview earnings.
 - A pending override with a missing creator is rejected by both review and cancellation RPCs and requires manual audit.
+- Run `docs/payroll-preview-readonly-preflight.sql` in isolated staging after both payroll migrations; resolve all overlap/date anomalies and confirm the RPC grants before functional tests.
