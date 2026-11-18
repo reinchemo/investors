@@ -10201,30 +10201,20 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
 
                 wizardLines = preview.rows.map(row => {
                     const staffId = Number(row.staff_id);
-                    const approvedOvertime = overtimeEntries.filter(entry =>
-                        Number(entry.staffId) === staffId &&
-                        entry.status === 'approved' &&
-                        entry.period === period
-                    );
+                    const approvedOvertime = overtimeEntries.filter(entry => Number(entry.staffId) === staffId && entry.status === 'approved' && entry.period === period);
                     const overtimeAmount = approvedOvertime.reduce((sum, entry) => sum + safeNum(entry.amount), 0);
                     const overtimeHours = approvedOvertime.reduce((sum, entry) => sum + safeNum(entry.hours), 0);
+                    const hasUnpricedOvertime = approvedOvertime.some(entry => safeNum(entry.hours) > 0 && (entry.amount === null || entry.amount === undefined || !Number.isFinite(Number(entry.amount)) || Number(entry.amount) <= 0));
                     const basicPay = safeNum(row.calculated_basic_pay);
-                    return {
-                        staffId,
-                        employeeNumber: row.employee_number || '',
-                        fullName: row.employee_name || 'Unknown employee',
-                        role: (staff.find(person => Number(person.id) === staffId) || {}).role || '',
-                        locationId: (staff.find(person => Number(person.id) === staffId) || {}).locationId || null,
-                        salary: safeNum(row.monthly_salary),
-                        paidDays: safeNum(row.paid_days),
-                        basicPay,
-                        overtime: overtimeAmount,
-                        overtimeHours,
-                        amount: basicPay + overtimeAmount,
-                        include: basicPay + overtimeAmount > 0,
-                        hasSalary: safeNum(row.monthly_salary) > 0
-                    };
+                    const person = staff.find(item => Number(item.id) === staffId) || {};
+                    return { staffId, employeeNumber: row.employee_number || '', fullName: row.employee_name || 'Unknown employee', role: person.role || '', locationId: person.locationId || null, salary: safeNum(row.monthly_salary), paidDays: safeNum(row.paid_days), basicPay, overtime: overtimeAmount, overtimeHours, hasUnpricedOvertime, amount: basicPay + overtimeAmount, include: basicPay + overtimeAmount > 0, hasSalary: safeNum(row.monthly_salary) > 0 };
                 });
+                const unpricedOvertime = wizardLines.filter(line => line.hasUnpricedOvertime);
+                if (unpricedOvertime.length) {
+                    err.textContent = 'Approved overtime for ' + unpricedOvertime.map(line => line.fullName).join(', ') + ' has no valid approved amount. Set and approve the overtime rate/amount before creating payroll.';
+                    err.style.display = 'block';
+                    return;
+                }
                 setWizardStep(2);
             } else if (currentWizardStep === 2) {
                 const included = wizardLines.filter(l => l.include);
@@ -10255,7 +10245,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
         async function savePayrollDraft() {
             const period = document.getElementById('pwPeriod').value.trim();
             const runDate = document.getElementById('pwRunDate').value;
-            const notes = document.getElementById('pwNotes').value.trim();
+            const userNotes = document.getElementById('pwNotes').value.trim();
+            const notes = [userNotes, 'Draft calculated from approved paid days using the proposal payroll preview, plus separately approved overtime. Statutory deductions and additional adjustments are not included.'].filter(Boolean).join('\n');
             const included = wizardLines.filter(l => l.include);
             const total = included.reduce((s, l) => s + safeNum(l.amount), 0);
             const err = document.getElementById('pwError3');
@@ -10297,7 +10288,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 gross: safeNum(l.amount),
                 deductions: 0,
                 net: safeNum(l.amount),
-                notes: null
+                notes: 'Basic pay KSh ' + fmt(l.basicPay ?? l.amount) + ' for ' + fmt(l.paidDays ?? 0) + ' approved paid days; approved overtime KSh ' + fmt(l.overtime || 0) + ' for ' + fmt(l.overtimeHours || 0) + ' hours. Statutory deductions not included in this draft.'
             }));
 
             const { error: itemsErr } = await supabaseClient
