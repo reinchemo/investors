@@ -309,7 +309,7 @@ Deno.serve(async (req) => {
       const period = String(body?.period || "").trim();
       const hours = Number(body?.hours);
       const reason = String(body?.reason || "").trim();
-      if (!/^\\d{4}-(0[1-9]|1[0-2])$/.test(period)) {
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) {
         return jsonResponse({ error: "Select a valid payroll month." }, 400);
       }
       if (!Number.isFinite(hours) || hours < 0.25 || hours > 240) {
