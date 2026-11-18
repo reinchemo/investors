@@ -77,3 +77,4 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - The creator can cancel their own pending override through `cancel_payroll_day_override`; a Payroll editor can cancel another user's pending request.
 - The cancellation RPC rejects missing IDs and any request that has already been approved, rejected or cancelled.
 - Cancelling a pending override records the authenticated actor and timestamp; cancelled overrides do not affect preview earnings.
+- A pending override with a missing creator is rejected by both review and cancellation RPCs and requires manual audit.
