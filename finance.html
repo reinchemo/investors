@@ -10393,19 +10393,18 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
         async function approvePayrollRun(runId) {
             const r = payrollRuns.find(x => x.id === runId);
             if (!r) return;
-            if (!confirm(`Approve payroll for ${r.period}? Once approved, the run is locked and ready to post.`)) return;
+            if (!confirm(`Approve payroll for ${r.period}? The server will enforce the maker-checker rule and lock the run.`)) return;
 
-            const { error } = await supabaseClient
-                .from('payroll_runs')
-                .update({
-                    status: 'approved',
-                    approved_at: new Date().toISOString(),
-                    approved_by: CURRENT_USER
-                })
-                .eq('id', runId);
+            // Approval must go through the database RPC. A browser-side UPDATE
+            // bypasses the intended maker-checker workflow and can use a
+            // caller-supplied identity value.
+            const { error } = await supabaseClient.rpc('approve_payroll_run', {
+                p_run_id: runId
+            });
 
             if (error) {
                 showToast('Approve failed: ' + error.message, 'error');
+                console.error('Approve payroll error:', error);
                 return;
             }
 
