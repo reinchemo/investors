@@ -261,6 +261,9 @@ begin
   if v_override.status <> 'pending' then
     raise exception 'Only pending overrides can be reviewed';
   end if;
+  if v_override.created_by is null then
+    raise exception 'Override has no recorded creator; manual audit is required';
+  end if;
   if v_override.created_by = v_user then
     raise exception 'Maker-checker rule: the creator cannot review their own override';
   end if;
@@ -307,7 +310,10 @@ begin
   if v_override.status <> 'pending' then
     raise exception 'Only pending overrides can be cancelled';
   end if;
-  if v_override.created_by <> v_user
+  if v_override.created_by is null then
+    raise exception 'Override has no recorded creator; manual audit is required';
+  end if;
+  if v_override.created_by is distinct from v_user
      and not public.portal_management_can_edit('Payroll') then
     raise exception 'Only the creator or a Payroll editor can cancel a pending override';
   end if;
