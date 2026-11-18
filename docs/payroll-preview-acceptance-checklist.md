@@ -99,3 +99,25 @@ For a fixed monthly salary of KSh 30,000 and a 30-calendar-day month, the propos
 - Employment beginning on the 11th, with 20 eligible days remaining: KSh 20,000.
 
 These are arithmetic reference vectors only; they do not validate PostgreSQL execution, statutory deductions, RLS, or ledger posting.
+
+## Verified statutory configuration blockers (18 Nov 2026)
+
+The existing production function `kenya_payroll_statutory(numeric)` is not approved for the new payroll path yet. Read-only inspection found that it:
+- Applies a flat 6% NSSF calculation to gross up to KSh 108,000. The NSSF Year 4 notice effective February 2026 specifies a lower earnings limit of KSh 9,000 and upper earnings limit of KSh 108,000, with Tier 1 and Tier 2 contributions. The implementation must model the statutory tiers and the treatment of pay below the lower limit explicitly.
+- Applies a KSh 300 SHIF minimum to every positive gross amount. KRA's current SHIF calculator states KSh 300 for gross monthly income KSh 0–5,999 and 2.75% for KSh 6,000 and above. The current function therefore needs correction around the threshold.
+- Does not accept employee-specific tax reliefs/deductions or a dated statutory configuration, so the output must not be treated as a final payslip/tax liability.
+
+Before enabling statutory net pay, add effective-dated configuration and tests for:
+- NSSF Year 4 (2026) Tier 1 lower limit KSh 9,000, Tier 2 upper limit KSh 108,000, 6% employee and employer rates, and the exact treatment of earnings below the lower limit.
+- SHIF: KSh 300 below KSh 6,000; 2.75% at KSh 6,000 and above.
+- PAYE bands and personal relief as published by KRA, plus allowable deductions/reliefs (including SHIF and Affordable Housing Levy) with employee-specific eligibility.
+- Affordable Housing Levy: 1.5% employee and 1.5% employer contribution.
+- Effective dates, rounding, taxable benefit/allowance treatment, and employee tax-residency/relief profile.
+
+Official reference points checked:
+- NSSF, Notice to Employers — Year 4 (2026): https://www.nssf.or.ke/notice-to-employers-year-4-2026-nssf-contribution-rates/
+- KRA, PAYE rates and relief: https://www.kra.go.ke/individual/filing-paying/types-of-taxes/paye
+- KRA, SHIF calculator: https://ecitizen.kra.go.ke/calculators/nhif-shif-calculators
+- KRA, Affordable Housing Levy: https://www.kra.go.ke/news-center/public-notices/2099-collection-of-the-affordable-housing-levy
+
+These are source checks, not payroll-adviser sign-off. Do not use the existing hard-coded statutory function to create or approve live payroll until the configuration and test cases above are implemented and reviewed.
