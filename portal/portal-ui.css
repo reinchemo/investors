@@ -63,3 +63,120 @@ img, svg { max-width: 100%; }
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Shared layout refinements for the small STARLINK team. */
+:root {
+  --portal-radius: 16px;
+  --portal-border: rgba(148, 174, 215, .16);
+  --portal-surface: rgba(17, 26, 45, .92);
+}
+body {
+  line-height: 1.55;
+}
+.layout {
+  width: min(1200px, 100%);
+  margin-inline: auto;
+}
+h1, h2, h3, h4 {
+  letter-spacing: -.025em;
+}
+button, .btn, .submit, .action-btn, a.button {
+  min-height: 40px;
+}
+.card, .panel, .stat-card, .stat, .notice {
+  border-radius: var(--portal-radius);
+  border-color: var(--portal-border);
+}
+input, select, textarea {
+  max-width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+}
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+table th {
+  white-space: nowrap;
+}
+table td {
+  vertical-align: middle;
+}
+.tablewrap, .table-wrap, .table-responsive {
+  border-radius: 12px;
+  overscroll-behavior-x: contain;
+}
+.badge, .pill, .status, .status-badge {
+  white-space: nowrap;
+}
+.empty, .empty-state {
+  padding: 24px 16px;
+  text-align: center;
+  color: #a6b6cc;
+}
+:focus-visible {
+  scroll-margin-block: 100px;
+}
+@media (max-width: 900px) {
+  .layout {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+@media (max-width: 640px) {
+  .layout {
+    padding: 16px 12px 28px;
+  }
+  .hero, .header, .page-header {
+    border-radius: 16px;
+  }
+  .hero {
+    padding: 20px 17px;
+  }
+  .hero h1, .header h1 {
+    font-size: clamp(21px, 6vw, 28px);
+  }
+  .grid, .stats, .stat-grid, .cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .card, .panel, .stat-card, .stat {
+    min-width: 0;
+    padding: 14px;
+  }
+  .actions, .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .actions > button, .header-actions > button {
+    flex: 1 1 auto;
+  }
+  .topbar {
+    padding-inline: 14px;
+    min-height: 64px;
+    height: auto;
+    gap: 10px;
+  }
+  .tablewrap, .table-wrap, .table-responsive {
+    margin-inline: 0;
+  }
+  table {
+    min-width: 560px;
+  }
+  .modal, .modal-card, .dialog {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+}
+@media (max-width: 380px) {
+  .grid, .stats, .stat-grid, .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
