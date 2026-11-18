@@ -127,7 +127,7 @@ begin
         when pol.id is null then false
         when not pol.is_paid then false
         when pol.paid_day_limit is null then true
-        else count(*) filter (where pol.is_paid) over(partition by r.leave_id order by r.pay_date rows between unbounded preceding and current row)<=pol.paid_day_limit
+        else count(*) filter (where pol.is_paid and not r.is_sunday and not r.is_holiday) over(partition by r.leave_id order by r.pay_date rows between unbounded preceding and current row)<=pol.paid_day_limit
       end leave_day_paid
     from raw_days r
     left join lateral (
@@ -145,8 +145,8 @@ begin
       case
         when p.override_treatment='unpaid_absence' then false
         when p.override_treatment='paid' then true
-        when p.leave_id is not null then p.leave_day_paid
         when p.is_sunday or p.is_holiday then true
+        when p.leave_id is not null then p.leave_day_paid
         when p.has_attendance then true
         else false
       end is_paid_day,
@@ -159,7 +159,7 @@ begin
       count(*) filter(where d.has_attendance)::bigint attendance_days,
       count(*) filter(where d.is_paid_day and d.is_sunday)::bigint paid_sundays,
       count(*) filter(where d.is_paid_day and d.is_holiday)::bigint paid_holidays,
-      count(*) filter(where d.is_paid_day and d.leave_id is not null)::bigint paid_leave,
+      count(*) filter(where d.is_paid_day and d.leave_id is not null and not d.is_sunday and not d.is_holiday)::bigint paid_leave,
       count(*) filter(where d.override_treatment='unpaid_absence')::bigint unpaid_absence,
       bool_or(d.day_salary is null or d.day_salary<=0) missing_salary,
       bool_or(d.missing_leave_policy) missing_leave_policy,
