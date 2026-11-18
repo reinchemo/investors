@@ -14,9 +14,11 @@ create table if not exists public.payroll_public_holidays (
   created_at timestamptz not null default now(),
   created_by uuid references auth.users(id),
   updated_at timestamptz,
-  updated_by uuid references auth.users(id),
-  unique (holiday_date, country_code, coalesce(region, ''))
+  updated_by uuid references auth.users(id)
 );
+
+create unique index if not exists payroll_public_holidays_unique_scope_idx
+  on public.payroll_public_holidays (holiday_date, country_code, coalesce(region, ''));
 
 create index if not exists payroll_public_holidays_active_date_idx
   on public.payroll_public_holidays (holiday_date)
