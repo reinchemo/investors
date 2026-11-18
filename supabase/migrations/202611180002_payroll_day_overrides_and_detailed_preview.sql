@@ -211,11 +211,16 @@ begin
 end;
 $function$;
 
+revoke all on function public.payroll_month_preview_v2(text) from public;
+grant execute on function public.payroll_month_preview_v2(text) to authenticated;
+
 comment on function public.payroll_month_preview_v2(text) is
 'Detailed proposal-aligned payroll preview. Monday-Saturday require approved attendance; Sundays and configured public holidays are paid unless an approved unpaid_absence override exists. Approved paid leave follows effective-dated policy and paid-day limits. No statutory deductions or ledger posting are performed.';
 
--- Approval is performed through a controlled RPC, not direct table updates.
+-- Only controlled RPCs may change or cancel overrides. Direct table
+-- UPDATE/DELETE would bypass the audit and maker-checker workflow.
 drop policy if exists payroll_day_overrides_update on public.payroll_day_overrides;
+drop policy if exists payroll_day_overrides_delete on public.payroll_day_overrides;
 drop policy if exists payroll_day_overrides_insert on public.payroll_day_overrides;
 create policy payroll_day_overrides_insert on public.payroll_day_overrides
   for insert to authenticated
