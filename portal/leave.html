@@ -470,7 +470,7 @@
                 <div class="stat-value cyan" id="allowance">—</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Approved Leave Days</div>
+                <div class="stat-label">Approved Annual Leave Used</div>
                 <div class="stat-value green" id="usedDays">—</div>
             </div>
             <div class="stat">
@@ -560,7 +560,7 @@
         let leaveRecords = [];
 
         function safe(value) {
-            return String(value ? ? "").replace(/[&<>"']/g, char => ({
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
                 "&": "&amp;",
                 "<": "&lt;",
                 ">": "&gt;",
@@ -586,8 +586,13 @@
         }
 
         function updateSummary() {
+            // The annual allowance applies to annual leave only. Sick, unpaid,
+            // maternity, paternity and other leave must not reduce this balance.
             const approved = leaveRecords
-                .filter(record => record.status === "approved")
+                .filter(record =>
+                    record.status === "approved" &&
+                    String(record.leave_type || "").toLowerCase() === "annual"
+                )
                 .reduce((sum, record) => sum + Number(record.days || 0), 0);
 
             const pending = leaveRecords
