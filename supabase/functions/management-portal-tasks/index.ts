@@ -228,7 +228,7 @@ Deno.serve(async (req: Request) => {
             // Find the task
             const taskResult = await admin
                 .from("tasks")
-                .select("id,title,status,assignee_staff_id")
+                .select("id,title,status,assignee_staff_id,reviewer_staff_id")
                 .eq("id", taskId)
                 .is("deleted_at", null)
                 .maybeSingle();
@@ -279,6 +279,21 @@ Deno.serve(async (req: Request) => {
                         error: "You cannot review a task assigned to yourself."
                     }, 403);
                 }
+            }
+
+            // If management designated a reviewer, only that staff-linked
+            // management account may approve or reject this task.
+            if (
+                task.reviewer_staff_id !== null &&
+                (
+                    managerStaffResult.data === null ||
+                    String(managerStaffResult.data) !== String(task.reviewer_staff_id)
+                )
+            ) {
+                return response({
+                    success: false,
+                    error: "This task is assigned to a different designated reviewer."
+                }, 403);
             }
 
             // =====================================
