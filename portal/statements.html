@@ -516,6 +516,11 @@
             </div>
 
             <div class="stat-card">
+                <div class="stat-label">Declared / Unpaid Dividends</div>
+                <div class="stat-value purple" id="pendingDividends">KES 0.00</div>
+            </div>
+
+            <div class="stat-card">
                 <div class="stat-label">Recorded Activities</div>
                 <div class="stat-value purple" id="activityCount">0</div>
             </div>
@@ -703,6 +708,7 @@
                         description: item.period || "Dividend distribution",
                         reference: `Dividend #${item.dividend_id || "allocation"}`,
                         amount: Number(item.amount || 0),
+                        status: String(item.status || "").toLowerCase(),
                         notes: String(item.status).toLowerCase() === "paid" ? "Paid dividend allocation" : "Declared allocation — awaiting payment"
                     });
                 });
@@ -733,12 +739,17 @@
                 .filter(item => item.category === "investment")
                 .reduce((sum, item) => sum + item.amount, 0);
 
-            const dividends = activities
-                .filter(item => item.category === "dividend")
+            const paidDividends = activities
+                .filter(item => item.category === "dividend" && item.status === "paid")
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            const pendingDividends = activities
+                .filter(item => item.category === "dividend" && item.status !== "paid")
                 .reduce((sum, item) => sum + item.amount, 0);
 
             document.getElementById("totalInvestments").textContent = money(investments);
-            document.getElementById("totalDividends").textContent = money(dividends);
+            document.getElementById("totalDividends").textContent = money(paidDividends);
+            document.getElementById("pendingDividends").textContent = money(pendingDividends);
             document.getElementById("activityCount").textContent = activities.length;
         }
 
