@@ -104,12 +104,12 @@ These are arithmetic reference vectors only; they do not validate PostgreSQL exe
 
 The existing production function `kenya_payroll_statutory(numeric)` is not approved for the new payroll path yet. Read-only inspection found that it:
 - Applies 6% to gross pay capped at KSh 108,000. This produces a maximum employee contribution of KSh 6,480 (Tier 1: KSh 540 on KSh 9,000; Tier 2: KSh 5,940 on the next KSh 99,000) and the same employer contribution under the NSSF Year 4 notice effective February 2026. The arithmetic is equivalent for ordinary monthly pensionable pay within the limits, but the implementation should make the tiers, pensionable-pay basis, partial-period handling and pay-below-limit treatment explicit and testable.
-- Applies a KSh 300 SHIF minimum to every positive gross amount. KRA's current SHIF calculator states KSh 300 for gross monthly income KSh 0–5,999 and 2.75% for KSh 6,000 and above. The current function therefore needs correction around the threshold.
+- Applies a KSh 300 SHIF minimum to every positive gross amount. The applicable minimum/threshold treatment must be confirmed against the current authoritative SHA/KRA guidance before changing the formula; secondary summaries are inconsistent. Do not assume that KSh 6,000 is a threshold without validating the official calculator and applicable legal instrument.
 - Does not accept employee-specific tax reliefs/deductions or a dated statutory configuration, so the output must not be treated as a final payslip/tax liability.
 
 Before enabling statutory net pay, add effective-dated configuration and tests for:
 - NSSF Year 4 (2026) Tier 1 lower limit KSh 9,000, Tier 2 upper limit KSh 108,000, 6% employee and employer rates, and the exact treatment of earnings below the lower limit.
-- SHIF: KSh 300 for gross monthly income KSh 0–5,999; 2.75% for KSh 6,000 and above. Test KSh 5,999, KSh 6,000 and KSh 6,001.
+- SHIF: confirm the statutory minimum and calculation threshold from current authoritative SHA/KRA guidance before implementation. Once verified, test values immediately below, at, and above the confirmed threshold.
 - PAYE bands: 10% on first KSh 24,000; 25% on next KSh 8,333; 30% on next KSh 467,667; 32.5% on next KSh 300,000; 35% above KSh 800,000. Personal relief KSh 2,400/month applies to resident individuals. Apply eligible deductions (including SHIF and AHL) and employee-specific insurance/pension/mortgage relief only where supported by verified payroll records.
 - Affordable Housing Levy: 1.5% employee and 1.5% employer contribution.
 - Effective dates, rounding, taxable benefit/allowance treatment, and employee tax-residency/relief profile.
@@ -126,7 +126,7 @@ These are source checks, not payroll-adviser sign-off. Do not use the existing h
 ## Statutory boundary test vectors
 
 - NSSF Year 4: KSh 9,000 pensionable earnings gives KSh 540 employee and KSh 540 employer; KSh 15,000 gives KSh 900 each; KSh 108,000 or more gives KSh 6,480 each (subject to the current official framework and pensionable-pay rules).
-- SHIF: KSh 5,999 gives KSh 300; KSh 6,000 gives KSh 165 under the 2.75% rule; KSh 6,001 gives KSh 165.03. Confirm KRA's calculator's boundary treatment before production use.
+- SHIF boundary vectors remain unresolved. Do not encode the KSh 5,999 / KSh 6,000 / KSh 6,001 expected amounts until the authoritative minimum/threshold treatment is confirmed.
 - Housing Levy: KSh 30,000 eligible gross monthly pay gives KSh 450 employee and KSh 450 employer.
 - PAYE must be calculated after only the deductions allowed by current KRA guidance and with resident/non-resident relief eligibility handled separately. Do not apply KSh 2,400 personal relief to every employee by default.
 
