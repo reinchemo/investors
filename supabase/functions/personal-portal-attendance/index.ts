@@ -123,6 +123,25 @@ Deno.serve(async (req) => {
         }, 400);
       }
 
+      // Do not allow a second shift to start while a recent shift is still open.
+      // This also prevents an overnight shift from being abandoned at midnight.
+      const { data: openShift, error: openShiftError } = await admin
+        .from("attendance")
+        .select("id, date, check_in")
+        .eq("staff_id", staffId)
+        .is("check_out", null)
+        .order("check_in", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (openShiftError) throw openShiftError;
+      if (openShift) {
+        return response({
+          error: `You still have an open shift from ${openShift.date}. Check out of that shift before starting another.`,
+          attendance_id: openShift.id,
+        }, 409);
+      }
+
       const { data: existing, error: lookupError } = await admin
         .from("attendance")
         .select("id, check_in")
@@ -171,29 +190,26 @@ Deno.serve(async (req) => {
 
     // EMPLOYEE: CHECK OUT
     if (action === "check_out") {
-      const { hour, minute } = now;
-
-      if (hour === 23 && minute >= 59) {
-        return response({
-          error: "The attendance cut-off has passed. Submit a correction request."
-        }, 400);
-      }
-
+      // Check-out is allowed after midnight for a valid overnight shift.
+      // The daily 11:59 PM submission cut-off applies to starting today's
+      // attendance, not to closing a shift that began before midnight.
       const { data: record, error: lookupError } = await admin
         .from("attendance")
         .select("*")
         .eq("staff_id", staffId)
-        .eq("date", now.date)
+        .is("check_out", null)
+        .order("check_in", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (lookupError) throw lookupError;
 
       if (!record || !record.check_in) {
-        return response({ error: "Check in before checking out." }, 400);
+        return response({ error: "No open shift was found. Check in before checking out." }, 400);
       }
 
-      if (record.check_out) {
-        return response({ error: "You have already checked out." }, 409);
+      if (new Date(now.timestamp).getTime() <= new Date(record.check_in).getTime()) {
+        return response({ error: "Check-out time must be after check-in time." }, 400);
       }
 
       const { data, error } = await admin
