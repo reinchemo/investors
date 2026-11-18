@@ -68,3 +68,7 @@ This preview is not a statutory net-pay calculator, payslip generator, payroll r
 - An unpaid leave policy on a weekday does not turn a Sunday or public holiday into an unpaid day.
 - An approved leave interval containing only Sundays/public holidays does not require a leave-pay policy for those calendar dates and does not block the preview.
 - Two overlapping approved leave requests for the same employee/date block the preview with `overlapping_leave_requests`; the system must not silently choose one request.
+- Override creation records the authenticated creator and starts in pending status; clients cannot submit pre-approved overrides.
+- Only a different Payroll editor can approve/reject a pending override through `review_payroll_day_override`; the creator cannot approve their own request.
+- Direct authenticated table updates and deletes are denied so approval metadata and audit history cannot be rewritten or erased through the table API.
+- The review RPC rejects invalid decisions and attempts to review an override that is no longer pending.
