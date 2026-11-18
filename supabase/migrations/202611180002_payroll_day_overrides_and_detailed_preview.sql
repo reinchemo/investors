@@ -243,7 +243,7 @@ begin
   if v_user is null then
     raise exception 'Authentication required';
   end if;
-  if p_decision not in ('approved','rejected') then
+  if p_decision is null or p_decision not in ('approved','rejected') then
     raise exception 'Decision must be approved or rejected';
   end if;
   if not public.portal_management_can_edit('Payroll') then
