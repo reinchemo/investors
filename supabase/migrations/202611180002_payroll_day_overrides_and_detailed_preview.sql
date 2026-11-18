@@ -29,7 +29,7 @@ alter table public.payroll_day_overrides enable row level security;
 drop policy if exists payroll_day_overrides_select on public.payroll_day_overrides;
 create policy payroll_day_overrides_select on public.payroll_day_overrides
   for select to authenticated
-  using (portal_account_is_active() or portal_management_can_view('Payroll'));
+  using (portal_management_can_view('Payroll'));
 drop policy if exists payroll_day_overrides_insert on public.payroll_day_overrides;
 create policy payroll_day_overrides_insert on public.payroll_day_overrides
   for insert to authenticated
@@ -99,7 +99,7 @@ begin
     select s.id staff_id,d::date pay_date,
       extract(isodow from d)::integer=7 is_sunday,
       exists(select 1 from public.payroll_public_holidays h
-        where h.is_active and h.country_code='KE' and h.holiday_date=d::date) is_holiday,
+        where h.is_active and h.country_code='KE' and h.region is null and h.holiday_date=d::date) is_holiday,
       exists(select 1 from public.attendance at
         where at.staff_id=s.id and at.date=d::date and at.status='approved') has_attendance,
       (select lr.id from public.leave_requests lr
