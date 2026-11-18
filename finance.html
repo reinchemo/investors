@@ -10320,7 +10320,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 actHtml += `<button class="btn btn-primary" style="background:linear-gradient(135deg,#1a7a4a,#22a05c); border-color:rgba(120,255,180,0.3);" onclick="postPayrollRun(${r.id})"><i class="fas fa-check-double"></i> Post to Ledger</button>`;
                 actHtml += `<button class="btn btn-ghost" style="color:#f0a89f; border-color:rgba(226,104,91,0.4);" onclick="cancelPayrollRun(${r.id})"><i class="fas fa-ban"></i> Cancel</button>`;
             } else if (r.status === 'posted') {
-                actHtml += `<div style="font-size:0.82rem; color:#7ee0a2; padding:0.5rem 0.8rem;"><i class="fas fa-check-circle"></i> Posted. Ledger rows created. To reverse, cancel this run.</div>`;
+                actHtml += `<div style="font-size:0.82rem; color:#7ee0a2; padding:0.5rem 0.8rem;"><i class="fas fa-check-circle"></i> Posted to ledger. Employee payment must be recorded separately.</div>`;
+                actHtml += `<button class="btn btn-primary" onclick="recordPayrollPayment(${r.id})"><i class="fas fa-money-bill-wave"></i> Record Employee Payments</button>`;
                 actHtml += `<button class="btn btn-ghost" style="color:#f0a89f; border-color:rgba(226,104,91,0.4);" onclick="cancelPayrollRun(${r.id})"><i class="fas fa-undo"></i> Reverse & Cancel</button>`;
             } else if (r.status === 'cancelled') {
                 actHtml += `<div style="font-size:0.82rem; color:#f0a89f; padding:0.5rem 0.8rem;"><i class="fas fa-ban"></i> Cancelled. Create a new run for this period if needed.</div>`;
@@ -10370,19 +10371,6 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 p_user: CURRENT_USER
             });
 
-            if (!error) {
-                // NEW: Sync the unified payments table to 'paid'
-                // This makes them show up as PAID in the Equity App's Payments tab
-                await supabaseClient
-                    .from('payroll_payments')
-                    .update({ 
-                        status: 'paid', 
-                        status_updated_at: new Date().toISOString(),
-                        status_updated_by: CURRENT_USER
-                    })
-                    .eq('payroll_run_id', runId);
-            }
-
             if (error) {
                 showToast('Post failed: ' + error.message, 'error');
                 console.error('Post payroll error:', error);
@@ -10394,6 +10382,61 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             openPayrollDetail(runId);
             showToast('✅ Payroll posted to ledger', 'success');
         }
+
+        async function recordPayrollPayment(runId) {
+            const r = payrollRuns.find(x => x.id === runId);
+            if (!r || r.status !== 'posted') return;
+
+            const method = prompt('Payment method (e.g. M-Pesa, bank, cash):', 'M-Pesa');
+            if (method === null) return;
+            if (!method.trim()) {
+                showToast('Enter a payment method.', 'error');
+                return;
+            }
+            const reference = prompt('Payment reference / transaction code (optional):', '');
+            if (reference === null) return;
+
+            const { data: pendingRows, error: readError } = await supabaseClient
+                .from('payroll_payments')
+                .select('id')
+                .eq('payroll_run_id', String(runId))
+                .eq('status', 'pending');
+
+            if (readError) {
+                showToast('Could not load pending payroll payments: ' + readError.message, 'error');
+                return;
+            }
+            if (!pendingRows || !pendingRows.length) {
+                showToast('There are no pending payments for this payroll run.', 'info');
+                return;
+            }
+            if (!confirm('Record ' + pendingRows.length + ' employee payment(s) as paid? Only do this after the money has actually been sent.')) return;
+
+            const { error } = await supabaseClient
+                .from('payroll_payments')
+                .update({
+                    status: 'paid',
+                    payment_method: method.trim(),
+                    reference: reference.trim() || null,
+                    status_updated_at: new Date().toISOString(),
+                    status_updated_by: CURRENT_USER,
+                    updated_at: new Date().toISOString(),
+                    updated_by: CURRENT_USER
+                })
+                .eq('payroll_run_id', String(runId))
+                .eq('status', 'pending');
+
+            if (error) {
+                showToast('Payment recording failed: ' + error.message, 'error');
+                return;
+            }
+
+            await loadPayrollFromCloud();
+            openPayrollDetail(runId);
+            showToast('Payment status recorded. Confirm the bank/M-Pesa transaction separately.', 'success');
+        }
+
+        window.recordPayrollPayment = recordPayrollPayment;
 
         async function cancelPayrollRun(runId) {
             const r = payrollRuns.find(x => x.id === runId);
