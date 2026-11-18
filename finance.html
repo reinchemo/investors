@@ -3684,7 +3684,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     <h1><i class="fas fa-users-cog" style="color:#5fc7bc;"></i> People &amp; Operations <small id="opsRangeLabel">This month</small></h1>
                     <div style="display:flex;gap:.45rem;flex-wrap:wrap;">
                         <button class="btn btn-ghost" type="button" onclick="renderOperationsReport()"><i class="fas fa-sync"></i> Refresh</button>
-                        <button class="btn btn-ghost" type="button" onclick="exportOperationsReportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        <button id="opsExportBtn" class="btn btn-ghost" type="button" onclick="exportOperationsReportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
                         <button class="btn btn-ghost" type="button" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
                     </div>
                 </div>
@@ -3706,8 +3706,8 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 <div class="table-section" style="margin-bottom:1rem;">
                     <div class="table-section-header"><h4><i class="fas fa-tasks" style="color:#5fc7bc;margin-right:.4rem;"></i> Task Assignment &amp; Review</h4></div>
                     <div class="table-wrap"><table class="data-table">
-                        <thead><tr><th>Employee</th><th style="text-align:right;">Assigned</th><th style="text-align:right;">In progress</th><th style="text-align:right;">Awaiting review</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Rejected</th><th style="text-align:right;">Overdue</th></tr></thead>
-                        <tbody id="opsTaskBody"><tr><td colspan="7">Open this report to load data.</td></tr></tbody>
+                        <thead><tr><th>Employee</th><th style="text-align:right;">Assigned</th><th style="text-align:right;">In progress</th><th style="text-align:right;">Awaiting review</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Completed</th><th style="text-align:right;">Rejected</th><th style="text-align:right;">Overdue</th></tr></thead>
+                        <tbody id="opsTaskBody"><tr><td colspan="8">Open this report to load data.</td></tr></tbody>
                     </table></div>
                 </div>
                 <div class="table-section" style="margin-bottom:1rem;">
@@ -9404,6 +9404,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const mayAttendance = can('view', 'Attendance');
             const mayPayroll = can('view', 'Payroll');
             const mayNames = can('view', 'Staff');
+            const exportButton = document.getElementById('opsExportBtn');
+            if (exportButton) exportButton.style.display = (can('export', 'Reports') || window.IS_FULL_ADMIN) ? 'inline-flex' : 'none';
             const rangeLabel = (range.from || 'All time') + ' → ' + (range.to || 'Today');
             document.getElementById('opsRangeLabel').textContent = rangeLabel;
             notice.textContent = 'Read-only report. Only data permitted by your assigned module permissions is included.';
@@ -9459,12 +9461,13 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const taskGroups = {};
             taskRows.forEach(task => {
                 const key = task.assigneeStaffId ? String(task.assigneeStaffId) : 'unassigned';
-                if (!taskGroups[key]) taskGroups[key] = { assigned: 0, inProgress: 0, review: 0, approved: 0, rejected: 0, overdue: 0 };
+                if (!taskGroups[key]) taskGroups[key] = { assigned: 0, inProgress: 0, review: 0, approved: 0, completed: 0, rejected: 0, overdue: 0 };
                 const g = taskGroups[key];
                 g.assigned++;
                 if (task.status === 'in_progress') g.inProgress++;
                 if (task.status === 'awaiting_review') g.review++;
-                if (task.status === 'approved' || task.status === 'completed') g.approved++;
+                if (task.status === 'approved') g.approved++;
+                if (task.status === 'completed') g.completed++;
                 if (task.status === 'rejected') g.rejected++;
                 if (task.deadline && task.deadline < range.to && !['approved','completed','cancelled','rejected'].includes(task.status)) g.overdue++;
             });
@@ -9473,9 +9476,9 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 return '<tr><td>' + escapeHTML(id === 'unassigned' ? 'Unassigned' : operationsStaffLabel(id, mayNames)) + '</td>' +
                     '<td style="text-align:right;">' + g.assigned + '</td><td style="text-align:right;">' + g.inProgress +
                     '</td><td style="text-align:right;">' + g.review + '</td><td style="text-align:right;">' + g.approved +
-                    '</td><td style="text-align:right;">' + g.rejected + '</td><td style="text-align:right;">' + g.overdue + '</td></tr>';
+                    '</td><td style="text-align:right;">' + g.completed + '</td><td style="text-align:right;">' + g.rejected + '</td><td style="text-align:right;">' + g.overdue + '</td></tr>';
             }).join('');
-            document.getElementById('opsTaskBody').innerHTML = mayTasks && taskGroupHtml ? taskGroupHtml : '<tr><td colspan="7" class="empty-row">No task records in this period, or Tasks access is not assigned.</td></tr>';
+            document.getElementById('opsTaskBody').innerHTML = mayTasks && taskGroupHtml ? taskGroupHtml : '<tr><td colspan="8" class="empty-row">No task records in this period, or Tasks access is not assigned.</td></tr>';
 
             const attendanceGroups = {};
             attendanceRows.forEach(row => {
@@ -9526,19 +9529,20 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 return;
             }
             const snap = operationsReportSnapshot;
-            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Rejected','Overdue','Attendance Records','Gross','Deductions','Net']];
+            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Completed','Rejected','Overdue','Attendance Records','Gross','Deductions','Net']];
             const taskGroups = {};
             snap.tasks.forEach(task => {
                 const key = task.assigneeStaffId ? String(task.assigneeStaffId) : 'Unassigned';
-                if (!taskGroups[key]) taskGroups[key] = { assigned:0, inProgress:0, review:0, approved:0, rejected:0, overdue:0 };
+                if (!taskGroups[key]) taskGroups[key] = { assigned:0, inProgress:0, review:0, approved:0, completed:0, rejected:0, overdue:0 };
                 const g = taskGroups[key]; g.assigned++;
                 if (task.status === 'in_progress') g.inProgress++;
                 if (task.status === 'awaiting_review') g.review++;
-                if (task.status === 'approved' || task.status === 'completed') g.approved++;
+                if (task.status === 'approved') g.approved++;
+                if (task.status === 'completed') g.completed++;
                 if (task.status === 'rejected') g.rejected++;
                 if (task.deadline && task.deadline < todayISO() && !['approved','completed','cancelled','rejected'].includes(task.status)) g.overdue++;
             });
-            Object.keys(taskGroups).forEach(name => { const g=taskGroups[name]; rows.push(['Tasks',name,'',g.assigned,g.inProgress,g.review,g.approved,g.rejected,g.overdue,'','','','']); });
+            Object.keys(taskGroups).forEach(name => { const g=taskGroups[name]; rows.push(['Tasks',name,'',g.assigned,g.inProgress,g.review,g.approved,g.completed,g.rejected,g.overdue,'','','','']); });
             const attendance = {};
             snap.attendance.forEach(row => { const key=String(row.staff_id); attendance[key]=(attendance[key]||0)+1; });
             Object.keys(attendance).forEach(name => rows.push(['Attendance','Staff #'+name,'', '', '', '', '', '', '',attendance[name],'','','']));
