@@ -1,11 +1,16 @@
-name: Deploy Personal Portal to GitHub Pages
+name: Deploy STARLINK to GitHub Pages
 
 on:
   push:
     branches: [master]
     paths:
+      - "*.html"
+      - "*.js"
+      - "*.jpg"
+      - "*.png"
+      - "*.svg"
+      - "*.ico"
       - "portal/**"
-      - "login.html"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -25,36 +30,21 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Prepare portal-only static site
+      - name: Prepare complete static site
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p _site/portal
-          cp login.html _site/login.html
-          cp portal/attendance.html portal/dashboard.html portal/dividends.html portal/earnings.html portal/investments.html portal/leave.html portal/notifications.html portal/overtime.html portal/payments.html portal/payslips.html portal/profile.html portal/security.html portal/statements.html portal/tasks.html portal/portal-ui.css _site/portal/
+          cp index.html login.html finance.html admin.html communication.html _site/
+          cp logo.jpg stamp.jpg _site/
+          cp mpesa-parser.js router.js _site/
+          cp portal/*.html portal/*.css _site/portal/
           touch _site/.nojekyll
-          cat > _site/index.html <<'EOF'
-          <!doctype html>
-          <html lang="en">
-          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="0;url=login.html"><title>STARLINK Personal Portal</title></head>
-          <body><p>Opening <a href="login.html">STARLINK Personal Portal</a>…</p></body>
-          </html>
-          EOF
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("_site/login.html")
-          s = p.read_text()
-          old = 'window.location.replace("index.html");'
-          new = 'showError("The management system is not hosted on this Personal Portal site. Please use the management system URL."); return;'
-          if old not in s:
-              raise SystemExit("Expected management redirect was not found; refusing to publish an unverified login page.")
-          p.write_text(s.replace(old, new, 1))
-          PY
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload portal site
+      - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
