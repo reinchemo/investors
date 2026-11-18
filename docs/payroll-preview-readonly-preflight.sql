@@ -62,7 +62,11 @@ having count(*) > 1;
 -- 6) Confirm the two RPCs are executable by authenticated and not PUBLIC.
 select p.proname,
        has_function_privilege('authenticated', p.oid, 'EXECUTE') as authenticated_can_execute,
-       has_function_privilege('public', p.oid, 'EXECUTE') as public_can_execute
+       exists (
+         select 1
+         from aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) acl
+         where acl.grantee = 0 and acl.privilege_type = 'EXECUTE'
+       ) as public_can_execute
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
