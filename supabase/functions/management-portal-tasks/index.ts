@@ -108,6 +108,15 @@ Deno.serve(async (req: Request) => {
                 }, 403);
             }
 
+            const managerStaffResult = await userClient.rpc("portal_my_staff_id");
+
+            if (managerStaffResult.error) {
+                return response({
+                    success: false,
+                    error: "Unable to verify your management identity."
+                }, 500);
+            }
+
             const tasksResult = await admin
                 .from("tasks")
                 .select(`
@@ -142,9 +151,19 @@ Deno.serve(async (req: Request) => {
                 }, 500);
             }
 
+            // Only show tasks assigned to this reviewer, plus tasks using
+            // the default management review queue. Do not expose another
+            // reviewer's submissions in an individual's queue.
+            const visibleTasks = (tasksResult.data || []).filter((task: any) =>
+                task.reviewer_staff_id === null
+                    ? true
+                    : managerStaffResult.data !== null &&
+                      String(task.reviewer_staff_id) === String(managerStaffResult.data)
+            );
+
             const staffIds = Array.from(new Set(
-                (tasksResult.data || [])
-                    .map((task: any) => task.assignee_staff_id)
+                visibleTasks
+                    .flatMap((task: any) => [task.assignee_staff_id, task.reviewer_staff_id])
                     .filter((id: number | null) => id !== null)
             ));
 
@@ -170,9 +189,10 @@ Deno.serve(async (req: Request) => {
                 }
             }
 
-            const tasks = (tasksResult.data || []).map((task: any) => ({
+            const tasks = visibleTasks.map((task: any) => ({
                 ...task,
-                employee: staffMap[String(task.assignee_staff_id)] || null
+                employee: staffMap[String(task.assignee_staff_id)] || null,
+                designatedReviewer: staffMap[String(task.reviewer_staff_id)] || null
             }));
 
             return response({
