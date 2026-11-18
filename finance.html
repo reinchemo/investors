@@ -2559,7 +2559,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             <!-- Step 2 -->
             <div class="wizard-body" data-pw-body="2">
                 <p style="color:#7f9bb8; font-size:0.82rem; margin-bottom:0.8rem;">
-                    Active staff are pre-filled with their salary. Adjust the amount for anyone whose pay differs this period. Uncheck anyone you're not paying this month.
+                    The lines below are calculated from approved attendance, approved paid leave and configured paid days. Approved overtime is shown separately. Calculated amounts cannot be edited here; authorised adjustments must be recorded separately.
                 </p>
                 <div class="table-section" style="max-height:400px; overflow-y:auto;">
                     <table class="data-table" style="min-width:600px;">
@@ -2569,7 +2569,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Employee</th>
                                 <th>Role</th>
                                 <th>Location</th>
-                                <th style="text-align:right;">Amount (KSh)</th>
+                                <th style="text-align:right;">Calculated gross pay (KSh)</th>
                             </tr>
                         </thead>
                         <tbody id="pwLineItemsBody"></tbody>
@@ -9934,12 +9934,14 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             }
             if (!panel || !button) return;
             panel.style.display = 'block';
-            panel.innerHTML = '<div style="padding:0.8rem;color:#9bb4ce;">Loading read-only payroll preview…</div>';
+            panel.innerHTML = '<div style="padding:0.8rem;color:#9bb4ce;">Loading approved attendance and earnings…</div>';
+            window._starlinkPayrollPreview = null;
             button.disabled = true;
             try {
                 const { data, error } = await supabaseClient.rpc('payroll_month_preview_v2', { p_period: period });
                 if (error) throw error;
                 const rows = Array.isArray(data) ? data : (data ? [data] : []);
+                window._starlinkPayrollPreview = { period, rows, loadedAt: new Date().toISOString() };
                 if (!rows.length) {
                     panel.innerHTML = '<div style="padding:0.8rem;color:#e8b879;">No eligible employees were returned for this period.</div>';
                     return;
@@ -10017,34 +10019,12 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     };
                 });
             } else {
-                // 🔥 NEW MODE: Blank slate
+                // New payroll drafts are populated from the proposal-aligned preview
+                // after the period is selected and the preview has passed validation.
                 document.getElementById('pwPeriod').value = getDefaultPeriod();
                 document.getElementById('pwRunDate').value = todayISO();
                 document.getElementById('pwNotes').value = '';
-                
-                const wizardPeriod = document.getElementById('pwPeriod').value || getDefaultPeriod();
-                wizardLines = activeStaff.map(s => {
-                    const baseSalary = safeNum(s.salary);
-                    const otEntries = overtimeEntries.filter(e =>
-                        e.staffId === s.id && e.status === 'approved' && e.period === wizardPeriod
-                    );
-                    const otAmount = otEntries.reduce((sum, e) => sum + e.amount, 0);
-                    const otHours = otEntries.reduce((sum, e) => sum + e.hours, 0);
-
-                    return {
-                        staffId: s.id,
-                        employeeNumber: s.employeeNumber || '',
-                        fullName: s.fullName,
-                        role: s.role || '',
-                        locationId: s.locationId,
-                        salary: baseSalary,
-                        overtime: otAmount,
-                        overtimeHours: otHours,
-                        amount: baseSalary + otAmount,
-                        include: true,
-                        hasSalary: baseSalary > 0
-                    };
-                });
+                wizardLines = [];
             }
 
             document.getElementById('pwError1').style.display = 'none';
@@ -10101,8 +10081,9 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     <td>${escapeHTML(line.role || '—')}</td>
                     <td>${escapeHTML(getLocationName(line.locationId))}</td>
                                       <td style="text-align:right;">
-                        <input type="number" class="payroll-line-input pw-line-amount" data-idx="${idx}" value="${line.amount}" min="0" step="1">
-                        ${line.overtime > 0 ? `<div style="font-size:0.68rem; color:#7fded1; margin-top:4px; font-family:'JetBrains Mono',monospace;">incl. OT: +KSh ${fmt(line.overtime)} (${line.overtimeHours.toFixed(2)}h)</div>` : ''}
+                        <input type="number" class="payroll-line-input pw-line-amount" data-idx="${idx}" value="${line.amount}" min="0" step="1" readonly aria-label="Calculated gross pay for ${escapeHTML(line.fullName)}" style="opacity:.9;cursor:not-allowed;">
+                        <div style="font-size:0.68rem;color:#829bb5;margin-top:4px;">Basic: KSh ${fmt(line.basicPay ?? line.amount)} · ${fmt(line.paidDays ?? 0)} paid days</div>
+                        ${line.overtime > 0 ? `<div style="font-size:0.68rem; color:#7fded1; margin-top:4px; font-family:'JetBrains Mono',monospace;">Approved OT: +KSh ${fmt(line.overtime)} (${line.overtimeHours.toFixed(2)}h)</div>` : ''}
                     </td>
                 </tr>`;
             }).join('');
@@ -10116,15 +10097,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     renderWizardLines();
                 });
             });
-            body.querySelectorAll('.pw-line-amount').forEach(inp => {
-                inp.addEventListener('input', () => {
-                    const idx = parseInt(inp.dataset.idx, 10);
-                    wizardLines[idx].amount = safeNum(inp.value);
-                    let newTotal = 0;
-                    wizardLines.forEach(l => { if (l.include) newTotal += safeNum(l.amount); });
-                    document.getElementById('pwLineTotal').textContent = 'KSh ' + fmt(newTotal);
-                });
-            });
+            // Calculated gross amounts are read-only here. Any later payroll
+            // adjustment must be separately authorised and recorded with a reason.
         }
 
         function renderWizardReview() {
@@ -10156,7 +10130,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                         <div class="val" style="font-family:'JetBrains Mono',monospace;">${included.length}</div>
                     </div>
                     <div class="detail-cell">
-                        <div class="lbl">Total Net</div>
+                        <div class="lbl">Gross payroll total</div>
                         <div class="val" style="font-family:'JetBrains Mono',monospace; color:#f0a89f; font-weight:700;">KSh ${fmt(total)}</div>
                     </div>
                 </div>
@@ -10173,7 +10147,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     </table>
                 </div>
                 <p style="color:#7f9bb8; font-size:0.78rem; margin-top:1rem;">
-                    Saving will create a <strong>draft</strong> payroll run. Nothing posts to the ledger until you approve and post it.
+                    Basic pay comes from the approved-day calculation; approved overtime is added separately. Saving creates a <strong>draft</strong> only. Statutory deductions and authorised manual adjustments are not included in this calculation and must be completed before payroll is treated as final.
                 </p>
             `;
         }
@@ -10206,6 +10180,51 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     err.style.display = 'block';
                     return;
                 }
+
+                const preview = window._starlinkPayrollPreview;
+                if (!preview || preview.period !== period || !Array.isArray(preview.rows)) {
+                    err.textContent = 'Run the proposal-based pay preview for this exact period before continuing.';
+                    err.style.display = 'block';
+                    return;
+                }
+                const blocked = preview.rows.filter(row => row.calculation_status !== 'preview_only');
+                if (blocked.length) {
+                    err.textContent = `${blocked.length} employee calculation(s) need attention. Resolve the listed salary or leave-policy issues in the preview before creating payroll.`;
+                    err.style.display = 'block';
+                    return;
+                }
+                if (!preview.rows.length) {
+                    err.textContent = 'No eligible employees were returned for this period.';
+                    err.style.display = 'block';
+                    return;
+                }
+
+                wizardLines = preview.rows.map(row => {
+                    const staffId = Number(row.staff_id);
+                    const approvedOvertime = overtimeEntries.filter(entry =>
+                        Number(entry.staffId) === staffId &&
+                        entry.status === 'approved' &&
+                        entry.period === period
+                    );
+                    const overtimeAmount = approvedOvertime.reduce((sum, entry) => sum + safeNum(entry.amount), 0);
+                    const overtimeHours = approvedOvertime.reduce((sum, entry) => sum + safeNum(entry.hours), 0);
+                    const basicPay = safeNum(row.calculated_basic_pay);
+                    return {
+                        staffId,
+                        employeeNumber: row.employee_number || '',
+                        fullName: row.employee_name || 'Unknown employee',
+                        role: (staff.find(person => Number(person.id) === staffId) || {}).role || '',
+                        locationId: (staff.find(person => Number(person.id) === staffId) || {}).locationId || null,
+                        salary: safeNum(row.monthly_salary),
+                        paidDays: safeNum(row.paid_days),
+                        basicPay,
+                        overtime: overtimeAmount,
+                        overtimeHours,
+                        amount: basicPay + overtimeAmount,
+                        include: basicPay + overtimeAmount > 0,
+                        hasSalary: safeNum(row.monthly_salary) > 0
+                    };
+                });
                 setWizardStep(2);
             } else if (currentWizardStep === 2) {
                 const included = wizardLines.filter(l => l.include);
