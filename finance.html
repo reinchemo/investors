@@ -3736,6 +3736,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             <option value="">All Assignees</option>
         </select>
                 <input type="text" class="grow" id="taskFilterSearch" placeholder="Search title, description, or ID...">
+                <button class="btn btn-ghost" id="taskExportCsv" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;"><i class="fas fa-file-csv"></i> Export CSV</button>
                 <button class="btn btn-ghost" id="taskFilterClear" style="padding:0.55rem 1rem; min-height:38px; font-size:0.75rem;">
             <i class="fas fa-times"></i> Clear
         </button>
@@ -12751,6 +12752,49 @@ function openTxnModal(txn = null) {
             openTaskDetailId = null;
         }
 
+        function exportFilteredTasksCsv() {
+            const statusF = document.getElementById('taskFilterStatus')?.value || '';
+            const prioF = document.getElementById('taskFilterPriority')?.value || '';
+            const catF = document.getElementById('taskFilterCategory')?.value || '';
+            const asgF = document.getElementById('taskFilterAssignee')?.value || '';
+            const q = (document.getElementById('taskFilterSearch')?.value || '').trim().toLowerCase();
+
+            let rows = [...tasks];
+            if (statusF) rows = rows.filter(t => t.status === statusF);
+            if (prioF) rows = rows.filter(t => t.priority === prioF);
+            if (catF) rows = rows.filter(t => t.categoryCode === catF);
+            if (asgF) rows = rows.filter(t => String(t.assigneeStaffId || '') === asgF);
+            if (q) rows = rows.filter(t =>
+                [t.id, t.title, t.description, getStaffName(t.assigneeStaffId)]
+                    .some(value => String(value || '').toLowerCase().includes(q))
+            );
+
+            if (!rows.length) {
+                showToast('There are no tasks in the current filter to export.', 'warning');
+                return;
+            }
+
+            const columns = ['Task ID','Title','Category','Assignee','Priority','Status','Progress (%)','Start Date','Deadline','Completed At','Created At','Description','Instructions','Expected Result'];
+            const csvCell = value => '"' + String(value ?? '').replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+            const csvRows = rows.map(t => [
+                t.id, t.title, getTaskCategoryName(t.categoryCode), getStaffName(t.assigneeStaffId),
+                t.priority, taskStatusLabel(t.status), Number(t.progressPct || 0),
+                t.startDate, t.deadline, t.completedAt, t.createdAt,
+                t.description, t.instructions, t.expectedResult
+            ]);
+            const csv = '\uFEFF' + [columns, ...csvRows].map(row => row.map(csvCell).join(',')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'starlink-task-report-' + todayISO() + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            showToast(rows.length + ' task record(s) exported.', 'success');
+        }
+
         function setupTaskFilters() {
             ['taskFilterStatus', 'taskFilterPriority', 'taskFilterCategory', 'taskFilterAssignee'].forEach(id => {
                 const el = document.getElementById(id);
@@ -12758,6 +12802,8 @@ function openTxnModal(txn = null) {
             });
             const search = document.getElementById('taskFilterSearch');
             if (search) search.addEventListener('input', debounce(renderTasks, 300));
+            const exportButton = document.getElementById('taskExportCsv');
+            if (exportButton) exportButton.addEventListener('click', exportFilteredTasksCsv);
             const clear = document.getElementById('taskFilterClear');
             if (clear) clear.addEventListener('click', () => {
                 ['taskFilterStatus', 'taskFilterPriority', 'taskFilterCategory', 'taskFilterAssignee', 'taskFilterSearch']
