@@ -2559,7 +2559,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
             <!-- Step 2 -->
             <div class="wizard-body" data-pw-body="2">
                 <p style="color:#7f9bb8; font-size:0.82rem; margin-bottom:0.8rem;">
-                    The lines below are calculated from approved attendance, approved paid leave and configured paid days. Approved overtime is shown separately. Calculated amounts cannot be edited here; authorised adjustments must be recorded separately.
+                    Base pay and approved overtime are read-only. Add authorised allowances or deductions only. Record the reason in payroll notes. Statutory deductions are not automatically calculated.
                 </p>
                 <div class="table-section" style="max-height:400px; overflow-y:auto;">
                     <table class="data-table" style="min-width:600px;">
@@ -2569,7 +2569,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Employee</th>
                                 <th>Role</th>
                                 <th>Location</th>
-                                <th style="text-align:right;">Calculated gross pay (KSh)</th>
+                                <th style="text-align:right;">Base + OT</th><th>Allowance</th><th>Deduction</th><th style="text-align:right;">Gross / Net</th>
                             </tr>
                         </thead>
                         <tbody id="pwLineItemsBody"></tbody>
@@ -10006,95 +10006,20 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             if (step === 3) renderWizardReview();
         }
 
-        function renderWizardLines() {
-            const body = document.getElementById('pwLineItemsBody');
-            let total = 0;
+        function renderWizardLines(){
+ const body=document.getElementById('pwLineItemsBody');let total=0;
+ body.innerHTML=wizardLines.map((l,i)=>{const gross=safeNum(l.amount)+safeNum(l.allowance),net=gross-safeNum(l.deduction);if(l.include)total+=net;return `<tr><td><input type="checkbox" class="pw-line-include" data-idx="${i}" ${l.include?'checked':''}></td><td><b>${escapeHTML(l.fullName)}</b><div>${escapeHTML(l.employeeNumber)}</div></td><td>${escapeHTML(l.role||'—')}</td><td>${escapeHTML(getLocationName(l.locationId))}</td><td style="text-align:right;">KSh ${fmt(l.amount)}</td><td><input type="number" min="0" step=".01" class="payroll-line-input pw-line-allowance" data-idx="${i}" value="${safeNum(l.allowance)}" style="width:95px"></td><td><input type="number" min="0" step=".01" class="payroll-line-input pw-line-deduction" data-idx="${i}" value="${safeNum(l.deduction)}" style="width:95px"></td><td style="text-align:right;">KSh ${fmt(gross)}<div style="color:#7fded1;">Net KSh ${fmt(net)}</div></td></tr>`;}).join('');
+ document.getElementById('pwLineTotal').textContent='KSh '+fmt(total);
+ body.querySelectorAll('.pw-line-include').forEach(x=>x.addEventListener('change',()=>{wizardLines[+x.dataset.idx].include=x.checked;renderWizardLines();}));
+ body.querySelectorAll('.pw-line-allowance,.pw-line-deduction').forEach(x=>x.addEventListener('change',()=>{const l=wizardLines[+x.dataset.idx];if(x.classList.contains('pw-line-allowance'))l.allowance=Math.max(0,safeNum(x.value));else l.deduction=Math.max(0,safeNum(x.value));renderWizardLines();}));
+}
 
-            body.innerHTML = wizardLines.map((line, idx) => {
-                if (line.include) total += safeNum(line.amount);
-                const isIncomplete = !line.hasSalary;
-                return `<tr>
-                    <td style="text-align:center;">
-                        <input type="checkbox" class="pw-line-include" data-idx="${idx}" ${line.include ? 'checked' : ''} style="width:auto; min-height:auto;">
-                    </td>
-                    <td>
-                        <div style="font-weight:600;">${escapeHTML(line.fullName)}</div>
-                        <div style="font-size:0.7rem; color:#7f9bb8; font-family:'JetBrains Mono',monospace;">${escapeHTML(line.employeeNumber)}</div>
-                        ${isIncomplete ? '<div style="font-size:0.7rem; color:#e8b879; margin-top:2px;">⚠ No salary set</div>' : ''}
-                    </td>
-                    <td>${escapeHTML(line.role || '—')}</td>
-                    <td>${escapeHTML(getLocationName(line.locationId))}</td>
-                                      <td style="text-align:right;">
-                        <input type="number" class="payroll-line-input pw-line-amount" data-idx="${idx}" value="${line.amount}" min="0" step="1" readonly aria-label="Calculated gross pay for ${escapeHTML(line.fullName)}" style="opacity:.9;cursor:not-allowed;">
-                        <div style="font-size:0.68rem;color:#829bb5;margin-top:4px;">Basic: KSh ${fmt(line.basicPay ?? line.amount)} · ${fmt(line.paidDays ?? 0)} paid days</div>
-                        ${line.overtime > 0 ? `<div style="font-size:0.68rem; color:#7fded1; margin-top:4px; font-family:'JetBrains Mono',monospace;">Approved OT: +KSh ${fmt(line.overtime)} (${line.overtimeHours.toFixed(2)}h)</div>` : ''}
-                    </td>
-                </tr>`;
-            }).join('');
-
-            document.getElementById('pwLineTotal').textContent = 'KSh ' + fmt(total);
-
-            body.querySelectorAll('.pw-line-include').forEach(cb => {
-                cb.addEventListener('change', () => {
-                    const idx = parseInt(cb.dataset.idx, 10);
-                    wizardLines[idx].include = cb.checked;
-                    renderWizardLines();
-                });
-            });
-            // Calculated gross amounts are read-only here. Any later payroll
-            // adjustment must be separately authorised and recorded with a reason.
-        }
-
-        function renderWizardReview() {
-            const period = document.getElementById('pwPeriod').value.trim();
-            const runDate = document.getElementById('pwRunDate').value;
-            const included = wizardLines.filter(l => l.include);
-            const total = included.reduce((s, l) => s + safeNum(l.amount), 0);
-
-            const lines = included.map(l => `
-                <tr>
-                    <td>${escapeHTML(l.fullName)}</td>
-                    <td style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#7f9bb8;">${escapeHTML(l.employeeNumber)}</td>
-                    <td style="text-align:right; font-family:'JetBrains Mono',monospace; color:#f0a89f; font-weight:700;">KSh ${fmt(l.amount)}</td>
-                </tr>
-            `).join('');
-
-            document.getElementById('pwReviewBody').innerHTML = `
-                <div class="detail-grid" style="margin-bottom:1rem;">
-                    <div class="detail-cell">
-                        <div class="lbl">Period</div>
-                        <div class="val" style="font-family:'JetBrains Mono',monospace; font-weight:700;">${escapeHTML(period)}</div>
-                    </div>
-                    <div class="detail-cell">
-                        <div class="lbl">Run Date</div>
-                        <div class="val">${escapeHTML(runDate)}</div>
-                    </div>
-                    <div class="detail-cell">
-                        <div class="lbl">Staff Count</div>
-                        <div class="val" style="font-family:'JetBrains Mono',monospace;">${included.length}</div>
-                    </div>
-                    <div class="detail-cell">
-                        <div class="lbl">Gross payroll total</div>
-                        <div class="val" style="font-family:'JetBrains Mono',monospace; color:#f0a89f; font-weight:700;">KSh ${fmt(total)}</div>
-                    </div>
-                </div>
-                <div class="table-section" style="max-height:300px; overflow-y:auto;">
-                    <table class="data-table" style="min-width:400px;">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Employee #</th>
-                                <th style="text-align:right;">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>${lines}</tbody>
-                    </table>
-                </div>
-                <p style="color:#7f9bb8; font-size:0.78rem; margin-top:1rem;">
-                    Basic pay comes from the approved-day calculation; approved overtime is added separately. Saving creates a <strong>draft</strong> only. Statutory deductions and authorised manual adjustments are not included in this calculation and must be completed before payroll is treated as final.
-                </p>
-            `;
-        }
+        function renderWizardReview(){
+ const period=document.getElementById('pwPeriod').value.trim(),date=document.getElementById('pwRunDate').value,rows=wizardLines.filter(x=>x.include);
+ const gross=rows.reduce((a,x)=>a+x.amount+x.allowance,0),ded=rows.reduce((a,x)=>a+x.deduction,0),net=gross-ded;
+ const html=rows.map(x=>`<tr><td>${escapeHTML(x.fullName)}</td><td>KSh ${fmt(x.amount)}</td><td>KSh ${fmt(x.allowance)}</td><td>KSh ${fmt(x.deduction)}</td><td>KSh ${fmt(x.amount+x.allowance-x.deduction)}</td></tr>`).join('');
+ document.getElementById('pwReviewBody').innerHTML=`<p>Period: ${escapeHTML(period)} · Run date: ${escapeHTML(date)} · Employees: ${rows.length}</p><p>Gross: KSh ${fmt(gross)} · Deductions: KSh ${fmt(ded)} · <b>Net payable: KSh ${fmt(net)}</b></p><div class="table-section"><table class="data-table"><thead><tr><th>Employee</th><th>Base + OT</th><th>Allowance</th><th>Deduction</th><th>Net</th></tr></thead><tbody>${html}</tbody></table></div><p style="color:#e8b879">Check every deduction has an approved basis. Statutory deductions are not included automatically.</p>`;
+}
 
         function wizardNext() {
             if (currentWizardStep === 1) {
@@ -10151,7 +10076,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     const hasUnpricedOvertime = approvedOvertime.some(entry => safeNum(entry.hours) > 0 && (entry.amount === null || entry.amount === undefined || !Number.isFinite(Number(entry.amount)) || Number(entry.amount) <= 0));
                     const basicPay = safeNum(row.calculated_basic_pay);
                     const person = staff.find(item => Number(item.id) === staffId) || {};
-                    return { staffId, employeeNumber: row.employee_number || '', fullName: row.employee_name || 'Unknown employee', role: person.role || '', locationId: person.locationId || null, salary: safeNum(row.monthly_salary), paidDays: safeNum(row.paid_days), basicPay, overtime: overtimeAmount, overtimeHours, hasUnpricedOvertime, amount: basicPay + overtimeAmount, include: basicPay + overtimeAmount > 0, hasSalary: safeNum(row.monthly_salary) > 0 };
+                    return { staffId, employeeNumber: row.employee_number || '', fullName: row.employee_name || 'Unknown employee', role: person.role || '', locationId: person.locationId || null, salary: safeNum(row.monthly_salary), paidDays: safeNum(row.paid_days), basicPay, overtime: overtimeAmount, overtimeHours, hasUnpricedOvertime, allowance: 0, deduction: 0, amount: basicPay + overtimeAmount, include: basicPay + overtimeAmount > 0, hasSalary: safeNum(row.monthly_salary) > 0 };
                 });
                 const unpricedOvertime = wizardLines.filter(line => line.hasUnpricedOvertime);
                 if (unpricedOvertime.length) {
@@ -10170,7 +10095,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     err.style.display = 'block';
                     return;
                 }
-                const zeroRows = included.filter(l => safeNum(l.amount) <= 0);
+                const negativeNet = included.filter(l => safeNum(l.amount) + safeNum(l.allowance) - safeNum(l.deduction) < 0);\n                if (negativeNet.length) { err.textContent = 'Deductions cannot exceed gross pay: ' + negativeNet.map(l => l.fullName).join(', '); err.style.display = 'block'; return; }\n                const zeroRows = included.filter(l => safeNum(l.amount) <= 0);
                 if (zeroRows.length) {
                     err.textContent = `⚠️ ${zeroRows.length} selected line(s) have zero amount. Uncheck them or enter an amount.`;
                     err.style.display = 'block';
@@ -10192,7 +10117,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const userNotes = document.getElementById('pwNotes').value.trim();
             const notes = [userNotes, 'Draft calculated from approved paid days using the proposal payroll preview, plus separately approved overtime. Statutory deductions and additional adjustments are not included.'].filter(Boolean).join('\n');
             const included = wizardLines.filter(l => l.include);
-            const total = included.reduce((s, l) => s + safeNum(l.amount), 0);
+            const totalGross = included.reduce((s, l) => s + safeNum(l.amount) + safeNum(l.allowance), 0);\n            const totalDeductions = included.reduce((s, l) => s + safeNum(l.deduction), 0);\n            const totalNet = totalGross - totalDeductions;
             const err = document.getElementById('pwError3');
             err.style.display = 'none';
 
@@ -10227,12 +10152,12 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
 
                       // 1. Save to standard payroll_items
             const items = included.map(l => ({
-                run_id: runId,
-                staff_id: l.staffId,
-                gross: safeNum(l.amount),
-                deductions: 0,
-                net: safeNum(l.amount),
-                notes: 'Basic pay KSh ' + fmt(l.basicPay ?? l.amount) + ' for ' + fmt(l.paidDays ?? 0) + ' approved paid days; approved overtime KSh ' + fmt(l.overtime || 0) + ' for ' + fmt(l.overtimeHours || 0) + ' hours. Statutory deductions not included in this draft.'
+                run_id: runId, staff_id: l.staffId,
+                gross: safeNum(l.amount) + safeNum(l.allowance),
+                deductions: safeNum(l.deduction),
+                net: safeNum(l.amount) + safeNum(l.allowance) - safeNum(l.deduction),
+                allowances: safeNum(l.allowance), other_deductions: safeNum(l.deduction),
+                notes: 'Basic and approved overtime KSh ' + fmt(l.amount) + '; allowance KSh ' + fmt(l.allowance) + '; manual deduction KSh ' + fmt(l.deduction) + '. Statutory deductions not calculated.'
             }));
 
             const { error: itemsErr } = await supabaseClient
@@ -10256,7 +10181,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     employee_id: String(l.staffId),
                     employee_name: l.fullName,
                     txn_date: runDate,
-                    gross_amount: safeNum(l.amount),
+                    gross_amount: safeNum(l.amount) + safeNum(l.allowance),
                     reference: 'PR-' + period + '-' + l.staffId, // Auto-generate a ref
                     status: 'pending', // Will be updated to paid/reconciled later
                     created_by: CURRENT_USER
