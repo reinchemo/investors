@@ -52,7 +52,7 @@ Deno.serve(async (req: Request) => {
     if (action === "list_staff") {
       const { data, error } = await admin
         .from("staff")
-        .select("id,employee_number,full_name,role,phone,email,status,start_date,end_date,annual_leave_days,location_id,address,payment_method")
+        .select("id,employee_number,full_name,role,phone,email,status,start_date,end_date,annual_leave_days,location_id,address,payment_method,salary")
         .is("deleted_at", null)
         .order("full_name");
       if (error) throw error;
