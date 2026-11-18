@@ -2942,7 +2942,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Reference</th>
                                 <th>Location</th>
                                 <th>Status</th>
-                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Gross</th><th style="text-align:right;">Deductions</th><th style="text-align:right;">Net pay</th>
                                 <th style="text-align:right;">Actions</th>
                             </tr>
                         </thead>
@@ -10086,10 +10086,10 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
 
         function renderWizardLines() {
             const body = document.getElementById('pwLineItemsBody');
-            let total = 0;
+            let total = 0, deductionsTotal = 0, netTotal = 0;
 
             body.innerHTML = wizardLines.map((line, idx) => {
-                if (line.include) total += safeNum(line.amount);
+                if (line.include) { total += safeNum(line.amount); deductionsTotal += safeNum(line.deductions); netTotal += Math.max(0,safeNum(line.amount)-safeNum(line.deductions)); }
                 const isIncomplete = !line.hasSalary;
                 return `<tr>
                     <td style="text-align:center;">
@@ -10112,6 +10112,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             }).join('');
 
             document.getElementById('pwLineTotal').textContent = 'KSh ' + fmt(total);
+            document.getElementById('pwDeductionTotal').textContent = 'KSh ' + fmt(deductionsTotal);
+            document.getElementById('pwNetTotal').textContent = 'KSh ' + fmt(netTotal);
 
             body.querySelectorAll('.pw-line-include').forEach(cb => {
                 cb.addEventListener('change', () => {
@@ -10237,6 +10239,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     return;
                 }
                 const zeroRows = included.filter(l => safeNum(l.amount) <= 0);
+                const invalidDeductions = included.filter(l => safeNum(l.deductions) < 0 || safeNum(l.deductions) > safeNum(l.amount));
+                if (invalidDeductions.length) { err.textContent = '⚠️ Deductions cannot be negative or exceed gross pay.'; err.style.display = 'block'; return; }
                 if (zeroRows.length) {
                     err.textContent = `⚠️ ${zeroRows.length} selected line(s) have zero amount. Uncheck them or enter an amount.`;
                     err.style.display = 'block';
@@ -10258,6 +10262,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const notes = document.getElementById('pwNotes').value.trim();
             const included = wizardLines.filter(l => l.include);
             const total = included.reduce((s, l) => s + safeNum(l.amount), 0);
+            const totalDeductions = included.reduce((s, l) => s + safeNum(l.deductions), 0);
+            const totalNet = included.reduce((s, l) => s + Math.max(0,safeNum(l.amount)-safeNum(l.deductions)), 0);
             const err = document.getElementById('pwError3');
             err.style.display = 'none';
 
