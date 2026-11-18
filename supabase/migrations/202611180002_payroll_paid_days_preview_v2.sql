@@ -43,7 +43,7 @@ begin
       greatest(coalesce(s.start_date,v_month_start),v_month_start) as eligible_from,
       least(coalesce(s.end_date,v_month_end),v_month_end) as eligible_to
     from public.staff s
-    where s.status='active'
+    where s.status in ('active','terminated')
       and s.deleted_at is null
       and coalesce(s.start_date,v_month_start)<=v_month_end
       and coalesce(s.end_date,v_month_end)>=v_month_start
@@ -60,9 +60,19 @@ begin
         where at.staff_id=a.id and at.date=d::date and at.status='approved'
       ) as has_approved_attendance,
       (
+        select lr.id
+        from public.leave_requests lr
+        where lr.staff_id=a.id and lr.status='approved'
+          and lr.cancelled_at is null
+          and d::date between lr.start_date and lr.end_date
+        order by lr.created_at desc, lr.id desc
+        limit 1
+      ) as approved_leave_id,
+      (
         select lr.leave_type
         from public.leave_requests lr
         where lr.staff_id=a.id and lr.status='approved'
+          and lr.cancelled_at is null
           and d::date between lr.start_date and lr.end_date
         order by lr.created_at desc, lr.id desc
         limit 1
@@ -70,22 +80,36 @@ begin
     from active_staff a
     cross join lateral generate_series(a.eligible_from,a.eligible_to,interval '1 day') d
   ),
-  classified as (
+  leave_policy as (
     select d.*,
-      case
-        when d.approved_leave_type is null then null
-        else (
-          select p.is_paid
-          from public.payroll_leave_pay_policies p
-          where p.is_active
-            and lower(p.leave_type)=lower(d.approved_leave_type)
-            and p.effective_from<=d.pay_date
-            and (p.effective_to is null or p.effective_to>=d.pay_date)
-          order by p.effective_from desc,p.id desc
-          limit 1
-        )
-      end as leave_is_paid
+      p.id as leave_policy_id,
+      p.is_paid as leave_is_paid,
+      p.paid_day_limit
     from days d
+    left join lateral (
+      select pol.id,pol.is_paid,pol.paid_day_limit
+      from public.payroll_leave_pay_policies pol
+      where d.approved_leave_type is not null
+        and pol.is_active
+        and lower(pol.leave_type)=lower(d.approved_leave_type)
+        and pol.effective_from<=d.pay_date
+        and (pol.effective_to is null or pol.effective_to>=d.pay_date)
+      order by pol.effective_from desc,pol.id desc
+      limit 1
+    ) p on true
+  ),
+  classified as (
+    select lp.*,
+      case
+        when lp.approved_leave_id is null then null
+        when lp.leave_is_paid is distinct from true then false
+        when lp.paid_day_limit is null then true
+        else row_number() over (
+          partition by lp.approved_leave_id
+          order by lp.pay_date
+        ) <= lp.paid_day_limit
+      end as leave_day_is_paid
+    from leave_policy lp
   ),
   rates as (
     select c.*,
@@ -105,11 +129,11 @@ begin
     select r.staff_id,
       count(*) filter(where r.has_approved_attendance)::bigint as attendance_days,
       bool_or(r.daily_monthly_salary is null or r.daily_monthly_salary<=0) as missing_salary,
-      bool_or(r.approved_leave_type is not null and r.leave_is_paid is null) as missing_leave_policy,
+      bool_or(r.approved_leave_type is not null and r.leave_policy_id is null) as missing_leave_policy,
       sum(
         case
           when r.approved_leave_type is not null then
-            case when r.leave_is_paid then coalesce(r.daily_monthly_salary,0)/v_days else 0 end
+            case when r.leave_day_is_paid then coalesce(r.daily_monthly_salary,0)/v_days else 0 end
           when r.is_sunday or r.is_holiday or r.has_approved_attendance then
             coalesce(r.daily_monthly_salary,0)/v_days
           else 0
@@ -152,4 +176,4 @@ end;
 $function$;
 
 comment on function public.payroll_month_preview(text) is
-'Proposal-aligned preview: daily salary divided by actual calendar days; eligible dates include approved attendance, Sundays, configured Kenyan public holidays and approved paid leave. Missing salary or leave policy blocks a payable preview. Does not post payroll or apply statutory deductions.';
+'Proposal-aligned preview: daily salary divided by actual calendar days; eligible dates include approved attendance, Sundays, configured Kenyan public holidays and approved paid leave subject to configured paid-day limits. Missing salary or leave policy blocks a payable preview. Does not post payroll or apply statutory deductions.';
