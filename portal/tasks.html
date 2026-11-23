@@ -361,6 +361,40 @@
             font-size: 11px;
             margin-top: 30px;
         }
+
+        .pool-section {
+            margin-top: 26px;
+        }
+        .pool-section h2 {
+            font-size: 18px;
+            margin: 0 0 12px;
+        }
+        .pool-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            padding: 17px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .pool-card p {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 7px 0 0;
+            line-height: 1.5;
+        }
+        .pool-list {
+            display: grid;
+            gap: 10px;
+        }
+        .pool-empty {
+            color: var(--muted);
+            font-size: 13px;
+            padding: 14px 0;
+        }
         
         @media(max-width:750px) {
             .stats {
@@ -477,6 +511,11 @@
         </div>
 
         <section id="taskList" class="task-list"></section>
+
+        <section class="pool-section" id="claimableSection" hidden>
+            <h2><i class="fa-solid fa-hand"></i> Available Tasks</h2>
+            <div id="claimableList" class="pool-list"></div>
+        </section>
 
         <div class="footer">
             STARLINK ULTRANET LLC · PERSONAL EMPLOYEE PORTAL
@@ -635,6 +674,10 @@
                 const result = await taskAction({ action: "list_tasks" });
                 currentTasks = Array.isArray(result.tasks) ? result.tasks : [];
 
+                // Load optional open-pool work without interrupting the existing
+                // employee task list if this account has no pool assignments.
+                await loadClaimableTasks();
+
                 el("message").style.display = "none";
                 el("welcome").textContent =
                     "You currently have " + currentTasks.length + " assigned task(s).";
@@ -651,6 +694,81 @@
                 );
             } finally {
                 loadingTasks = false;
+            }
+        }
+
+        async function assignmentWorkflowAction(payload) {
+            const sessionResult = await db.auth.getSession();
+            if (sessionResult.error || !sessionResult.data.session) {
+                window.location.href = "../login.html";
+                return null;
+            }
+            const result = await db.functions.invoke("task-assignment-workflows", {
+                body: payload
+            });
+            if (result.error) {
+                const message = result.data && result.data.error
+                    ? result.data.error
+                    : result.error.message || "Task assignment action failed.";
+                throw new Error(message);
+            }
+            if (!result.data || !result.data.success) {
+                throw new Error(result.data && result.data.error
+                    ? result.data.error
+                    : "Unable to complete task assignment action.");
+            }
+            return result.data;
+        }
+
+        async function loadClaimableTasks() {
+            const section = el("claimableSection");
+            const list = el("claimableList");
+            try {
+                const result = await assignmentWorkflowAction({
+                    action: "list_my_assignments"
+                });
+                const tasks = Array.isArray(result.claimable_tasks)
+                    ? result.claimable_tasks
+                    : [];
+                section.hidden = tasks.length === 0;
+                list.innerHTML = tasks.map(task => `
+                    <article class="pool-card">
+                        <div>
+                            <strong>${escapeHTML(task.title || "Untitled task")}</strong>
+                            <p>${escapeHTML(task.description || "No description provided.")}</p>
+                            <p>
+                                ${escapeHTML(task.priority || "Normal")} priority
+                                · Due: ${escapeHTML(formatDate(task.deadline))}
+                                · ${escapeHTML(normalise(task.assignment_mode))}
+                            </p>
+                        </div>
+                        <button class="btn-primary" data-claim-task="${escapeHTML(task.id)}">
+                            <i class="fa-solid fa-hand"></i> Claim Task
+                        </button>
+                    </article>
+                `).join("");
+                list.querySelectorAll("[data-claim-task]").forEach(button => {
+                    button.addEventListener("click", async () => {
+                        const taskId = button.dataset.claimTask;
+                        button.disabled = true;
+                        try {
+                            await assignmentWorkflowAction({
+                                action: "claim_task",
+                                task_id: taskId
+                            });
+                            alert("Task claimed. It is now available in your assigned work.");
+                            await loadTasks();
+                        } catch (error) {
+                            alert(error.message || "Unable to claim this task.");
+                            button.disabled = false;
+                        }
+                    });
+                });
+            } catch (error) {
+                // The standard assigned-task workflow remains available even
+                // if this employee account is not enabled for pool claiming.
+                console.warn("Available task pool is unavailable:", error);
+                section.hidden = true;
             }
         }
 
