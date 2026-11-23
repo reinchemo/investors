@@ -41,6 +41,7 @@ Deno.serve(async(req)=>{
     const {data:investor}=await admin.from("investors").select("id,name,email,phone").eq("id",portal.investor_id).is("deleted_at",null).maybeSingle();
     if(!investor)return out({error:"Linked investor record not found."},404);
     let {data:party}=await admin.from("funding_parties").select("*").eq("investor_id",investor.id).maybeSingle();
+    if(party&&party.status!=="active"&&party.status!=="draft")return out({error:"Your funder profile is suspended or closed. Contact management."},403);
     if(!party){
       const {data:created,error}=await admin.from("funding_parties").insert({investor_id:investor.id,legal_name:investor.name,contact_name:investor.name,email:investor.email,phone:investor.phone,party_type:"individual",kyc_status:"not_started",status:"draft"}).select("*").single();
       if(error)throw error;party=created;
@@ -181,7 +182,7 @@ Deno.serve(async(req)=>{
     if(otherActor===user.id)return out({error:"Legal and finance approvals must be completed by different authorised users."},409);
     if(!legal&&(!before.terms_approval_reference||!before.management_approval_reference))return out({error:"Management and terms approval references are required before finance approval."},409);
     if(!legal&&Number(before.term_days)!==120&&(!before.tax_approval_reference||!before.management_approval_reference))return out({error:"Non-standard tenure requires management and tax approval references."},409);
-    if(!legal&&before.tax_rate!==null&&!before.tax_approval_reference)return out({error:"A tax approval reference is required for configured deductions."},409);
+    if(!legal&&(before.tax_rate!==null||(Array.isArray(before.other_deductions)&&before.other_deductions.length>0))&&!before.tax_approval_reference)return out({error:"A tax approval reference is required for configured deductions."},409);
     const now=new Date().toISOString();
     const patch:any={[actorField]:user.id,[refField]:reference,[atField]:now,updated_at:now};
     if(legal){patch.legal_gate_cleared_at=now;patch.legal_gate_cleared_by=user.id;}
@@ -203,7 +204,7 @@ Deno.serve(async(req)=>{
     if(!before||!["approved","open","paused"].includes(before.status))return out({error:"Opportunity must first receive both approvals."},409);
     if(action==="open_opportunity"&&(!before.legal_gate_cleared_at||!before.terms_approved_at||!before.proposed_return_rate||!before.term_days||!before.terms_approval_reference||!before.management_approval_reference))return out({error:"Legal gate, approved terms, rate and management approval must be recorded before publication."},409);
     if(action==="open_opportunity"&&Number(before.term_days)!==120&&(!before.tax_approval_reference||!before.management_approval_reference))return out({error:"Optional tenure requires management and tax approval."},409);
-    if(action==="open_opportunity"&&before.tax_rate!==null&&!before.tax_approval_reference)return out({error:"Tax settings are not approved."},409);
+    if(action==="open_opportunity"&&(before.tax_rate!==null||(Array.isArray(before.other_deductions)&&before.other_deductions.length>0))&&!before.tax_approval_reference)return out({error:"Tax settings are not approved."},409);
     const status=action==="open_opportunity"?"open":"paused";
     const {data,error}=await admin.from("funding_opportunities").update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error;await audit("opportunity",id,status,before,data);return out({success:true,record:data});
