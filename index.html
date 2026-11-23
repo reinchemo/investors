@@ -3119,8 +3119,10 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                         <tr>
                             <th>Shareholder</th>
                             <th>Equity %</th>
-                            <th style="text-align:right;">Amount</th>
-                            <th style="text-align:right;">Rounding</th>
+                            <th style="text-align:right;">1st Division</th>
+                            <th style="text-align:right;">2nd Division</th>
+                            <th style="text-align:right;">Final Payout</th>
+                            <th>Payment Status</th>
                         </tr>
                     </thead>
                     <tbody id="detailBody"></tbody>
@@ -8143,12 +8145,18 @@ async function openSecurePdf(investorId) {
         const final = safeNum(a.final !== undefined ? a.final : (stage1 + stage2));
         paidTotal += final;
 
+        const paymentStatus = d.status === 'paid'
+            ? '<span class="status-pill paid"><i class="fas fa-check-circle"></i> PAID</span>'
+            : d.status === 'cancelled'
+                ? '<span class="status-pill cancelled">CANCELLED</span>'
+                : '<span class="status-pill pending">NOT PAID</span>';
         rowsHtml += `<tr>
             <td>${escapeHTML(a.name)}</td>
             <td class="alloc-pct">${safeNum(a.percentage).toFixed(2)}%</td>
             <td class="alloc-amount" style="text-align:right;">${fmt(stage1)}</td>
             <td class="alloc-amount" style="text-align:right;">${fmt(stage2)}</td>
             <td class="alloc-amount" style="text-align:right; font-weight:700; color:#f4c98d;">${fmt(final)}</td>
+            <td>${paymentStatus}</td>
         </tr>`;
     });
 
@@ -8162,6 +8170,7 @@ async function openSecurePdf(investorId) {
             <td class="alloc-amount" style="text-align:right;">${fmt(vStage1)}</td>
             <td class="alloc-amount" style="text-align:right;">${fmt(vStage2)}</td>
             <td class="alloc-amount" style="text-align:right; color:#e8b879; font-weight:700;">→ RESERVE</td>
+            <td><span class="status-pill" style="color:#e8b879;">NOT APPLICABLE</span></td>
         </tr>`;
     }
 
@@ -8169,15 +8178,15 @@ async function openSecurePdf(investorId) {
     const reserveAmount = safeNum(d.reserveAmount);
     const runningReserve = safeNum(d.runningReserveBalance);
     rowsHtml += `<tr class="total-row">
-        <td colspan="3"><strong>TOTAL PAID TO SHAREHOLDERS</strong></td>
+        <td colspan="4"><strong>${d.status === 'paid' ? 'TOTAL PAID TO SHAREHOLDERS' : 'TOTAL SHAREHOLDER PAYOUTS'}</strong></td>
         <td colspan="2" style="text-align:right;"><strong>KSh ${fmt(paidTotal)}</strong></td>
     </tr>`;
     rowsHtml += `<tr class="total-row" style="background:rgba(200,154,91,0.1);">
-        <td colspan="3"><strong>COMPANY RESERVE (this period)</strong></td>
+        <td colspan="4"><strong>COMPANY RESERVE (this period)</strong></td>
         <td colspan="2" style="text-align:right; color:#f4c98d;"><strong>KSh ${fmt(reserveAmount)}</strong></td>
     </tr>`;
     rowsHtml += `<tr class="total-row" style="background:rgba(122,90,248,0.1);">
-        <td colspan="3"><strong>RUNNING RESERVE BALANCE</strong></td>
+        <td colspan="4"><strong>RUNNING RESERVE BALANCE</strong></td>
         <td colspan="2" style="text-align:right; color:#b8a0ff;"><strong>KSh ${fmt(runningReserve)}</strong></td>
     </tr>`;
 
