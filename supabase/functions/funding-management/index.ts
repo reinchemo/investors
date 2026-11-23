@@ -50,7 +50,9 @@ Deno.serve(async(req)=>{
   if(action==="create_party"){
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
     const name=String(body.legal_name||"").trim(); if(name.length<2||name.length>180)return out({error:"Valid legal name required."},400);
-    const {data,error}=await admin.from("funding_parties").insert({legal_name:name,contact_name:String(body.contact_name||"").trim()||null,email:String(body.email||"").trim()||null,phone:String(body.phone||"").trim()||null,party_type:body.party_type==="company"?"company":"individual",kyc_status:"not_started",status:"draft",notes:String(body.notes||"").slice(0,2000)||null}).select("*").single();
+    const investorId=body.investor_id?Number(body.investor_id):null;
+    if(investorId&&!Number.isSafeInteger(investorId))return out({error:"Invalid linked investor."},400);
+    const {data,error}=await admin.from("funding_parties").insert({legal_name:name,contact_name:String(body.contact_name||"").trim()||null,email:String(body.email||"").trim()||null,phone:String(body.phone||"").trim()||null,party_type:body.party_type==="company"?"company":"individual",investor_id:investorId,beneficial_ownership:Array.isArray(body.beneficial_ownership)?body.beneficial_ownership:[],consent_records:Array.isArray(body.consent_records)?body.consent_records:[],kyc_status:"not_started",status:"draft",notes:String(body.notes||"").slice(0,2000)||null}).select("*").single();
     if(error)throw error; await audit("party",data.id,"created",null,data); return out({success:true,record:data});
   }
   if(action==="set_party_status"){
@@ -63,19 +65,60 @@ Deno.serve(async(req)=>{
     const {data,error}=await admin.from("funding_parties").update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error;await audit("party",id,"status_"+status,before,data);return out({success:true,record:data});
   }
+  if(action==="list_equity_investors"){
+    if(!(await need("view")))return out({error:"Funding view permission required."},403);
+    const {data,error}=await admin.from("investors").select("id,name,investor_number,email,phone,status").is("deleted_at",null).order("name").limit(1000);
+    if(error)throw error;return out({success:true,records:data||[]});
+  }
+  if(action==="create_document_upload"){
+    if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
+    const funderId=Number(body.funder_id),filename=String(body.filename||"").replace(/[^a-zA-Z0-9._-]/g,"_").slice(0,120),mime=String(body.mime_type||"");
+    const size=Number(body.file_size_bytes);
+    if(!Number.isSafeInteger(funderId)||!filename||!["application/pdf","image/jpeg","image/png"].includes(mime)||!Number.isSafeInteger(size)||size<1||size>10485760)return out({error:"Only PDF, JPG or PNG documents up to 10 MB are accepted."},400);
+    const path=funderId+"/"+crypto.randomUUID()+"-"+filename;
+    const {data,error}=await admin.storage.from("funding-private").createSignedUploadUrl(path);
+    if(error)throw error;
+    const {data:doc,error:docError}=await admin.from("funding_documents").insert({funder_id:funderId,document_type:String(body.document_type||"identity").slice(0,60),object_path:path,original_filename:filename,mime_type:mime,file_size_bytes:size,expiry_date:body.expiry_date||null,uploaded_by:user.id}).select("*").single();
+    if(docError)throw docError;
+    await audit("document",doc.id,"upload_link_created",null,{...doc,object_path:"[private]"});
+    return out({success:true,document:doc,signed_upload:data});
+  }
+  if(action==="review_document"){
+    if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
+    const id=Number(body.id),decision=String(body.decision||"");
+    if(!Number.isSafeInteger(id)||!["accepted","rejected"].includes(decision))return out({error:"Valid document decision required."},400);
+    const {data:before}=await admin.from("funding_documents").select("*").eq("id",id).maybeSingle();
+    if(!before||before.review_status!=="pending")return out({error:"Document is not awaiting review."},409);
+    const {data,error}=await admin.from("funding_documents").update({review_status:decision,reviewed_by:user.id,reviewed_at:new Date().toISOString(),review_reason:String(body.reason||"").slice(0,1000)||null}).eq("id",id).select("*").single();
+    if(error)throw error;await audit("document",id,"review_"+decision,{...before,object_path:"[private]"},{...data,object_path:"[private]"});return out({success:true,record:data});
+  }
+  if(action==="create_signed_document_url"){
+    if(!(await need("view")))return out({error:"Funding view permission required."},403);
+    const id=Number(body.id);const {data:doc}=await admin.from("funding_documents").select("*").eq("id",id).maybeSingle();
+    if(!doc)return out({error:"Document not found."},404);
+    const {data,error}=await admin.storage.from("funding-private").createSignedUrl(doc.object_path,300);
+    if(error)throw error;return out({success:true,url:data.signedUrl,expires_in:300});
+  }
   if(action==="set_kyc"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const id=Number(body.id),status=String(body.kyc_status||"");
     if(!Number.isSafeInteger(id)||!["pending","verified","rejected","expired"].includes(status))return out({error:"Valid funder and KYC status required."},400);
     const {data:before}=await admin.from("funding_parties").select("*").eq("id",id).maybeSingle(); if(!before)return out({error:"Funder not found."},404);
-    const {data,error}=await admin.from("funding_parties").update({kyc_status:status,kyc_reference:String(body.kyc_reference||"").trim()||before.kyc_reference,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
+    const reason=String(body.reason||"").trim().slice(0,1000)||null;
+    const {data,error}=await admin.from("funding_parties").update({kyc_status:status,kyc_reference:String(body.kyc_reference||"").trim()||before.kyc_reference,kyc_reviewed_by:user.id,kyc_reviewed_at:new Date().toISOString(),kyc_decision_reason:reason,rejection_reason:status==="rejected"?reason:null,status:status==="verified"?"active":status==="rejected"?"closed":before.status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error; await audit("party",id,"kyc_"+status,before,data); return out({success:true,record:data});
   }
   if(action==="create_opportunity"){
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
     const title=String(body.title||"").trim(),amount=Number(body.target_amount),ref=String(body.reference_code||"").trim();
     if(title.length<3||title.length>180||!ref||ref.length>60||!Number.isFinite(amount)||amount<=0)return out({error:"Valid title, unique reference and positive target amount required."},400);
-    const {data,error}=await admin.from("funding_opportunities").insert({reference_code:ref,title,description:String(body.description||"").slice(0,4000)||null,project_id:body.project_id?Number(body.project_id):null,target_amount:amount,currency_code:String(body.currency_code||"KES").toUpperCase(),proposed_return_rate:body.proposed_return_rate===undefined?null:Number(body.proposed_return_rate),term_days:body.term_days?Number(body.term_days):null,opens_on:body.opens_on||null,closes_on:body.closes_on||null,status:"draft",created_by:user.id}).select("*").single();
+    const term=body.term_days===undefined||body.term_days===null||body.term_days===""?120:Number(body.term_days);
+    const rate=body.proposed_return_rate===""||body.proposed_return_rate===undefined?null:Number(body.proposed_return_rate);
+    const min=body.minimum_commitment===undefined||body.minimum_commitment===""?1:Number(body.minimum_commitment);
+    const max=body.maximum_commitment===""||body.maximum_commitment===undefined?null:Number(body.maximum_commitment);
+    const tax=body.tax_rate===""||body.tax_rate===undefined?null:Number(body.tax_rate);
+    if(!Number.isInteger(term)||term<1||term>3650||!Number.isFinite(min)||min<=0||(max!==null&&(!Number.isFinite(max)||max<min))||(rate!==null&&(!Number.isFinite(rate)||rate<0))||(tax!==null&&(!Number.isFinite(tax)||tax<0||tax>100)))return out({error:"Check tenure, commitment limits, return rate and tax rate."},400);
+    const {data,error}=await admin.from("funding_opportunities").insert({reference_code:ref,title,description:String(body.description||"").slice(0,4000)||null,funding_purpose:String(body.funding_purpose||"").slice(0,2000)||null,project_id:body.project_id?Number(body.project_id):null,target_amount:amount,currency_code:String(body.currency_code||"KES").toUpperCase(),minimum_commitment:min,maximum_commitment:max,proposed_return_rate:rate,return_type:body.return_type==="annualised_simple"?"annualised_simple":"fixed_total_period",day_count_basis:["actual_360","30_360"].includes(body.day_count_basis)?body.day_count_basis:"actual_365",term_days:term,opens_on:body.opens_on||null,closes_on:body.closes_on||null,eligibility:body.eligibility&&typeof body.eligibility==="object"?body.eligibility:{},required_documents:Array.isArray(body.required_documents)?body.required_documents:[],tax_rate:tax,tax_approval_reference:String(body.tax_approval_reference||"").trim()||null,management_approval_reference:String(body.management_approval_reference||"").trim()||null,terms_approval_reference:String(body.terms_approval_reference||"").trim()||null,early_settlement_allowed:body.early_settlement_allowed===true,compounding_allowed:false,status:"draft",created_by:user.id}).select("*").single();
     if(error)throw error; await audit("opportunity",data.id,"created",null,data); return out({success:true,record:data});
   }
   if(action==="submit_opportunity"){
@@ -98,7 +141,13 @@ Deno.serve(async(req)=>{
     if(before[actorField])return out({error:"This approval has already been recorded."},409);
     const otherActor=legal?before.finance_approved_by:before.legal_approved_by;
     if(otherActor===user.id)return out({error:"Legal and finance approvals must be completed by different authorised users."},409);
-    const patch:any={[actorField]:user.id,[refField]:reference,[atField]:new Date().toISOString(),updated_at:new Date().toISOString()};
+    if(!legal&&(!before.terms_approval_reference||!before.management_approval_reference))return out({error:"Management and terms approval references are required before finance approval."},409);
+    if(!legal&&Number(before.term_days)!==120&&(!before.tax_approval_reference||!before.management_approval_reference))return out({error:"Non-standard tenure requires management and tax approval references."},409);
+    if(!legal&&before.tax_rate!==null&&!before.tax_approval_reference)return out({error:"A tax approval reference is required for configured deductions."},409);
+    const now=new Date().toISOString();
+    const patch:any={[actorField]:user.id,[refField]:reference,[atField]:now,updated_at:now};
+    if(legal){patch.legal_gate_cleared_at=now;patch.legal_gate_cleared_by=user.id;}
+    else{patch.terms_approved_at=now;patch.terms_approved_by=user.id;}
     const {data:updated,error}=await admin.from("funding_opportunities").update(patch).eq("id",id).eq("status","pending_approval").is(actorField,null).select("*").maybeSingle();
     if(error)throw error;if(!updated)return out({error:"Approval changed concurrently; refresh and retry."},409);
     let result=updated;
@@ -114,6 +163,9 @@ Deno.serve(async(req)=>{
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const id=Number(body.id);const {data:before}=await admin.from("funding_opportunities").select("*").eq("id",id).maybeSingle();
     if(!before||!["approved","open","paused"].includes(before.status))return out({error:"Opportunity must first receive both approvals."},409);
+    if(action==="open_opportunity"&&(!before.legal_gate_cleared_at||!before.terms_approved_at||!before.proposed_return_rate||!before.term_days||!before.terms_approval_reference||!before.management_approval_reference))return out({error:"Legal gate, approved terms, rate and management approval must be recorded before publication."},409);
+    if(action==="open_opportunity"&&Number(before.term_days)!==120&&(!before.tax_approval_reference||!before.management_approval_reference))return out({error:"Optional tenure requires management and tax approval."},409);
+    if(action==="open_opportunity"&&before.tax_rate!==null&&!before.tax_approval_reference)return out({error:"Tax settings are not approved."},409);
     const status=action==="open_opportunity"?"open":"paused";
     const {data,error}=await admin.from("funding_opportunities").update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error;await audit("opportunity",id,status,before,data);return out({success:true,record:data});
@@ -124,15 +176,18 @@ Deno.serve(async(req)=>{
     const [{data:opp},{data:party}]=await Promise.all([admin.from("funding_opportunities").select("*").eq("id",opportunity).maybeSingle(),admin.from("funding_parties").select("*").eq("id",funder).maybeSingle()]);
     if(!opp||opp.status!=="open")return out({error:"Only open approved opportunities accept commitments."},409);
     if(!party||party.kyc_status!=="verified"||party.status!=="active")return out({error:"Funder must be active with verified KYC."},409);
-    if(!Number.isFinite(principal)||principal<=0||!Number.isFinite(rate)||rate<0||!Number.isInteger(days)||days<1||days>3650)return out({error:"Valid principal, return rate and term are required."},400);
-    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",opportunity).not("status","in",'("(cancelled)")');
+    if(!Number.isFinite(principal)||principal<=0||principal<Number(opp.minimum_commitment)|| (opp.maximum_commitment!==null&&principal>Number(opp.maximum_commitment)))return out({error:"Commitment amount is outside the approved minimum/maximum."},400);
+    if(rate!==Number(opp.proposed_return_rate)||days!==Number(opp.term_days))return out({error:"Rate and tenure must match the approved opportunity terms."},409);
+    if(!opp.legal_gate_cleared_at||!opp.terms_approved_at||!opp.legal_approval_reference||!opp.finance_approval_reference)return out({error:"The legal and commercial approval gates are not cleared."},409);
+    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",opportunity).not("status","in",'("(cancelled,rejected)")');
     const already=(prior||[]).reduce((s,x)=>s+Number(x.principal_amount),0);
     if(already+principal>Number(opp.target_amount))return out({error:"Total commitments cannot exceed the opportunity target amount."},400);
     const agreement=String(body.agreement_reference||"").trim(),signed=String(body.signed_at||"").trim();
     const signedAt=agreement&&signed?new Date(signed):null;
     const isSigned=!!(agreement&&signedAt&&!Number.isNaN(signedAt.getTime()));
     const maturity=isSigned?new Date(signedAt!.getTime()+days*86400000).toISOString().slice(0,10):null;
-    const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opportunity,funder_id:funder,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:rate,term_days:days,status:isSigned?"committed":"pending_agreement",agreement_reference:isSigned?agreement:null,signed_at:isSigned?signedAt!.toISOString():null,terms_locked_at:isSigned?new Date().toISOString():null,maturity_date:maturity}).select("*").single();
+    const termsSnapshot={opportunity_id:opp.id,reference_code:opp.reference_code,title:opp.title,funding_purpose:opp.funding_purpose,principal_amount:principal,currency_code:opp.currency_code,return_type:opp.return_type,return_rate:rate,day_count_basis:opp.day_count_basis,term_days:days,tax_rate:opp.tax_rate,other_deductions:opp.other_deductions,early_settlement_allowed:opp.early_settlement_allowed,compounding_allowed:false,terms_version:opp.terms_version,legal_approval_reference:opp.legal_approval_reference,finance_approval_reference:opp.finance_approval_reference};
+    const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opportunity,funder_id:funder,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:rate,term_days:days,return_type:opp.return_type,day_count_basis:opp.day_count_basis,tax_rate_snapshot:opp.tax_rate,deductions_snapshot:opp.other_deductions,terms_snapshot:termsSnapshot,terms_version:opp.terms_version,early_settlement_allowed:opp.early_settlement_allowed,compounding_allowed:false,status:isSigned?"committed":"agreement_pending",agreement_reference:isSigned?agreement:null,signed_at:isSigned?signedAt!.toISOString():null,terms_locked_at:isSigned?new Date().toISOString():null,accepted_at:isSigned?new Date().toISOString():null,maturity_date:maturity}).select("*").single();
     if(error)throw error;await audit("commitment",data.id,"created",null,data);return out({success:true,record:data});
   }
   if(action==="sign_commitment"){
@@ -175,17 +230,17 @@ Deno.serve(async(req)=>{
     const {error:ledgerError}=await admin.from("funding_liability_ledger").insert({commitment_id:receipt.commitment_id,receipt_id:id,entry_type:"principal_received",amount:receipt.amount,currency_code:receipt.currency_code,effective_date:receipt.received_on,reference:receipt.external_reference,created_by:user.id});
     if(ledgerError)throw ledgerError;
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",receipt.commitment_id).single();
-    await admin.from("funding_commitments").update({status:"funded",updated_at:new Date().toISOString()}).eq("id",receipt.commitment_id);
+    await admin.from("funding_commitments").update({status:"active_funding",updated_at:new Date().toISOString()}).eq("id",receipt.commitment_id);
     await audit("receipt",id,"verified_and_posted",before,receipt);return out({success:true,record:receipt,commitment:commit});
   }
   if(action==="process_maturities"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const today=new Date().toISOString().slice(0,10);
-    const {data:due,error}=await admin.from("funding_commitments").select("*").eq("status","funded").lte("maturity_date",today).limit(200);
+    const {data:due,error}=await admin.from("funding_commitments").select("*").in("status",["funded","active_funding"]).lte("maturity_date",today).limit(200);
     if(error)throw error;
     const processed=[];
     for(const commitment of due||[]){
-      const {data:changed,error:updateError}=await admin.from("funding_commitments").update({status:"matured",updated_at:new Date().toISOString()}).eq("id",commitment.id).eq("status","funded").select("*").maybeSingle();
+      const {data:changed,error:updateError}=await admin.from("funding_commitments").update({status:"matured",updated_at:new Date().toISOString()}).eq("id",commitment.id).in("status",["funded","active_funding"]).select("*").maybeSingle();
       if(updateError)throw updateError;
       if(changed) { await audit("commitment",commitment.id,"matured",commitment,changed); processed.push(changed); }
     }
@@ -196,7 +251,7 @@ Deno.serve(async(req)=>{
     const cid=Number(body.commitment_id),pid=Number(body.project_id),amount=Number(body.allocated_amount);
     if(!cid||!pid||!Number.isFinite(amount)||amount<=0)return out({error:"Commitment, project and positive allocation required."},400);
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",cid).maybeSingle();
-    if(!commit||!["funded","matured"].includes(commit.status))return out({error:"Only funded commitments can be allocated."},409);
+    if(!commit||!["funded","active_funding","matured","overdue"].includes(commit.status))return out({error:"Only funded commitments can be allocated."},409);
     const {data:received}=await admin.from("funding_liability_ledger").select("amount").eq("commitment_id",cid).eq("entry_type","principal_received");
     const {data:allocated}=await admin.from("funding_project_allocations").select("allocated_amount").eq("commitment_id",cid);
     const total=(received||[]).reduce((s,x)=>s+Number(x.amount),0),used=(allocated||[]).reduce((s,x)=>s+Number(x.allocated_amount),0);
