@@ -675,10 +675,16 @@ Deno.serve(async (req) => {
         const gross=returnType==="annualised_simple" ? principal*(rate/100)*(term/actual365(term,basis)) : principal*(rate/100);
         const taxRate=Number(snap.tax_rate??c.tax_rate_snapshot??0);
         const tax=gross*(taxRate/100);
-        const net=Math.max(0,gross-tax);
+        const extraDeductions=Array.isArray(snap.other_deductions)?snap.other_deductions.reduce((sum:number,item:any)=>{
+          const kind=String(item?.type||"percentage");
+          if(kind==="fixed")return sum+Math.max(0,Number(item?.amount||0));
+          return sum+gross*Math.max(0,Number(item?.rate??item?.percentage??0))/100;
+        },0):0;
+        const totalDeductions=tax+extraDeductions;
+        const net=Math.max(0,gross-totalDeductions);
         const activeCapital=Math.max(0,capitalReceived-principalRepaid);
         const maturityTotal=principal+net;
-        return {...c,capital_received:capitalReceived,principal_repaid:principalRepaid,return_paid:returnAlreadyPaid,active_capital:activeCapital,return_type:returnType,day_count_basis:basis,display_rate:rate,gross_return:gross,estimated_deductions:tax,net_return:net,maturity_total:maturityTotal,verified_receipts:verifiedReceipts,settlements:paid};
+        return {...c,capital_received:capitalReceived,principal_repaid:principalRepaid,return_paid:returnAlreadyPaid,active_capital:activeCapital,return_type:returnType,day_count_basis:basis,display_rate:rate,gross_return:gross,estimated_deductions:totalDeductions,net_return:net,maturity_total:maturityTotal,verified_receipts:verifiedReceipts,settlements:paid};
       });
       return jsonResponse({success:true,investor,funder,opportunities:opportunities||[],commitments:portfolio,receipts,settlements,live_offers_enabled:true,legal_notice:"Only approved published opportunities are shown. Only verified receipts count as invested capital. Figures are based on each commitment's locked terms snapshot and do not constitute a guarantee."});
     }
