@@ -26,7 +26,7 @@ Deno.serve(async(req)=>{
     const {error}=await admin.from("funding_audit_log").insert({entity_type:type,entity_id:id,action:verb,before_data:before??null,after_data:after??null,actor_id:user.id});
     if(error)console.error("Funding audit log failed",error);
   };
-  const listTables:Record<string,string>={parties:"funding_parties",opportunities:"funding_opportunities",commitments:"funding_commitments",receipts:"funding_receipts",settlements:"funding_settlements",allocations:"funding_project_allocations",ledger:"funding_liability_ledger"};
+  const listTables:Record<string,string>={parties:"funding_parties",opportunities:"funding_opportunities",commitments:"funding_commitments",receipts:"funding_receipts",settlements:"funding_settlements",allocations:"funding_project_allocations",ledger:"funding_liability_ledger",documents:"funding_documents"};
   if(action==="investor_express_interest"){
     const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,account_status").eq("user_id",user.id).maybeSingle();
     if(!portal||portal.account_status!=="active"||!portal.investor_id)return out({error:"An active investor portal account is required."},403);
@@ -235,7 +235,7 @@ Deno.serve(async(req)=>{
     const signedDate=new Date(signed);
     if(Number.isNaN(signedDate.getTime())||signedDate.getTime()>Date.now()+86400000)return out({error:"Valid signed date is required."},400);
     const {data:before}=await admin.from("funding_commitments").select("*").eq("id",id).maybeSingle();
-    if(!before||!["pending_agreement","commitment_submitted"].includes(before.status))return out({error:"Only submitted commitments awaiting a signed agreement can be activated for payment."},409);
+    if(!before||!["pending_agreement","agreement_pending","commitment_submitted"].includes(before.status))return out({error:"Only submitted commitments awaiting a signed agreement can be activated for payment."},409);
     const maturity=new Date(signedDate.getTime()+Number(before.term_days)*86400000).toISOString().slice(0,10);
     const {data,error}=await admin.from("funding_commitments").update({status:"payment_pending",agreement_reference:agreement,signed_at:signedDate.toISOString(),terms_locked_at:new Date().toISOString(),accepted_at:new Date().toISOString(),maturity_date:maturity,updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_agreement").select("*").maybeSingle();
     if(error)throw error;if(!data)return out({error:"Commitment changed concurrently; refresh and retry."},409);
@@ -333,7 +333,12 @@ Deno.serve(async(req)=>{
     const entries=[];if(Number(paid.principal_paid)>0)entries.push({commitment_id:paid.commitment_id,settlement_id:id,entry_type:"principal_repaid",amount:paid.principal_paid,effective_date:paidOn,reference:ref,created_by:user.id});
     if(Number(paid.return_paid)>0)entries.push({commitment_id:paid.commitment_id,settlement_id:id,entry_type:"return_paid",amount:paid.return_paid,effective_date:paidOn,reference:ref,created_by:user.id});
     if(entries.length){const {error:le}=await admin.from("funding_liability_ledger").insert(entries);if(le)throw le;}
-    await audit("settlement",id,"paid_and_posted",before,paid);return out({success:true,record:paid});
+    const {data:allLedger}=await admin.from("funding_liability_ledger").select("entry_type,amount").eq("commitment_id",paid.commitment_id);
+    const receivedPrincipal=(allLedger||[]).filter((x:any)=>x.entry_type==="principal_received").reduce((n:number,x:any)=>n+Number(x.amount),0);
+    const repaidPrincipal=(allLedger||[]).filter((x:any)=>x.entry_type==="principal_repaid").reduce((n:number,x:any)=>n+Number(x.amount),0);
+    const fullySettled=repaidPrincipal>=receivedPrincipal-0.01;
+    await admin.from("funding_commitments").update({status:fullySettled?"fully_settled":"partially_settled",updated_at:new Date().toISOString()}).eq("id",paid.commitment_id);
+    await audit("settlement",id,"paid_and_posted",before,paid);return out({success:true,record:paid,commitment_status:fullySettled?"fully_settled":"partially_settled"});
   }
   return out({error:"Unsupported funding action."},400);
  }catch(e){console.error("Funding workflow",e);return out({error:"Funding workflow could not be completed."},500);}
