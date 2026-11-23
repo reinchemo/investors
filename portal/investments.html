@@ -385,6 +385,32 @@
                 padding: 15px
             }
         }
+        .funding-section{margin-top:38px;padding-top:30px;border-top:1px solid var(--line)}
+        .funding-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+        .funding-heading h2{font:800 26px Outfit,sans-serif;margin:8px 0}
+        .funding-heading p,.funding-hint{color:var(--muted);font-size:12px;line-height:1.6}
+        .funding-private,.funding-state{font-size:10px;font-weight:800;letter-spacing:.7px;padding:8px 11px;border-radius:30px;background:rgba(53,212,154,.1);color:var(--green);border:1px solid rgba(53,212,154,.22)}
+        .funding-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0}
+        .funding-stat{padding:18px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,rgba(23,38,64,.96),rgba(17,29,50,.85))}
+        .funding-stat small,.funding-metrics small{display:block;color:var(--muted);font-size:11px}
+        .funding-stat strong{display:block;font:800 22px Outfit,sans-serif;margin-top:9px;color:var(--cyan);overflow-wrap:anywhere}
+        .funding-stat strong.green{color:var(--green)}
+        .funding-kyc{padding:13px 16px;border:1px solid rgba(56,213,242,.2);border-radius:12px;background:rgba(56,213,242,.06);font-size:12px;color:#ccecf6}
+        .funding-contract,.funding-offer{padding:20px;border:1px solid var(--line);border-radius:17px;background:rgba(17,29,50,.9);margin:14px 0}
+        .funding-contract-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+        .funding-contract h3,.funding-offer h3{font:700 18px Outfit,sans-serif;margin:7px 0}
+        .funding-contract p,.funding-offer p{font-size:12px;color:var(--muted);margin:0;line-height:1.6}
+        .funding-ref{font:700 10px 'JetBrains Mono',monospace;color:var(--cyan);letter-spacing:1px}
+        .funding-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+        .funding-metrics>div{padding:12px;border-radius:11px;background:rgba(255,255,255,.025)}
+        .funding-metrics strong{display:block;font-size:14px;margin-top:6px;overflow-wrap:anywhere}
+        .funding-calculation{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px;border-radius:11px;background:rgba(56,213,242,.055);border:1px solid rgba(56,213,242,.14);font-size:12px;color:var(--muted);margin:12px 0}
+        .funding-calculation strong{color:var(--green)}
+        .funding-label{display:block;font-size:11px;color:var(--muted);margin:16px 0 7px}
+        .funding-amount{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font:600 14px inherit}
+        .funding-primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#06101e;font-weight:800;border:0;margin-top:10px}
+        .funding-primary:disabled{opacity:.45;cursor:not-allowed}
+        @media(max-width:700px){.funding-summary{grid-template-columns:1fr}.funding-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.funding-heading h2{font-size:22px}}
     </style>
     <link rel="stylesheet" href="portal-ui.css">
 </head>
@@ -503,11 +529,13 @@
                     return;
                 }
 
-                renderInvestor(
-                    result.investor,
-                    result.investments || [],
-                    result.transactions || []
-                );
+                let fundingData = { opportunities: [], commitments: [], funder: null };
+                try {
+                    const { data: fundingResult, error: fundingError } = await supabaseClient.functions.invoke("portal-personal-data", { body: { action: "funding" } });
+                    if (fundingError) throw fundingError;
+                    if (fundingResult?.success) fundingData = fundingResult;
+                } catch (fundingError) { console.warn("Short-term funding portfolio unavailable:", fundingError); }
+                renderInvestor(result.investor, result.investments || [], result.transactions || [], fundingData);
 
             } catch (error) {
                 console.error("Investment page error:", error);
@@ -520,7 +548,72 @@
             }
         }
 
-        function renderInvestor(investor, investments, transactions) {
+        function renderFundingSection(data) {
+            const commitments = Array.isArray(data.commitments) ? data.commitments : [];
+            const opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
+            const verified = commitments.filter(c => Number(c.capital_received || 0) > 0);
+            const totalInvested = verified.reduce((sum,c) => sum + Number(c.active_capital || 0), 0);
+            const projectedNet = verified.reduce((sum,c) => {
+                const ratio = Number(c.principal_amount) > 0 ? Math.min(1, Number(c.capital_received || 0) / Number(c.principal_amount)) : 0;
+                return sum + Number(c.net_return || 0) * ratio;
+            }, 0);
+            const activeCount = verified.filter(c => ["active_funding","funded","matured","partially_settled","overdue"].includes(c.status)).length;
+            const cash = value => new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES",maximumFractionDigits:2}).format(Number(value||0));
+            const statusLabel = value => String(value||"").replaceAll("_"," ").replace(/\b\w/g,x=>x.toUpperCase());
+            const commitmentRows = commitments.length ? commitments.map(c => {
+                const terms = c.terms_snapshot || {};
+                const received = Number(c.capital_received || 0);
+                const ratio = Number(c.principal_amount) > 0 ? Math.min(1, received / Number(c.principal_amount)) : 0;
+                const gross = Number(c.gross_return || 0) * ratio;
+                const deductions = Number(c.estimated_deductions || 0) * ratio;
+                const net = Number(c.net_return || 0) * ratio;
+                return '<article class="funding-contract"><div class="funding-contract-head"><div><span class="funding-ref">'+safe(terms.reference_code || ("FUND-"+c.id))+'</span><h3>'+safe(terms.title || "Short-term funding")+'</h3><p>'+safe(terms.funding_purpose || "Business funding")+'</p></div><span class="funding-state">'+safe(statusLabel(c.status))+'</span></div>'+
+                  '<div class="funding-metrics"><div><small>Agreed principal</small><strong>'+cash(c.principal_amount)+'</strong></div><div><small>Verified funds received</small><strong>'+cash(received)+'</strong></div><div><small>Return rate</small><strong>'+safe(c.display_rate)+'% '+(c.return_type==="annualised_simple"?"p.a.":"total")+'</strong></div><div><small>Tenure</small><strong>'+safe(c.term_days)+' days</strong></div><div><small>Estimated net return</small><strong class="green">'+cash(net)+'</strong></div><div><small>Maturity date</small><strong>'+dateText(c.maturity_date)+'</strong></div></div>'+
+                  '<div class="funding-calculation"><span>Gross return '+cash(gross)+'</span><span>Estimated deductions '+cash(deductions)+'</span><strong>Projected total at maturity '+cash(Number(c.active_capital||0)+net)+'</strong></div>'+
+                  (c.status==="interested" ? '<button class="btn funding-primary" onclick="submitFundingCommitment('+Number(c.id)+')" '+(data.funder?.kyc_status!=="verified"?"disabled":"")+'>Submit commitment</button>' : '')+
+                  (c.status==="interested"&&data.funder?.kyc_status!=="verified" ? '<p class="funding-hint">Complete and verify KYC before submitting a formal commitment.</p>' : '')+
+                  '<p class="funding-hint">Only verified receipts count as invested capital. Return figures use the locked terms snapshot and remain estimates until settlement.</p></article>';
+            }).join("") : '<div class="empty"><strong>No short-term funding records yet</strong><p>Your funding interests, commitments and verified investments will appear here.</p></div>';
+            const offerCards = opportunities.length ? opportunities.map(o => {
+                const rate=Number(o.proposed_return_rate||0),term=Number(o.term_days||120);
+                const denominator=o.day_count_basis==="actual_360"||o.day_count_basis==="30_360"?360:365;
+                const initialGross=o.return_type==="annualised_simple"?Number(o.minimum_commitment)*rate/100*term/denominator:Number(o.minimum_commitment)*rate/100;
+                return '<article class="funding-offer"><div class="funding-contract-head"><div><span class="funding-ref">'+safe(o.reference_code)+'</span><h3>'+safe(o.title)+'</h3><p>'+safe(o.funding_purpose||o.description||"")+'</p></div><span class="funding-state">APPROVED OFFER</span></div>'+
+                  '<div class="funding-metrics"><div><small>Return rate</small><strong>'+rate+'% '+(o.return_type==="annualised_simple"?"p.a.":"for term")+'</strong></div><div><small>Tenure</small><strong>'+term+' days</strong></div><div><small>Minimum</small><strong>'+cash(o.minimum_commitment)+'</strong></div><div><small>Maximum</small><strong>'+(o.maximum_commitment?cash(o.maximum_commitment):"Opportunity capacity")+'</strong></div></div>'+
+                  '<label class="funding-label" for="funding-amount-'+o.id+'">Calculate your return (KES)</label><input class="funding-amount" id="funding-amount-'+o.id+'" type="number" min="'+o.minimum_commitment+'" '+(o.maximum_commitment?'max="'+o.maximum_commitment+'"':'')+' step="100" value="'+o.minimum_commitment+'" oninput="calculateFundingOffer('+o.id+','+rate+','+term+',\''+o.return_type+'\',\''+o.day_count_basis+'\')">'+
+                  '<div class="funding-calculation" id="funding-calc-'+o.id+'"><span>Estimated gross return</span><strong>'+cash(initialGross)+' · Total at maturity '+cash(Number(o.minimum_commitment)+initialGross)+'</strong></div>'+
+                  '<button class="btn funding-primary" onclick="expressFundingInterest('+o.id+')">Express interest</button><p class="funding-hint">Interest is not a commitment or payment. KYC, a signed agreement and verified payment are required before funding becomes active.</p></article>';
+            }).join("") : '<div class="empty"><strong>No approved funding opportunities are currently open</strong><p>Offers appear only after management, legal and finance approval. No unapproved rate or tax setting can be used in a live offer.</p></div>';
+            return '<section class="funding-section"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
+              '<div class="funding-summary"><div class="funding-stat"><small>Verified capital invested</small><strong>'+cash(totalInvested)+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+cash(projectedNet)+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
+              '<div class="funding-kyc"><strong>KYC status:</strong> '+safe(statusLabel(data.funder?.kyc_status||"Not started"))+' · '+safe(data.funder?.status||"No funder profile")+'. A verified profile is required before a formal commitment can be submitted.</div>'+
+              '<div class="section-head"><h2>Your funding portfolio</h2><p>Principal, locked return terms, estimated deductions, maturity and settlement progress.</p></div>'+commitmentRows+
+              '<div class="section-head"><h2>Approved funding opportunities</h2><p>Compare terms and calculate a potential return before expressing interest.</p></div>'+offerCards+
+              '<div class="notice"><strong>Important:</strong> Fixed total-period returns are calculated once for the whole term. Annualised returns use simple pro-rating on the approved day-count basis. Compounding is not applied. Taxes and deductions are shown only when they are part of approved, signed terms. Projected returns are not guarantees.</div></section>';
+        }
+
+        window.calculateFundingOffer = function(id,rate,term,type,basis) {
+            const principal=Number(document.getElementById("funding-amount-"+id)?.value||0);
+            const denominator=basis==="actual_360"||basis==="30_360"?360:365;
+            const gross=type==="annualised_simple"?principal*(rate/100)*(term/denominator):principal*(rate/100);
+            const target=document.getElementById("funding-calc-"+id);
+            if(target)target.innerHTML="<span>Gross return estimate</span><strong>"+new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(gross)+" · Total at maturity "+new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(principal+gross)+"</strong>";
+        };
+        window.expressFundingInterest = async function(opportunityId) {
+            const principal=Number(document.getElementById("funding-amount-"+opportunityId)?.value||0);
+            if(!Number.isFinite(principal)||principal<=0)return alert("Enter a valid amount.");
+            const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_express_interest",opportunity_id:opportunityId,principal_amount:principal,idempotency_key:crypto.randomUUID()}});
+            if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit interest.");
+            alert("Interest submitted. This is not yet a funding commitment or payment.");await loadInvestments();
+        };
+        window.submitFundingCommitment = async function(id) {
+            if(!confirm("Submit this as a formal commitment request? KYC must be verified. A signed agreement and verified payment are still required."))return;
+            const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_submit_commitment",id}});
+            if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit commitment.");
+            alert("Commitment submitted for agreement preparation.");await loadInvestments();
+        };
+
+        function renderInvestor(investor, investments, transactions, fundingData = {}) {
             const totalCapital = investments.reduce(
                 (sum, item) => sum + Number(item.amount || 0), 0
             );
@@ -642,6 +735,7 @@
    <br><br>
    The capital contribution total is the sum of your non-deleted investment entries. It is not necessarily the same as your current equity value. Ownership percentage is not calculated here because the official company-wide equity denominator must come from the approved capitalization records.
   </div>
+  ${renderFundingSection(fundingData)}
  `;
 }
 
