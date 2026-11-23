@@ -12933,6 +12933,9 @@ function openTxnModal(txn = null) {
             }
 
             populateTaskDropdowns();
+            const assigneeSearch = document.getElementById('tskAssigneeSearch');
+            if (assigneeSearch) assigneeSearch.value = '';
+            renderTaskAssigneeChecklist();
 
             // Safety helper to set value only if the element exists
             const setVal = (id, val) => {
@@ -13047,12 +13050,11 @@ function openTxnModal(txn = null) {
                 if (assigneeStaffIds.length && ['draft','assigned'].includes(t.status)) upd.status = 'assigned';
                 const { error } = await supabaseClient.from('tasks').update(upd).eq('id', editingTaskId);
                 if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
-                if (assigneeStaffIds.length || (t && t.assigneeStaffId)) {
-                    const { error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
-                        body: { action: 'assign_task', task_id: editingTaskId, staff_ids: assigneeStaffIds, assignment_mode: assignmentMode }
-                    });
-                    if (assignmentError) { err.textContent = '⚠️ Task saved, but staff assignment failed: ' + assignmentError.message; err.style.display = 'block'; return; }
-                }
+                // Always sync the full checked list, including an empty list, so unchecked staff are removed.
+                const { error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
+                    body: { action: 'assign_task', task_id: editingTaskId, staff_ids: assigneeStaffIds, assignment_mode: assignmentMode }
+                });
+                if (assignmentError) { err.textContent = '⚠️ Task saved, but staff assignment failed: ' + assignmentError.message; err.style.display = 'block'; return; }
                 showToast('✅ Task updated', 'success');
             } else {
                 const { data: idData, error: idErr } = await supabaseClient.rpc('next_task_id');
