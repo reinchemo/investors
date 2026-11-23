@@ -10449,7 +10449,9 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     err.style.display = 'block';
                     return;
                 }
-                const negativeNet = included.filter(l => safeNum(l.amount) + safeNum(l.allowance) - safeNum(l.deduction) < 0);\n                if (negativeNet.length) { err.textContent = 'Deductions cannot exceed gross pay: ' + negativeNet.map(l => l.fullName).join(', '); err.style.display = 'block'; return; }\n                const zeroRows = included.filter(l => safeNum(l.amount) <= 0);
+                const negativeNet = included.filter(l => safeNum(l.amount) + safeNum(l.allowance) - safeNum(l.deduction) < 0);
+                if (negativeNet.length) { err.textContent = 'Deductions cannot exceed gross pay: ' + negativeNet.map(l => l.fullName).join(', '); err.style.display = 'block'; return; }
+                const zeroRows = included.filter(l => safeNum(l.amount) <= 0);
                 if (zeroRows.length) {
                     err.textContent = `⚠️ ${zeroRows.length} selected line(s) have zero amount. Uncheck them or enter an amount.`;
                     err.style.display = 'block';
@@ -10472,7 +10474,13 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const notes = [userNotes, 'Draft calculated from approved paid days using the proposal payroll preview, plus separately approved overtime. Statutory deductions and additional adjustments are not included.'].filter(Boolean).join('\n');
             const included = wizardLines.filter(l => l.include);
             const totalGross = included.reduce((s, l) => s + safeNum(l.amount) + safeNum(l.allowance), 0);\n            const totalDeductions = included.reduce((s, l) => s + safeNum(l.deduction), 0);\n            const totalNet = totalGross - totalDeductions;
+            const { data: authResult, error: authError } = await supabaseClient.auth.getUser();
             const err = document.getElementById('pwError3');
+            if (authError || !authResult?.user?.id) {
+                err.textContent = 'Your session could not be verified. Sign in again before saving payroll.';
+                err.style.display = 'block';
+                return;
+            }
             err.style.display = 'none';
 
             const nextBtn = document.getElementById('pwNextBtn');
@@ -10485,11 +10493,11 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                     period: period,
                     run_date: runDate,
                     status: 'draft',
-                    total_gross: total,
-                    total_deductions: 0,
-                    total_net: total,
+                    total_gross: totalGross,
+                    total_deductions: totalDeductions,
+                    total_net: totalNet,
                     notes: notes || null,
-                    created_by: CURRENT_USER
+                    created_by: authResult.user.id
                 })
                 .select('id')
                 .single();
@@ -10505,13 +10513,21 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const runId = runData.id;
 
                       // 1. Save to standard payroll_items
+            const periodCalendarDays = new Date(Number(period.slice(0, 4)), Number(period.slice(5, 7)), 0).getDate();
             const items = included.map(l => ({
                 run_id: runId, staff_id: l.staffId,
                 gross: safeNum(l.amount) + safeNum(l.allowance),
                 deductions: safeNum(l.deduction),
                 net: safeNum(l.amount) + safeNum(l.allowance) - safeNum(l.deduction),
-                allowances: safeNum(l.allowance), other_deductions: safeNum(l.deduction),
-                notes: 'Basic and approved overtime KSh ' + fmt(l.amount) + '; allowance KSh ' + fmt(l.allowance) + '; manual deduction KSh ' + fmt(l.deduction) + '. Statutory deductions not calculated.'
+                salary_snapshot: safeNum(l.salary),
+                period_calendar_days: periodCalendarDays,
+                paid_days: safeNum(l.paidDays),
+                basic_pay: safeNum(l.basicPay),
+                overtime_pay: safeNum(l.overtime),
+                allowances: safeNum(l.allowance),
+                other_deductions: safeNum(l.deduction),
+                calculation_notes: 'Basic pay from approved attendance preview; approved overtime added. Statutory deductions are not calculated automatically.',
+                notes: 'Basic pay KSh ' + fmt(l.basicPay) + '; approved overtime KSh ' + fmt(l.overtime) + '; allowance KSh ' + fmt(l.allowance) + '; manual deduction KSh ' + fmt(l.deduction) + '. Statutory deductions not calculated.'
             }));
 
             const { error: itemsErr } = await supabaseClient
@@ -10525,6 +10541,30 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 nextBtn.disabled = false;
                 nextBtn.innerHTML = '<i class="fas fa-check"></i> Save Draft';
                 return;
+            }
+
+            // Link approved overtime to this payroll run so it cannot be reused in another run.
+            const overtimeIds = included.flatMap(line =>
+                overtimeEntries.filter(entry => Number(entry.staffId) === Number(line.staffId) &&
+                    entry.period === period && entry.status === 'approved' && !entry.payrollRunId)
+                    .map(entry => entry.id)
+            );
+            if (overtimeIds.length) {
+                const { error: overtimeLinkError } = await supabaseClient
+                    .from('overtime_entries')
+                    .update({ payroll_run_id: runId, updated_at: new Date().toISOString() })
+                    .in('id', overtimeIds)
+                    .eq('status', 'approved')
+                    .is('payroll_run_id', null);
+                if (overtimeLinkError) {
+                    await supabaseClient.from('payroll_items').delete().eq('run_id', runId);
+                    await supabaseClient.from('payroll_runs').delete().eq('id', runId);
+                    err.textContent = '⚠️ Could not link approved overtime to payroll: ' + overtimeLinkError.message;
+                    err.style.display = 'block';
+                    nextBtn.disabled = false;
+                    nextBtn.innerHTML = '<i class="fas fa-check"></i> Save Draft';
+                    return;
+                }
             }
 
             // 2. NEW: Sync to Unified Payments table (Item 14)
