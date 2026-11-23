@@ -197,7 +197,10 @@ Deno.serve(async (req) => {
 
     if (action === "investor_dashboard") {
       if (!account.investor_id) {
-        return jsonResponse({ success: true, investor: null, investments: [], transactions: [] });
+        if(!account.funder_id)return jsonResponse({ success: true, investor: null, investments: [], transactions: [] });
+        const {data:funderProfile,error:funderError}=await admin.from("funding_parties").select("id,legal_name,status,created_at").eq("id",account.funder_id).maybeSingle();
+        if(funderError||!funderProfile)return jsonResponse({error:"Your funding profile is not available."},404);
+        return jsonResponse({success:true,investor:{id:null,name:funderProfile.legal_name,investor_number:"SHORT-TERM",equity:0,status:funderProfile.status,joined_date:funderProfile.created_at},investments:[],transactions:[],funder_only:true});
       }
 
       const investorId = Number(account.investor_id);
