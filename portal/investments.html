@@ -553,13 +553,18 @@
             const commitments = Array.isArray(data.commitments) ? data.commitments : [];
             const opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
             const verified = commitments.filter(c => Number(c.capital_received || 0) > 0);
-            const totalInvested = verified.reduce((sum,c) => sum + Number(c.active_capital || 0), 0);
-            const projectedNet = verified.reduce((sum,c) => {
-                const ratio = Number(c.principal_amount) > 0 ? Math.min(1, Number(c.capital_received || 0) / Number(c.principal_amount)) : 0;
-                return sum + Number(c.net_return || 0) * ratio;
-            }, 0);
+            const totalsByCurrency = {};
+            verified.forEach(c => {
+                const currency=c.currency_code||"KES";
+                const ratio=Number(c.principal_amount)>0?Math.min(1,Number(c.capital_received||0)/Number(c.principal_amount)):0;
+                totalsByCurrency[currency]=totalsByCurrency[currency]||{principal:0,net:0};
+                totalsByCurrency[currency].principal+=Number(c.active_capital||0);
+                totalsByCurrency[currency].net+=Number(c.net_return||0)*ratio;
+            });
+            const totalInvestedHtml=Object.entries(totalsByCurrency).map(([currency,values])=>'<span>'+cash(values.principal,currency)+'</span>').join(' · ')||cash(0,"KES");
+            const projectedNetHtml=Object.entries(totalsByCurrency).map(([currency,values])=>'<span>'+cash(values.net,currency)+'</span>').join(' · ')||cash(0,"KES");
             const activeCount = verified.filter(c => ["active_funding","funded","matured","partially_settled","overdue"].includes(c.status)).length;
-            const cash = value => new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES",maximumFractionDigits:2}).format(Number(value||0));
+            const cash = (value,currency="KES") => new Intl.NumberFormat("en-KE",{style:"currency",currency,maximumFractionDigits:2}).format(Number(value||0));
             const statusLabel = value => String(value||"").replaceAll("_"," ").replace(/\b\w/g,x=>x.toUpperCase());
             const commitmentRows = commitments.length ? commitments.map(c => {
                 const terms = c.terms_snapshot || {};
@@ -569,8 +574,8 @@
                 const deductions = Number(c.estimated_deductions || 0) * ratio;
                 const net = Number(c.net_return || 0) * ratio;
                 return '<article class="funding-contract"><div class="funding-contract-head"><div><span class="funding-ref">'+safe(terms.reference_code || ("FUND-"+c.id))+'</span><h3>'+safe(terms.title || "Short-term funding")+'</h3><p>'+safe(terms.funding_purpose || "Business funding")+'</p></div><span class="funding-state">'+safe(statusLabel(c.status))+'</span></div>'+
-                  '<div class="funding-metrics"><div><small>Agreed principal</small><strong>'+cash(c.principal_amount)+'</strong></div><div><small>Verified funds received</small><strong>'+cash(received)+'</strong></div><div><small>Return rate</small><strong>'+safe(c.display_rate)+'% '+(c.return_type==="annualised_simple"?"p.a.":"total")+'</strong></div><div><small>Tenure</small><strong>'+safe(c.term_days)+' days</strong></div><div><small>Estimated net return</small><strong class="green">'+cash(net)+'</strong></div><div><small>Maturity date</small><strong>'+dateText(c.maturity_date)+'</strong></div></div>'+
-                  '<div class="funding-calculation"><span>Gross return '+cash(gross)+'</span><span>Estimated deductions '+cash(deductions)+'</span><strong>Projected total at maturity '+cash(Number(c.active_capital||0)+net)+'</strong></div>'+
+                  '<div class="funding-metrics"><div><small>Agreed principal</small><strong>'+cash(c.principal_amount,c.currency_code)+'</strong></div><div><small>Verified funds received</small><strong>'+cash(received,c.currency_code)+'</strong></div><div><small>Return rate</small><strong>'+safe(c.display_rate)+'% '+(c.return_type==="annualised_simple"?"p.a.":"total")+'</strong></div><div><small>Tenure</small><strong>'+safe(c.term_days)+' days</strong></div><div><small>Estimated net return</small><strong class="green">'+cash(net,c.currency_code)+'</strong></div><div><small>Maturity date</small><strong>'+dateText(c.maturity_date)+'</strong></div></div>'+
+                  '<div class="funding-calculation"><span>Gross return '+cash(gross,c.currency_code)+'</span><span>Estimated deductions '+cash(deductions,c.currency_code)+'</span><strong>Projected total at maturity '+cash(Number(c.active_capital||0)+net,c.currency_code)+'</strong></div>'+
                   (c.status==="interested" ? '<button class="btn funding-primary" onclick="submitFundingCommitment('+Number(c.id)+')" '+(data.funder?.kyc_status!=="verified"?"disabled":"")+'>Submit commitment</button>' : '')+
                   (c.status==="interested"&&data.funder?.kyc_status!=="verified" ? '<p class="funding-hint">Complete and verify KYC before submitting a formal commitment.</p>' : '')+
                   '<p class="funding-hint">Only verified receipts count as invested capital. Return figures use the locked terms snapshot and remain estimates until settlement.</p></article>';
@@ -583,9 +588,9 @@
                 const initialExtras=Array.isArray(o.other_deductions)?o.other_deductions.reduce((sum,item)=>sum+(item.type==="fixed"?Number(item.amount||0):initialGross*Number(item.rate??item.percentage??0)/100),0):0;
                 const initialNet=Math.max(0,initialGross-initialTax-initialExtras);
                 return '<article class="funding-offer"><div class="funding-contract-head"><div><span class="funding-ref">'+safe(o.reference_code)+'</span><h3>'+safe(o.title)+'</h3><p>'+safe(o.funding_purpose||o.description||"")+'</p></div><span class="funding-state">APPROVED OFFER</span></div>'+
-                  '<div class="funding-metrics"><div><small>Return rate</small><strong>'+rate+'% '+(o.return_type==="annualised_simple"?"p.a.":"for term")+'</strong></div><div><small>Tenure</small><strong>'+term+' days</strong></div><div><small>Minimum</small><strong>'+cash(o.minimum_commitment)+'</strong></div><div><small>Maximum</small><strong>'+(o.maximum_commitment?cash(o.maximum_commitment):"Opportunity capacity")+'</strong></div></div>'+(Array.isArray(o.required_documents)&&o.required_documents.length?'<p class="funding-hint">Required documents: '+o.required_documents.map(safe).join(", ")+'</p>':'')+'<p class="funding-hint">Eligibility: '+safe(JSON.stringify(o.eligibility||{}))+'</p>'+
-                  '<label class="funding-label" for="funding-amount-'+o.id+'">Calculate your return ('+safe(o.currency_code)+')</label><input class="funding-amount" id="funding-amount-'+o.id+'" data-tax="'+Number(o.tax_rate||0)+'" data-deductions="'+safe(JSON.stringify(o.other_deductions||[]))+'" type="number" min="'+o.minimum_commitment+'" '+(o.maximum_commitment?'max="'+o.maximum_commitment+'"':'')+' step="100" value="'+o.minimum_commitment+'" oninput="calculateFundingOffer('+o.id+','+rate+','+term+',\''+o.return_type+'\',\''+o.day_count_basis+'\')">'+
-                  '<div class="funding-calculation" id="funding-calc-'+o.id+'"><span>Gross '+cash(initialGross)+' · Deductions '+cash(initialTax+initialExtras)+'</span><strong>Net return '+cash(initialNet)+' · Maturity '+cash(Number(o.minimum_commitment)+initialNet)+'</strong></div>'+
+                  '<div class="funding-metrics"><div><small>Return rate</small><strong>'+rate+'% '+(o.return_type==="annualised_simple"?"p.a.":"for term")+'</strong></div><div><small>Tenure</small><strong>'+term+' days</strong></div><div><small>Minimum</small><strong>'+cash(o.minimum_commitment,o.currency_code)+'</strong></div><div><small>Maximum</small><strong>'+(o.maximum_commitment?cash(o.maximum_commitment,o.currency_code):"Opportunity capacity")+'</strong></div></div>'+(Array.isArray(o.required_documents)&&o.required_documents.length?'<p class="funding-hint">Required documents: '+o.required_documents.map(safe).join(", ")+'</p>':'')+'<p class="funding-hint">Eligibility: '+safe(JSON.stringify(o.eligibility||{}))+'</p>'+
+                  '<label class="funding-label" for="funding-amount-'+o.id+'">Calculate your return ('+safe(o.currency_code)+')</label><input class="funding-amount" id="funding-amount-'+o.id+'" data-currency="'+safe(o.currency_code||"KES")+'" data-tax="'+Number(o.tax_rate||0)+'" data-deductions="'+safe(JSON.stringify(o.other_deductions||[]))+'" type="number" min="'+o.minimum_commitment+'" '+(o.maximum_commitment?'max="'+o.maximum_commitment+'"':'')+' step="100" value="'+o.minimum_commitment+'" oninput="calculateFundingOffer('+o.id+','+rate+','+term+',\''+o.return_type+'\',\''+o.day_count_basis+'\')">'+
+                  '<div class="funding-calculation" id="funding-calc-'+o.id+'"><span>Gross '+cash(initialGross,o.currency_code)+' · Deductions '+cash(initialTax+initialExtras,o.currency_code)+'</span><strong>Net return '+cash(initialNet,o.currency_code)+' · Maturity '+cash(Number(o.minimum_commitment)+initialNet,o.currency_code)+'</strong></div>'+
                   '<label class="funding-consent"><input type="checkbox" id="funding-consent-'+o.id+'"> I consent to STARLINK using my submitted contact and KYC information to assess this funding request under the published terms and retention policy.</label><button class="btn funding-primary" onclick="expressFundingInterest('+o.id+')">Express interest</button><p class="funding-hint">Interest is not a commitment or payment. KYC, a signed agreement and verified payment are required before funding becomes active.</p></article>';
             }).join("") : '<div class="empty"><strong>No approved funding opportunities are currently open</strong><p>Offers appear only after management, legal and finance approval. No unapproved rate or tax setting can be used in a live offer.</p></div>';
             return '<section class="funding-section"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
@@ -605,7 +610,7 @@
             let extras=[];try{extras=JSON.parse(input?.dataset.deductions||"[]");}catch(_){}
             const other=Array.isArray(extras)?extras.reduce((sum,item)=>sum+(item.type==="fixed"?Number(item.amount||0):gross*Number(item.rate??item.percentage??0)/100),0):0;
             const deductions=tax+other,net=Math.max(0,gross-deductions);
-            const fmt=value=>new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(value);
+            const fmt=value=>new Intl.NumberFormat("en-KE",{style:"currency",currency:input?.dataset.currency||"KES"}).format(value);
             const target=document.getElementById("funding-calc-"+id);
             if(target)target.innerHTML="<span>Gross "+fmt(gross)+" · Deductions "+fmt(deductions)+"</span><strong>Net return "+fmt(net)+" · Total at maturity "+fmt(principal+net)+"</strong>";
         };
