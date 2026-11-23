@@ -226,7 +226,7 @@ Deno.serve(async(req)=>{
     const isSigned=!!(agreement&&signedAt&&!Number.isNaN(signedAt.getTime()));
     const maturity=isSigned?new Date(signedAt!.getTime()+days*86400000).toISOString().slice(0,10):null;
     const termsSnapshot={opportunity_id:opp.id,reference_code:opp.reference_code,title:opp.title,funding_purpose:opp.funding_purpose,principal_amount:principal,currency_code:opp.currency_code,return_type:opp.return_type,return_rate:rate,day_count_basis:opp.day_count_basis,term_days:days,tax_rate:opp.tax_rate,other_deductions:opp.other_deductions,early_settlement_allowed:opp.early_settlement_allowed,compounding_allowed:false,terms_version:opp.terms_version,legal_approval_reference:opp.legal_approval_reference,finance_approval_reference:opp.finance_approval_reference};
-    const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opportunity,funder_id:funder,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:rate,term_days:days,return_type:opp.return_type,day_count_basis:opp.day_count_basis,tax_rate_snapshot:opp.tax_rate,deductions_snapshot:opp.other_deductions,terms_snapshot:termsSnapshot,terms_version:opp.terms_version,early_settlement_allowed:opp.early_settlement_allowed,compounding_allowed:false,status:isSigned?"committed":"agreement_pending",agreement_reference:isSigned?agreement:null,signed_at:isSigned?signedAt!.toISOString():null,terms_locked_at:isSigned?new Date().toISOString():null,accepted_at:isSigned?new Date().toISOString():null,maturity_date:maturity}).select("*").single();
+    const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opportunity,funder_id:funder,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:rate,term_days:days,return_type:opp.return_type,day_count_basis:opp.day_count_basis,tax_rate_snapshot:opp.tax_rate,deductions_snapshot:opp.other_deductions,terms_snapshot:termsSnapshot,terms_version:opp.terms_version,early_settlement_allowed:opp.early_settlement_allowed,compounding_allowed:false,status:isSigned?"payment_pending":"agreement_pending",agreement_reference:isSigned?agreement:null,signed_at:isSigned?signedAt!.toISOString():null,terms_locked_at:isSigned?new Date().toISOString():null,accepted_at:isSigned?new Date().toISOString():null,maturity_date:maturity}).select("*").single();
     if(error)throw error;await audit("commitment",data.id,"created",null,data);return out({success:true,record:data});
   }
   if(action==="sign_commitment"){
@@ -246,12 +246,14 @@ Deno.serve(async(req)=>{
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
     const cid=Number(body.commitment_id),amount=Number(body.amount);if(!cid||!Number.isFinite(amount)||amount<=0)return out({error:"Commitment and positive receipt amount required."},400);
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",cid).maybeSingle();
-    if(!commit||!["committed","payment_pending","funds_pending","funded","active_funding"].includes(commit.status))return out({error:"A signed commitment is required before recording funds."},409);
+    if(!commit||!["committed","payment_pending","payment_received","payment_verified","funds_pending","funded","active_funding"].includes(commit.status))return out({error:"A signed commitment is required before recording funds."},409);
     const {data:existingReceipts}=await admin.from("funding_receipts").select("amount").eq("commitment_id",cid).neq("verification_status","rejected");
     const receivedSoFar=(existingReceipts||[]).reduce((s,x)=>s+Number(x.amount),0);
     if(receivedSoFar+amount>Number(commit.principal_amount))return out({error:"Receipts cannot exceed the signed commitment principal."},409);
     const {data:receipt,error}=await admin.from("funding_receipts").insert({commitment_id:cid,amount,currency_code:commit.currency_code,received_on:body.received_on||new Date().toISOString().slice(0,10),payment_method:String(body.payment_method||"").slice(0,80)||null,external_reference:String(body.external_reference||"").slice(0,160)||null,notes:String(body.notes||"").slice(0,1000)||null,verification_status:"pending",created_by:user.id}).select("*").single();
-    if(error)throw error;await audit("receipt",receipt.id,"recorded_pending_verification",null,receipt);return out({success:true,record:receipt});
+    if(error)throw error;
+    await admin.from("funding_commitments").update({status:"payment_received",updated_at:new Date().toISOString()}).eq("id",cid).in("status",["payment_pending","committed","funds_pending","payment_received"]);
+    await audit("receipt",receipt.id,"recorded_pending_verification",null,receipt);return out({success:true,record:receipt});
   }
   if(action==="verify_receipt"){
     if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
@@ -269,8 +271,23 @@ Deno.serve(async(req)=>{
     const {error:ledgerError}=await admin.from("funding_liability_ledger").insert({commitment_id:receipt.commitment_id,receipt_id:id,entry_type:"principal_received",amount:receipt.amount,currency_code:receipt.currency_code,effective_date:receipt.received_on,reference:receipt.external_reference,created_by:user.id});
     if(ledgerError)throw ledgerError;
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",receipt.commitment_id).single();
-    await admin.from("funding_commitments").update({status:"active_funding",updated_at:new Date().toISOString()}).eq("id",receipt.commitment_id);
+    await admin.from("funding_commitments").update({status:"payment_verified",updated_at:new Date().toISOString()}).eq("id",receipt.commitment_id);
     await audit("receipt",id,"verified_and_posted",before,receipt);return out({success:true,record:receipt,commitment:commit});
+  }
+  if(action==="activate_funding"){
+    if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
+    const id=Number(body.id);
+    const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",id).maybeSingle();
+    if(!commit||commit.status!=="payment_verified")return out({error:"Commitment must have verified receipts before activation."},409);
+    if(!commit.agreement_reference||!commit.signed_at||!commit.terms_locked_at)return out({error:"A verified signed agreement is required before activation."},409);
+    const {data:ledger,error}=await admin.from("funding_liability_ledger").select("amount").eq("commitment_id",id).eq("entry_type","principal_received");
+    if(error)throw error;
+    const verifiedPrincipal=(ledger||[]).reduce((sum:number,row:any)=>sum+Number(row.amount),0);
+    if(verifiedPrincipal+0.01<Number(commit.principal_amount))return out({error:"Verified receipts do not yet cover the full committed principal."},409);
+    const {data,error:updateError}=await admin.from("funding_commitments").update({status:"active_funding",updated_at:new Date().toISOString()}).eq("id",id).eq("status","payment_verified").select("*").maybeSingle();
+    if(updateError)throw updateError;if(!data)return out({error:"Commitment changed; refresh and retry."},409);
+    await audit("commitment",id,"activated_after_verified_funds_and_agreement",commit,data);
+    return out({success:true,record:data});
   }
   if(action==="process_maturities"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
