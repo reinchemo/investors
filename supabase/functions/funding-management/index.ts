@@ -85,16 +85,31 @@ Deno.serve(async(req)=>{
     const {data,error}=await admin.from("funding_opportunities").update({status:"pending_approval",updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error; await audit("opportunity",id,"submitted_for_approval",before,data); return out({success:true,record:data});
   }
-  if(action==="approve_opportunity"){
+  if(action==="approve_legal"||action==="approve_finance"){
     if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
-    const id=Number(body.id),legal=String(body.legal_approval_reference||"").trim(),finance=String(body.finance_approval_reference||"").trim();
-    if(!id||!legal||!finance)return out({error:"Both legal and finance approval references are required."},400);
+    const id=Number(body.id),reference=String(body.approval_reference||"").trim();
+    if(!Number.isSafeInteger(id)||!reference||reference.length>180)return out({error:"Opportunity and approval reference are required."},400);
     const {data:before}=await admin.from("funding_opportunities").select("*").eq("id",id).maybeSingle();
     if(!before||before.status!=="pending_approval")return out({error:"Opportunity is not awaiting approval."},409);
-    const {data,error}=await admin.from("funding_opportunities").update({status:"approved",legal_approval_reference:legal,finance_approval_reference:finance,approved_by:user.id,approved_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_approval").select("*").maybeSingle();
-    if(error)throw error;if(!data)return out({error:"Opportunity changed; refresh and retry."},409);
-    await audit("opportunity",id,"approved",before,data); return out({success:true,record:data});
+    const legal=action==="approve_legal";
+    const actorField=legal?"legal_approved_by":"finance_approved_by";
+    const refField=legal?"legal_approval_reference":"finance_approval_reference";
+    const atField=legal?"legal_approved_at":"finance_approved_at";
+    if(before[actorField])return out({error:"This approval has already been recorded."},409);
+    const otherActor=legal?before.finance_approved_by:before.legal_approved_by;
+    if(otherActor===user.id)return out({error:"Legal and finance approvals must be completed by different authorised users."},409);
+    const patch:any={[actorField]:user.id,[refField]:reference,[atField]:new Date().toISOString(),updated_at:new Date().toISOString()};
+    const {data:updated,error}=await admin.from("funding_opportunities").update(patch).eq("id",id).eq("status","pending_approval").is(actorField,null).select("*").maybeSingle();
+    if(error)throw error;if(!updated)return out({error:"Approval changed concurrently; refresh and retry."},409);
+    let result=updated;
+    if(updated.legal_approved_by&&updated.finance_approved_by&&updated.legal_approved_by!==updated.finance_approved_by){
+      const {data:approved,error:approveError}=await admin.from("funding_opportunities").update({status:"approved",approved_by:user.id,approved_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_approval").not("legal_approved_by","is",null).not("finance_approved_by","is",null).select("*").maybeSingle();
+      if(approveError)throw approveError;if(approved)result=approved;
+    }
+    await audit("opportunity",id,legal?"legal_approval_recorded":"finance_approval_recorded",before,result);
+    return out({success:true,record:result});
   }
+  if(action==="approve_opportunity")return out({error:"Use separate approve_legal and approve_finance actions. Different authorised users are required."},400);
   if(action==="open_opportunity"||action==="pause_opportunity"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const id=Number(body.id);const {data:before}=await admin.from("funding_opportunities").select("*").eq("id",id).maybeSingle();
@@ -128,7 +143,7 @@ Deno.serve(async(req)=>{
     const {data:existingReceipts}=await admin.from("funding_receipts").select("amount").eq("commitment_id",cid).neq("verification_status","rejected");
     const receivedSoFar=(existingReceipts||[]).reduce((s,x)=>s+Number(x.amount),0);
     if(receivedSoFar+amount>Number(commit.principal_amount))return out({error:"Receipts cannot exceed the signed commitment principal."},409);
-    const {data:receipt,error}=await admin.from("funding_receipts").insert({commitment_id:cid,amount,currency_code:commit.currency_code,received_on:body.received_on||new Date().toISOString().slice(0,10),payment_method:String(body.payment_method||"").slice(0,80)||null,external_reference:String(body.external_reference||"").slice(0,160)||null,notes:String(body.notes||"").slice(0,1000)||null,verification_status:"pending"}).select("*").single();
+    const {data:receipt,error}=await admin.from("funding_receipts").insert({commitment_id:cid,amount,currency_code:commit.currency_code,received_on:body.received_on||new Date().toISOString().slice(0,10),payment_method:String(body.payment_method||"").slice(0,80)||null,external_reference:String(body.external_reference||"").slice(0,160)||null,notes:String(body.notes||"").slice(0,1000)||null,verification_status:"pending",created_by:user.id}).select("*").single();
     if(error)throw error;await audit("receipt",receipt.id,"recorded_pending_verification",null,receipt);return out({success:true,record:receipt});
   }
   if(action==="verify_receipt"){
@@ -172,13 +187,14 @@ Deno.serve(async(req)=>{
     const received=(ledger||[]).filter(x=>x.entry_type==="principal_received").reduce((s,x)=>s+Number(x.amount),0);
     const principalPaid=(ledger||[]).filter(x=>x.entry_type==="principal_repaid").reduce((s,x)=>s+Number(x.amount),0);
     if(principal>received-principalPaid)return out({error:"Principal repayment exceeds outstanding principal."},409);
-    const {data,error}=await admin.from("funding_settlements").insert({commitment_id:cid,principal_paid:principal,return_paid:ret,status:"pending_approval"}).select("*").single();
+    const {data,error}=await admin.from("funding_settlements").insert({commitment_id:cid,principal_paid:principal,return_paid:ret,status:"pending_approval",created_by:user.id}).select("*").single();
     if(error)throw error;await audit("settlement",data.id,"submitted_for_approval",null,data);return out({success:true,record:data});
   }
   if(action==="approve_settlement"){
     if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
     const id=Number(body.id);const {data:before}=await admin.from("funding_settlements").select("*").eq("id",id).maybeSingle();
     if(!before||before.status!=="pending_approval")return out({error:"Settlement is not awaiting approval."},409);
+    if(before.created_by===user.id)return out({error:"The person who created a settlement cannot approve it."},403);
     const {data,error}=await admin.from("funding_settlements").update({status:"approved",approved_by:user.id,approved_at:new Date().toISOString()}).eq("id",id).eq("status","pending_approval").select("*").maybeSingle();
     if(error)throw error;if(!data)return out({error:"Settlement changed; refresh and retry."},409);
     await audit("settlement",id,"approved",before,data);return out({success:true,record:data});
@@ -189,6 +205,7 @@ Deno.serve(async(req)=>{
     if(!ref)return out({error:"Payment reference is required."},400);
     const {data:before}=await admin.from("funding_settlements").select("*").eq("id",id).maybeSingle();
     if(!before||before.status!=="approved")return out({error:"Only approved settlements can be marked paid."},409);
+    if(before.approved_by===user.id)return out({error:"The settlement approver cannot record the payment. A second authorised user is required."},403);
     const {data:paid,error}=await admin.from("funding_settlements").update({status:"paid",payment_reference:ref,paid_on:paidOn}).eq("id",id).eq("status","approved").select("*").maybeSingle();
     if(error)throw error;if(!paid)return out({error:"Settlement changed; refresh and retry."},409);
     const {data:existing}=await admin.from("funding_liability_ledger").select("id").eq("settlement_id",id).maybeSingle();
