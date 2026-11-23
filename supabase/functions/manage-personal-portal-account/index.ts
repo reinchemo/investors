@@ -51,13 +51,11 @@ function getServiceRoleKey(): string {
 
 const SERVICE_ROLE_KEY = getServiceRoleKey();
 
-const allowedOrigins = (
-  Deno.env.get("ALLOWED_ORIGINS") ??
-  "https://reinchemo.github.io,http://localhost:5500,http://127.0.0.1:5500"
-)
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = Array.from(new Set([
+  ...(Deno.env.get("ALLOWED_ORIGINS") ?? "http://localhost:5500,http://127.0.0.1:5500")
+    .split(",").map((origin) => origin.trim()).filter(Boolean),
+  "https://reinchemo.github.io",
+]));
 
 const supabaseAdmin = createClient(
   SUPABASE_URL,
