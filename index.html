@@ -3021,6 +3021,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>Reference</th>
                                 <th>Date</th>
                                 <th>Days Pending</th>
+                                <th style="text-align:right;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="reconPendingBody"></tbody>
@@ -4897,11 +4898,49 @@ async function openSecurePdf(investorId) {
             document.getElementById('reconDupRefBody').innerHTML = !issues.dupRef.length ? `<tr><td colspan="4"><div class="empty-row"><i class="fas fa-check-circle"></i>No duplicate references found.</div></td></tr>` :
                 issues.dupRef.map(d => `<tr class="recon-row-warning"><td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(d.reference)}</td><td>${d.employees.map(e => escapeHTML(e.name)).join(', ')}</td><td class="employee-amount">KSh ${fmt(d.total)}</td><td>${d.employees.length}</td></tr>`).join('');
 
-            document.getElementById('reconPendingBody').innerHTML = !issues.pending.length ? `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>No pending payments.</div></td></tr>` :
-                issues.pending.map(e => `<tr class="${e.daysPending > 30 ? 'recon-row-warning' : 'recon-row-caution'}"><td><strong>${escapeHTML(e.name)}</strong></td><td class="employee-amount">KSh ${fmt(e.amount)}</td><td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(e.reference || '—')}</td><td>${escapeHTML(e.date || '—')}</td><td><strong style="color:${e.daysPending > 30 ? '#f0a89f' : '#e8b879'};">${e.daysPending} days</strong></td></tr>`).join('');
+            document.getElementById('reconPendingBody').innerHTML = !issues.pending.length ? `<tr><td colspan="6"><div class="empty-row"><i class="fas fa-check-circle"></i>No pending payments.</div></td></tr>` :
+                issues.pending.map(e => `<tr class="${e.daysPending > 30 ? 'recon-row-warning' : 'recon-row-caution'}"><td><strong>${escapeHTML(e.name)}</strong></td><td class="employee-amount">KSh ${fmt(e.amount)}</td><td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${escapeHTML(e.reference || '—')}</td><td>${escapeHTML(e.date || '—')}</td><td><strong style="color:${e.daysPending > 30 ? '#f0a89f' : '#e8b879'};">${e.daysPending} days</strong></td><td style="text-align:right;"><button class="div-action-btn expand" onclick="markReconciledPaymentComplete('${e.id}')"><i class="fas fa-check"></i> Mark Complete</button></td></tr>`).join('');
 
             document.getElementById('reconDividendBody').innerHTML = !issues.dividends.length ? `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>All dividends fully paid.</div></td></tr>` :
                 issues.dividends.map(d => `<tr class="${d.ageDays > 30 ? 'recon-row-warning' : 'recon-row-caution'}"><td><span class="div-ref">${escapeHTML(d.id)}</span></td><td><strong>${escapeHTML(d.periodLabel)}</strong></td><td><span class="status-pill ${escapeHTML(d.status)}">${escapeHTML(d.status)}</span></td><td class="employee-amount">KSh ${fmt(d.totalDistributable)}</td><td><strong style="color:${d.ageDays > 30 ? '#f0a89f' : '#e8b879'};">${d.ageDays} days</strong></td></tr>`).join('');
+        }
+
+        async function markReconciledPaymentComplete(paymentId) {
+            const payment = EMPLOYEE_PAYMENTS.find(e => String(e.id) === String(paymentId));
+            if (!payment || payment.status !== 'pending') {
+                showToast('This payment is no longer pending. Refreshing reconciliation.', 'warning');
+                await fetchSummary();
+                renderReconciliationModal();
+                return;
+            }
+            const confirmed = confirm(`Confirm that KSh ${fmt(payment.amount)} has actually been paid to ${payment.name}? This will mark the payment as paid in the shared payment ledger.`);
+            if (!confirmed) return;
+
+            const reference = prompt('Enter the payment transaction reference (optional). Leave blank if unavailable:', payment.reference || '');
+            if (reference === null) return;
+
+            const update = {
+                status: 'paid',
+                reference: reference.trim() || payment.reference || null,
+                updated_at: new Date().toISOString(),
+                updated_by: CURRENT_USER
+            };
+            const { error } = await supabaseClient
+                .from('payroll_payments')
+                .update(update)
+                .eq('id', payment.id)
+                .eq('status', 'pending');
+            if (error) {
+                showError('Could not complete payment: ' + error.message);
+                return;
+            }
+
+            await logAudit('PAID', 'Payment', `Manually confirmed payment for ${payment.name}`, 'pending', `paid / ${update.reference || 'no reference'}`);
+            await fetchSummary();
+            renderEmployeePayments();
+            renderReconciliationModal();
+            renderReconciliationBanner();
+            showToast('Payment marked as complete.', 'success');
         }
 
         function openReconModal() {
@@ -10091,6 +10130,19 @@ async function openNewTemplateModal() {
 .starlink-workspace-close:hover{background:#b94b50!important;transform:scale(1.06)!important}
 .starlink-fullpage-modal>.modal-card{padding-top:clamp(1.5rem,3vw,2.5rem)!important}
 @media(max-width:760px){.starlink-workspace-close{top:9px!important;right:10px!important;width:38px!important;height:38px!important;font-size:16px!important}}
+
+/* Equity workspace: one selected panel at a time; transaction view uses the full canvas */
+.starlink-module-frame > .starlink-fullpage-modal,
+.starlink-module-frame > .starlink-fullpage-modal.show {
+  width:100%!important; max-width:none!important; min-width:0!important;
+  height:100%!important; min-height:100%!important; margin:0!important;
+  padding:0!important; box-sizing:border-box!important; overflow:auto!important;
+}
+.starlink-module-frame > #investorTxnModal > .modal-card,
+.starlink-module-frame > #reconModal > .modal-card {
+  width:100%!important; max-width:none!important; min-height:100%!important;
+  height:auto!important; border-radius:0!important; margin:0!important;
+}
 </style>
 <script id="starlink-index-sidebar">
 (function(){
@@ -10144,6 +10196,7 @@ async function openNewTemplateModal() {
   const restoreModal=()=>{
    if(!activeModal)return;
    if(modalObserver)modalObserver.disconnect();
+   activeModal.classList.remove('show');
    activeModal.classList.remove('starlink-fullpage-modal');
    if(activeModalParent)activeModalParent.insertBefore(activeModal,activeModalNext&&activeModalNext.parentNode===activeModalParent?activeModalNext:null);
    activeModal=null;modalObserver=null;activeModalParent=null;activeModalNext=null;
