@@ -47,6 +47,9 @@ Deno.serve(async(req)=>{
       if(error)throw error;party=created;
     }
     const snapshot={opportunity_id:opp.id,reference_code:opp.reference_code,title:opp.title,funding_purpose:opp.funding_purpose,principal_amount:principal,currency_code:opp.currency_code,return_type:opp.return_type,return_rate:Number(opp.proposed_return_rate),day_count_basis:opp.day_count_basis,term_days:Number(opp.term_days),tax_rate:opp.tax_rate,other_deductions:opp.other_deductions,terms_version:opp.terms_version,legal_approval_reference:opp.legal_approval_reference,finance_approval_reference:opp.finance_approval_reference,management_approval_reference:opp.management_approval_reference};
+    if(body.consent!==true)return out({error:"Please record your consent before submitting funding interest."},400);
+    const consentRecords=[...(Array.isArray(party.consent_records)?party.consent_records:[]),{purpose:"short_term_funding_interest",consented_at:new Date().toISOString(),terms_version:opp.terms_version,actor_user_id:user.id}];
+    await admin.from("funding_parties").update({consent_records:consentRecords,updated_at:new Date().toISOString()}).eq("id",party.id);
     const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opp.id,funder_id:party.id,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:opp.proposed_return_rate,term_days:opp.term_days,return_type:opp.return_type,day_count_basis:opp.day_count_basis,tax_rate_snapshot:opp.tax_rate,deductions_snapshot:opp.other_deductions,terms_snapshot:snapshot,terms_version:opp.terms_version,status:"interested",idempotency_key:key}).select("*").single();
     if(error)throw error;await audit("commitment",data.id,"investor_interest_submitted",null,data);return out({success:true,record:data,kyc_status:party.kyc_status});
   }
@@ -91,7 +94,7 @@ Deno.serve(async(req)=>{
     const name=String(body.legal_name||"").trim(); if(name.length<2||name.length>180)return out({error:"Valid legal name required."},400);
     const investorId=body.investor_id?Number(body.investor_id):null;
     if(investorId&&!Number.isSafeInteger(investorId))return out({error:"Invalid linked investor."},400);
-    const {data,error}=await admin.from("funding_parties").insert({legal_name:name,contact_name:String(body.contact_name||"").trim()||null,email:String(body.email||"").trim()||null,phone:String(body.phone||"").trim()||null,party_type:body.party_type==="company"?"company":"individual",investor_id:investorId,beneficial_ownership:Array.isArray(body.beneficial_ownership)?body.beneficial_ownership:[],consent_records:Array.isArray(body.consent_records)?body.consent_records:[],kyc_status:"not_started",status:"draft",notes:String(body.notes||"").slice(0,2000)||null}).select("*").single();
+    const {data,error}=await admin.from("funding_parties").insert({legal_name:name,contact_name:String(body.contact_name||"").trim()||null,email:String(body.email||"").trim()||null,phone:String(body.phone||"").trim()||null,party_type:body.party_type==="company"?"company":"individual",investor_id:investorId,beneficial_ownership:Array.isArray(body.beneficial_ownership)?body.beneficial_ownership:[],payment_account:body.payment_account&&typeof body.payment_account==="object"?body.payment_account:null,consent_records:Array.isArray(body.consent_records)?body.consent_records:[],kyc_status:"not_started",status:"draft",notes:String(body.notes||"").slice(0,2000)||null}).select("*").single();
     if(error)throw error; await audit("party",data.id,"created",null,data); return out({success:true,record:data});
   }
   if(action==="set_party_status"){
