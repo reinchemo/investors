@@ -401,6 +401,26 @@ Deno.serve(async(req)=>{
     if(error)throw error;if(!data)return out({error:"Settlement changed; refresh and retry."},409);
     await audit("settlement",id,"approved",before,data);return out({success:true,record:data});
   }
+  if(action==="mark_settlement_failed"){
+    if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
+    const id=Number(body.id),reason=String(body.failure_reason||"").trim().slice(0,1000);
+    if(!reason)return out({error:"Record why the payout failed."},400);
+    const {data:before}=await admin.from("funding_settlements").select("*").eq("id",id).maybeSingle();
+    if(!before||before.status!=="approved")return out({error:"Only an approved payout can be marked failed."},409);
+    if(before.approved_by===user.id)return out({error:"The settlement approver cannot record payout failure."},403);
+    const {data,error}=await admin.from("funding_settlements").update({status:"failed",failure_reason:reason,updated_at:new Date().toISOString()}).eq("id",id).eq("status","approved").select("*").maybeSingle();
+    if(error)throw error;if(!data)return out({error:"Settlement changed; refresh and retry."},409);
+    await audit("settlement",id,"payout_failed_outstanding_retained",before,data);return out({success:true,record:data});
+  }
+  if(action==="retry_settlement"){
+    if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
+    const id=Number(body.id);
+    const {data:before}=await admin.from("funding_settlements").select("*").eq("id",id).maybeSingle();
+    if(!before||before.status!=="failed")return out({error:"Only failed payouts can be resubmitted."},409);
+    const {data,error}=await admin.from("funding_settlements").update({status:"pending_approval",approved_by:null,approved_at:null,requested_by:user.id,updated_at:new Date().toISOString()}).eq("id",id).eq("status","failed").select("*").maybeSingle();
+    if(error)throw error;if(!data)return out({error:"Settlement changed; refresh and retry."},409);
+    await audit("settlement",id,"failed_payout_resubmitted_for_approval",before,data);return out({success:true,record:data});
+  }
   if(action==="mark_settlement_paid"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const id=Number(body.id),ref=String(body.payment_reference||"").trim(),paidOn=String(body.paid_on||new Date().toISOString().slice(0,10));
