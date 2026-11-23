@@ -135,6 +135,19 @@ Deno.serve(async(req)=>{
     const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opportunity,funder_id:funder,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:rate,term_days:days,status:isSigned?"committed":"pending_agreement",agreement_reference:isSigned?agreement:null,signed_at:isSigned?signedAt!.toISOString():null,terms_locked_at:isSigned?new Date().toISOString():null,maturity_date:maturity}).select("*").single();
     if(error)throw error;await audit("commitment",data.id,"created",null,data);return out({success:true,record:data});
   }
+  if(action==="sign_commitment"){
+    if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
+    const id=Number(body.id),agreement=String(body.agreement_reference||"").trim(),signed=String(body.signed_at||"").trim();
+    if(!Number.isSafeInteger(id)||agreement.length<2||agreement.length>180||!signed)return out({error:"Commitment, signed agreement reference and signed date are required."},400);
+    const signedDate=new Date(signed);
+    if(Number.isNaN(signedDate.getTime())||signedDate.getTime()>Date.now()+86400000)return out({error:"Valid signed date is required."},400);
+    const {data:before}=await admin.from("funding_commitments").select("*").eq("id",id).maybeSingle();
+    if(!before||before.status!=="pending_agreement")return out({error:"Only commitments awaiting an agreement can be signed."},409);
+    const maturity=new Date(signedDate.getTime()+Number(before.term_days)*86400000).toISOString().slice(0,10);
+    const {data,error}=await admin.from("funding_commitments").update({status:"committed",agreement_reference:agreement,signed_at:signedDate.toISOString(),terms_locked_at:new Date().toISOString(),maturity_date:maturity,updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_agreement").select("*").maybeSingle();
+    if(error)throw error;if(!data)return out({error:"Commitment changed concurrently; refresh and retry."},409);
+    await audit("commitment",id,"agreement_signed_terms_locked",before,data);return out({success:true,record:data});
+  }
   if(action==="record_receipt"){
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
     const cid=Number(body.commitment_id),amount=Number(body.amount);if(!cid||!Number.isFinite(amount)||amount<=0)return out({error:"Commitment and positive receipt amount required."},400);
