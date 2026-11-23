@@ -1528,7 +1528,7 @@
             }
 
             const isEmployee = Boolean(portalAccount.staff_id);
-            const isInvestor = Boolean(portalAccount.investor_id);
+            const isInvestor = Boolean(portalAccount.investor_id || portalAccount.funder_id);
 
             if (employeePages.includes(page) && !isEmployee) {
                 showError("This employee section is not available for your account.");
@@ -1709,7 +1709,7 @@
             );
 
             const investorAccount = Boolean(
-                portalAccount && portalAccount.investor_id
+                portalAccount && (portalAccount.investor_id || portalAccount.funder_id)
             );
 
             // Employee navigation
@@ -1741,6 +1741,9 @@
             if (investorAccount) {
                 byId("investorNavLabel").style.display = "block";
                 byId("investorNavigation").style.display = "flex";
+                document.querySelectorAll('#investorNavigation a[data-page="dividends"],#investorNavigation a[data-page="statements"]').forEach(link => {
+                    link.style.display = portalAccount.investor_id ? "flex" : "none";
+                });
             } else {
                 byId("investorNavLabel").style.display = "none";
                 byId("investorNavigation").style.display = "none";
@@ -1929,8 +1932,14 @@
             const payload = result.data;
             investorRecord = payload.investor;
             byId("investorNumber").textContent = investorRecord.investor_number || "—";
-            byId("investorEquity").textContent = money(investorRecord.equity);
+            byId("investorEquity").textContent = payload.funder_only ? "Not applicable" : money(investorRecord.equity);
             byId("investorStatus").textContent = investorRecord.status || "—";
+            if(payload.funder_only){
+                byId("investorNumber").textContent = "SHORT-TERM";
+                byId("investorProfileNumber").textContent = "Short-term funder";
+                byId("investorProfileEquity").textContent = "Not an equity shareholder";
+                const equityStat=byId("investorEquity")?.closest(".stat-card");if(equityStat)equityStat.hidden=true;
+            }
             byId("investorName").textContent = investorRecord.name || "—";
             byId("investorProfileNumber").textContent = investorRecord.investor_number || "—";
             byId("investorJoined").textContent = formatDate(investorRecord.joined_date);

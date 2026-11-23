@@ -51,13 +51,11 @@ function getServiceRoleKey(): string {
 
 const SERVICE_ROLE_KEY = getServiceRoleKey();
 
-const allowedOrigins = (
-  Deno.env.get("ALLOWED_ORIGINS") ??
-  "http://localhost:5500,http://127.0.0.1:5500"
-)
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = Array.from(new Set([
+  ...(Deno.env.get("ALLOWED_ORIGINS") ?? "http://localhost:5500,http://127.0.0.1:5500")
+    .split(",").map((origin) => origin.trim()).filter(Boolean),
+  "https://reinchemo.github.io",
+]));
 
 const supabaseAdmin = createClient(
   SUPABASE_URL,
@@ -134,7 +132,7 @@ async function writeAuditLog(input: {
       entity_id: input.entityId,
       record_before: input.before,
       record_after: input.after,
-      changed_fields: ["account_status", "staff_id", "investor_id"],
+      changed_fields: ["account_status", "staff_id", "investor_id", "funder_id"],
       reason: "Personal portal account administration",
       ip_address: input.ipAddress,
       device_info: input.deviceInfo,
@@ -305,7 +303,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
           supabaseAdmin
             .from("personal_portal_accounts")
             .select(
-              "id, user_id, staff_id, investor_id, account_status",
+              "id, user_id, staff_id, investor_id, funder_id, account_status",
             )
             .in("user_id", userIds),
         ]);
@@ -404,6 +402,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
         );
       }
 
+      const {data:funderRows,error:funderListError}=await supabaseAdmin.from("funding_parties").select("id,legal_name,party_type,status,kyc_status").order("legal_name",{ascending:true}).limit(500);
+      if(funderListError)return jsonResponse(500,{error:"Unable to retrieve short-term funder records."},origin);
       return jsonResponse(
         200,
         {
@@ -415,6 +415,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
           users,
           staff: staffRows ?? [],
           investors: investorRows ?? [],
+          funders: funderRows ?? [],
         },
         origin,
       );
@@ -457,6 +458,33 @@ Deno.serve(async (request: Request): Promise<Response> => {
       }
       await writeAuditLog({ actor: user.id, action: "PORTAL_EMPLOYEE_ACCOUNT_CREATED", entityId: account.id, before: null, after: { ...account, username }, ipAddress: request.headers.get("x-forwarded-for"), deviceInfo: request.headers.get("user-agent") });
       return jsonResponse(200, { success: true, message: "Employee login created. Give the employee their username and temporary password securely.", account: { ...account, username } }, origin);
+    }
+
+    if (action === "create_funder_account") {
+      const username=typeof body.username==="string"?body.username.trim().toLowerCase():"";
+      const password=typeof body.password==="string"?body.password:"";
+      const funderId=body.funder_id;
+      if(!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username))return jsonResponse(400,{error:"Username must be 3–32 characters and use letters, numbers, dots, underscores or hyphens."},origin);
+      if(password.length<8||password.length>128)return jsonResponse(400,{error:"Set a password between 8 and 128 characters."},origin);
+      if(!validId(funderId))return jsonResponse(400,{error:"Select a valid short-term funder profile."},origin);
+      const {data:funder,error:funderError}=await supabaseAdmin.from("funding_parties").select("id,legal_name,email,phone,status").eq("id",funderId).maybeSingle();
+      if(funderError||!funder)return jsonResponse(404,{error:"The short-term funder profile was not found."},origin);
+      if(funder.status==="closed"||funder.status==="suspended")return jsonResponse(409,{error:"A closed or suspended funder cannot receive a portal login."},origin);
+      const {data:linked}=await supabaseAdmin.from("personal_portal_accounts").select("user_id").eq("funder_id",funderId).maybeSingle();
+      if(linked)return jsonResponse(409,{error:"This funder already has a portal login."},origin);
+      const {data:usernameExists,error:usernameError}=await supabaseAdmin.from("profiles").select("id").ilike("username",username).maybeSingle();
+      if(usernameError)return jsonResponse(500,{error:"Unable to check username availability."},origin);
+      if(usernameExists)return jsonResponse(409,{error:"That username is already in use. Choose another."},origin);
+      const internalEmail=username+"@portal.starlink.invalid";
+      const {data:created,error:createError}=await supabaseAdmin.auth.admin.createUser({email:internalEmail,password,email_confirm:true,user_metadata:{full_name:funder.legal_name,portal_username:username,account_type:"short_term_funder"}});
+      if(createError||!created.user)return jsonResponse(409,{error:createError?.message??"Unable to create the funder login."},origin);
+      const newUser=created.user;
+      const {error:profileError}=await supabaseAdmin.from("profiles").upsert({id:newUser.id,full_name:funder.legal_name,email:internalEmail,phone:funder.phone??null,username},{onConflict:"id"});
+      if(profileError){await supabaseAdmin.auth.admin.deleteUser(newUser.id);return jsonResponse(500,{error:"Could not save the funder login profile."},origin);}
+      const {data:account,error:accountError}=await supabaseAdmin.from("personal_portal_accounts").insert({user_id:newUser.id,staff_id:null,investor_id:null,funder_id:funder.id,account_status:"active"}).select().single();
+      if(accountError){await supabaseAdmin.auth.admin.deleteUser(newUser.id);return jsonResponse(409,{error:"The portal account could not be linked to this funder."},origin);}
+      await writeAuditLog({actor:user.id,action:"PORTAL_FUNDER_ACCOUNT_CREATED",entityId:account.id,before:null,after:{...account,username},ipAddress:request.headers.get("x-forwarded-for"),deviceInfo:request.headers.get("user-agent")});
+      return jsonResponse(200,{success:true,message:"Short-term funder login created. Share the username and temporary password securely.",account:{...account,username}},origin);
     }
 
     // =====================================================
@@ -571,6 +599,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
     if (action === "link") {
       const requestedStaffId = body.staff_id;
       const requestedInvestorId = body.investor_id;
+      const requestedFunderId = body.funder_id;
 
       if (
         requestedStaffId !== undefined &&
@@ -596,6 +625,10 @@ Deno.serve(async (request: Request): Promise<Response> => {
         );
       }
 
+      if (requestedFunderId !== undefined && requestedFunderId !== null && !validId(requestedFunderId)) {
+        return jsonResponse(400,{error:"funder_id must be a positive integer."},origin);
+      }
+
       // Preserve existing links when a field is omitted.
       const staffId = requestedStaffId === undefined
         ? existing?.staff_id ?? null
@@ -604,13 +637,12 @@ Deno.serve(async (request: Request): Promise<Response> => {
       const investorId = requestedInvestorId === undefined
         ? existing?.investor_id ?? null
         : requestedInvestorId;
+      const funderId = requestedFunderId === undefined
+        ? existing?.funder_id ?? null
+        : requestedFunderId;
 
-      if (staffId === null && investorId === null) {
-        return jsonResponse(
-          400,
-          { error: "Link at least one employee or investor record." },
-          origin,
-        );
+      if (staffId === null && investorId === null && funderId === null) {
+        return jsonResponse(400,{error:"Link at least one employee, equity investor or short-term funder record."},origin);
       }
 
       if (staffId !== null) {
@@ -650,10 +682,16 @@ Deno.serve(async (request: Request): Promise<Response> => {
         }
       }
 
+      if (funderId !== null) {
+        const {data:funderRecord,error:funderError}=await supabaseAdmin.from("funding_parties").select("id,status").eq("id",funderId).maybeSingle();
+        if(funderError||!funderRecord||["closed","suspended"].includes(funderRecord.status))return jsonResponse(404,{error:"The short-term funder record was not found or is inactive."},origin);
+      }
+
       const accountPayload = {
         user_id: targetUserId,
         staff_id: staffId,
         investor_id: investorId,
+        funder_id: funderId,
         account_status: existing?.account_status ?? "active",
         updated_at: new Date().toISOString(),
       };
