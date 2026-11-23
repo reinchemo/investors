@@ -45,25 +45,36 @@ Deno.serve(async (req: Request) => {
 
     if (action === "assign_task") {
       if (!(await managementPermission("edit"))) return reply({ error: "Tasks edit permission required." }, 403);
-      if (!taskId || (body.staff_ids !== undefined && (!Array.isArray(body.staff_ids) || body.staff_ids.length > 50))) return reply({ error: "A valid task and employee list are required." }, 400);
+      if (!taskId || !Array.isArray(body.staff_ids) || body.staff_ids.length > 50) return reply({ error: "A valid task and employee list are required." }, 400);
       const mode = String(body.assignment_mode || "single");
       if (!["single","everyone_must_complete","first_to_claim","open_pool"].includes(mode)) return reply({ error: "Invalid assignment mode." }, 400);
-      if (mode === "single" && body.staff_ids.length !== 1) return reply({ error: "Single assignment accepts exactly one employee." }, 400);
-      const rawIds = Array.isArray(body.staff_ids) ? body.staff_ids : [];
+      const rawIds = body.staff_ids;
       const ids = [...new Set(rawIds.map((v: unknown) => Number(v)))];
-      if ((mode !== "first_to_claim" && mode !== "open_pool" && ids.length < 1) || ids.some((v: number) => !Number.isSafeInteger(v) || v <= 0)) return reply({ error: "Invalid employee selection." }, 400);
+      if ((mode === "single" && ids.length > 1) || (mode === "everyone_must_complete" && ids.length < 2) ||
+          (mode === "first_to_claim" || mode === "open_pool") && ids.length !== 0 ||
+          ids.some((v: number) => !Number.isSafeInteger(v) || v <= 0)) return reply({ error: "Invalid employee selection." }, 400);
       const { data: task, error: taskErr } = await admin.from("tasks").select("id,status").eq("id", taskId).is("deleted_at", null).maybeSingle();
       if (taskErr || !task) return reply({ error: "Task not found." }, 404);
       const { data: staff, error: staffErr } = await admin.from("staff").select("id").in("id", ids).eq("status", "active").is("deleted_at", null);
       if (staffErr || (staff || []).length !== ids.length) return reply({ error: "Every selected employee must be active." }, 400);
-      const rows = mode === "first_to_claim" || mode === "open_pool" ? [] : ids.map((id: number) => ({ task_id: taskId, staff_id: id, assignment_state: "assigned" }));
-      if (rows.length) {
-        const { error } = await admin.from("task_assignments").upsert(rows, { onConflict: "task_id,staff_id" });
+      const rows = ids.map((id: number) => ({ task_id: taskId, staff_id: id, assignment_state: "assigned" }));
+      const { data: existingAssignments, error: existingErr } = await admin.from("task_assignments").select("id,staff_id").eq("task_id", taskId);
+      if (existingErr) throw existingErr;
+      const selected = new Set(ids);
+      const removedIds = (existingAssignments || []).filter((row: any) => !selected.has(Number(row.staff_id))).map((row: any) => row.id);
+      if (removedIds.length) {
+        const { error } = await admin.from("task_assignments").delete().in("id", removedIds);
         if (error) throw error;
       }
-      const primary = rows.length ? ids[0] : null;
+      const existingIds = new Set((existingAssignments || []).filter((row: any) => selected.has(Number(row.staff_id))).map((row: any) => Number(row.staff_id)));
+      const newRows = rows.filter((row: any) => !existingIds.has(Number(row.staff_id)));
+      if (newRows.length) {
+        const { error } = await admin.from("task_assignments").insert(newRows);
+        if (error) throw error;
+      }
+      const primary = ids.length ? ids[0] : null;
       const { error: updateErr } = await admin.from("tasks").update({
-        assignment_mode: mode, assignee_staff_id: primary, updated_at: new Date().toISOString(),
+        assignment_mode: mode, assignee_staff_id: primary, status: ids.length ? "assigned" : "draft", updated_at: new Date().toISOString(),
         updated_by: user.email || user.id,
       }).eq("id", taskId).is("deleted_at", null);
       if (updateErr) throw updateErr;
@@ -74,6 +85,14 @@ Deno.serve(async (req: Request) => {
       });
       if (commentErr) console.error("Task assignment history warning", commentErr);
       return reply({ success: true, task_id: taskId, assignment_mode: mode, assigned_staff_ids: ids });
+    }
+
+    if (action === "list_task_assignments") {
+      if (!(await managementPermission("view"))) return reply({ error: "Tasks view permission required." }, 403);
+      if (!taskId) return reply({ error: "Task reference required." }, 400);
+      const { data, error } = await admin.from("task_assignments").select("staff_id").eq("task_id", taskId);
+      if (error) throw error;
+      return reply({ success: true, staff_ids: (data || []).map((row: any) => Number(row.staff_id)) });
     }
 
     if (action === "claim_task") {
