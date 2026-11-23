@@ -383,3 +383,9 @@ table tbody tr:hover { background:rgba(118,40,245,.07) !important; }
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; }
 }
+
+
+/* Shared dashboard visual language — finance reference palette */
+.portal-reveal { opacity:0; transform:translateY(18px); }
+.portal-reveal.portal-visible { opacity:1; transform:translateY(0); transition:opacity .68s cubic-bezier(.22,1,.36,1),transform .68s cubic-bezier(.22,1,.36,1); }
+@media (prefers-reduced-motion:reduce) { .portal-reveal {opacity:1;transform:none;} .portal-reveal.portal-visible {transition:none;} }
