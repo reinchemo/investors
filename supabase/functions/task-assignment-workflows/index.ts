@@ -87,6 +87,14 @@ Deno.serve(async (req: Request) => {
       return reply({ success: true, task_id: taskId, assignment_mode: mode, assigned_staff_ids: ids });
     }
 
+    if (action === "list_task_assignments") {
+      if (!(await managementPermission("view"))) return reply({ error: "Tasks view permission required." }, 403);
+      if (!taskId) return reply({ error: "Task reference required." }, 400);
+      const { data, error } = await admin.from("task_assignments").select("staff_id").eq("task_id", taskId);
+      if (error) throw error;
+      return reply({ success: true, staff_ids: (data || []).map((row: any) => Number(row.staff_id)) });
+    }
+
     if (action === "claim_task") {
       const employee = await employeeAccount();
       if (!employee) return reply({ error: "An active employee-linked account is required." }, 403);
