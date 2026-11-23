@@ -642,7 +642,7 @@ Deno.serve(async (req) => {
       const today = new Date().toISOString().slice(0,10);
       const { data: opportunities, error: opportunitiesError } = await admin.from("funding_opportunities")
         .select("id,reference_code,title,description,funding_purpose,target_amount,currency_code,minimum_commitment,maximum_commitment,proposed_return_rate,return_type,day_count_basis,term_days,opens_on,closes_on,eligibility,required_documents,early_settlement_allowed,terms_version")
-        .eq("status","open").lte("opens_on",today).or("closes_on.is.null,closes_on.gte."+today).order("created_at",{ascending:false}).limit(100);
+        .eq("status","open").or("opens_on.is.null,opens_on.lte."+today).or("closes_on.is.null,closes_on.gte."+today).order("created_at",{ascending:false}).limit(100);
       if (opportunitiesError) return jsonResponse({ error: "Unable to load approved funding opportunities." }, 500);
       let commitments:any[] = [];
       let receipts:any[] = [];
