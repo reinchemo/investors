@@ -9618,7 +9618,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 ? 'KSh ' + fmt(runRows.reduce((sum, run) => sum + safeNum(run.totalNet), 0))
                 : '—';
             if (!mayTasks && !mayAttendance && !mayLeave && !mayOvertime && !mayPayroll) {
-                notice.textContent = 'Your account can open Reports, but it does not currently have view permission for Tasks, Attendance or Payroll data.';
+                notice.textContent = 'Your account can open Reports, but it does not currently have view permission for Tasks, Attendance, Leave, Overtime or Payroll data.';
             }
         }
 
@@ -9628,7 +9628,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 return;
             }
             const snap = operationsReportSnapshot;
-            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Completed','Rejected','Overdue','Attendance Records','Gross','Deductions','Net']];
+            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Completed','Rejected','Overdue','Attendance Records','Leave Requests','Leave Days','Overtime Entries','Overtime Hours','Overtime Amount','Gross','Deductions','Net']];
             const taskGroups = {};
             snap.tasks.forEach(task => {
                 const key = task.assigneeStaffId ? String(task.assigneeStaffId) : 'Unassigned';
@@ -9645,9 +9645,9 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const attendance = {};
             snap.attendance.forEach(row => { const key=String(row.staff_id); attendance[key]=(attendance[key]||0)+1; });
             Object.keys(attendance).forEach(name => rows.push(['Attendance','Staff #'+name,'', '', '', '', '', '', '', '',attendance[name],'','','']));
-            snap.leave.forEach(row => rows.push(['Leave','Staff #'+row.staff_id,row.status,'','','','','','','','','','','']));
-            snap.overtime.forEach(row => rows.push(['Overtime','Staff #'+row.staff_id,row.status,'','','','','','','','', '', '', row.amount]));
-            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
+            snap.leave.forEach(row => rows.push(['Leave','Staff #'+row.staff_id,row.status,'','','','','','','','',1,row.days,'','','','','','']));
+            snap.overtime.forEach(row => rows.push(['Overtime','Staff #'+row.staff_id,row.status,'','','','','','','','','','',1,row.hours,row.amount,'','','']));
+            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
             const csv = rows.map(row => row.map(value => '"' + String(value == null ? '' : value).replace(/"/g,'""') + '"').join(',')).join('\r\n');
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
