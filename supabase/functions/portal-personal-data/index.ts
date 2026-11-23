@@ -628,6 +628,62 @@ Deno.serve(async (req) => {
     }
 
     // ==========================================
+    // PRODUCT B — PERSONAL SHORT-TERM FUNDING
+    // All rows are scoped to the investor linked to this verified portal session.
+    // ==========================================
+    if (action === "funding") {
+      if (!account.investor_id) return jsonResponse({ success: true, funder: null, opportunities: [], commitments: [], message: "This account has no investor classification." });
+      const investorId = Number(account.investor_id);
+      const [{ data: investor, error: investorError }, { data: funder, error: funderError }] = await Promise.all([
+        admin.from("investors").select("id,name,email,phone").eq("id", investorId).is("deleted_at", null).maybeSingle(),
+        admin.from("funding_parties").select("id,legal_name,kyc_status,status,party_type").eq("investor_id", investorId).maybeSingle()
+      ]);
+      if (investorError || funderError) return jsonResponse({ error: "Unable to load your funding profile." }, 500);
+      const today = new Date().toISOString().slice(0,10);
+      const { data: opportunities, error: opportunitiesError } = await admin.from("funding_opportunities")
+        .select("id,reference_code,title,description,funding_purpose,target_amount,currency_code,minimum_commitment,maximum_commitment,proposed_return_rate,return_type,day_count_basis,term_days,opens_on,closes_on,eligibility,required_documents,early_settlement_allowed,terms_version")
+        .eq("status","open").lte("opens_on",today).or("closes_on.is.null,closes_on.gte."+today).order("created_at",{ascending:false}).limit(100);
+      if (opportunitiesError) return jsonResponse({ error: "Unable to load approved funding opportunities." }, 500);
+      let commitments:any[] = [];
+      let receipts:any[] = [];
+      let settlements:any[] = [];
+      if (funder) {
+        const [commitResult, receiptResult, settlementResult] = await Promise.all([
+          admin.from("funding_commitments").select("id,opportunity_id,principal_amount,currency_code,agreed_return_rate,term_days,maturity_date,status,agreement_reference,signed_at,terms_locked_at,terms_snapshot,return_type,day_count_basis,tax_rate_snapshot,created_at,accepted_at")
+            .eq("funder_id",funder.id).order("created_at",{ascending:false}).limit(500),
+          admin.from("funding_receipts").select("id,commitment_id,amount,currency_code,received_on,payment_method,external_reference,verification_status,verified_at")
+            .in("commitment_id",(await admin.from("funding_commitments").select("id").eq("funder_id",funder.id)).data?.map((x:any)=>x.id)||[]).limit(1000),
+          admin.from("funding_settlements").select("id,commitment_id,principal_paid,return_paid,paid_on,payment_reference,status")
+            .in("commitment_id",(await admin.from("funding_commitments").select("id").eq("funder_id",funder.id)).data?.map((x:any)=>x.id)||[]).order("created_at",{ascending:false}).limit(500)
+        ]);
+        if (commitResult.error || receiptResult.error || settlementResult.error) return jsonResponse({ error: "Unable to load your funding statements." }, 500);
+        commitments = commitResult.data || []; receipts = receiptResult.data || []; settlements = settlementResult.data || [];
+      }
+      const actual365=(term:number,basis:string)=>basis==="actual_360"?360:basis==="30_360"?360:365;
+      const portfolio=commitments.map((c:any)=>{
+        const snap=c.terms_snapshot||{};
+        const verifiedReceipts=receipts.filter((r:any)=>r.commitment_id===c.id&&r.verification_status==="verified");
+        const capitalReceived=verifiedReceipts.reduce((sum:number,r:any)=>sum+Number(r.amount||0),0);
+        const paid=settlements.filter((x:any)=>x.commitment_id===c.id&&x.status==="paid");
+        const principalRepaid=paid.reduce((sum:number,x:any)=>sum+Number(x.principal_paid||0),0);
+        const returnAlreadyPaid=paid.reduce((sum:number,x:any)=>sum+Number(x.return_paid||0),0);
+        const principal=Number(c.principal_amount||0);
+        const rate=Number(snap.return_rate??c.agreed_return_rate??0);
+        const term=Number(snap.term_days??c.term_days??0);
+        const returnType=snap.return_type||c.return_type||"fixed_total_period";
+        const basis=snap.day_count_basis||c.day_count_basis||"actual_365";
+        const gross=returnType==="annualised_simple" ? principal*(rate/100)*(term/actual365(term,basis)) : principal*(rate/100);
+        const taxRate=Number(snap.tax_rate??c.tax_rate_snapshot??0);
+        const tax=gross*(taxRate/100);
+        const net=Math.max(0,gross-tax);
+        const activeCapital=Math.max(0,capitalReceived-principalRepaid);
+        const maturityTotal=principal+net;
+        return {...c,capital_received:capitalReceived,principal_repaid:principalRepaid,return_paid:returnAlreadyPaid,active_capital:activeCapital,return_type:returnType,day_count_basis:basis,display_rate:rate,gross_return:gross,estimated_deductions:tax,net_return:net,maturity_total:maturityTotal,verified_receipts:verifiedReceipts,settlements:paid};
+      });
+      return jsonResponse({success:true,investor,funder,opportunities:opportunities||[],commitments:portfolio,receipts,settlements,live_offers_enabled:true,legal_notice:"Only approved published opportunities are shown. Only verified receipts count as invested capital. Figures are based on each commitment's locked terms snapshot and do not constitute a guarantee."});
+    }
+
+    // ==========================================
     // INVESTOR DIVIDENDS
     // ==========================================
 
