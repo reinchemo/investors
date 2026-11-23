@@ -164,12 +164,11 @@ Deno.serve(async (req) => {
           .eq("staff_id", account.staff_id)
           .order("date", { ascending: false })
           .limit(10),
-        admin.from("tasks")
-          .select("id, title, priority, status, progress_pct, deadline")
-          .eq("assignee_staff_id", account.staff_id)
-          .is("deleted_at", null)
-          .order("created_at", { ascending: false })
-          .limit(10),
+        admin.from("task_assignments")
+          .select("id,assignment_state,progress_pct,assigned_at,tasks(id,title,priority,status,progress_pct,deadline,assignment_mode,service_status)")
+          .eq("staff_id", account.staff_id)
+          .order("assigned_at", { ascending: false })
+          .limit(20),
         admin.from("leave_requests")
           .select("id, leave_type, start_date, end_date, days, status")
           .eq("staff_id", account.staff_id)
@@ -186,7 +185,7 @@ Deno.serve(async (req) => {
         success: true,
         staff: staffResult.data || null,
         attendance: attendanceResult.data || [],
-        tasks: tasksResult.data || [],
+        tasks: (tasksResult.data || []).map((assignment: any) => ({ ...assignment.tasks, assignment_id: assignment.id, assignment_state: assignment.assignment_state, assignment_progress_pct: assignment.progress_pct })).filter((task: any) => task && task.id),
         leave_requests: leaveResult.data || [],
       });
     }

@@ -146,6 +146,21 @@ Deno.serve(async (req: Request) => {
         body: `Assignment status changed to ${next}; progress ${progress}%.`,
         kind: "assignment_update",
       });
+      const { data: parent } = await admin.from("tasks").select("assignment_mode,status").eq("id", taskId).is("deleted_at", null).maybeSingle();
+      if (parent) {
+        if (parent.assignment_mode === "single" || parent.assignment_mode === "first_to_claim") {
+          const parentStatus = next === "awaiting_review" ? "awaiting_review" : next === "in_progress" ? "in_progress" : next === "accepted" ? "accepted" : null;
+          if (parentStatus) await admin.from("tasks").update({ status: parentStatus, progress_pct: progress, updated_at: new Date().toISOString(), updated_by: user.email || user.id }).eq("id", taskId).is("deleted_at", null);
+        } else if (parent.assignment_mode === "everyone_must_complete") {
+          const { data: allRows } = await admin.from("task_assignments").select("assignment_state").eq("task_id", taskId);
+          const states = (allRows || []).map((row: any) => row.assignment_state);
+          const allSubmitted = states.length > 0 && states.every((state: string) => ["awaiting_review","approved","completed"].includes(state));
+          const anyRejected = states.some((state: string) => state === "rejected");
+          const anyWorking = states.some((state: string) => ["claimed","accepted","in_progress","assigned"].includes(state));
+          const aggregate = allSubmitted ? "awaiting_review" : anyRejected ? "rejected" : anyWorking ? "in_progress" : null;
+          if (aggregate) await admin.from("tasks").update({ status: aggregate, updated_at: new Date().toISOString(), updated_by: user.email || user.id }).eq("id", taskId).is("deleted_at", null);
+        }
+      }
       return reply({ success: true, assignment: updated });
     }
 
