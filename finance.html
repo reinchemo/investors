@@ -3825,7 +3825,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                                 <th>ID</th>
                                 <th>Title</th>
                                 <th>Category</th>
-                                <th>Assignee</th>
+                                <th>Assignees</th>
                                 <th>Priority</th>
                                 <th>Deadline</th>
                                 <th>Status</th>
@@ -12624,7 +12624,7 @@ function openTxnModal(txn = null) {
                     categoryCode: r.category_code, subcategory: r.subcategory,
                     priority: r.priority, status: r.status, progressPct: r.progress_pct,
                     createdBy: r.created_by, assigneeStaffId: r.assignee_staff_id,
-                    reviewerStaffId: r.reviewer_staff_id,
+                    assignedStaff: [], reviewerStaffId: r.reviewer_staff_id,
                     startDate: r.start_date, deadline: r.deadline, completedAt: r.completed_at,
                     locationId: r.location_id, customerId: r.customer_id, projectId: r.project_id,
                     investorId: r.investor_id, transactionId: r.transaction_id, assetId: r.asset_id,
@@ -12632,6 +12632,22 @@ function openTxnModal(txn = null) {
                     notes: r.notes, createdAt: r.created_at, updatedAt: r.updated_at,
                     updatedBy: r.updated_by
                 }));
+                if (tasks.length) {
+                    const { data: assignmentData, error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
+                        body: { action: 'list_task_assignees', task_ids: tasks.map(t => String(t.id)) }
+                    });
+                    if (assignmentError) {
+                        console.warn('Could not load task assignee names; falling back to primary assignees.', assignmentError.message);
+                    } else {
+                        const byTask = new Map();
+                        (assignmentData?.assignments || []).forEach(a => {
+                            const key = String(a.task_id);
+                            if (!byTask.has(key)) byTask.set(key, []);
+                            byTask.get(key).push({ id: Number(a.staff_id), name: a.staff_name });
+                        });
+                        tasks.forEach(t => { t.assignedStaff = byTask.get(String(t.id)) || []; });
+                    }
+                }
                 return true;
             } catch (e) { console.warn('Tasks fetch failed:', e.message); }
             return false;
@@ -12676,8 +12692,20 @@ function openTxnModal(txn = null) {
 
         function getStaffName(id) {
             if (!id) return '—';
-            const s = staff.find(x => x.id === id);
+            const s = staff.find(x => String(x.id) === String(id));
             return s ? s.fullName : '—';
+        }
+
+        function getTaskAssigneeIds(task) {
+            const ids = (task.assignedStaff || []).map(s => Number(s.id)).filter(Number.isSafeInteger);
+            if (!ids.length && task.assigneeStaffId) ids.push(Number(task.assigneeStaffId));
+            return [...new Set(ids)];
+        }
+
+        function getTaskAssigneeNames(task) {
+            const assigned = task.assignedStaff || [];
+            if (assigned.length) return assigned.map(s => s.name || getStaffName(s.id)).filter(Boolean);
+            return task.assigneeStaffId ? [getStaffName(task.assigneeStaffId)] : [];
         }
 
         function getTaskCategoryName(code) {
@@ -12717,7 +12745,7 @@ function openTxnModal(txn = null) {
             }
             if (prioF) filtered = filtered.filter(t => t.priority === prioF);
             if (catF) filtered = filtered.filter(t => t.categoryCode === catF);
-            if (asgF) filtered = filtered.filter(t => String(t.assigneeStaffId) === asgF);
+            if (asgF) filtered = filtered.filter(t => getTaskAssigneeIds(t).some(id => String(id) === asgF));
             if (q) filtered = filtered.filter(t =>
                 ((t.title || '') + ' ' + (t.description || '') + ' ' + t.id).toLowerCase().includes(q)
             );
@@ -12765,7 +12793,7 @@ function openTxnModal(txn = null) {
                     <td class="id-cell">${escapeHTML(t.id)}</td>
                     <td><a href="#" class="task-title-link" data-id="${escapeHTML(t.id)}" style="color:inherit; text-decoration:none; font-weight:600; border-bottom:1px dotted #5fc7bc;">${escapeHTML(t.title)}</a></td>
                     <td>${escapeHTML(getTaskCategoryName(t.categoryCode))}</td>
-                    <td>${escapeHTML(getStaffName(t.assigneeStaffId))}</td>
+                    <td>${getTaskAssigneeNames(t).length ? getTaskAssigneeNames(t).map(name => `<span class="status-pill" style="display:inline-block;margin:2px 4px 2px 0;white-space:normal;">${escapeHTML(name)}</span>`).join('') : '—'}</td>
                     <td><span class="status-pill ${priorityPill}">${escapeHTML(t.priority)}</span></td>
                     <td>${t.deadline ? escapeHTML(t.deadline) : '—'}</td>
                     <td><span class="status-pill ${escapeHTML(t.status)}">${escapeHTML(taskStatusLabel(t.status))}</span></td>
