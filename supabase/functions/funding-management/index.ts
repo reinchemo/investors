@@ -336,11 +336,24 @@ Deno.serve(async(req)=>{
     const cid=Number(body.commitment_id),principal=Number(body.principal_paid),ret=Number(body.return_paid);
     if(!cid||!Number.isFinite(principal)||principal<0||!Number.isFinite(ret)||ret<0||principal+ret<=0)return out({error:"Valid principal and return amounts required."},400);
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",cid).maybeSingle();
-    if(!commit||!["funded","matured"].includes(commit.status))return out({error:"Only funded commitments can be settled."},409);
+    if(!commit||!["active_funding","funded","matured","overdue","partially_settled"].includes(commit.status))return out({error:"Only active or matured funding commitments can be settled."},409);
     const {data:ledger}=await admin.from("funding_liability_ledger").select("entry_type,amount").eq("commitment_id",cid);
     const received=(ledger||[]).filter(x=>x.entry_type==="principal_received").reduce((s,x)=>s+Number(x.amount),0);
     const principalPaid=(ledger||[]).filter(x=>x.entry_type==="principal_repaid").reduce((s,x)=>s+Number(x.amount),0);
-    if(principal>received-principalPaid)return out({error:"Principal repayment exceeds outstanding principal."},409);
+    const returnPaid=(ledger||[]).filter(x=>x.entry_type==="return_paid").reduce((s,x)=>s+Number(x.amount),0);
+    const outstandingPrincipal=Math.max(0,received-principalPaid);
+    if(principal>outstandingPrincipal+0.01)return out({error:"Principal repayment exceeds outstanding principal."},409);
+    const terms=commit.terms_snapshot||{};
+    const rate=Number(terms.return_rate??commit.agreed_return_rate??0),term=Number(terms.term_days??commit.term_days??0);
+    const basis=String(terms.day_count_basis??commit.day_count_basis??"actual_365");
+    const denominator=basis==="actual_360"||basis==="30_360"?360:365;
+    const gross=String(terms.return_type??commit.return_type)==="annualised_simple"?Number(commit.principal_amount)*rate/100*term/denominator:Number(commit.principal_amount)*rate/100;
+    const tax=gross*Number(terms.tax_rate??commit.tax_rate_snapshot??0)/100;
+    const extras=Array.isArray(terms.other_deductions)?terms.other_deductions.reduce((sum:number,item:any)=>sum+(item?.type==="fixed"?Number(item.amount||0):gross*Number(item?.rate??item?.percentage??0)/100),0):0;
+    const outstandingReturn=Math.max(0,gross-tax-extras-returnPaid);
+    if(ret>outstandingReturn+0.01)return out({error:"Return payment exceeds the remaining contractual return."},409);
+    const partial=principal+0.01<outstandingPrincipal||ret+0.01<outstandingReturn;
+    if(partial&&!commit.early_settlement_allowed)return out({error:"Partial settlement is not permitted by this signed agreement."},409);
     const {data,error}=await admin.from("funding_settlements").insert({commitment_id:cid,principal_paid:principal,return_paid:ret,status:"pending_approval",created_by:user.id}).select("*").single();
     if(error)throw error;await audit("settlement",data.id,"submitted_for_approval",null,data);return out({success:true,record:data});
   }
