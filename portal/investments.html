@@ -558,7 +558,7 @@
                 const currency=c.currency_code||"KES";
                 const ratio=Number(c.principal_amount)>0?Math.min(1,Number(c.capital_received||0)/Number(c.principal_amount)):0;
                 totalsByCurrency[currency]=totalsByCurrency[currency]||{principal:0,net:0};
-                totalsByCurrency[currency].principal+=Number(c.active_capital||0);
+                totalsByCurrency[currency].principal+=Number(c.capital_received||0);
                 totalsByCurrency[currency].net+=Number(c.net_return||0)*ratio;
             });
             const totalInvestedHtml=Object.entries(totalsByCurrency).map(([currency,values])=>'<span>'+cash(values.principal,currency)+'</span>').join(' · ')||cash(0,"KES");
@@ -594,7 +594,7 @@
                   '<label class="funding-consent"><input type="checkbox" id="funding-consent-'+o.id+'"> I consent to STARLINK using my submitted contact and KYC information to assess this funding request under the published terms and retention policy.</label><button class="btn funding-primary" onclick="expressFundingInterest('+o.id+')">Express interest</button><p class="funding-hint">Interest is not a commitment or payment. KYC, a signed agreement and verified payment are required before funding becomes active.</p></article>';
             }).join("") : '<div class="empty"><strong>No approved funding opportunities are currently open</strong><p>Offers appear only after management, legal and finance approval. No unapproved rate or tax setting can be used in a live offer.</p></div>';
             return '<section class="funding-section"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
-              '<div class="funding-summary"><div class="funding-stat"><small>Verified capital invested</small><strong>'+cash(totalInvested)+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+cash(projectedNet)+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
+              '<div class="funding-summary"><div class="funding-stat"><small>Total verified capital received</small><strong>'+cash(totalInvested)+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+cash(projectedNet)+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
               '<div class="funding-kyc"><strong>KYC status:</strong> '+safe(statusLabel(data.funder?.kyc_status||"Not started"))+' · '+safe(data.funder?.status||"No funder profile")+'. A verified profile is required before a formal commitment can be submitted.</div>'+
               '<div class="section-head"><h2>Your funding portfolio</h2><p>Principal, locked return terms, estimated deductions, maturity and settlement progress.</p></div>'+commitmentRows+
               '<div class="section-head"><h2>Approved funding opportunities</h2><p>Compare terms and calculate a potential return before expressing interest.</p></div>'+offerCards+
