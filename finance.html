@@ -12982,6 +12982,12 @@ function openTxnModal(txn = null) {
                 };
                 const { error } = await supabaseClient.from('tasks').insert(row);
                 if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
+                if (assigneeStaffIds.length) {
+                    const { error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
+                        body: { action: 'assign_task', task_id: newId, staff_ids: assigneeStaffIds, assignment_mode: assignmentMode }
+                    });
+                    if (assignmentError) { err.textContent = '⚠️ Task created, but staff assignment failed: ' + assignmentError.message; err.style.display = 'block'; return; }
+                }
                 showToast('✅ Task created: ' + newId, 'success');
             }
 
