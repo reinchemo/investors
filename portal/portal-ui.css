@@ -389,3 +389,13 @@ table tbody tr:hover { background:rgba(118,40,245,.07) !important; }
 .portal-reveal { opacity:0; transform:translateY(18px); }
 .portal-reveal.portal-visible { opacity:1; transform:translateY(0); transition:opacity .68s cubic-bezier(.22,1,.36,1),transform .68s cubic-bezier(.22,1,.36,1); }
 @media (prefers-reduced-motion:reduce) { .portal-reveal {opacity:1;transform:none;} .portal-reveal.portal-visible {transition:none;} }
+
+
+/* Intersection-based reveal with low-cost fallback for browsers without IO. */
+(function(){
+  const reveal=()=>document.querySelectorAll('.portal-reveal:not(.portal-visible)').forEach((el,i)=>{el.style.transitionDelay=Math.min(i%5,4)*55+'ms';});
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('.portal-reveal').forEach(el=>el.classList.add('portal-visible'));return;}
+  reveal();
+  const io=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('portal-visible');io.unobserve(entry.target);}}),{threshold:.08,rootMargin:'0px 0px -25px 0px'});
+  document.querySelectorAll('.portal-reveal').forEach(el=>io.observe(el));
+})();
