@@ -205,14 +205,22 @@ Deno.serve(async(req)=>{
     return out({success:true,record:result});
   }
   if(action==="approve_opportunity")return out({error:"Use separate approve_legal and approve_finance actions. Different authorised users are required."},400);
-  if(action==="open_opportunity"||action==="pause_opportunity"){
+  if(["open_opportunity","pause_opportunity","close_opportunity","cancel_opportunity"].includes(action)){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const id=Number(body.id);const {data:before}=await admin.from("funding_opportunities").select("*").eq("id",id).maybeSingle();
-    if(!before||!["approved","open","paused"].includes(before.status))return out({error:"Opportunity must first receive both approvals."},409);
-    if(action==="open_opportunity"&&(!before.legal_gate_cleared_at||!before.terms_approved_at||!before.proposed_return_rate||!before.term_days||!before.terms_approval_reference||!before.management_approval_reference))return out({error:"Legal gate, approved terms, rate and management approval must be recorded before publication."},409);
+    if(!before)return out({error:"Opportunity not found."},404);
+    if(action==="open_opportunity"&&!["approved","paused"].includes(before.status))return out({error:"Only approved or paused opportunities can be opened."},409);
+    if(action==="pause_opportunity"&&before.status!=="open")return out({error:"Only an open opportunity can be paused."},409);
+    if(action==="close_opportunity"&&!["open","paused","approved"].includes(before.status))return out({error:"Only approved, open or paused opportunities can be closed."},409);
+    if(action==="cancel_opportunity"){
+      if(!["draft","pending_approval","approved","paused","open"].includes(before.status))return out({error:"This opportunity cannot be cancelled from its current status."},409);
+      const {data:existing}=await admin.from("funding_commitments").select("id").eq("opportunity_id",id).not("status","in",'("cancelled","rejected","interested")').limit(1);
+      if(existing?.length)return out({error:"An opportunity with submitted commitments cannot be cancelled. Close it and resolve existing contracts."},409);
+    }
+    if(action==="open_opportunity"&&(!before.legal_gate_cleared_at||!before.terms_approved_at||before.proposed_return_rate===null||!before.term_days||!before.terms_approval_reference||!before.management_approval_reference))return out({error:"Legal gate, approved terms, rate and management approval must be recorded before publication."},409);
     if(action==="open_opportunity"&&Number(before.term_days)!==120&&(!before.tax_approval_reference||!before.management_approval_reference))return out({error:"Optional tenure requires management and tax approval."},409);
-    if(action==="open_opportunity"&&(before.tax_rate!==null||(Array.isArray(before.other_deductions)&&before.other_deductions.length>0))&&!before.tax_approval_reference)return out({error:"Tax settings are not approved."},409);
-    const status=action==="open_opportunity"?"open":"paused";
+    if(action==="open_opportunity"&&(before.tax_rate!==null||(Array.isArray(before.other_deductions)&&before.other_deductions.length>0))&&!before.tax_approval_reference)return out({error:"Tax/deduction settings are not approved."},409);
+    const status=action==="open_opportunity"?"open":action==="pause_opportunity"?"paused":action==="close_opportunity"?"closed":"cancelled";
     const {data,error}=await admin.from("funding_opportunities").update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error;await audit("opportunity",id,status,before,data);return out({success:true,record:data});
   }
