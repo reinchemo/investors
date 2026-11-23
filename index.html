@@ -10291,6 +10291,29 @@ async function openNewTemplateModal() {
     requestAnimationFrame(()=>requestAnimationFrame(()=>promoteModal(button,modal)));
    }
   },true);
+  // Promote the dashboard's View All Distributions action into the same full-workspace panel used by sidebar navigation.
+  document.addEventListener('click',e=>{
+   const button=e.target.closest('#viewDividendsBtn');
+   if(!button)return;
+   const modal=document.getElementById('dividendsHistoryModal');
+   if(!modal)return;
+   if(pendingModalObserver)pendingModalObserver.disconnect();
+   pendingModalObserver=new MutationObserver(()=>{
+    if(modal.classList.contains('show')){
+     pendingModalObserver.disconnect();pendingModalObserver=null;
+     promoteModal(button,modal);
+     side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a.id==='dividendsBtn'));
+    }
+   });
+   pendingModalObserver.observe(modal,{attributes:true,attributeFilter:['class']});
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(modal.classList.contains('show')){
+     if(pendingModalObserver){pendingModalObserver.disconnect();pendingModalObserver=null;}
+     promoteModal(button,modal);
+     side.querySelectorAll('a,button').forEach(a=>a.classList.toggle('starlink-current',a.id==='dividendsBtn'));
+    }
+   }));
+  },true);
   ['#starlink-home','finance.html','communication.html','admin.html'].forEach(sel=>{const a=side.querySelector(sel.startsWith('#')?'a[href="'+sel+'"]':'a[href*="'+sel+'"]');if(a){a.removeAttribute('target');a.removeAttribute('rel');}}); };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
