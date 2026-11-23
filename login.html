@@ -327,12 +327,12 @@
 
             <div class="form-group">
 
-                <label for="email">Email Address</label>
+                <label for="email">Username or Email</label>
 
                 <div class="input-wrap">
                     <i class="fas fa-envelope"></i>
 
-                    <input type="email" id="email" placeholder="you@example.com" autocomplete="username" required>
+                    <input type="text" id="email" placeholder="Enter username or email" autocomplete="username" required>
                 </div>
 
             </div>
@@ -550,11 +550,12 @@
 
             clearMessages();
 
-            const email = emailInput.value.trim();
+            const loginIdentifier = emailInput.value.trim();
+            const email = loginIdentifier.includes("@") ? loginIdentifier : loginIdentifier.toLowerCase() + "@portal.starlink.invalid";
             const password = passwordInput.value;
 
             if (!email || !password) {
-                showError("Please enter both email and password.");
+                showError("Please enter your username and password.");
                 return;
             }
 
