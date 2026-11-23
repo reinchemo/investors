@@ -150,6 +150,7 @@ Deno.serve(async(req)=>{
     if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
     const id=Number(body.id);const {data:before}=await admin.from("funding_receipts").select("*").eq("id",id).maybeSingle();
     if(!before||before.verification_status!=="pending")return out({error:"Receipt is not pending verification."},409);
+    if(before.created_by===user.id)return out({error:"The receipt recorder cannot verify their own receipt."},403);
     if(body.decision==="reject"){
       const {data,error}=await admin.from("funding_receipts").update({verification_status:"rejected",verified_by:user.id,verified_at:new Date().toISOString()}).eq("id",id).select("*").single();
       if(error)throw error;await audit("receipt",id,"rejected",before,data);return out({success:true,record:data});
@@ -163,6 +164,19 @@ Deno.serve(async(req)=>{
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",receipt.commitment_id).single();
     await admin.from("funding_commitments").update({status:"funded",updated_at:new Date().toISOString()}).eq("id",receipt.commitment_id);
     await audit("receipt",id,"verified_and_posted",before,receipt);return out({success:true,record:receipt,commitment:commit});
+  }
+  if(action==="process_maturities"){
+    if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
+    const today=new Date().toISOString().slice(0,10);
+    const {data:due,error}=await admin.from("funding_commitments").select("*").eq("status","funded").lte("maturity_date",today).limit(200);
+    if(error)throw error;
+    const processed=[];
+    for(const commitment of due||[]){
+      const {data:changed,error:updateError}=await admin.from("funding_commitments").update({status:"matured",updated_at:new Date().toISOString()}).eq("id",commitment.id).eq("status","funded").select("*").maybeSingle();
+      if(updateError)throw updateError;
+      if(changed) { await audit("commitment",commitment.id,"matured",commitment,changed); processed.push(changed); }
+    }
+    return out({success:true,processed:processed.length,commitments:processed});
   }
   if(action==="allocate_project"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
