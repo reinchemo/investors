@@ -648,16 +648,19 @@ Deno.serve(async (req) => {
       let receipts:any[] = [];
       let settlements:any[] = [];
       if (funder) {
-        const [commitResult, receiptResult, settlementResult] = await Promise.all([
-          admin.from("funding_commitments").select("id,opportunity_id,principal_amount,currency_code,agreed_return_rate,term_days,maturity_date,status,agreement_reference,signed_at,terms_locked_at,terms_snapshot,return_type,day_count_basis,tax_rate_snapshot,created_at,accepted_at")
-            .eq("funder_id",funder.id).order("created_at",{ascending:false}).limit(500),
-          admin.from("funding_receipts").select("id,commitment_id,amount,currency_code,received_on,payment_method,external_reference,verification_status,verified_at")
-            .in("commitment_id",(await admin.from("funding_commitments").select("id").eq("funder_id",funder.id)).data?.map((x:any)=>x.id)||[]).limit(1000),
-          admin.from("funding_settlements").select("id,commitment_id,principal_paid,return_paid,paid_on,payment_reference,status")
-            .in("commitment_id",(await admin.from("funding_commitments").select("id").eq("funder_id",funder.id)).data?.map((x:any)=>x.id)||[]).order("created_at",{ascending:false}).limit(500)
-        ]);
-        if (commitResult.error || receiptResult.error || settlementResult.error) return jsonResponse({ error: "Unable to load your funding statements." }, 500);
-        commitments = commitResult.data || []; receipts = receiptResult.data || []; settlements = settlementResult.data || [];
+        const commitResult = await admin.from("funding_commitments").select("id,opportunity_id,principal_amount,currency_code,agreed_return_rate,term_days,maturity_date,status,agreement_reference,signed_at,terms_locked_at,terms_snapshot,return_type,day_count_basis,tax_rate_snapshot,created_at,accepted_at")
+          .eq("funder_id",funder.id).order("created_at",{ascending:false}).limit(500);
+        if (commitResult.error) return jsonResponse({ error: "Unable to load your funding commitments." }, 500);
+        commitments = commitResult.data || [];
+        const commitmentIds = commitments.map((item:any)=>item.id);
+        if (commitmentIds.length) {
+          const [receiptResult,settlementResult] = await Promise.all([
+            admin.from("funding_receipts").select("id,commitment_id,amount,currency_code,received_on,payment_method,external_reference,verification_status,verified_at").in("commitment_id",commitmentIds).limit(1000),
+            admin.from("funding_settlements").select("id,commitment_id,principal_paid,return_paid,paid_on,payment_reference,status").in("commitment_id",commitmentIds).order("created_at",{ascending:false}).limit(500)
+          ]);
+          if (receiptResult.error || settlementResult.error) return jsonResponse({ error: "Unable to load your funding statements." }, 500);
+          receipts = receiptResult.data || []; settlements = settlementResult.data || [];
+        }
       }
       const actual365=(term:number,basis:string)=>basis==="actual_360"?360:basis==="30_360"?360:365;
       const portfolio=commitments.map((c:any)=>{
