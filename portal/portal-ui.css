@@ -248,3 +248,138 @@ table td {
   .portal-brand strong { font-size: 11px; }
   .portal-home-link { padding-inline: 10px; font-size: 11px; }
 }
+
+
+/* =========================================================
+   STARLINK FINANCE THEME — image-led visual refresh
+   Dark ink surfaces, electric violet / cyan / orange accents.
+   Presentation only: no data or business logic is modified.
+   ========================================================= */
+:root {
+  --portal-violet: #7628f5;
+  --portal-violet-2: #4e35ff;
+  --portal-blue: #3447ff;
+  --portal-cyan: #38d7ee;
+  --portal-orange: #ff751c;
+  --portal-green: #32d7b3;
+  --portal-ink: #070713;
+  --portal-deep: #0a0a1b;
+  --portal-card: #101020;
+  --portal-muted: #a5a5bd;
+  --portal-glow-violet: 0 0 22px rgba(118,40,245,.2);
+}
+html { scroll-behavior:smooth; }
+body {
+  background:
+    radial-gradient(ellipse at 4% 4%,rgba(118,40,245,.12),transparent 32%),
+    radial-gradient(ellipse at 96% 12%,rgba(45,67,255,.10),transparent 30%),
+    var(--portal-ink) !important;
+  font-family:'DM Sans','Inter',sans-serif !important;
+}
+h1,h2,h3,h4,.page-heading h2,.brand strong,.metric-value,.stat-value {
+  font-family:'Outfit','Space Grotesk',sans-serif !important;
+  letter-spacing:-.035em;
+}
+.sidebar {
+  background:linear-gradient(180deg,#05050c 0%,#090817 72%,#120827 100%) !important;
+  border-right-color:rgba(118,40,245,.2) !important;
+  box-shadow:12px 0 48px rgba(0,0,0,.26);
+}
+.brand-icon,.logo,.portal-brand-mark {
+  background:linear-gradient(135deg,#a42cf5,#6428e9 48%,#354cff) !important;
+  box-shadow:0 0 30px rgba(118,40,245,.38) !important;
+}
+.nav-label { color:#8983aa !important; }
+.nav-links a { color:#c6c5d7 !important; border-radius:10px !important; }
+.nav-links a i { color:#aaa3c9 !important; }
+.nav-links a:hover {
+  color:#fff !important;
+  background:linear-gradient(90deg,rgba(118,40,245,.17),rgba(54,70,255,.06)) !important;
+  transform:translateX(4px);
+}
+.nav-links a.active {
+  color:#fff !important;
+  border-color:rgba(118,40,245,.32) !important;
+  background:linear-gradient(100deg,rgba(118,40,245,.3),rgba(52,71,255,.14)) !important;
+  box-shadow:inset 3px 0 #8e3cff,0 0 20px rgba(118,40,245,.08) !important;
+}
+.nav-links a.active i { color:#c18aff !important; }
+.topbar {
+  background:rgba(7,7,19,.86) !important;
+  border-bottom-color:rgba(118,40,245,.16) !important;
+  backdrop-filter:blur(22px) saturate(150%) !important;
+}
+.hero {
+  background:
+    radial-gradient(circle at 85% 10%,rgba(118,40,245,.2),transparent 36%),
+    linear-gradient(115deg,#111020 0%,#14102c 58%,#141b3d 100%) !important;
+  border:1px solid rgba(133,73,255,.28) !important;
+  box-shadow:0 22px 55px rgba(0,0,0,.25),0 0 35px rgba(118,40,245,.08);
+}
+.hero:after {
+  background:radial-gradient(circle,rgba(118,40,245,.18),rgba(56,215,238,.04) 45%,transparent 72%) !important;
+}
+.panel,.stat-card,.stat,.card,.section-card,.metric {
+  background:linear-gradient(145deg,rgba(18,17,35,.97),rgba(10,10,23,.98)) !important;
+  border:1px solid rgba(151,133,206,.16) !important;
+  box-shadow:0 14px 38px rgba(0,0,0,.2);
+}
+.notice {
+  background:linear-gradient(100deg,rgba(118,40,245,.1),rgba(52,71,255,.06)) !important;
+  border-color:rgba(137,75,255,.22) !important;
+}
+.btn-primary,.submit,.action-btn.primary {
+  background:linear-gradient(110deg,#7828f4,#5135ff) !important;
+  box-shadow:0 8px 24px rgba(104,43,239,.24);
+}
+.btn-primary:hover,.submit:hover,.action-btn.primary:hover {
+  box-shadow:0 0 28px rgba(118,40,245,.4),0 12px 26px rgba(0,0,0,.2) !important;
+}
+.icon-btn { background:#111126 !important; border-color:rgba(151,133,206,.2) !important; }
+.icon-btn:hover { border-color:rgba(118,40,245,.65) !important; color:#d5b8ff !important; }
+input,select,textarea { background:#0c0c1c !important; color:#f5f3ff !important; border-color:rgba(151,133,206,.2) !important; }
+input:focus,select:focus,textarea:focus { border-color:#8a45ff !important; box-shadow:0 0 0 3px rgba(118,40,245,.14),0 0 18px rgba(118,40,245,.1) !important; }
+table th { background:rgba(118,40,245,.08) !important; color:#aaa1c8 !important; }
+table tbody tr:hover { background:rgba(118,40,245,.07) !important; }
+.status.good,.status.approved,.status.paid { color:#45e3bb !important; background:rgba(50,215,179,.12) !important; }
+.status.pending { color:#ffbd74 !important; background:rgba(255,117,28,.13) !important; }
+.status.bad,.status.rejected { color:#ff819f !important; background:rgba(255,70,110,.12) !important; }
+
+/* dashboard entrance choreography */
+@keyframes financeRise {
+  from { opacity:0; transform:translate3d(0,20px,0) scale(.99); }
+  to { opacity:1; transform:translate3d(0,0,0) scale(1); }
+}
+@keyframes financeGlow {
+  0%,100% { box-shadow:0 0 18px rgba(118,40,245,.18); }
+  50% { box-shadow:0 0 31px rgba(118,40,245,.34),0 0 13px rgba(56,215,238,.12); }
+}
+@keyframes financeShimmer {
+  0% { background-position:0% 50%; }
+  100% { background-position:200% 50%; }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .content > *,#dashboardView > *,#employeeArea > *,#investorArea > * {
+    animation:financeRise .65s cubic-bezier(.2,.75,.25,1) both;
+  }
+  .stats-grid > *, .summary-grid > *, .grid > * {
+    animation:financeRise .62s cubic-bezier(.2,.75,.25,1) both;
+  }
+  .stats-grid > *:nth-child(2),.summary-grid > *:nth-child(2),.grid > *:nth-child(2) { animation-delay:.06s; }
+  .stats-grid > *:nth-child(3),.summary-grid > *:nth-child(3),.grid > *:nth-child(3) { animation-delay:.12s; }
+  .stats-grid > *:nth-child(4),.summary-grid > *:nth-child(4),.grid > *:nth-child(4) { animation-delay:.18s; }
+  .panel,.stat-card,.stat,.card,.section-card,.metric {
+    transition:transform .28s cubic-bezier(.2,.75,.25,1),border-color .28s,box-shadow .28s;
+  }
+  .panel:hover,.stat-card:hover,.stat:hover,.card:hover,.section-card:hover,.metric:hover {
+    transform:translateY(-4px);
+    border-color:rgba(137,75,255,.38) !important;
+    box-shadow:0 18px 42px rgba(0,0,0,.28),0 0 24px rgba(118,40,245,.09);
+  }
+  .brand-icon { animation:financeGlow 4s ease-in-out infinite; }
+  .hero h1 span,.grad-text { background:linear-gradient(100deg,#c8a3ff,#6f71ff,#41dff0);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:financeShimmer 8s linear infinite; }
+  .nav-links a,.btn,.icon-btn { transition:all .22s cubic-bezier(.2,.75,.25,1); }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; }
+}
