@@ -53,6 +53,16 @@ Deno.serve(async(req)=>{
     const {data,error}=await admin.from("funding_parties").insert({legal_name:name,contact_name:String(body.contact_name||"").trim()||null,email:String(body.email||"").trim()||null,phone:String(body.phone||"").trim()||null,party_type:body.party_type==="company"?"company":"individual",kyc_status:"not_started",status:"draft",notes:String(body.notes||"").slice(0,2000)||null}).select("*").single();
     if(error)throw error; await audit("party",data.id,"created",null,data); return out({success:true,record:data});
   }
+  if(action==="set_party_status"){
+    if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
+    const id=Number(body.id),status=String(body.status||"");
+    if(!Number.isSafeInteger(id)||!["active","suspended","closed"].includes(status))return out({error:"Valid funder and status required."},400);
+    const {data:before}=await admin.from("funding_parties").select("*").eq("id",id).maybeSingle();
+    if(!before)return out({error:"Funder not found."},404);
+    if(status==="active"&&before.kyc_status!=="verified")return out({error:"KYC must be verified before activating a funder."},409);
+    const {data,error}=await admin.from("funding_parties").update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
+    if(error)throw error;await audit("party",id,"status_"+status,before,data);return out({success:true,record:data});
+  }
   if(action==="set_kyc"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const id=Number(body.id),status=String(body.kyc_status||"");
@@ -100,7 +110,9 @@ Deno.serve(async(req)=>{
     if(!opp||opp.status!=="open")return out({error:"Only open approved opportunities accept commitments."},409);
     if(!party||party.kyc_status!=="verified"||party.status!=="active")return out({error:"Funder must be active with verified KYC."},409);
     if(!Number.isFinite(principal)||principal<=0||!Number.isFinite(rate)||rate<0||!Number.isInteger(days)||days<1||days>3650)return out({error:"Valid principal, return rate and term are required."},400);
-    if(principal>Number(opp.target_amount))return out({error:"Commitment cannot exceed opportunity target amount."},400);
+    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",opportunity).not("status","in",'("(cancelled)")');
+    const already=(prior||[]).reduce((s,x)=>s+Number(x.principal_amount),0);
+    if(already+principal>Number(opp.target_amount))return out({error:"Total commitments cannot exceed the opportunity target amount."},400);
     const agreement=String(body.agreement_reference||"").trim(),signed=String(body.signed_at||"").trim();
     const signedAt=agreement&&signed?new Date(signed):null;
     const isSigned=!!(agreement&&signedAt&&!Number.isNaN(signedAt.getTime()));
@@ -113,6 +125,9 @@ Deno.serve(async(req)=>{
     const cid=Number(body.commitment_id),amount=Number(body.amount);if(!cid||!Number.isFinite(amount)||amount<=0)return out({error:"Commitment and positive receipt amount required."},400);
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",cid).maybeSingle();
     if(!commit||!["committed","funds_pending","funded"].includes(commit.status))return out({error:"A signed commitment is required before recording funds."},409);
+    const {data:existingReceipts}=await admin.from("funding_receipts").select("amount").eq("commitment_id",cid).neq("verification_status","rejected");
+    const receivedSoFar=(existingReceipts||[]).reduce((s,x)=>s+Number(x.amount),0);
+    if(receivedSoFar+amount>Number(commit.principal_amount))return out({error:"Receipts cannot exceed the signed commitment principal."},409);
     const {data:receipt,error}=await admin.from("funding_receipts").insert({commitment_id:cid,amount,currency_code:commit.currency_code,received_on:body.received_on||new Date().toISOString().slice(0,10),payment_method:String(body.payment_method||"").slice(0,80)||null,external_reference:String(body.external_reference||"").slice(0,160)||null,notes:String(body.notes||"").slice(0,1000)||null,verification_status:"pending"}).select("*").single();
     if(error)throw error;await audit("receipt",receipt.id,"recorded_pending_verification",null,receipt);return out({success:true,record:receipt});
   }
