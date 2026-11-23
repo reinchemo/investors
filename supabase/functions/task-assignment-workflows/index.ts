@@ -55,7 +55,9 @@ Deno.serve(async (req: Request) => {
           ids.some((v: number) => !Number.isSafeInteger(v) || v <= 0)) return reply({ error: "Invalid employee selection." }, 400);
       const { data: task, error: taskErr } = await admin.from("tasks").select("id,status").eq("id", taskId).is("deleted_at", null).maybeSingle();
       if (taskErr || !task) return reply({ error: "Task not found." }, 404);
-      const { data: staff, error: staffErr } = await admin.from("staff").select("id").in("id", ids).eq("status", "active").is("deleted_at", null);
+      const { data: staff, error: staffErr } = ids.length
+        ? await admin.from("staff").select("id").in("id", ids).eq("status", "active").is("deleted_at", null)
+        : { data: [], error: null };
       if (staffErr || (staff || []).length !== ids.length) return reply({ error: "Every selected employee must be active." }, 400);
       const rows = ids.map((id: number) => ({ task_id: taskId, staff_id: id, assignment_state: "assigned" }));
       const { data: existingAssignments, error: existingErr } = await admin.from("task_assignments").select("id,staff_id").eq("task_id", taskId);

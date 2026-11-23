@@ -1605,6 +1605,17 @@
                 content: "Page " counter(page);
             }
         }
+    
+        .staff-picker{border:1px solid rgba(110,151,190,.28);border-radius:15px;background:linear-gradient(145deg,rgba(25,43,66,.92),rgba(15,27,44,.96));padding:13px;box-shadow:0 12px 28px rgba(0,0,0,.16);}
+        .staff-picker-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}.staff-picker-top strong{display:block;color:#edf4fb;font-size:.84rem;font-weight:700;}.staff-picker-top small{display:block;color:#829bb5;font-size:.68rem;margin-top:3px;}
+        .staff-selected-pill{flex:0 0 auto;border:1px solid rgba(95,199,188,.35);background:rgba(95,199,188,.12);color:#82e1d4;border-radius:999px;padding:5px 10px;font-size:.68rem;font-weight:800;}
+        .staff-picker-search{display:flex;align-items:center;gap:9px;border:1px solid rgba(124,158,193,.24);background:rgba(7,17,31,.5);border-radius:10px;padding:0 11px;}.staff-picker-search i{color:#7f9bb8;font-size:.8rem;}.staff-picker-search input{border:0!important;background:transparent!important;box-shadow:none!important;color:#edf4fb!important;min-height:38px!important;padding:8px 0!important;width:100%;outline:none!important;}.staff-picker-search input::placeholder{color:#7189a3;}
+        .staff-picker-actions{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 6px;}.staff-picker-link{border:0;background:none;color:#72d8cb;font-size:.69rem;font-weight:700;padding:4px 2px;cursor:pointer;}.staff-picker-link:hover{text-decoration:underline;color:#a0f1e7;}.staff-picker-link.muted{color:#91a5ba;}
+        .staff-picker-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:225px;overflow-y:auto;padding:2px 3px 4px 1px;}.staff-picker-item{display:flex;align-items:center;gap:10px;min-width:0;border:1px solid rgba(124,158,193,.18);border-radius:10px;padding:9px 10px;background:rgba(255,255,255,.025);cursor:pointer;transition:border-color .16s,background .16s;}.staff-picker-item:hover{border-color:rgba(95,199,188,.5);background:rgba(95,199,188,.07);}.staff-picker-item.selected{border-color:rgba(95,199,188,.65);background:rgba(58,164,151,.14);}
+        .staff-picker-item input[type=checkbox]{width:17px;height:17px;min-width:17px;accent-color:#55c6b7;cursor:pointer;margin:0;}.staff-picker-copy{display:block;min-width:0;}.staff-picker-name{display:block;color:#e7eff8;font-size:.74rem;font-weight:650;line-height:1.3;overflow-wrap:anywhere;}.staff-picker-role{display:block;color:#8ba2bb;font-size:.64rem;margin-top:3px;line-height:1.25;}
+        .staff-picker-foot{display:flex;align-items:flex-start;gap:7px;color:#829bb5;font-size:.66rem;line-height:1.45;border-top:1px solid rgba(124,158,193,.15);padding:10px 2px 0;margin-top:8px;}.staff-picker-foot i{color:#71d5c8;margin-top:1px;}.staff-picker-empty{grid-column:1/-1;text-align:center;color:#8ba2bb;font-size:.72rem;padding:18px 8px;}
+        @media(max-width:640px){.staff-picker-list{grid-template-columns:1fr;max-height:210px;}.staff-picker{padding:10px;}}
+
     </style>
 
 <style id="starlink-sidebar-shell">
@@ -2359,10 +2370,15 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
 
             <div class="modal-row">
                 <div>
-                    <label>Assignee Staff <span style="color:#e8837a;">*</span></label>
-                    <select id="tskAssignee" multiple size="5" aria-describedby="tskAssigneeHelp" style="min-height:142px; height:auto; padding:0.55rem 0.7rem;"></select>
-                    <small id="tskAssigneeHelp" style="display:block;color:#7f9bb8;font-size:0.7rem;line-height:1.5;margin-top:0.4rem;">Select one person or hold Ctrl (Windows) / Cmd (Mac) to select multiple staff. Multiple selections mean everyone is expected to complete their part.</small>
-                    <div id="tskAssigneeCount" style="font-size:0.72rem;color:#7fded1;margin-top:0.35rem;">No staff selected</div>
+                    <label>Assign task to <span style="color:#e8837a;">*</span></label>
+                    <select id="tskAssignee" multiple aria-hidden="true" tabindex="-1" style="display:none;"></select>
+                    <div class="staff-picker" id="staffPicker">
+                        <div class="staff-picker-top"><div><strong>Select team members</strong><small>Only checked staff will receive this task.</small></div><span class="staff-selected-pill" id="tskAssigneeCount">0 selected</span></div>
+                        <div class="staff-picker-search"><i class="fas fa-search"></i><input type="search" id="tskAssigneeSearch" placeholder="Search staff by name or role..." autocomplete="off"></div>
+                        <div class="staff-picker-actions"><button type="button" class="staff-picker-link" id="tskAssigneeSelectVisible">Select visible</button><button type="button" class="staff-picker-link muted" id="tskAssigneeClear">Clear selection</button></div>
+                        <div class="staff-picker-list" id="tskAssigneeChecklist" role="group" aria-label="Choose staff members"></div>
+                        <div class="staff-picker-foot"><i class="fas fa-info-circle"></i><span>Choose one or more people. Every selected person will be assigned the task.</span></div>
+                    </div>
                 </div>
                 <div>
                     <label>Designated Reviewer (Staff)</label>
@@ -12823,8 +12839,8 @@ function openTxnModal(txn = null) {
             if (asgSel) {
                 asgSel.innerHTML = staff.filter(s => s.status === 'active')
                     .map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
-                asgSel.onchange = updateTaskAssigneeCount;
-                updateTaskAssigneeCount();
+                renderTaskAssigneeChecklist();
+                bindTaskAssigneePicker();
             }
 
             const reviewerSel = document.getElementById('tskReviewer');
@@ -12844,13 +12860,64 @@ function openTxnModal(txn = null) {
 
         function getSelectedTaskAssigneeIds() {
             const select = document.getElementById('tskAssignee');
-            return select ? Array.from(select.selectedOptions).map(option => Number(option.value)).filter(Number.isSafeInteger) : [];
+            return select ? Array.from(select.options).filter(option => option.selected).map(option => Number(option.value)).filter(Number.isSafeInteger) : [];
+        }
+
+        function renderTaskAssigneeChecklist() {
+            const select = document.getElementById('tskAssignee'), list = document.getElementById('tskAssigneeChecklist');
+            if (!select || !list) return;
+            const query = (document.getElementById('tskAssigneeSearch')?.value || '').trim().toLowerCase();
+            const options = Array.from(select.options).filter(option => !query || (option.textContent || '').toLowerCase().includes(query));
+            list.innerHTML = options.length ? options.map(option => {
+                const id = String(option.value), checked = option.selected, parts = option.textContent.split(' (');
+                const staffName = parts[0], role = parts.length > 1 ? parts.slice(1).join(' (').replace(/\)$/, '') : 'Team member';
+                return `<label class="staff-picker-item ${checked ? 'selected' : ''}" data-staff-id="${escapeHTML(id)}"><input type="checkbox" value="${escapeHTML(id)}" ${checked ? 'checked' : ''} aria-label="Assign to ${escapeHTML(staffName)}"><span class="staff-picker-copy"><span class="staff-picker-name">${escapeHTML(staffName)}</span><span class="staff-picker-role">${escapeHTML(role)}</span></span></label>`;
+            }).join('') : '<div class="staff-picker-empty"><i class="fas fa-search"></i><br>No staff match your search.</div>';
+            updateTaskAssigneeCount();
         }
 
         function updateTaskAssigneeCount() {
-            const count = getSelectedTaskAssigneeIds().length;
-            const label = document.getElementById('tskAssigneeCount');
-            if (label) label.textContent = count === 0 ? 'No staff selected — task will remain unassigned' : count === 1 ? '1 staff member selected' : count + ' staff members selected';
+            const count = getSelectedTaskAssigneeIds().length, label = document.getElementById('tskAssigneeCount');
+            if (label) label.textContent = count + ' selected';
+            const select = document.getElementById('tskAssignee');
+            if (select) Array.from(select.options).forEach(option => {
+                const item = document.querySelector(`.staff-picker-item[data-staff-id="${CSS.escape(String(option.value))}"]`);
+                if (item) item.classList.toggle('selected', option.selected);
+            });
+        }
+
+        function setTaskAssigneeSelection(ids) {
+            const selected = new Set((ids || []).map(String)), select = document.getElementById('tskAssignee');
+            if (!select) return;
+            Array.from(select.options).forEach(option => { option.selected = selected.has(String(option.value)); });
+            renderTaskAssigneeChecklist();
+        }
+
+        function bindTaskAssigneePicker() {
+            const list = document.getElementById('tskAssigneeChecklist'), search = document.getElementById('tskAssigneeSearch');
+            if (list && !list.dataset.bound) {
+                list.dataset.bound = 'true';
+                list.addEventListener('change', event => {
+                    const checkbox = event.target.closest('input[type="checkbox"]');
+                    if (!checkbox) return;
+                    const select = document.getElementById('tskAssignee');
+                    const option = Array.from(select.options).find(item => String(item.value) === String(checkbox.value));
+                    if (option) option.selected = checkbox.checked;
+                    renderTaskAssigneeChecklist();
+                });
+            }
+            if (search && !search.dataset.bound) { search.dataset.bound = 'true'; search.addEventListener('input', renderTaskAssigneeChecklist); }
+            const selectVisible = document.getElementById('tskAssigneeSelectVisible');
+            if (selectVisible && !selectVisible.dataset.bound) {
+                selectVisible.dataset.bound = 'true';
+                selectVisible.addEventListener('click', () => {
+                    const visibleIds = new Set(Array.from(document.querySelectorAll('#tskAssigneeChecklist .staff-picker-item')).map(item => item.dataset.staffId));
+                    Array.from(document.getElementById('tskAssignee').options).forEach(option => { if (visibleIds.has(String(option.value))) option.selected = true; });
+                    renderTaskAssigneeChecklist();
+                });
+            }
+            const clear = document.getElementById('tskAssigneeClear');
+            if (clear && !clear.dataset.bound) { clear.dataset.bound = 'true'; clear.addEventListener('click', () => setTaskAssigneeSelection([])); }
         }
 
                 async function openTaskModal(taskId = null) {
@@ -12866,6 +12933,9 @@ function openTxnModal(txn = null) {
             }
 
             populateTaskDropdowns();
+            const assigneeSearch = document.getElementById('tskAssigneeSearch');
+            if (assigneeSearch) assigneeSearch.value = '';
+            renderTaskAssigneeChecklist();
 
             // Safety helper to set value only if the element exists
             const setVal = (id, val) => {
@@ -12880,14 +12950,14 @@ function openTxnModal(txn = null) {
                 setVal('tskDescription', t.description);
                 setVal('tskCategory', t.categoryCode);
                 setVal('tskPriority', t.priority || 'normal');
-                Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = String(option.value) === String(t.assigneeStaffId || ''); });
+                setTaskAssigneeSelection(t.assigneeStaffId ? [t.assigneeStaffId] : []);
                 try {
                     const { data: assignmentData, error: assignmentLoadError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
                         body: { action: 'list_task_assignments', task_id: taskId }
                     });
                     if (!assignmentLoadError && assignmentData && Array.isArray(assignmentData.staff_ids)) {
                         const selectedIds = new Set(assignmentData.staff_ids.map(String));
-                        Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = selectedIds.has(String(option.value)); });
+                        setTaskAssigneeSelection(Array.from(selectedIds));
                     }
                 } catch (assignmentLoadError) {
                     console.warn('Could not load all task assignees; showing primary assignee only.', assignmentLoadError);
@@ -12905,8 +12975,7 @@ function openTxnModal(txn = null) {
                 setVal('tskDescription', '');
                 setVal('tskCategory', '');
                 setVal('tskPriority', 'normal');
-                Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = false; });
-                updateTaskAssigneeCount();
+                setTaskAssigneeSelection([]);
                 setVal('tskReviewer', '');
                 setVal('tskLocation', '');
                 setVal('tskStartDate', todayISO());
@@ -12981,12 +13050,11 @@ function openTxnModal(txn = null) {
                 if (assigneeStaffIds.length && ['draft','assigned'].includes(t.status)) upd.status = 'assigned';
                 const { error } = await supabaseClient.from('tasks').update(upd).eq('id', editingTaskId);
                 if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
-                if (assigneeStaffIds.length || (t && t.assigneeStaffId)) {
-                    const { error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
-                        body: { action: 'assign_task', task_id: editingTaskId, staff_ids: assigneeStaffIds, assignment_mode: assignmentMode }
-                    });
-                    if (assignmentError) { err.textContent = '⚠️ Task saved, but staff assignment failed: ' + assignmentError.message; err.style.display = 'block'; return; }
-                }
+                // Always sync the full checked list, including an empty list, so unchecked staff are removed.
+                const { error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
+                    body: { action: 'assign_task', task_id: editingTaskId, staff_ids: assigneeStaffIds, assignment_mode: assignmentMode }
+                });
+                if (assignmentError) { err.textContent = '⚠️ Task saved, but staff assignment failed: ' + assignmentError.message; err.style.display = 'block'; return; }
                 showToast('✅ Task updated', 'success');
             } else {
                 const { data: idData, error: idErr } = await supabaseClient.rpc('next_task_id');

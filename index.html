@@ -2972,6 +2972,7 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                 <button class="recon-tab" data-recon="dup-ref"><i class="fas fa-copy"></i> Duplicates <span class="badge" id="reconBadgeDup">0</span></button>
                 <button class="recon-tab" data-recon="pending"><i class="fas fa-clock"></i> Pending <span class="badge" id="reconBadgePending">0</span></button>
                 <button class="recon-tab" data-recon="dividends"><i class="fas fa-coins"></i> Dividends <span class="badge" id="reconBadgeDiv">0</span></button>
+                <button class="recon-tab" data-recon="paid-investors"><i class="fas fa-user-check"></i> Paid Investors <span class="badge" id="reconBadgePaidInvestors">0</span></button>
             </div>
             <div class="recon-section active" data-recon-section="summary">
                 <div class="recon-stats" id="reconStats"></div>
@@ -3042,6 +3043,15 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                             </tr>
                         </thead>
                         <tbody id="reconDividendBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="recon-section" data-recon-section="paid-investors">
+                <div class="reconcile-note" style="margin-bottom:0.8rem;"><i class="fas fa-check-circle"></i><span>Shareholders listed below belong to distributions marked as paid. Each row shows the recorded allocation for that period.</span></div>
+                <div class="employee-table-wrap">
+                    <table class="employee-table">
+                        <thead><tr><th>Investor</th><th>Distribution Period</th><th>Paid Date</th><th style="text-align:right;">Payout Amount</th><th>Status</th></tr></thead>
+                        <tbody id="reconPaidInvestorsBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -4865,7 +4875,19 @@ async function openSecurePdf(investorId) {
             document.getElementById('reconBadgeDup').textContent = issues.dupRef.length;
             document.getElementById('reconBadgePending').textContent = issues.pending.length;
             document.getElementById('reconBadgeDiv').textContent = issues.dividends.length;
-            ['Summary', 'Missing', 'Dup', 'Pending', 'Div'].forEach(k => {
+            const paidInvestorRows = dividends.filter(d => d.status === 'paid').flatMap(d =>
+                (Array.isArray(d.allocations) ? d.allocations : [])
+                    .filter(a => !a.isVirtual && !/VIRTUAL/i.test(a.name || ''))
+                    .map(a => ({
+                        name: a.name || investors.find(inv => String(inv.id) === String(a.investorId))?.name || 'Unknown investor',
+                        period: d.periodLabel || '—',
+                        paidAt: d.paidAt || null,
+                        amount: safeNum(a.final !== undefined ? a.final : (a.stage1 !== undefined || a.stage2 !== undefined ? safeNum(a.stage1) + safeNum(a.stage2) : a.amount)),
+                        distributionId: d.id
+                    }))
+            ).sort((a, b) => (b.paidAt || '').localeCompare(a.paidAt || '') || a.name.localeCompare(b.name));
+            document.getElementById('reconBadgePaidInvestors').textContent = paidInvestorRows.length;
+            ['Summary', 'Missing', 'Dup', 'Pending', 'Div', 'PaidInvestors'].forEach(k => {
                 const b = document.getElementById('reconBadge' + k);
                 const tab = b.closest('.recon-tab');
                 tab.classList.toggle('empty', b.textContent === '0');
@@ -4905,6 +4927,16 @@ async function openSecurePdf(investorId) {
 
             document.getElementById('reconDividendBody').innerHTML = !issues.dividends.length ? `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-check-circle"></i>All dividends fully paid.</div></td></tr>` :
                 issues.dividends.map(d => `<tr class="${d.ageDays > 30 ? 'recon-row-warning' : 'recon-row-caution'}"><td><span class="div-ref">${escapeHTML(d.id)}</span></td><td><strong>${escapeHTML(d.periodLabel)}</strong></td><td><span class="status-pill ${escapeHTML(d.status)}">${escapeHTML(d.status)}</span></td><td class="employee-amount">KSh ${fmt(d.totalDistributable)}</td><td><strong style="color:${d.ageDays > 30 ? '#f0a89f' : '#e8b879'};">${d.ageDays} days</strong></td></tr>`).join('');
+
+            document.getElementById('reconPaidInvestorsBody').innerHTML = !paidInvestorRows.length
+                ? `<tr><td colspan="5"><div class="empty-row"><i class="fas fa-users"></i>No investor payouts have been marked as paid yet.</div></td></tr>`
+                : paidInvestorRows.map(row => `<tr>
+                    <td><strong>${escapeHTML(row.name)}</strong></td>
+                    <td>${escapeHTML(row.period)}</td>
+                    <td>${row.paidAt ? escapeHTML(new Date(row.paidAt).toLocaleDateString()) : '—'}</td>
+                    <td class="employee-amount" style="text-align:right;">KSh ${fmt(row.amount)}</td>
+                    <td><span class="status-pill paid"><i class="fas fa-check-circle"></i> PAID</span></td>
+                </tr>`).join('');
         }
 
         async function markReconciledPaymentComplete(paymentId) {
