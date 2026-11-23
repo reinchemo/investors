@@ -583,7 +583,7 @@
                 const initialNet=Math.max(0,initialGross-initialTax-initialExtras);
                 return '<article class="funding-offer"><div class="funding-contract-head"><div><span class="funding-ref">'+safe(o.reference_code)+'</span><h3>'+safe(o.title)+'</h3><p>'+safe(o.funding_purpose||o.description||"")+'</p></div><span class="funding-state">APPROVED OFFER</span></div>'+
                   '<div class="funding-metrics"><div><small>Return rate</small><strong>'+rate+'% '+(o.return_type==="annualised_simple"?"p.a.":"for term")+'</strong></div><div><small>Tenure</small><strong>'+term+' days</strong></div><div><small>Minimum</small><strong>'+cash(o.minimum_commitment)+'</strong></div><div><small>Maximum</small><strong>'+(o.maximum_commitment?cash(o.maximum_commitment):"Opportunity capacity")+'</strong></div></div>'+
-                  '<label class="funding-label" for="funding-amount-'+o.id+'">Calculate your return (KES)</label><input class="funding-amount" id="funding-amount-'+o.id+'" type="number" min="'+o.minimum_commitment+'" '+(o.maximum_commitment?'max="'+o.maximum_commitment+'"':'')+' step="100" value="'+o.minimum_commitment+'" oninput="calculateFundingOffer('+o.id+','+rate+','+term+',\''+o.return_type+'\',\''+o.day_count_basis+'\')">'+
+                  '<label class="funding-label" for="funding-amount-'+o.id+'">Calculate your return ('+safe(o.currency_code)+')</label><input class="funding-amount" id="funding-amount-'+o.id+'" data-tax="'+Number(o.tax_rate||0)+'" data-deductions="'+safe(JSON.stringify(o.other_deductions||[]))+'" type="number" min="'+o.minimum_commitment+'" '+(o.maximum_commitment?'max="'+o.maximum_commitment+'"':'')+' step="100" value="'+o.minimum_commitment+'" oninput="calculateFundingOffer('+o.id+','+rate+','+term+',\''+o.return_type+'\',\''+o.day_count_basis+'\')">'+
                   '<div class="funding-calculation" id="funding-calc-'+o.id+'"><span>Gross '+cash(initialGross)+' · Deductions '+cash(initialTax+initialExtras)+'</span><strong>Net return '+cash(initialNet)+' · Maturity '+cash(Number(o.minimum_commitment)+initialNet)+'</strong></div>'+
                   '<button class="btn funding-primary" onclick="expressFundingInterest('+o.id+')">Express interest</button><p class="funding-hint">Interest is not a commitment or payment. KYC, a signed agreement and verified payment are required before funding becomes active.</p></article>';
             }).join("") : '<div class="empty"><strong>No approved funding opportunities are currently open</strong><p>Offers appear only after management, legal and finance approval. No unapproved rate or tax setting can be used in a live offer.</p></div>';
@@ -596,11 +596,17 @@
         }
 
         window.calculateFundingOffer = function(id,rate,term,type,basis) {
-            const principal=Number(document.getElementById("funding-amount-"+id)?.value||0);
+            const input=document.getElementById("funding-amount-"+id);
+            const principal=Number(input?.value||0);
             const denominator=basis==="actual_360"||basis==="30_360"?360:365;
             const gross=type==="annualised_simple"?principal*(rate/100)*(term/denominator):principal*(rate/100);
+            const tax=gross*Number(input?.dataset.tax||0)/100;
+            let extras=[];try{extras=JSON.parse(input?.dataset.deductions||"[]");}catch(_){}
+            const other=Array.isArray(extras)?extras.reduce((sum,item)=>sum+(item.type==="fixed"?Number(item.amount||0):gross*Number(item.rate??item.percentage??0)/100),0):0;
+            const deductions=tax+other,net=Math.max(0,gross-deductions);
+            const fmt=value=>new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(value);
             const target=document.getElementById("funding-calc-"+id);
-            if(target)target.innerHTML="<span>Gross return estimate</span><strong>"+new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(gross)+" · Total at maturity "+new Intl.NumberFormat("en-KE",{style:"currency",currency:"KES"}).format(principal+gross)+"</strong>";
+            if(target)target.innerHTML="<span>Gross "+fmt(gross)+" · Deductions "+fmt(deductions)+"</span><strong>Net return "+fmt(net)+" · Total at maturity "+fmt(principal+net)+"</strong>";
         };
         window.expressFundingInterest = async function(opportunityId) {
             const principal=Number(document.getElementById("funding-amount-"+opportunityId)?.value||0);
