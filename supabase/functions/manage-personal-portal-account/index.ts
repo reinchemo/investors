@@ -419,6 +419,50 @@ Deno.serve(async (request: Request): Promise<Response> => {
       );
     }
 
+    if (action === "create_employee_account") {
+      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+      const staffId = body.staff_id;
+      if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || !validId(staffId)) {
+        return jsonResponse(400, { error: "A valid employee email and employee record are required." }, origin);
+      }
+      const { data: staffRecord, error: staffError } = await supabaseAdmin
+        .from("staff").select("id, full_name, email, phone, deleted_at").eq("id", staffId).maybeSingle();
+      if (staffError || !staffRecord || staffRecord.deleted_at) {
+        return jsonResponse(404, { error: "The active employee record could not be found." }, origin);
+      }
+      const { data: linked } = await supabaseAdmin.from("personal_portal_accounts")
+        .select("user_id").eq("staff_id", staffId).maybeSingle();
+      if (linked) return jsonResponse(409, { error: "This employee already has a portal account." }, origin);
+      const { data: invited, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+        data: { full_name: staffRecord.full_name, phone: staffRecord.phone ?? null },
+        redirectTo: "https://reinchemo.github.io/investors/login.html"
+      });
+      if (inviteError || !invited.user) {
+        return jsonResponse(409, { error: inviteError?.message ?? "Unable to send the employee invitation." }, origin);
+      }
+      const invitedUser = invited.user;
+      const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
+        id: invitedUser.id, full_name: staffRecord.full_name, email, phone: staffRecord.phone ?? null
+      }, { onConflict: "id" });
+      if (profileError) {
+        await supabaseAdmin.auth.admin.deleteUser(invitedUser.id);
+        return jsonResponse(500, { error: "Invitation could not be linked to the employee profile." }, origin);
+      }
+      const { data: account, error: accountError } = await supabaseAdmin.from("personal_portal_accounts").insert({
+        user_id: invitedUser.id, staff_id: staffRecord.id, investor_id: null, account_status: "active"
+      }).select().single();
+      if (accountError) {
+        await supabaseAdmin.auth.admin.deleteUser(invitedUser.id);
+        return jsonResponse(409, { error: "The portal account could not be created. Check whether this employee is already linked." }, origin);
+      }
+      await writeAuditLog({
+        actor: user.id, action: "PORTAL_EMPLOYEE_ACCOUNT_INVITED", entityId: account.id,
+        before: null, after: { ...account, email }, ipAddress: request.headers.get("x-forwarded-for"),
+        deviceInfo: request.headers.get("user-agent")
+      });
+      return jsonResponse(200, { success: true, message: "Invitation sent. The employee must use the email link to set a password.", account: { ...account, email } }, origin);
+    }
+
     // =====================================================
     // ACTIONS BELOW REQUIRE A TARGET USER ID
     // =====================================================
