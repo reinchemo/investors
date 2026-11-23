@@ -12853,6 +12853,17 @@ function openTxnModal(txn = null) {
                 setVal('tskCategory', t.categoryCode);
                 setVal('tskPriority', t.priority || 'normal');
                 Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = String(option.value) === String(t.assigneeStaffId || ''); });
+                try {
+                    const { data: assignmentData, error: assignmentLoadError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
+                        body: { action: 'list_task_assignments', task_id: taskId }
+                    });
+                    if (!assignmentLoadError && assignmentData && Array.isArray(assignmentData.staff_ids)) {
+                        const selectedIds = new Set(assignmentData.staff_ids.map(String));
+                        Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = selectedIds.has(String(option.value)); });
+                    }
+                } catch (assignmentLoadError) {
+                    console.warn('Could not load all task assignees; showing primary assignee only.', assignmentLoadError);
+                }
                 updateTaskAssigneeCount();
                 setVal('tskReviewer', t.reviewerStaffId);
                 setVal('tskLocation', t.locationId);
