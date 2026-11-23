@@ -143,6 +143,7 @@ Deno.serve(async(req)=>{
     if(!Number.isSafeInteger(id)||!["accepted","rejected"].includes(decision))return out({error:"Valid document decision required."},400);
     const {data:before}=await admin.from("funding_documents").select("*").eq("id",id).maybeSingle();
     if(!before||before.review_status!=="pending")return out({error:"Document is not awaiting review."},409);
+    if(before.uploaded_by===user.id)return out({error:"The document uploader cannot approve their own KYC evidence."},403);
     const {data,error}=await admin.from("funding_documents").update({review_status:decision,reviewed_by:user.id,reviewed_at:new Date().toISOString(),review_reason:String(body.reason||"").slice(0,1000)||null}).eq("id",id).select("*").single();
     if(error)throw error;await audit("document",id,"review_"+decision,{...before,object_path:"[private]"},{...data,object_path:"[private]"});return out({success:true,record:data});
   }
@@ -330,6 +331,9 @@ Deno.serve(async(req)=>{
     if(error)throw error;
     const verifiedPrincipal=(ledger||[]).reduce((sum:number,row:any)=>sum+Number(row.amount),0);
     if(verifiedPrincipal+0.01<Number(commit.principal_amount))return out({error:"Verified receipts do not yet cover the full committed principal."},409);
+    const {data:verifiedReceipts,error:verifiedError}=await admin.from("funding_receipts").select("verified_by").eq("commitment_id",id).eq("verification_status","verified");
+    if(verifiedError)throw verifiedError;
+    if((verifiedReceipts||[]).some((row:any)=>row.verified_by===user.id))return out({error:"The receipt verifier cannot also activate the funding. A second authorised approver is required."},403);
     const {data,error:updateError}=await admin.from("funding_commitments").update({status:"active_funding",updated_at:new Date().toISOString()}).eq("id",id).eq("status","payment_verified").select("*").maybeSingle();
     if(updateError)throw updateError;if(!data)return out({error:"Commitment changed; refresh and retry."},409);
     await audit("commitment",id,"activated_after_verified_funds_and_agreement",commit,data);
