@@ -484,7 +484,7 @@
             if (!classifications.length) classifications.push("Personal Account");
 
             content.innerHTML = `
-  <section class="hero">
+  <section class="hero portal-reveal">
    <div class="avatar">${safe(initials(displayName))}</div>
    <div>
     <div class="hero-name">${safe(displayName)}</div>
@@ -497,7 +497,7 @@
   </section>
 
   <div class="grid">
-   <section class="panel">
+   <section class="panel portal-reveal">
     <h3>Account information</h3>
     ${field("Login email",user.email)}
     ${field("Account status",account.account_status)}
@@ -507,7 +507,7 @@
    </section>
 
    ${staff?`
-    <section class="panel">
+    <section class="panel portal-reveal">
      <h3>Employment information</h3>
      ${field("Employee number",staff.employee_number)}
      ${field("Full name",staff.full_name)}
@@ -522,7 +522,7 @@
     </section>`:""}
 
    ${investor?`
-    <section class="panel">
+    <section class="panel portal-reveal">
      <h3>Investor information</h3>
      ${field("Investor number",investor.investor_number)}
      ${field("Investor name",investor.name)}
@@ -536,7 +536,7 @@
     </section>`:""}
 
    ${!staff&&!investor?`
-    <section class="panel">
+    <section class="panel portal-reveal">
      <h3>Account classification</h3>
      <p class="subtitle">No employee or investor record is currently linked to this account. Please contact an authorized administrator.</p>
     </section>`:""}
