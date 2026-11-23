@@ -1,4 +1,5 @@
 name: Deploy STARLINK to GitHub Pages
+# Deployment refresh requested after the employee username-login update.
 
 on:
   push:
