@@ -1528,7 +1528,7 @@
             }
 
             const isEmployee = Boolean(portalAccount.staff_id);
-            const isInvestor = Boolean(portalAccount.investor_id);
+            const isInvestor = Boolean(portalAccount.investor_id || portalAccount.funder_id);
 
             if (employeePages.includes(page) && !isEmployee) {
                 showError("This employee section is not available for your account.");
@@ -1709,7 +1709,7 @@
             );
 
             const investorAccount = Boolean(
-                portalAccount && portalAccount.investor_id
+                portalAccount && (portalAccount.investor_id || portalAccount.funder_id)
             );
 
             // Employee navigation
