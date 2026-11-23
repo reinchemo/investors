@@ -28,8 +28,8 @@ Deno.serve(async(req)=>{
   };
   const listTables:Record<string,string>={parties:"funding_parties",opportunities:"funding_opportunities",commitments:"funding_commitments",receipts:"funding_receipts",settlements:"funding_settlements",allocations:"funding_project_allocations",ledger:"funding_liability_ledger",documents:"funding_documents"};
   if(action==="investor_express_interest"){
-    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,account_status").eq("user_id",user.id).maybeSingle();
-    if(!portal||portal.account_status!=="active"||!portal.investor_id)return out({error:"An active investor portal account is required."},403);
+    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,funder_id,account_status").eq("user_id",user.id).maybeSingle();
+    if(!portal||portal.account_status!=="active"||(!portal.investor_id&&!portal.funder_id))return out({error:"An active investor or funder portal account is required."},403);
     const opportunity=Number(body.opportunity_id),principal=Number(body.principal_amount),key=String(body.idempotency_key||"").trim();
     if(!key||key.length>120||!Number.isFinite(principal)||principal<=0)return out({error:"A valid amount and request reference are required."},400);
     const {data:opp}=await admin.from("funding_opportunities").select("*").eq("id",opportunity).maybeSingle();
@@ -38,14 +38,22 @@ Deno.serve(async(req)=>{
     if(principal<Number(opp.minimum_commitment)||(opp.maximum_commitment!==null&&principal>Number(opp.maximum_commitment)))return out({error:"Amount is outside the opportunity's approved commitment range."},400);
     const {data:priorKey}=await admin.from("funding_commitments").select("id,status").eq("idempotency_key",key).maybeSingle();
     if(priorKey)return out({success:true,record:priorKey,replayed:true});
-    const {data:investor}=await admin.from("investors").select("id,name,email,phone").eq("id",portal.investor_id).is("deleted_at",null).maybeSingle();
-    if(!investor)return out({error:"Linked investor record not found."},404);
-    let {data:party}=await admin.from("funding_parties").select("*").eq("investor_id",investor.id).maybeSingle();
-    if(party&&party.status!=="active"&&party.status!=="draft")return out({error:"Your funder profile is suspended or closed. Contact management."},403);
-    if(!party){
-      const {data:created,error}=await admin.from("funding_parties").insert({investor_id:investor.id,legal_name:investor.name,contact_name:investor.name,email:investor.email,phone:investor.phone,party_type:"individual",kyc_status:"not_started",status:"draft"}).select("*").single();
-      if(error)throw error;party=created;
+    let party:any=null;
+    if(portal.funder_id){
+      const {data,error}=await admin.from("funding_parties").select("*").eq("id",portal.funder_id).maybeSingle();
+      if(error)throw error;party=data;
+    }else{
+      const {data:investor}=await admin.from("investors").select("id,name,email,phone").eq("id",portal.investor_id).is("deleted_at",null).maybeSingle();
+      if(!investor)return out({error:"Linked investor record not found."},404);
+      const {data,error}=await admin.from("funding_parties").select("*").eq("investor_id",investor.id).maybeSingle();
+      if(error)throw error;party=data;
+      if(!party){
+        const {data:created,error:createError}=await admin.from("funding_parties").insert({investor_id:investor.id,legal_name:investor.name,contact_name:investor.name,email:investor.email,phone:investor.phone,party_type:"individual",kyc_status:"not_started",status:"draft"}).select("*").single();
+        if(createError)throw createError;party=created;
+      }
     }
+    if(!party)return out({error:"Linked funder profile not found."},404);
+    if(party.status!=="active"&&party.status!=="draft")return out({error:"Your funder profile is suspended or closed. Contact management."},403);
     const snapshot={opportunity_id:opp.id,reference_code:opp.reference_code,title:opp.title,funding_purpose:opp.funding_purpose,principal_amount:principal,currency_code:opp.currency_code,return_type:opp.return_type,return_rate:Number(opp.proposed_return_rate),day_count_basis:opp.day_count_basis,term_days:Number(opp.term_days),tax_rate:opp.tax_rate,other_deductions:opp.other_deductions,terms_version:opp.terms_version,legal_approval_reference:opp.legal_approval_reference,finance_approval_reference:opp.finance_approval_reference,management_approval_reference:opp.management_approval_reference};
     if(body.consent!==true)return out({error:"Please record your consent before submitting funding interest."},400);
     const consentRecords=[...(Array.isArray(party.consent_records)?party.consent_records:[]),{purpose:"short_term_funding_interest",consented_at:new Date().toISOString(),terms_version:opp.terms_version,actor_user_id:user.id}];
@@ -57,7 +65,9 @@ Deno.serve(async(req)=>{
     const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,account_status").eq("user_id",user.id).maybeSingle();
     if(!portal||portal.account_status!=="active"||!portal.investor_id)return out({error:"An active investor portal account is required."},403);
     const id=Number(body.id);
-    const {data:investorParty}=await admin.from("funding_parties").select("id,kyc_status,status").eq("investor_id",portal.investor_id).maybeSingle();
+    const {data:investorParty}=portal.funder_id
+      ? await admin.from("funding_parties").select("id,kyc_status,status").eq("id",portal.funder_id).maybeSingle()
+      : await admin.from("funding_parties").select("id,kyc_status,status").eq("investor_id",portal.investor_id).maybeSingle();
     if(!investorParty||investorParty.kyc_status!=="verified"||investorParty.status!=="active")return out({error:"KYC must be verified and your funder profile active before submitting a commitment."},409);
     const {data:before}=await admin.from("funding_commitments").select("*,funding_opportunities(target_amount,status,minimum_commitment,maximum_commitment)").eq("id",id).eq("funder_id",investorParty.id).maybeSingle();
     if(!before||before.status!=="interested")return out({error:"Interest request not found or already submitted."},409);
