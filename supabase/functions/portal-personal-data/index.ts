@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     // Only active personal portal accounts can use this function.
     const { data: account, error: accountError } = await admin
       .from("personal_portal_accounts")
-      .select("id, staff_id, investor_id, account_status, created_at")
+      .select("id, staff_id, investor_id, funder_id, account_status, created_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
     // ==========================================
 
     if (action === "portal_access") {
-      if (!account.staff_id && !account.investor_id) {
+      if (!account.staff_id && !account.investor_id && !account.funder_id) {
         return jsonResponse({ error: "Your account has no employee or investor classification." }, 403);
       }
       return jsonResponse({
@@ -140,6 +140,7 @@ Deno.serve(async (req) => {
         account: {
           staff_id: account.staff_id,
           investor_id: account.investor_id,
+          funder_id: account.funder_id,
           account_status: account.account_status,
         },
       });
@@ -563,13 +564,10 @@ Deno.serve(async (req) => {
 
     if (action === "investments") {
       if (!account.investor_id) {
-        return jsonResponse({
-          success: true,
-          investor: null,
-          investments: [],
-          transactions: [],
-          message: "This account has no investor classification.",
-        });
+        if (!account.funder_id) return jsonResponse({ success: true, investor: null, investments: [], transactions: [], message: "This account has no investor classification." });
+        const {data:funderProfile,error:funderProfileError}=await admin.from("funding_parties").select("id,legal_name,status,created_at").eq("id",account.funder_id).maybeSingle();
+        if(funderProfileError||!funderProfile)return jsonResponse({error:"Your funding profile is not available."},404);
+        return jsonResponse({success:true,investor:{id:null,name:funderProfile.legal_name,investor_number:"SHORT-TERM",equity:0,status:funderProfile.status,joined_date:funderProfile.created_at},investments:[],transactions:[],funder_only:true});
       }
 
       const investorId = Number(account.investor_id);
@@ -632,11 +630,11 @@ Deno.serve(async (req) => {
     // All rows are scoped to the investor linked to this verified portal session.
     // ==========================================
     if (action === "funding") {
-      if (!account.investor_id) return jsonResponse({ success: true, funder: null, opportunities: [], commitments: [], message: "This account has no investor classification." });
-      const investorId = Number(account.investor_id);
+      if (!account.investor_id && !account.funder_id) return jsonResponse({ success: true, funder: null, opportunities: [], commitments: [], message: "This account has no investor or funder classification." });
+      const investorId = account.investor_id ? Number(account.investor_id) : null;
       const [{ data: investor, error: investorError }, { data: funder, error: funderError }] = await Promise.all([
-        admin.from("investors").select("id,name,email,phone").eq("id", investorId).is("deleted_at", null).maybeSingle(),
-        admin.from("funding_parties").select("id,legal_name,kyc_status,status,party_type").eq("investor_id", investorId).maybeSingle()
+        investorId ? admin.from("investors").select("id,name,email,phone").eq("id", investorId).is("deleted_at", null).maybeSingle() : Promise.resolve({data:null,error:null}),
+        account.funder_id ? admin.from("funding_parties").select("id,legal_name,kyc_status,status,party_type").eq("id", account.funder_id).maybeSingle() : admin.from("funding_parties").select("id,legal_name,kyc_status,status,party_type").eq("investor_id", investorId).maybeSingle()
       ]);
       if (investorError || funderError) return jsonResponse({ error: "Unable to load your funding profile." }, 500);
       const today = new Date().toISOString().slice(0,10);
