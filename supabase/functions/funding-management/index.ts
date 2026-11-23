@@ -114,7 +114,9 @@ Deno.serve(async(req)=>{
     const {data:before}=await admin.from("funding_parties").select("*").eq("id",id).maybeSingle();
     if(!before)return out({error:"Funder not found."},404);
     if(status==="active"&&before.kyc_status!=="verified")return out({error:"KYC must be verified before activating a funder."},409);
-    const {data,error}=await admin.from("funding_parties").update({status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
+    const reason=String(body.reason||"").trim().slice(0,1000)||null;
+    const nextNotes=reason?[String(before.notes||""),`[${new Date().toISOString()}] ${status}: ${reason}`].filter(Boolean).join("\n").slice(0,4000):before.notes;
+    const {data,error}=await admin.from("funding_parties").update({status,suspended_at:status==="suspended"?new Date().toISOString():null,rejection_reason:status==="closed"?reason:before.rejection_reason,notes:nextNotes,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error;await audit("party",id,"status_"+status,before,data);return out({success:true,record:data});
   }
   if(action==="list_equity_investors"){
