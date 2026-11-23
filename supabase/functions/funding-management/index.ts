@@ -27,6 +27,44 @@ Deno.serve(async(req)=>{
     if(error)console.error("Funding audit log failed",error);
   };
   const listTables:Record<string,string>={parties:"funding_parties",opportunities:"funding_opportunities",commitments:"funding_commitments",receipts:"funding_receipts",settlements:"funding_settlements",allocations:"funding_project_allocations",ledger:"funding_liability_ledger"};
+  if(action==="investor_express_interest"){
+    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,account_status").eq("user_id",user.id).maybeSingle();
+    if(!portal||portal.account_status!=="active"||!portal.investor_id)return out({error:"An active investor portal account is required."},403);
+    const opportunity=Number(body.opportunity_id),principal=Number(body.principal_amount),key=String(body.idempotency_key||"").trim();
+    if(!key||key.length>120||!Number.isFinite(principal)||principal<=0)return out({error:"A valid amount and request reference are required."},400);
+    const {data:opp}=await admin.from("funding_opportunities").select("*").eq("id",opportunity).maybeSingle();
+    const today=new Date().toISOString().slice(0,10);
+    if(!opp||opp.status!=="open"||!opp.legal_gate_cleared_at||!opp.terms_approved_at||opp.opens_on&&opp.opens_on>today||opp.closes_on&&opp.closes_on<today)return out({error:"This opportunity is not currently accepting interest."},409);
+    if(principal<Number(opp.minimum_commitment)||(opp.maximum_commitment!==null&&principal>Number(opp.maximum_commitment)))return out({error:"Amount is outside the opportunity's approved commitment range."},400);
+    const {data:priorKey}=await admin.from("funding_commitments").select("id,status").eq("idempotency_key",key).maybeSingle();
+    if(priorKey)return out({success:true,record:priorKey,replayed:true});
+    const {data:investor}=await admin.from("investors").select("id,name,email,phone").eq("id",portal.investor_id).is("deleted_at",null).maybeSingle();
+    if(!investor)return out({error:"Linked investor record not found."},404);
+    let {data:party}=await admin.from("funding_parties").select("*").eq("investor_id",investor.id).maybeSingle();
+    if(!party){
+      const {data:created,error}=await admin.from("funding_parties").insert({investor_id:investor.id,legal_name:investor.name,contact_name:investor.name,email:investor.email,phone:investor.phone,party_type:"individual",kyc_status:"not_started",status:"draft"}).select("*").single();
+      if(error)throw error;party=created;
+    }
+    const snapshot={opportunity_id:opp.id,reference_code:opp.reference_code,title:opp.title,funding_purpose:opp.funding_purpose,principal_amount:principal,currency_code:opp.currency_code,return_type:opp.return_type,return_rate:Number(opp.proposed_return_rate),day_count_basis:opp.day_count_basis,term_days:Number(opp.term_days),tax_rate:opp.tax_rate,other_deductions:opp.other_deductions,terms_version:opp.terms_version,legal_approval_reference:opp.legal_approval_reference,finance_approval_reference:opp.finance_approval_reference,management_approval_reference:opp.management_approval_reference};
+    const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opp.id,funder_id:party.id,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:opp.proposed_return_rate,term_days:opp.term_days,return_type:opp.return_type,day_count_basis:opp.day_count_basis,tax_rate_snapshot:opp.tax_rate,deductions_snapshot:opp.other_deductions,terms_snapshot:snapshot,terms_version:opp.terms_version,status:"interested",idempotency_key:key}).select("*").single();
+    if(error)throw error;await audit("commitment",data.id,"investor_interest_submitted",null,data);return out({success:true,record:data,kyc_status:party.kyc_status});
+  }
+  if(action==="investor_submit_commitment"){
+    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,account_status").eq("user_id",user.id).maybeSingle();
+    if(!portal||portal.account_status!=="active"||!portal.investor_id)return out({error:"An active investor portal account is required."},403);
+    const id=Number(body.id);
+    const {data:investorParty}=await admin.from("funding_parties").select("id,kyc_status,status").eq("investor_id",portal.investor_id).maybeSingle();
+    if(!investorParty||investorParty.kyc_status!=="verified"||investorParty.status!=="active")return out({error:"KYC must be verified and your funder profile active before submitting a commitment."},409);
+    const {data:before}=await admin.from("funding_commitments").select("*,funding_opportunities(target_amount,status,minimum_commitment,maximum_commitment)").eq("id",id).eq("funder_id",investorParty.id).maybeSingle();
+    if(!before||before.status!=="interested")return out({error:"Interest request not found or already submitted."},409);
+    if(before.funding_opportunities?.status!=="open")return out({error:"The funding opportunity is no longer open."},409);
+    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",before.opportunity_id).not("status","in",'("(cancelled,rejected,interested)")');
+    const already=(prior||[]).reduce((sum:number,row:any)=>sum+Number(row.principal_amount),0);
+    if(already+Number(before.principal_amount)>Number(before.funding_opportunities.target_amount))return out({error:"The remaining approved funding capacity is insufficient."},409);
+    const {data,error}=await admin.from("funding_commitments").update({status:"commitment_submitted",updated_at:new Date().toISOString()}).eq("id",id).eq("status","interested").select("*").maybeSingle();
+    if(error)throw error;if(!data)return out({error:"Request changed; refresh and retry."},409);
+    await audit("commitment",id,"investor_commitment_submitted",before,data);return out({success:true,record:data});
+  }
   if(action==="dashboard"){
     if(!(await need("view")))return out({error:"Funding view permission required."},403);
     const names=Object.values(listTables);
@@ -197,9 +235,9 @@ Deno.serve(async(req)=>{
     const signedDate=new Date(signed);
     if(Number.isNaN(signedDate.getTime())||signedDate.getTime()>Date.now()+86400000)return out({error:"Valid signed date is required."},400);
     const {data:before}=await admin.from("funding_commitments").select("*").eq("id",id).maybeSingle();
-    if(!before||before.status!=="pending_agreement")return out({error:"Only commitments awaiting an agreement can be signed."},409);
+    if(!before||!["pending_agreement","commitment_submitted"].includes(before.status))return out({error:"Only submitted commitments awaiting a signed agreement can be activated for payment."},409);
     const maturity=new Date(signedDate.getTime()+Number(before.term_days)*86400000).toISOString().slice(0,10);
-    const {data,error}=await admin.from("funding_commitments").update({status:"committed",agreement_reference:agreement,signed_at:signedDate.toISOString(),terms_locked_at:new Date().toISOString(),maturity_date:maturity,updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_agreement").select("*").maybeSingle();
+    const {data,error}=await admin.from("funding_commitments").update({status:"payment_pending",agreement_reference:agreement,signed_at:signedDate.toISOString(),terms_locked_at:new Date().toISOString(),accepted_at:new Date().toISOString(),maturity_date:maturity,updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_agreement").select("*").maybeSingle();
     if(error)throw error;if(!data)return out({error:"Commitment changed concurrently; refresh and retry."},409);
     await audit("commitment",id,"agreement_signed_terms_locked",before,data);return out({success:true,record:data});
   }
@@ -207,7 +245,7 @@ Deno.serve(async(req)=>{
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
     const cid=Number(body.commitment_id),amount=Number(body.amount);if(!cid||!Number.isFinite(amount)||amount<=0)return out({error:"Commitment and positive receipt amount required."},400);
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",cid).maybeSingle();
-    if(!commit||!["committed","funds_pending","funded"].includes(commit.status))return out({error:"A signed commitment is required before recording funds."},409);
+    if(!commit||!["committed","payment_pending","funds_pending","funded","active_funding"].includes(commit.status))return out({error:"A signed commitment is required before recording funds."},409);
     const {data:existingReceipts}=await admin.from("funding_receipts").select("amount").eq("commitment_id",cid).neq("verification_status","rejected");
     const receivedSoFar=(existingReceipts||[]).reduce((s,x)=>s+Number(x.amount),0);
     if(receivedSoFar+amount>Number(commit.principal_amount))return out({error:"Receipts cannot exceed the signed commitment principal."},409);
