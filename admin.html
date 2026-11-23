@@ -439,24 +439,27 @@
         <div id="view-portal-access" class="view-section">
           <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-7">
             <div><h1 class="text-2xl font-bold text-white"><i class="fas fa-id-card text-cyan-400 mr-2"></i> Employee Portal Access</h1>
-            <p class="text-sm text-gray-400 mt-1">Invite employees to activate their own secure login and manage existing access.</p></div>
+            <p class="text-sm text-gray-400 mt-1">Create username/password logins for employees and manage their access.</p></div>
             <button onclick="switchView('view-list')" class="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white"><i class="fas fa-arrow-left mr-2"></i>Back to administrators</button>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
             <div class="lg:col-span-1 bg-[#181c2e] border border-gray-800 rounded-xl p-5">
               <h3 class="font-semibold text-white mb-1">Invite an employee</h3>
-              <p class="text-xs text-gray-400 mb-5">Choose an existing staff record. The employee receives an email invitation and creates their own password.</p>
+              <p class="text-xs text-gray-400 mb-5">Choose an existing staff record and create a username/password. No email invitation is sent.</p>
               <label class="block text-xs text-gray-400 mb-2">Employee</label>
               <select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4"></select>
-              <label class="block text-xs text-gray-400 mb-2">Login email</label>
-              <input id="portalInviteEmail" type="email" autocomplete="email" placeholder="employee@example.com" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4">
+              <label class="block text-xs text-gray-400 mb-2">Username</label>
+              <input id="portalInviteUsername" type="text" autocomplete="off" placeholder="e.g. john.kiptoo" maxlength="32" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4">
+              <label class="block text-xs text-gray-400 mb-2">Temporary password</label>
+              <input id="portalInvitePassword" type="password" autocomplete="new-password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4">
+              <p class="text-[11px] text-gray-500 -mt-2 mb-4">No email or invitation is sent. Give the credentials directly to the employee using a secure method.</p>
               <div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mb-3"></div>
               <button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:brightness-110 rounded-lg py-3 font-bold text-white"><i class="fas fa-paper-plane mr-2"></i> Send portal invitation</button>
               <p class="text-[11px] text-gray-500 mt-3">No shared or administrator-known password is created. Each employee sets a private password through the secure invitation link.</p>
             </div>
             <div class="lg:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
               <div class="p-5 border-b border-gray-800 flex justify-between items-center"><div><h3 class="font-semibold text-white">Portal access register</h3><p class="text-xs text-gray-400 mt-1">Accounts linked to employee records.</p></div><button onclick="loadPortalAccess()" class="text-cyan-400 text-sm"><i class="fas fa-rotate mr-1"></i>Refresh</button></div>
-              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Employee</th><th class="text-left px-4 py-3">Login email</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Last login</th><th class="text-right px-4 py-3">Action</th></tr></thead><tbody id="portalAccessRows"><tr><td colspan="5" class="p-6 text-center text-gray-500">Loading portal accounts…</td></tr></tbody></table></div>
+              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Employee</th><th class="text-left px-4 py-3">Username</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Last login</th><th class="text-right px-4 py-3">Action</th></tr></thead><tbody id="portalAccessRows"><tr><td colspan="5" class="p-6 text-center text-gray-500">Loading portal accounts…</td></tr></tbody></table></div>
             </div>
           </div>
         </div>
@@ -1220,20 +1223,21 @@
                 else rows.innerHTML = linked.map(u => {
                     const p = u.portal_account, employee = staff.find(s => Number(s.id) === Number(p.staff_id));
                     const status = p.account_status || 'active';
-                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + (employee?.full_name || u.full_name || 'Employee') + '<div class="text-xs text-gray-500">' + (employee?.employee_number || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + (u.email || '—') + '</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ' + (status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400') + '">' + status + '</span></td><td class="px-4 py-3 text-gray-400 text-xs">' + (u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Never') + '</td><td class="px-4 py-3 text-right"><button onclick="setPortalAccountStatus(\'' + u.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">' + (status === 'active' ? 'Suspend' : 'Activate') + '</button></td></tr>';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + (employee?.full_name || u.full_name || 'Employee') + '<div class="text-xs text-gray-500">' + (employee?.employee_number || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + (u.username || '—') + '</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ' + (status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400') + '">' + status + '</span></td><td class="px-4 py-3 text-gray-400 text-xs">' + (u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Never') + '</td><td class="px-4 py-3 text-right"><button onclick="setPortalAccountStatus(\'' + u.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">' + (status === 'active' ? 'Suspend' : 'Activate') + '</button></td></tr>';
                 }).join('');
             } catch (e) { rows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">' + e.message + '</td></tr>'; }
         }
 
         async function inviteEmployeePortal() {
             const staffId = Number(document.getElementById('portalStaffSelect').value);
-            const email = document.getElementById('portalInviteEmail').value.trim();
+            const username = document.getElementById('portalInviteUsername').value.trim();
+            const password = document.getElementById('portalInvitePassword').value;
             const msg = document.getElementById('portalInviteMessage'), btn = document.getElementById('portalInviteBtn');
             msg.className = 'text-xs rounded-lg p-3 mb-3 bg-red-500/10 text-red-300'; msg.classList.remove('hidden');
-            if (!staffId || !email) { msg.textContent = 'Choose an employee and enter their login email.'; return; }
+            if (!staffId || !username || !password) { msg.textContent = 'Choose an employee and enter a username and password.'; return; }
             btn.disabled = true; btn.textContent = 'Sending invitation…';
             try {
-                const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', { body: { action: 'create_employee_account', staff_id: staffId, email } });
+                const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', { body: { action: 'create_employee_account', staff_id: staffId, username, password } });
                 if (error) {
                     let message = error.message;
                     try { const detail = await error.context.json(); message = detail.error || message; } catch (_) {}
@@ -1241,7 +1245,8 @@
                 }
                 if (!data?.success) throw new Error(data?.error || 'Invitation failed.');
                 msg.className = 'text-xs rounded-lg p-3 mb-3 bg-emerald-500/10 text-emerald-300'; msg.textContent = data.message || 'Invitation sent.';
-                document.getElementById('portalInviteEmail').value = '';
+                document.getElementById('portalInviteUsername').value = '';
+                document.getElementById('portalInvitePassword').value = '';
                 await loadPortalAccess();
             } catch (e) { msg.textContent = e.message; }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Send portal invitation'; }
