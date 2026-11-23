@@ -143,6 +143,13 @@ Deno.serve(async(req)=>{
     const id=Number(body.id),status=String(body.kyc_status||"");
     if(!Number.isSafeInteger(id)||!["pending","verified","rejected","expired"].includes(status))return out({error:"Valid funder and KYC status required."},400);
     const {data:before}=await admin.from("funding_parties").select("*").eq("id",id).maybeSingle(); if(!before)return out({error:"Funder not found."},404);
+    if(status==="verified"){
+      const {data:acceptedDocs,error:docsError}=await admin.from("funding_documents").select("document_type").eq("funder_id",id).eq("review_status","accepted");
+      if(docsError)throw docsError;
+      const types=new Set((acceptedDocs||[]).map((d:any)=>d.document_type));
+      if(before.party_type==="company"&&(!types.has("company_registration")||!types.has("beneficial_ownership")))return out({error:"Accept the company registration and beneficial ownership documents before verifying corporate KYC."},409);
+      if(before.party_type==="individual"&&!types.has("identity"))return out({error:"Accept an identity document before verifying individual KYC."},409);
+    }
     const reason=String(body.reason||"").trim().slice(0,1000)||null;
     const {data,error}=await admin.from("funding_parties").update({kyc_status:status,kyc_reference:String(body.kyc_reference||"").trim()||before.kyc_reference,kyc_reviewed_by:user.id,kyc_reviewed_at:new Date().toISOString(),kyc_decision_reason:reason,rejection_reason:status==="rejected"?reason:null,status:status==="verified"?"active":status==="rejected"?"closed":before.status,updated_at:new Date().toISOString()}).eq("id",id).select("*").single();
     if(error)throw error; await audit("party",id,"kyc_"+status,before,data); return out({success:true,record:data});
