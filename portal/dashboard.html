@@ -993,6 +993,7 @@
             <div class="nav-label" id="investorNavLabel">Investment services</div>
             <nav class="nav-links" id="investorNavigation">
                 <a href="investments.html" data-page="investments" data-access="investor"><i class="fas fa-chart-line"></i> My Investments</a>
+                <a href="investments.html#short-term-funding" data-page="funding" data-access="investor"><i class="fas fa-hand-holding-dollar"></i> Short-Term Funding</a>
                 <a href="dividends.html" data-page="dividends" data-access="investor"><i class="fas fa-chart-pie"></i> Dividends</a>
                 <a href="statements.html" data-page="statements" data-access="investor"><i class="fas fa-file-lines"></i> Statements</a>
             </nav>
@@ -1392,6 +1393,7 @@
             payslips: "Payslips",
             leave: "Leave Requests",
             investments: "My Investments",
+            funding: "Short-Term Funding",
             dividends: "Dividends",
             statements: "Statements",
             notifications: "Notifications",
@@ -1411,6 +1413,7 @@
 
         const investorPages = [
             "investments",
+            "funding",
             "dividends",
             "statements"
         ];
@@ -1559,7 +1562,7 @@
                 return;
             }
 
-            const target = page + ".html";
+            const target = page === "funding" ? "investments.html#short-term-funding" : page + ".html";
 
             if (!frame.hidden && frame.getAttribute("src") === target) {
                 return;
