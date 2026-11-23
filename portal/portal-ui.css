@@ -399,3 +399,82 @@ table tbody tr:hover { background:rgba(118,40,245,.07) !important; }
   const io=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('portal-visible');io.unobserve(entry.target);}}),{threshold:.08,rootMargin:'0px 0px -25px 0px'});
   document.querySelectorAll('.portal-reveal').forEach(el=>io.observe(el));
 })();
+
+
+/* Strong dashboard-specific overrides: placed after each page's own CSS. */
+:root {
+  --bg:#070713 !important;
+  --surface:#111020 !important;
+  --surface2:#17152b !important;
+  --surface3:#211b3b !important;
+  --line:rgba(160,139,218,.18) !important;
+  --white:#f8f7ff !important;
+  --muted:#aaa4c2 !important;
+  --cyan:#43d9eb !important;
+  --blue:#4055ff !important;
+  --purple:#9c52ff !important;
+  --green:#38d8b4 !important;
+  --orange:#ff7929 !important;
+  --sidebar:250px;
+}
+body {
+ background:
+   radial-gradient(ellipse at 0% 0%,rgba(116,38,242,.16),transparent 34%),
+   radial-gradient(ellipse at 100% 12%,rgba(52,69,255,.13),transparent 30%),
+   #070713 !important;
+ color:#f8f7ff !important;
+}
+.app { background:transparent !important; }
+.sidebar {
+ background:linear-gradient(180deg,#05050c 0%,#090817 70%,#16092b 100%) !important;
+ border-right:1px solid rgba(134,69,255,.28) !important;
+ box-shadow:12px 0 50px rgba(0,0,0,.35) !important;
+}
+.brand-icon {
+ background:linear-gradient(135deg,#c03af2,#792cf3 52%,#374cff) !important;
+ box-shadow:0 0 30px rgba(148,52,255,.5) !important;
+}
+.nav-links a.active {
+ background:linear-gradient(100deg,rgba(124,39,245,.42),rgba(52,71,255,.18)) !important;
+ border:1px solid rgba(154,89,255,.35) !important;
+ box-shadow:inset 3px 0 #a24dff,0 0 22px rgba(124,39,245,.12) !important;
+ color:#fff !important;
+}
+.nav-links a.active i {color:#d1a4ff !important;}
+.nav-links a:hover {
+ background:linear-gradient(90deg,rgba(124,39,245,.22),rgba(52,71,255,.08)) !important;
+ color:#fff !important;
+ transform:translateX(4px);
+}
+.main {background:transparent !important;}
+.topbar {
+ background:rgba(7,7,19,.92) !important;
+ border-bottom:1px solid rgba(142,89,255,.18) !important;
+ backdrop-filter:blur(22px) saturate(150%) !important;
+}
+.content {background:transparent !important;}
+.hero,.welcome-banner,.page-header {
+ background:
+   radial-gradient(circle at 88% 0%,rgba(129,49,255,.25),transparent 36%),
+   linear-gradient(115deg,#171127,#15142c 58%,#18204a) !important;
+ border:1px solid rgba(151,83,255,.32) !important;
+ box-shadow:0 20px 48px rgba(0,0,0,.25),0 0 32px rgba(124,39,245,.08) !important;
+}
+.panel,.stat-card,.stat,.card,.section-card,.metric,.profile-item {
+ background:linear-gradient(145deg,#171528,#0d0c1c) !important;
+ border:1px solid rgba(153,132,205,.2) !important;
+ box-shadow:0 15px 38px rgba(0,0,0,.25) !important;
+}
+.panel:hover,.stat-card:hover,.stat:hover,.card:hover,.section-card:hover,.metric:hover {
+ transform:translateY(-4px);
+ border-color:rgba(155,83,255,.55) !important;
+ box-shadow:0 18px 42px rgba(0,0,0,.32),0 0 26px rgba(124,39,245,.14) !important;
+}
+.btn-primary,.submit,.action-btn.primary,.btn.primary {
+ background:linear-gradient(110deg,#842df5,#493bff) !important;
+ border-color:transparent !important;
+ box-shadow:0 9px 26px rgba(108,44,240,.3) !important;
+}
+.btn-primary:hover,.submit:hover,.action-btn.primary:hover,.btn.primary:hover {
+ box-shadow:0 0 30px rgba(130,49,255,.48) !important;
+}
