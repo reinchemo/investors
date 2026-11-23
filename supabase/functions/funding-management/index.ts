@@ -58,7 +58,7 @@ Deno.serve(async(req)=>{
     const {data:before}=await admin.from("funding_commitments").select("*,funding_opportunities(target_amount,status,minimum_commitment,maximum_commitment)").eq("id",id).eq("funder_id",investorParty.id).maybeSingle();
     if(!before||before.status!=="interested")return out({error:"Interest request not found or already submitted."},409);
     if(before.funding_opportunities?.status!=="open")return out({error:"The funding opportunity is no longer open."},409);
-    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",before.opportunity_id).not("status","in",'("(cancelled,rejected,interested)")');
+    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",before.opportunity_id).not("status","in",'("cancelled","rejected","interested")');
     const already=(prior||[]).reduce((sum:number,row:any)=>sum+Number(row.principal_amount),0);
     if(already+Number(before.principal_amount)>Number(before.funding_opportunities.target_amount))return out({error:"The remaining approved funding capacity is insufficient."},409);
     const {data,error}=await admin.from("funding_commitments").update({status:"commitment_submitted",updated_at:new Date().toISOString()}).eq("id",id).eq("status","interested").select("*").maybeSingle();
@@ -210,14 +210,15 @@ Deno.serve(async(req)=>{
   }
   if(action==="create_commitment"){
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
-    const opportunity=Number(body.opportunity_id),funder=Number(body.funder_id),principal=Number(body.principal_amount),rate=Number(body.agreed_return_rate),days=Number(body.term_days);
+    const opportunity=Number(body.opportunity_id),funder=Number(body.funder_id),principal=Number(body.principal_amount);
     const [{data:opp},{data:party}]=await Promise.all([admin.from("funding_opportunities").select("*").eq("id",opportunity).maybeSingle(),admin.from("funding_parties").select("*").eq("id",funder).maybeSingle()]);
+    const rate=Number(opp?.proposed_return_rate),days=Number(opp?.term_days);
     if(!opp||opp.status!=="open")return out({error:"Only open approved opportunities accept commitments."},409);
     if(!party||party.kyc_status!=="verified"||party.status!=="active")return out({error:"Funder must be active with verified KYC."},409);
     if(!Number.isFinite(principal)||principal<=0||principal<Number(opp.minimum_commitment)|| (opp.maximum_commitment!==null&&principal>Number(opp.maximum_commitment)))return out({error:"Commitment amount is outside the approved minimum/maximum."},400);
     if(rate!==Number(opp.proposed_return_rate)||days!==Number(opp.term_days))return out({error:"Rate and tenure must match the approved opportunity terms."},409);
     if(!opp.legal_gate_cleared_at||!opp.terms_approved_at||!opp.legal_approval_reference||!opp.finance_approval_reference)return out({error:"The legal and commercial approval gates are not cleared."},409);
-    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",opportunity).not("status","in",'("(cancelled,rejected)")');
+    const {data:prior}=await admin.from("funding_commitments").select("principal_amount").eq("opportunity_id",opportunity).not("status","in",'("cancelled","rejected","interested")');
     const already=(prior||[]).reduce((s,x)=>s+Number(x.principal_amount),0);
     if(already+principal>Number(opp.target_amount))return out({error:"Total commitments cannot exceed the opportunity target amount."},400);
     const agreement=String(body.agreement_reference||"").trim(),signed=String(body.signed_at||"").trim();
