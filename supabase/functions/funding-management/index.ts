@@ -291,13 +291,14 @@ Deno.serve(async(req)=>{
   }
   if(action==="record_receipt"){
     if(!(await need("create")))return out({error:"Funding create permission required."},403);
-    const cid=Number(body.commitment_id),amount=Number(body.amount);if(!cid||!Number.isFinite(amount)||amount<=0)return out({error:"Commitment and positive receipt amount required."},400);
+    const cid=Number(body.commitment_id),amount=Number(body.amount),externalReference=String(body.external_reference||"").trim(),idempotencyKey=String(body.idempotency_key||"").trim()||crypto.randomUUID();
+    if(!cid||!Number.isFinite(amount)||amount<=0||!externalReference||externalReference.length>160||idempotencyKey.length>120)return out({error:"Commitment, positive amount, unique external payment reference and valid idempotency key are required."},400);
     const {data:commit}=await admin.from("funding_commitments").select("*").eq("id",cid).maybeSingle();
     if(!commit||!["committed","payment_pending","payment_received","payment_verified","funds_pending","funded","active_funding"].includes(commit.status))return out({error:"A signed commitment is required before recording funds."},409);
     const {data:existingReceipts}=await admin.from("funding_receipts").select("amount").eq("commitment_id",cid).neq("verification_status","rejected");
     const receivedSoFar=(existingReceipts||[]).reduce((s,x)=>s+Number(x.amount),0);
     if(receivedSoFar+amount>Number(commit.principal_amount))return out({error:"Receipts cannot exceed the signed commitment principal."},409);
-    const {data:receipt,error}=await admin.from("funding_receipts").insert({commitment_id:cid,amount,currency_code:commit.currency_code,received_on:body.received_on||new Date().toISOString().slice(0,10),payment_method:String(body.payment_method||"").slice(0,80)||null,external_reference:String(body.external_reference||"").slice(0,160)||null,notes:String(body.notes||"").slice(0,1000)||null,verification_status:"pending",created_by:user.id}).select("*").single();
+    const {data:receipt,error}=await admin.from("funding_receipts").insert({commitment_id:cid,amount,currency_code:commit.currency_code,received_on:body.received_on||new Date().toISOString().slice(0,10),payment_method:String(body.payment_method||"").slice(0,80)||null,external_reference:externalReference,idempotency_key:idempotencyKey,notes:String(body.notes||"").slice(0,1000)||null,verification_status:"pending",created_by:user.id}).select("*").single();
     if(error)throw error;
     await admin.from("funding_commitments").update({status:"payment_received",updated_at:new Date().toISOString()}).eq("id",cid).in("status",["payment_pending","committed","funds_pending","payment_received"]);
     await audit("receipt",receipt.id,"recorded_pending_verification",null,receipt);return out({success:true,record:receipt});
