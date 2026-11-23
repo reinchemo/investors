@@ -14619,6 +14619,11 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
    if(sub.querySelector('.tab'))finance.appendChild(sub);
   });
 
+  const fundingLink=document.createElement('a');
+  fundingLink.href='funding.html';
+  fundingLink.className='starlink-workspace-link';
+  fundingLink.innerHTML='<i class="fas fa-hand-holding-usd"></i><span>Short-Term Funding</span>';
+  funding.appendChild(fundingLink);
   const logout=navActions&&navActions.querySelector('#navLogoutBtn');
   const logoutGroup=group('','starlink-logout-group');
   if(logout){
@@ -14669,7 +14674,7 @@ async function queueNotification(eventType, channel, recipientContact, payload) 
   main.appendChild(workspacePane);
 
   const titleNode=top.querySelector('.shell-title');
-  const routes={'communication.html':'Communications','admin.html':'Admin Roles'};
+  const routes={'communication.html':'Communications','admin.html':'Admin Roles','funding.html':'Short-Term Funding'};
   const openWorkspace=(file,label)=>{
    dashboard.hidden=true;
    workspacePane.hidden=false;
