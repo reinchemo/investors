@@ -87,6 +87,24 @@ Deno.serve(async (req: Request) => {
       return reply({ success: true, task_id: taskId, assignment_mode: mode, assigned_staff_ids: ids });
     }
 
+    if (action === "list_task_assignees") {
+      if (!(await managementPermission("view"))) return reply({ error: "Tasks view permission required." }, 403);
+      const taskIds = Array.isArray(body.task_ids) ? [...new Set(body.task_ids.map((v: unknown) => String(v).trim()).filter((v: string) => v.length > 0))].slice(0, 500) : [];
+      if (!taskIds.length) return reply({ success: true, assignments: [] });
+      const { data: rows, error: rowsErr } = await admin.from("task_assignments").select("task_id,staff_id").in("task_id", taskIds);
+      if (rowsErr) throw rowsErr;
+      const staffIds = [...new Set((rows || []).map((row: any) => Number(row.staff_id)).filter((id: number) => Number.isSafeInteger(id)))];
+      const { data: staffRows, error: staffErr } = staffIds.length
+        ? await admin.from("staff").select("id,full_name").in("id", staffIds)
+        : { data: [], error: null };
+      if (staffErr) throw staffErr;
+      const names = new Map((staffRows || []).map((person: any) => [Number(person.id), person.full_name]));
+      return reply({ success: true, assignments: (rows || []).map((row: any) => ({
+        task_id: row.task_id, staff_id: Number(row.staff_id),
+        staff_name: names.get(Number(row.staff_id)) || "Unknown staff",
+      })) });
+    }
+
     if (action === "list_task_assignments") {
       if (!(await managementPermission("view"))) return reply({ error: "Tasks view permission required." }, 403);
       if (!taskId) return reply({ error: "Task reference required." }, 400);
