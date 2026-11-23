@@ -299,7 +299,7 @@ Deno.serve(async (request: Request): Promise<Response> => {
         ] = await Promise.all([
           supabaseAdmin
             .from("profiles")
-            .select("id, full_name, email, phone, starlink_id")
+            .select("id, full_name, email, phone, starlink_id, username")
             .in("id", userIds),
 
           supabaseAdmin
@@ -345,7 +345,8 @@ Deno.serve(async (request: Request): Promise<Response> => {
 
         return {
           id: authUser.id,
-          email: authUser.email ?? profile?.email ?? null,
+          email: profile?.username ?? authUser.email ?? profile?.email ?? null,
+          username: profile?.username ?? null,
           created_at: authUser.created_at,
           last_sign_in_at: authUser.last_sign_in_at ?? null,
           full_name: profile?.full_name ??
@@ -420,47 +421,42 @@ Deno.serve(async (request: Request): Promise<Response> => {
     }
 
     if (action === "create_employee_account") {
-      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+      const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : "";
+      const password = typeof body.password === "string" ? body.password : "";
       const staffId = body.staff_id;
-      if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || !validId(staffId)) {
-        return jsonResponse(400, { error: "A valid employee email and employee record are required." }, origin);
-      }
-      const { data: staffRecord, error: staffError } = await supabaseAdmin
-        .from("staff").select("id, full_name, email, phone, deleted_at").eq("id", staffId).maybeSingle();
-      if (staffError || !staffRecord || staffRecord.deleted_at) {
-        return jsonResponse(404, { error: "The active employee record could not be found." }, origin);
-      }
-      const { data: linked } = await supabaseAdmin.from("personal_portal_accounts")
-        .select("user_id").eq("staff_id", staffId).maybeSingle();
+      if (!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username)) return jsonResponse(400, { error: "Username must be 3–32 characters and use letters, numbers, dots, underscores or hyphens." }, origin);
+      if (password.length < 8 || password.length > 128) return jsonResponse(400, { error: "Set a password between 8 and 128 characters." }, origin);
+      if (!validId(staffId)) return jsonResponse(400, { error: "Select a valid employee record." }, origin);
+      const { data: staffRecord, error: staffError } = await supabaseAdmin.from("staff").select("id, full_name, phone, deleted_at").eq("id", staffId).maybeSingle();
+      if (staffError || !staffRecord || staffRecord.deleted_at) return jsonResponse(404, { error: "The active employee record could not be found." }, origin);
+      const { data: linked } = await supabaseAdmin.from("personal_portal_accounts").select("user_id").eq("staff_id", staffId).maybeSingle();
       if (linked) return jsonResponse(409, { error: "This employee already has a portal account." }, origin);
-      const { data: invited, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: { full_name: staffRecord.full_name, phone: staffRecord.phone ?? null },
-        redirectTo: "https://reinchemo.github.io/investors/login.html"
+      const { data: usernameExists, error: usernameError } = await supabaseAdmin.from("profiles").select("id").ilike("username", username).maybeSingle();
+      if (usernameError) return jsonResponse(500, { error: "Unable to check username availability." }, origin);
+      if (usernameExists) return jsonResponse(409, { error: "That username is already in use. Choose another." }, origin);
+      const internalEmail = username + "@portal.starlink.invalid";
+      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: internalEmail, password, email_confirm: true,
+        user_metadata: { full_name: staffRecord.full_name, portal_username: username, account_type: "employee" }
       });
-      if (inviteError || !invited.user) {
-        return jsonResponse(409, { error: inviteError?.message ?? "Unable to send the employee invitation." }, origin);
-      }
-      const invitedUser = invited.user;
+      if (createError || !created.user) return jsonResponse(409, { error: createError?.message ?? "Unable to create the employee login." }, origin);
+      const newUser = created.user;
       const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
-        id: invitedUser.id, full_name: staffRecord.full_name, email, phone: staffRecord.phone ?? null
+        id: newUser.id, full_name: staffRecord.full_name, email: internalEmail, phone: staffRecord.phone ?? null, username
       }, { onConflict: "id" });
       if (profileError) {
-        await supabaseAdmin.auth.admin.deleteUser(invitedUser.id);
-        return jsonResponse(500, { error: "Invitation could not be linked to the employee profile." }, origin);
+        await supabaseAdmin.auth.admin.deleteUser(newUser.id);
+        return jsonResponse(500, { error: "Could not save the employee login profile." }, origin);
       }
       const { data: account, error: accountError } = await supabaseAdmin.from("personal_portal_accounts").insert({
-        user_id: invitedUser.id, staff_id: staffRecord.id, investor_id: null, account_status: "active"
+        user_id: newUser.id, staff_id: staffRecord.id, investor_id: null, account_status: "active"
       }).select().single();
       if (accountError) {
-        await supabaseAdmin.auth.admin.deleteUser(invitedUser.id);
-        return jsonResponse(409, { error: "The portal account could not be created. Check whether this employee is already linked." }, origin);
+        await supabaseAdmin.auth.admin.deleteUser(newUser.id);
+        return jsonResponse(409, { error: "The portal account could not be linked to this employee." }, origin);
       }
-      await writeAuditLog({
-        actor: user.id, action: "PORTAL_EMPLOYEE_ACCOUNT_INVITED", entityId: account.id,
-        before: null, after: { ...account, email }, ipAddress: request.headers.get("x-forwarded-for"),
-        deviceInfo: request.headers.get("user-agent")
-      });
-      return jsonResponse(200, { success: true, message: "Invitation sent. The employee must use the email link to set a password.", account: { ...account, email } }, origin);
+      await writeAuditLog({ actor: user.id, action: "PORTAL_EMPLOYEE_ACCOUNT_CREATED", entityId: account.id, before: null, after: { ...account, username }, ipAddress: request.headers.get("x-forwarded-for"), deviceInfo: request.headers.get("user-agent") });
+      return jsonResponse(200, { success: true, message: "Employee login created. Give the employee their username and temporary password securely.", account: { ...account, username } }, origin);
     }
 
     // =====================================================
