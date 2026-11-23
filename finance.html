@@ -2359,8 +2359,10 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
 
             <div class="modal-row">
                 <div>
-                    <label>Assignee (Staff)</label>
-                    <select id="tskAssignee"></select>
+                    <label>Assignee Staff <span style="color:#e8837a;">*</span></label>
+                    <select id="tskAssignee" multiple size="5" aria-describedby="tskAssigneeHelp" style="min-height:142px; height:auto; padding:0.55rem 0.7rem;"></select>
+                    <small id="tskAssigneeHelp" style="display:block;color:#7f9bb8;font-size:0.7rem;line-height:1.5;margin-top:0.4rem;">Select one person or hold Ctrl (Windows) / Cmd (Mac) to select multiple staff. Multiple selections mean everyone is expected to complete their part.</small>
+                    <div id="tskAssigneeCount" style="font-size:0.72rem;color:#7fded1;margin-top:0.35rem;">No staff selected</div>
                 </div>
                 <div>
                     <label>Designated Reviewer (Staff)</label>
@@ -12791,8 +12793,10 @@ function openTxnModal(txn = null) {
 
             const asgSel = document.getElementById('tskAssignee');
             if (asgSel) {
-                asgSel.innerHTML = '<option value="">— Unassigned —</option>' +
-                    staff.filter(s => s.status === 'active').map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
+                asgSel.innerHTML = staff.filter(s => s.status === 'active')
+                    .map(s => `<option value="${s.id}">${escapeHTML(s.fullName)}${s.role ? ' (' + escapeHTML(s.role) + ')' : ''}</option>`).join('');
+                asgSel.onchange = updateTaskAssigneeCount;
+                updateTaskAssigneeCount();
             }
 
             const reviewerSel = document.getElementById('tskReviewer');
@@ -12809,6 +12813,17 @@ function openTxnModal(txn = null) {
             }
         }
 
+
+        function getSelectedTaskAssigneeIds() {
+            const select = document.getElementById('tskAssignee');
+            return select ? Array.from(select.selectedOptions).map(option => Number(option.value)).filter(Number.isSafeInteger) : [];
+        }
+
+        function updateTaskAssigneeCount() {
+            const count = getSelectedTaskAssigneeIds().length;
+            const label = document.getElementById('tskAssigneeCount');
+            if (label) label.textContent = count === 0 ? 'No staff selected — task will remain unassigned' : count === 1 ? '1 staff member selected' : count + ' staff members selected';
+        }
 
                 async function openTaskModal(taskId = null) {
             editingTaskId = taskId;
@@ -12837,7 +12852,8 @@ function openTxnModal(txn = null) {
                 setVal('tskDescription', t.description);
                 setVal('tskCategory', t.categoryCode);
                 setVal('tskPriority', t.priority || 'normal');
-                setVal('tskAssignee', t.assigneeStaffId);
+                Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = String(option.value) === String(t.assigneeStaffId || ''); });
+                updateTaskAssigneeCount();
                 setVal('tskReviewer', t.reviewerStaffId);
                 setVal('tskLocation', t.locationId);
                 setVal('tskStartDate', t.startDate);
@@ -12850,7 +12866,8 @@ function openTxnModal(txn = null) {
                 setVal('tskDescription', '');
                 setVal('tskCategory', '');
                 setVal('tskPriority', 'normal');
-                setVal('tskAssignee', '');
+                Array.from(document.getElementById('tskAssignee').options).forEach(option => { option.selected = false; });
+                updateTaskAssigneeCount();
                 setVal('tskReviewer', '');
                 setVal('tskLocation', '');
                 setVal('tskStartDate', todayISO());
@@ -12874,8 +12891,9 @@ function openTxnModal(txn = null) {
             const description = Validation.sanitize(document.getElementById('tskDescription').value, 1000);
             const categoryCode = document.getElementById('tskCategory').value || null;
             const priority = document.getElementById('tskPriority').value;
-            const assigneeRaw = document.getElementById('tskAssignee').value;
-            const assigneeStaffId = assigneeRaw ? parseInt(assigneeRaw, 10) : null;
+            const assigneeStaffIds = getSelectedTaskAssigneeIds();
+            const assigneeStaffId = assigneeStaffIds.length ? assigneeStaffIds[0] : null;
+            const assignmentMode = assigneeStaffIds.length > 1 ? 'everyone_must_complete' : 'single';
             const reviewerRaw = document.getElementById('tskReviewer').value;
             const reviewerStaffId = reviewerRaw ? parseInt(reviewerRaw, 10) : null;
             const locationRaw = document.getElementById('tskLocation').value;
@@ -12914,17 +12932,22 @@ function openTxnModal(txn = null) {
                 const t = tasks.find(x => x.id === editingTaskId);
                 const upd = {
                     title, description: description || null, category_code: categoryCode,
-                    priority, assignee_staff_id: assigneeStaffId, reviewer_staff_id: reviewerStaffId, location_id: locationId,
+                    priority, assignee_staff_id: null, reviewer_staff_id: reviewerStaffId, location_id: locationId,
                     start_date: startDate, deadline,
                     instructions: instructions || null, expected_result: expectedResult || null,
                     notes: notes || null, updated_at: new Date().toISOString(),
                     updated_by: CURRENT_USER
                 };
-                if (!t.assigneeStaffId && assigneeStaffId && t.status === 'draft') {
-                    upd.status = 'assigned';
-                }
+                if (!assigneeStaffIds.length && t.status === 'assigned') upd.status = 'draft';
+                if (assigneeStaffIds.length && ['draft','assigned'].includes(t.status)) upd.status = 'assigned';
                 const { error } = await supabaseClient.from('tasks').update(upd).eq('id', editingTaskId);
                 if (error) { err.textContent = '⚠️ Save failed: ' + error.message; err.style.display = 'block'; return; }
+                if (assigneeStaffIds.length || (t && t.assigneeStaffId)) {
+                    const { error: assignmentError } = await supabaseClient.functions.invoke('task-assignment-workflows', {
+                        body: { action: 'assign_task', task_id: editingTaskId, staff_ids: assigneeStaffIds, assignment_mode: assignmentMode }
+                    });
+                    if (assignmentError) { err.textContent = '⚠️ Task saved, but staff assignment failed: ' + assignmentError.message; err.style.display = 'block'; return; }
+                }
                 showToast('✅ Task updated', 'success');
             } else {
                 const { data: idData, error: idErr } = await supabaseClient.rpc('next_task_id');
@@ -12937,7 +12960,7 @@ function openTxnModal(txn = null) {
                     status: assigneeStaffId ? 'assigned' : 'draft',
                     progress_pct: 0,
                     created_by: CURRENT_USER,
-                    assignee_staff_id: assigneeStaffId,
+                    assignee_staff_id: null,
                     reviewer_staff_id: reviewerStaffId,
                     location_id: locationId,
                     start_date: startDate, deadline,
