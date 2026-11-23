@@ -53,7 +53,7 @@ const SERVICE_ROLE_KEY = getServiceRoleKey();
 
 const allowedOrigins = (
   Deno.env.get("ALLOWED_ORIGINS") ??
-  "http://localhost:5500,http://127.0.0.1:5500"
+  "https://reinchemo.github.io,http://localhost:5500,http://127.0.0.1:5500"
 )
   .split(",")
   .map((origin) => origin.trim())
