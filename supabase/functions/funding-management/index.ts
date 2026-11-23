@@ -245,16 +245,35 @@ Deno.serve(async(req)=>{
     const {data,error}=await admin.from("funding_commitments").insert({opportunity_id:opportunity,funder_id:funder,principal_amount:principal,currency_code:opp.currency_code,agreed_return_rate:rate,term_days:days,return_type:opp.return_type,day_count_basis:opp.day_count_basis,tax_rate_snapshot:opp.tax_rate,deductions_snapshot:opp.other_deductions,terms_snapshot:termsSnapshot,terms_version:opp.terms_version,early_settlement_allowed:opp.early_settlement_allowed,compounding_allowed:false,status:isSigned?"payment_pending":"agreement_pending",agreement_reference:isSigned?agreement:null,signed_at:isSigned?signedAt!.toISOString():null,terms_locked_at:isSigned?new Date().toISOString():null,accepted_at:isSigned?new Date().toISOString():null,maturity_date:maturity}).select("*").single();
     if(error)throw error;await audit("commitment",data.id,"created",null,data);return out({success:true,record:data});
   }
-  if(action==="sign_commitment"){
+  if(action==="create_agreement_upload"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
-    const id=Number(body.id),agreement=String(body.agreement_reference||"").trim(),signed=String(body.signed_at||"").trim();
-    if(!Number.isSafeInteger(id)||agreement.length<2||agreement.length>180||!signed)return out({error:"Commitment, signed agreement reference and signed date are required."},400);
+    const id=Number(body.commitment_id),filename=String(body.filename||"").replace(/[^a-zA-Z0-9._-]/g,"_").slice(0,120),mime=String(body.mime_type||""),size=Number(body.file_size_bytes);
+    const {data:commit}=await admin.from("funding_commitments").select("id,status").eq("id",id).maybeSingle();
+    if(!commit||!["commitment_submitted","agreement_pending","pending_agreement"].includes(commit.status))return out({error:"Commitment is not awaiting a signed agreement."},409);
+    if(!filename||mime!=="application/pdf"||!Number.isSafeInteger(size)||size<1||size>10485760)return out({error:"Upload a signed PDF agreement up to 10 MB."},400);
+    const path="agreements/"+id+"/"+crypto.randomUUID()+"-"+filename;
+    const {data,error}=await admin.storage.from("funding-private").createSignedUploadUrl(path);
+    if(error)throw error;return out({success:true,path,signed_upload:data});
+  }
+  if(action==="sign_commitment"){
+    if(!(await need("approve")))return out({error:"Funding approval permission required."},403);
+    const id=Number(body.id),agreement=String(body.agreement_reference||"").trim(),signed=String(body.signed_at||"").trim(),documentPath=String(body.agreement_document_path||"").trim();
+    if(!Number.isSafeInteger(id)||agreement.length<2||agreement.length>180||!signed||!documentPath.startsWith("agreements/"+id+"/"))return out({error:"Commitment, signed PDF, agreement reference and signed date are required."},400);
     const signedDate=new Date(signed);
     if(Number.isNaN(signedDate.getTime())||signedDate.getTime()>Date.now()+86400000)return out({error:"Valid signed date is required."},400);
     const {data:before}=await admin.from("funding_commitments").select("*").eq("id",id).maybeSingle();
     if(!before||!["pending_agreement","agreement_pending","commitment_submitted"].includes(before.status))return out({error:"Only submitted commitments awaiting a signed agreement can be activated for payment."},409);
+    if(before.created_by===user.id)return out({error:"The commitment creator cannot verify its signed agreement."},403);
+    const {data:storedFiles,error:fileError}=await admin.storage.from("funding-private").list("agreements/"+id,{search:documentPath.split("/").pop()});
+    if(fileError)throw fileError;
+    if(!(storedFiles||[]).some((file:any)=>file.name===documentPath.split("/").pop()))return out({error:"Signed agreement PDF was not found in private storage."},404);
+    const {data:existingVersions,error:versionError}=await admin.from("funding_agreements").select("version").eq("commitment_id",id).order("version",{ascending:false}).limit(1);
+    if(versionError)throw versionError;
+    const version=Number(existingVersions?.[0]?.version||0)+1;
+    const {error:agreementError}=await admin.from("funding_agreements").insert({commitment_id:id,version,terms_snapshot:before.terms_snapshot||{},document_path:documentPath,signed_by_name:String(body.signed_by_name||"").slice(0,180)||null,signed_by_identity:String(body.signed_by_identity||"").slice(0,120)||null,signed_at:signedDate.toISOString(),verified_by:user.id,verified_at:new Date().toISOString(),created_by:user.id,is_immutable:true});
+    if(agreementError)throw agreementError;
     const maturity=new Date(signedDate.getTime()+Number(before.term_days)*86400000).toISOString().slice(0,10);
-    const {data,error}=await admin.from("funding_commitments").update({status:"payment_pending",agreement_reference:agreement,signed_at:signedDate.toISOString(),terms_locked_at:new Date().toISOString(),accepted_at:new Date().toISOString(),maturity_date:maturity,updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_agreement").select("*").maybeSingle();
+    const {data,error}=await admin.from("funding_commitments").update({status:"payment_pending",agreement_reference:agreement,agreement_document_path:documentPath,signed_at:signedDate.toISOString(),terms_locked_at:new Date().toISOString(),accepted_at:new Date().toISOString(),maturity_date:maturity,updated_at:new Date().toISOString()}).eq("id",id).eq("status","pending_agreement").select("*").maybeSingle();
     if(error)throw error;if(!data)return out({error:"Commitment changed concurrently; refresh and retry."},409);
     await audit("commitment",id,"agreement_signed_terms_locked",before,data);return out({success:true,record:data});
   }
