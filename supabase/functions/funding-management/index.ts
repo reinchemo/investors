@@ -383,7 +383,16 @@ Deno.serve(async(req)=>{
     const {data:allLedger}=await admin.from("funding_liability_ledger").select("entry_type,amount").eq("commitment_id",paid.commitment_id);
     const receivedPrincipal=(allLedger||[]).filter((x:any)=>x.entry_type==="principal_received").reduce((n:number,x:any)=>n+Number(x.amount),0);
     const repaidPrincipal=(allLedger||[]).filter((x:any)=>x.entry_type==="principal_repaid").reduce((n:number,x:any)=>n+Number(x.amount),0);
-    const fullySettled=repaidPrincipal>=receivedPrincipal-0.01;
+    const returnPaidTotal=(allLedger||[]).filter((x:any)=>x.entry_type==="return_paid").reduce((n:number,x:any)=>n+Number(x.amount),0);
+    const {data:commitForSettlement}=await admin.from("funding_commitments").select("*").eq("id",paid.commitment_id).single();
+    const terms=commitForSettlement?.terms_snapshot||{};
+    const rate=Number(terms.return_rate??commitForSettlement?.agreed_return_rate??0),term=Number(terms.term_days??commitForSettlement?.term_days??0);
+    const basis=String(terms.day_count_basis??commitForSettlement?.day_count_basis??"actual_365"),denominator=basis==="actual_360"||basis==="30_360"?360:365;
+    const gross=String(terms.return_type??commitForSettlement?.return_type)==="annualised_simple"?Number(commitForSettlement?.principal_amount||0)*rate/100*term/denominator:Number(commitForSettlement?.principal_amount||0)*rate/100;
+    const tax=gross*Number(terms.tax_rate??commitForSettlement?.tax_rate_snapshot??0)/100;
+    const extras=Array.isArray(terms.other_deductions)?terms.other_deductions.reduce((sum:number,item:any)=>sum+(item?.type==="fixed"?Number(item.amount||0):gross*Number(item?.rate??item?.percentage??0)/100),0):0;
+    const contractualReturn=Math.max(0,gross-tax-extras);
+    const fullySettled=repaidPrincipal>=receivedPrincipal-0.01&&returnPaidTotal>=contractualReturn-0.01;
     await admin.from("funding_commitments").update({status:fullySettled?"fully_settled":"partially_settled",updated_at:new Date().toISOString()}).eq("id",paid.commitment_id);
     await audit("settlement",id,"paid_and_posted",before,paid);return out({success:true,record:paid,commitment_status:fullySettled?"fully_settled":"partially_settled"});
   }
