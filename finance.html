@@ -3701,6 +3701,8 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     <div class="summary-card"><div class="summary-label"><i class="fas fa-tasks"></i> TASKS IN PERIOD</div><div class="summary-value" id="opsTaskTotal">—</div><div class="summary-sub">Assigned task records</div></div>
                     <div class="summary-card"><div class="summary-label"><i class="fas fa-clipboard-check"></i> AWAITING REVIEW</div><div class="summary-value" id="opsTaskReview">—</div><div class="summary-sub">Submitted by employees</div></div>
                     <div class="summary-card"><div class="summary-label"><i class="fas fa-clock"></i> ATTENDANCE RECORDS</div><div class="summary-value" id="opsAttendanceTotal">—</div><div class="summary-sub">Records in selected period</div></div>
+                    <div class="summary-card"><div class="summary-label"><i class="fas fa-calendar-check"></i> LEAVE REQUESTS</div><div class="summary-value" id="opsLeaveTotal">—</div><div class="summary-sub" id="opsLeavePending">Pending: —</div></div>
+                    <div class="summary-card"><div class="summary-label"><i class="fas fa-stopwatch"></i> OVERTIME HOURS</div><div class="summary-value" id="opsOvertimeHours">—</div><div class="summary-sub" id="opsOvertimePending">Pending: —</div></div>
                     <div class="summary-card income"><div class="summary-label"><i class="fas fa-money-check-alt"></i> PAYROLL NET</div><div class="summary-value" id="opsPayrollNet">—</div><div class="summary-sub">Runs dated in selected period</div></div>
                 </div>
                 <div class="table-section" style="margin-bottom:1rem;">
@@ -3715,6 +3717,20 @@ body.starlink-shell .sidebar-tabs .tab:hover{transform:translateX(2px)}
                     <div class="table-wrap"><table class="data-table">
                         <thead><tr><th>Employee</th><th style="text-align:right;">Records</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Pending</th><th style="text-align:right;">Rejected</th><th style="text-align:right;">With Check-in</th></tr></thead>
                         <tbody id="opsAttendanceBody"><tr><td colspan="6">Open this report to load data.</td></tr></tbody>
+                    </table></div>
+                </div>
+                <div class="table-section" style="margin-bottom:1rem;">
+                    <div class="table-section-header"><h4><i class="fas fa-calendar-check" style="color:#5fc7bc;margin-right:.4rem;"></i> Leave Requests Summary</h4></div>
+                    <div class="table-wrap"><table class="data-table">
+                        <thead><tr><th>Employee</th><th style="text-align:right;">Requests</th><th style="text-align:right;">Requested Days</th><th style="text-align:right;">Pending</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Rejected</th></tr></thead>
+                        <tbody id="opsLeaveBody"><tr><td colspan="6">Open this report to load data.</td></tr></tbody>
+                    </table></div>
+                </div>
+                <div class="table-section" style="margin-bottom:1rem;">
+                    <div class="table-section-header"><h4><i class="fas fa-stopwatch" style="color:#5fc7bc;margin-right:.4rem;"></i> Overtime Summary</h4></div>
+                    <div class="table-wrap"><table class="data-table">
+                        <thead><tr><th>Employee</th><th style="text-align:right;">Entries</th><th style="text-align:right;">Hours</th><th style="text-align:right;">Pending</th><th style="text-align:right;">Approved</th><th style="text-align:right;">Rejected</th><th style="text-align:right;">Amount</th></tr></thead>
+                        <tbody id="opsOvertimeBody"><tr><td colspan="7">Open this report to load data.</td></tr></tbody>
                     </table></div>
                 </div>
                 <div class="table-section">
@@ -9374,7 +9390,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
         // ==================================================
         // PEOPLE & OPERATIONS REPORT — read-only summaries
         // ==================================================
-        let operationsReportSnapshot = { tasks: [], attendance: [], payrollRuns: [], payrollItems: [], payrollPayments: [] };
+        let operationsReportSnapshot = { tasks: [], attendance: [], leave: [], overtime: [], payrollRuns: [], payrollItems: [], payrollPayments: [] };
 
         function operationsDateRange() {
             const fromEl = document.getElementById('opsFrom');
@@ -9405,6 +9421,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             }
             const mayTasks = can('view', 'Tasks');
             const mayAttendance = can('view', 'Attendance');
+            const mayLeave = can('view', 'Leave');
+            const mayOvertime = can('view', 'Overtime');
             const mayPayroll = can('view', 'Payroll');
             const mayNames = can('view', 'Staff');
             const exportButton = document.getElementById('opsExportBtn');
@@ -9415,6 +9433,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
 
             let taskRows = [];
             let attendanceRows = [];
+            let leaveRows = [];
+            let overtimeRows = [];
             let runRows = [];
             let itemRows = [];
             let paymentRows = [];
@@ -9444,6 +9464,36 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 }
             }
 
+            if (mayLeave) {
+                let query = supabaseClient.from('leave_requests')
+                    .select('id,staff_id,leave_type,start_date,end_date,days,status')
+                    .order('start_date', { ascending: false })
+                    .limit(2000);
+                if (range.to) query = query.lte('start_date', range.to);
+                if (range.from) query = query.gte('end_date', range.from);
+                const result = await query;
+                if (result.error) {
+                    console.warn('Operations leave report failed:', result.error.message);
+                } else {
+                    leaveRows = result.data || [];
+                }
+            }
+
+            if (mayOvertime) {
+                let query = supabaseClient.from('overtime_entries')
+                    .select('id,staff_id,period,hours,amount,status')
+                    .order('period', { ascending: false })
+                    .limit(2000);
+                if (range.from) query = query.gte('period', range.from.slice(0, 7));
+                if (range.to) query = query.lte('period', range.to.slice(0, 7));
+                const result = await query;
+                if (result.error) {
+                    console.warn('Operations overtime report failed:', result.error.message);
+                } else {
+                    overtimeRows = result.data || [];
+                }
+            }
+
             if (mayPayroll) {
                 const ok = await loadPayrollFromCloud();
                 if (ok) {
@@ -9459,7 +9509,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 }
             }
 
-            operationsReportSnapshot = { tasks: taskRows, attendance: attendanceRows, payrollRuns: runRows, payrollItems: itemRows, payrollPayments: paymentRows };
+            operationsReportSnapshot = { tasks: taskRows, attendance: attendanceRows, leave: leaveRows, overtime: overtimeRows, payrollRuns: runRows, payrollItems: itemRows, payrollPayments: paymentRows };
 
             const taskGroups = {};
             taskRows.forEach(task => {
@@ -9503,6 +9553,48 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             }).join('');
             document.getElementById('opsAttendanceBody').innerHTML = mayAttendance && attendanceHtml ? attendanceHtml : '<tr><td colspan="6" class="empty-row">No attendance records in this period, or Attendance access is not assigned.</td></tr>';
 
+            const leaveGroups = {};
+            leaveRows.forEach(row => {
+                const key = String(row.staff_id || 'unassigned');
+                if (!leaveGroups[key]) leaveGroups[key] = { requests: 0, days: 0, pending: 0, approved: 0, rejected: 0 };
+                const g = leaveGroups[key];
+                g.requests++;
+                g.days += safeNum(row.days);
+                const status = String(row.status || '').toLowerCase();
+                if (status === 'pending') g.pending++;
+                else if (status === 'approved') g.approved++;
+                else if (status === 'rejected') g.rejected++;
+            });
+            const leaveHtml = Object.keys(leaveGroups).sort().map(id => {
+                const g = leaveGroups[id];
+                return '<tr><td>' + escapeHTML(operationsStaffLabel(id, mayNames)) + '</td><td style="text-align:right;">' + g.requests +
+                    '</td><td style="text-align:right;">' + fmt(g.days) + '</td><td style="text-align:right;">' + g.pending +
+                    '</td><td style="text-align:right;">' + g.approved + '</td><td style="text-align:right;">' + g.rejected + '</td></tr>';
+            }).join('');
+            document.getElementById('opsLeaveBody').innerHTML = mayLeave && leaveHtml ? leaveHtml : '<tr><td colspan="6" class="empty-row">No leave requests in this period, or Leave access is not assigned.</td></tr>';
+
+            const overtimeGroups = {};
+            overtimeRows.forEach(row => {
+                const key = String(row.staff_id || 'unassigned');
+                if (!overtimeGroups[key]) overtimeGroups[key] = { entries: 0, hours: 0, pending: 0, approved: 0, rejected: 0, amount: 0 };
+                const g = overtimeGroups[key];
+                g.entries++;
+                g.hours += safeNum(row.hours);
+                g.amount += safeNum(row.amount);
+                const status = String(row.status || '').toLowerCase();
+                if (status === 'pending') g.pending++;
+                else if (status === 'approved') g.approved++;
+                else if (status === 'rejected') g.rejected++;
+            });
+            const overtimeHtml = Object.keys(overtimeGroups).sort().map(id => {
+                const g = overtimeGroups[id];
+                return '<tr><td>' + escapeHTML(operationsStaffLabel(id, mayNames)) + '</td><td style="text-align:right;">' + g.entries +
+                    '</td><td style="text-align:right;">' + fmt(g.hours) + '</td><td style="text-align:right;">' + g.pending +
+                    '</td><td style="text-align:right;">' + g.approved + '</td><td style="text-align:right;">' + g.rejected +
+                    '</td><td style="text-align:right;">KSh ' + fmt(g.amount) + '</td></tr>';
+            }).join('');
+            document.getElementById('opsOvertimeBody').innerHTML = mayOvertime && overtimeHtml ? overtimeHtml : '<tr><td colspan="7" class="empty-row">No overtime entries in this period, or Overtime access is not assigned.</td></tr>';
+
             const payrollHtml = runRows.map(run => {
                 const runItems = itemRows.filter(item => String(item.runId) === String(run.id));
                 const runPayments = paymentRows.filter(payment => String(payment.payroll_run_id) === String(run.id));
@@ -9518,11 +9610,15 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             document.getElementById('opsTaskTotal').textContent = mayTasks ? taskRows.length : '—';
             document.getElementById('opsTaskReview').textContent = mayTasks ? taskRows.filter(task => task.status === 'awaiting_review').length : '—';
             document.getElementById('opsAttendanceTotal').textContent = mayAttendance ? attendanceRows.length : '—';
+            document.getElementById('opsLeaveTotal').textContent = mayLeave ? leaveRows.length : '—';
+            document.getElementById('opsLeavePending').textContent = mayLeave ? 'Pending: ' + leaveRows.filter(row => String(row.status || '').toLowerCase() === 'pending').length : 'Leave access restricted';
+            document.getElementById('opsOvertimeHours').textContent = mayOvertime ? fmt(overtimeRows.reduce((sum, row) => sum + safeNum(row.hours), 0)) : '—';
+            document.getElementById('opsOvertimePending').textContent = mayOvertime ? 'Pending: ' + overtimeRows.filter(row => String(row.status || '').toLowerCase() === 'pending').length : 'Overtime access restricted';
             document.getElementById('opsPayrollNet').textContent = mayPayroll
                 ? 'KSh ' + fmt(runRows.reduce((sum, run) => sum + safeNum(run.totalNet), 0))
                 : '—';
-            if (!mayTasks && !mayAttendance && !mayPayroll) {
-                notice.textContent = 'Your account can open Reports, but it does not currently have view permission for Tasks, Attendance or Payroll data.';
+            if (!mayTasks && !mayAttendance && !mayLeave && !mayOvertime && !mayPayroll) {
+                notice.textContent = 'Your account can open Reports, but it does not currently have view permission for Tasks, Attendance, Leave, Overtime or Payroll data.';
             }
         }
 
@@ -9532,7 +9628,7 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
                 return;
             }
             const snap = operationsReportSnapshot;
-            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Completed','Rejected','Overdue','Attendance Records','Gross','Deductions','Net']];
+            const rows = [['Section','Employee / Period','Status','Assigned','In Progress','Awaiting Review','Approved','Completed','Rejected','Overdue','Attendance Records','Leave Requests','Leave Days','Overtime Entries','Overtime Hours','Overtime Amount','Gross','Deductions','Net']];
             const taskGroups = {};
             snap.tasks.forEach(task => {
                 const key = task.assigneeStaffId ? String(task.assigneeStaffId) : 'Unassigned';
@@ -9549,7 +9645,9 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const attendance = {};
             snap.attendance.forEach(row => { const key=String(row.staff_id); attendance[key]=(attendance[key]||0)+1; });
             Object.keys(attendance).forEach(name => rows.push(['Attendance','Staff #'+name,'', '', '', '', '', '', '', '',attendance[name],'','','']));
-            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
+            snap.leave.forEach(row => rows.push(['Leave','Staff #'+row.staff_id,row.status,'','','','','','','','',1,row.days,'','','','','','']));
+            snap.overtime.forEach(row => rows.push(['Overtime','Staff #'+row.staff_id,row.status,'','','','','','','','','','',1,row.hours,row.amount,'','','']));
+            snap.payrollRuns.forEach(run => rows.push(['Payroll',run.period,run.status,'','','','','','','','','','','','','',run.totalGross,run.totalDeductions,run.totalNet]));
             const csv = rows.map(row => row.map(value => '"' + String(value == null ? '' : value).replace(/"/g,'""') + '"').join(',')).join('\r\n');
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
