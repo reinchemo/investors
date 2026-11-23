@@ -379,6 +379,24 @@ Deno.serve(async (req: Request) => {
                 }, 409);
             }
 
+            // Synchronise multi-employee assignment rows with the management decision.
+            const { data: linkedAssignments, error: linkedError } = await admin.from("task_assignments")
+                .select("id,assignment_state").eq("task_id", taskId).eq("assignment_state", "awaiting_review");
+            if (linkedError) {
+                console.error("Assignment review sync error:", linkedError);
+                return response({ success: false, error: "Task decision saved, but assignment records could not be synchronised." }, 500);
+            }
+            if ((linkedAssignments || []).length > 0) {
+                const nextAssignmentState = decision === "approved" ? "approved" : "rejected";
+                const { error: syncError } = await admin.from("task_assignments")
+                    .update({ assignment_state: nextAssignmentState, progress_pct: decision === "approved" ? 100 : 0, updated_at: new Date().toISOString(), completed_at: decision === "approved" ? new Date().toISOString() : null })
+                    .in("id", linkedAssignments.map((row: any) => row.id)).eq("assignment_state", "awaiting_review");
+                if (syncError) {
+                    console.error("Assignment review sync error:", syncError);
+                    return response({ success: false, error: "Task decision saved, but assignment records could not be synchronised." }, 500);
+                }
+            }
+
             // =====================================
             // 7. RECORD THE REVIEW COMMENT
             // =====================================
