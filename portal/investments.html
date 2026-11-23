@@ -520,22 +520,28 @@
                     throw new Error(result?.error || "Unable to load your investment information.");
                 }
 
-                if (!result.investor) {
-                    content.innerHTML = `
-                        <div class="message">
-                            <div style="font-size:34px;margin-bottom:12px">📊</div>
-                            <strong>Investor access is not available</strong>
-                            <p>This account is not linked to an active investor record.</p>
-                        </div>`;
-                    return;
-                }
-
                 let fundingData = { opportunities: [], commitments: [], funder: null };
                 try {
                     const { data: fundingResult, error: fundingError } = await supabaseClient.functions.invoke("portal-personal-data", { body: { action: "funding" } });
                     if (fundingError) throw fundingError;
                     if (fundingResult?.success) fundingData = fundingResult;
                 } catch (fundingError) { console.warn("Short-term funding portfolio unavailable:", fundingError); }
+
+                // A standalone short-term funder does not need an equity investor record.
+                if (!result.investor) {
+                    if (fundingData.funder) {
+                        renderFunderOnly(fundingData);
+                    } else {
+                        content.innerHTML = `
+                            <div class="message">
+                                <div style="font-size:34px;margin-bottom:12px">📊</div>
+                                <strong>Investor access is not available</strong>
+                                <p>This account is not linked to an investor or short-term funder profile.</p>
+                            </div>`;
+                    }
+                    return;
+                }
+
                 renderInvestor(result.investor, result.investments || [], result.transactions || [], fundingData);
 
             } catch (error) {
@@ -552,6 +558,7 @@
         function renderFundingSection(data) {
             const commitments = Array.isArray(data.commitments) ? data.commitments : [];
             const opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
+            const cash = (value,currency="KES") => new Intl.NumberFormat("en-KE",{style:"currency",currency,maximumFractionDigits:2}).format(Number(value||0));
             const verified = commitments.filter(c => Number(c.capital_received || 0) > 0);
             const totalsByCurrency = {};
             verified.forEach(c => {
@@ -564,7 +571,6 @@
             const totalInvestedHtml=Object.entries(totalsByCurrency).map(([currency,values])=>'<span>'+cash(values.principal,currency)+'</span>').join(' · ')||cash(0,"KES");
             const projectedNetHtml=Object.entries(totalsByCurrency).map(([currency,values])=>'<span>'+cash(values.net,currency)+'</span>').join(' · ')||cash(0,"KES");
             const activeCount = verified.filter(c => ["active_funding","funded","matured","partially_settled","overdue"].includes(c.status)).length;
-            const cash = (value,currency="KES") => new Intl.NumberFormat("en-KE",{style:"currency",currency,maximumFractionDigits:2}).format(Number(value||0));
             const statusLabel = value => String(value||"").replaceAll("_"," ").replace(/\b\w/g,x=>x.toUpperCase());
             const commitmentRows = commitments.length ? commitments.map(c => {
                 const terms = c.terms_snapshot || {};
@@ -593,8 +599,8 @@
                   '<div class="funding-calculation" id="funding-calc-'+o.id+'"><span>Gross '+cash(initialGross,o.currency_code)+' · Deductions '+cash(initialTax+initialExtras,o.currency_code)+'</span><strong>Net return '+cash(initialNet,o.currency_code)+' · Maturity '+cash(Number(o.minimum_commitment)+initialNet,o.currency_code)+'</strong></div>'+
                   '<label class="funding-consent"><input type="checkbox" id="funding-consent-'+o.id+'"> I consent to STARLINK using my submitted contact and KYC information to assess this funding request under the published terms and retention policy.</label><button class="btn funding-primary" onclick="expressFundingInterest('+o.id+')">Express interest</button><p class="funding-hint">Interest is not a commitment or payment. KYC, a signed agreement and verified payment are required before funding becomes active.</p></article>';
             }).join("") : '<div class="empty"><strong>No approved funding opportunities are currently open</strong><p>Offers appear only after management, legal and finance approval. No unapproved rate or tax setting can be used in a live offer.</p></div>';
-            return '<section class="funding-section"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
-              '<div class="funding-summary"><div class="funding-stat"><small>Total verified capital received</small><strong>'+cash(totalInvested)+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+cash(projectedNet)+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
+            return '<section class="funding-section" id="short-term-funding"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
+              '<div class="funding-summary"><div class="funding-stat"><small>Total verified capital received</small><strong>'+totalInvestedHtml+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+projectedNetHtml+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
               '<div class="funding-kyc"><strong>KYC status:</strong> '+safe(statusLabel(data.funder?.kyc_status||"Not started"))+' · '+safe(data.funder?.status||"No funder profile")+'. A verified profile is required before a formal commitment can be submitted.</div>'+
               '<div class="section-head"><h2>Your funding portfolio</h2><p>Principal, locked return terms, estimated deductions, maturity and settlement progress.</p></div>'+commitmentRows+
               '<div class="section-head"><h2>Approved funding opportunities</h2><p>Compare terms and calculate a potential return before expressing interest.</p></div>'+offerCards+
@@ -628,6 +634,20 @@
             if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit commitment.");
             alert("Commitment submitted for agreement preparation.");await loadInvestments();
         };
+
+        function renderFunderOnly(fundingData) {
+            content.innerHTML = `
+                <section class="heading">
+                    <div class="eyebrow">FUNDER RELATIONS</div>
+                    <h1>Short-Term Funding</h1>
+                    <p class="subtitle">View approved opportunities, calculate returns and track your funding portfolio.</p>
+                </section>
+                ${renderFundingSection(fundingData)}
+            `;
+            if (window.location.hash === "#short-term-funding") {
+                document.getElementById("short-term-funding")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
 
         function renderInvestor(investor, investments, transactions, fundingData = {}) {
             const totalCapital = investments.reduce(
@@ -753,6 +773,9 @@
   </div>
   ${renderFundingSection(fundingData)}
  `;
+            if (window.location.hash === "#short-term-funding") {
+                document.getElementById("short-term-funding")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
 }
 
 async function logout(){
