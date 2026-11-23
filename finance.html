@@ -10474,7 +10474,8 @@ document.getElementById('sumCapitalCount').textContent = capitalCount + ' transa
             const notes = [userNotes, 'Draft calculated from approved paid days using the proposal payroll preview, plus separately approved overtime. Statutory deductions and additional adjustments are not included.'].filter(Boolean).join('\n');
             const included = wizardLines.filter(l => l.include);
             const totalGross = included.reduce((s, l) => s + safeNum(l.amount) + safeNum(l.allowance), 0);
-            const totalDeductions = included.reduce((s, l) => s + safeNum(l.deduction), 0);\n            const totalNet = totalGross - totalDeductions;
+            const totalDeductions = included.reduce((s, l) => s + safeNum(l.deduction), 0);
+            const totalNet = totalGross - totalDeductions;
             const { data: authResult, error: authError } = await supabaseClient.auth.getUser();
             const err = document.getElementById('pwError3');
             if (authError || !authResult?.user?.id) {
