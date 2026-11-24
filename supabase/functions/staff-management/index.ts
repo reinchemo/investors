@@ -41,13 +41,14 @@ Deno.serve(async (req: Request) => {
     if (!body || typeof body !== "object" || Array.isArray(body)) return reply({ error: "Invalid request." }, 400);
     const action = String(body.action || "");
 
-    const permission = action === "list_staff" ? "view" : action === "update_staff" ? "edit" : "create";
-    const { data: allowed, error: permissionError } = await userClient.rpc("portal_management_has_permission", {
-      p_module: "Staff",
-      p_permission: permission,
+    const { data: roleRows, error: roleError } = await admin
+      .from("user_roles").select("roles!inner(is_full_admin)").eq("user_id", authData.user.id);
+    if (roleError) throw roleError;
+    const isFullAdmin = (roleRows || []).some((row: any) => {
+      const role = Array.isArray(row.roles) ? row.roles[0] : row.roles;
+      return role?.is_full_admin === true;
     });
-    if (permissionError) throw permissionError;
-    if (!allowed) return reply({ error: "You do not have permission to manage staff records." }, 403);
+    if (!isFullAdmin) return reply({ error: "Full Administrator permission is required." }, 403);
 
     if (action === "list_staff") {
       const { data, error } = await admin
