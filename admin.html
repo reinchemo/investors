@@ -460,6 +460,20 @@
             </div>
           </div>
           <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4"><div><h3 class="font-semibold text-white mb-1">Create employee portal login</h3><p class="text-xs text-gray-400">Only active employees without an account can receive a login.</p></div><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 items-end flex-1"><div><label class="block text-xs text-gray-400 mb-2">Employee</label><select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></select></div><div><label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalInviteUsername" maxlength="32" placeholder="john.kiptoo" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><div><label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalInvitePassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="bg-cyan-600 hover:bg-cyan-500 rounded-lg py-3 font-bold text-white">Create portal login</button></div><div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div></div>
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-6">
+            <section class="xl:col-span-7 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
+              <div class="p-5 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="font-semibold text-white"><i class="fas fa-hand-holding-usd text-amber-400 mr-2"></i>Short-term funder register</h3><p class="text-xs text-gray-400 mt-1">Funder profiles created in Funding Management appear here automatically.</p></div><a href="funding.html" class="text-sm text-cyan-300 hover:text-cyan-200">Open Funding Management <i class="fas fa-arrow-up-right-from-square ml-1"></i></a></div>
+              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Funder</th><th class="text-left px-4 py-3">Type</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">KYC</th><th class="text-left px-4 py-3">Portal access</th></tr></thead><tbody id="portalFunderRows"><tr><td colspan="5" class="p-6 text-center text-gray-500">Loading funders…</td></tr></tbody></table></div>
+            </section>
+            <section class="xl:col-span-5 bg-[#181c2e] border border-gray-800 rounded-xl p-5">
+              <h3 class="font-semibold text-white mb-1"><i class="fas fa-key text-amber-400 mr-2"></i>Create short-term funder login</h3><p class="text-xs text-gray-400 mb-4">Register the funder profile first in Funding Management, then create its portal login here.</p>
+              <label class="block text-xs text-gray-400 mb-2">Short-term funder</label><select id="portalFunderSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></select>
+              <label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalFunderUsername" maxlength="32" placeholder="funder.username" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+              <label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalFunderPassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+              <button id="portalFunderInviteBtn" onclick="inviteFunderPortal()" class="w-full bg-amber-600 hover:bg-amber-500 rounded-lg py-3 font-bold text-white">Create funder portal login</button>
+              <div id="portalFunderMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div>
+            </section>
+          </div>
         </div>
 
         <!-- ========================================== -->
@@ -1205,10 +1219,14 @@
         };
 
         let portalStaffCache = [];
+        let portalFunderCache = [];
         async function loadPortalAccess() {
             const rows = document.getElementById('portalAccessRows');
             const staffSelect = document.getElementById('portalStaffSelect');
+            const funderRows = document.getElementById('portalFunderRows');
+            const funderSelect = document.getElementById('portalFunderSelect');
             rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">Loading…</td></tr>';
+            funderRows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Loading funders…</td></tr>';
             try {
                 const [{ data: staffData, error: staffError }, { data: portalData, error: portalError }] = await Promise.all([
                     supabaseClient.functions.invoke('staff-management', { body: { action: 'list_staff' } }),
@@ -1219,17 +1237,30 @@
                 if (!staffData?.success) throw new Error(staffData?.error || 'Unable to load employee records.');
                 if (!portalData?.success) throw new Error(portalData?.error || 'Unable to load portal accounts.');
                 portalStaffCache = staffData.staff || [];
+                portalFunderCache = portalData.funders || [];
                 const users = portalData.users || [];
                 const accounts = new Map(users.filter(u => u.portal_account?.staff_id).map(u => [Number(u.portal_account.staff_id), { user: u, account: u.portal_account }]));
+                const funderAccounts = new Map(users.filter(u => u.portal_account?.funder_id).map(u => [Number(u.portal_account.funder_id), { user: u, account: u.portal_account }]));
                 staffSelect.innerHTML = '<option value="">Select active employee…</option>' + portalStaffCache.filter(s => s.status === 'active' && !accounts.has(Number(s.id))).map(s => '<option value="' + s.id + '">' + escapePortalText(s.employee_number) + ' · ' + escapePortalText(s.full_name) + '</option>').join('');
                 if (!portalStaffCache.length) rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">No employee records found. Register your first employee.</td></tr>';
                 else rows.innerHTML = portalStaffCache.map(s => {
                     const link = accounts.get(Number(s.id));
                     const status = link?.account?.account_status || 'Not created';
                     const statusClass = status === 'active' ? 'text-emerald-400' : status === 'suspended' ? 'text-rose-400' : 'text-gray-500';
-                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(s.full_name) + '<div class="text-xs text-gray-500">' + escapePortalText(s.employee_number) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.email || '—') + '<div class="text-xs text-gray-500">' + escapePortalText(s.phone || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.role || 'Employee') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + status + '</td><td class="px-4 py-3 text-right"><button onclick="editPortalEmployee(' + s.id + ')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">Edit</button>' + (link ? ' <button onclick="setPortalAccountStatus(\'' + link.user.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '') + '</td></tr>';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(s.full_name) + '<div class="text-xs text-gray-500">' + escapePortalText(s.employee_number) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.email || '—') + '<div class="text-xs text-gray-500">' + escapePortalText(s.phone || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.role || 'Employee') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right"><button onclick="editPortalEmployee(' + s.id + ')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">Edit</button>' + (link ? ' <button onclick="setPortalAccountStatus(\\'' + link.user.id + '\\',\\'' + (status === 'active' ? 'suspend' : 'activate') + '\\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '') + '</td></tr>';
                 }).join('');
-            } catch (e) { rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>'; }
+                funderSelect.innerHTML = '<option value="">Select eligible funder…</option>' + portalFunderCache.filter(f => !['closed','suspended'].includes(String(f.status || '').toLowerCase()) && !funderAccounts.has(Number(f.id))).map(f => '<option value="' + f.id + '">' + escapePortalText(f.legal_name) + ' · ' + escapePortalText(f.party_type || 'Funder') + '</option>').join('');
+                if (!portalFunderCache.length) funderRows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">No short-term funder profiles found. Register a funder in Funding Management first.</td></tr>';
+                else funderRows.innerHTML = portalFunderCache.map(f => {
+                    const link = funderAccounts.get(Number(f.id));
+                    const status = link?.account?.account_status || 'Not created';
+                    const statusClass = status === 'active' ? 'text-emerald-400' : status === 'suspended' ? 'text-rose-400' : 'text-gray-500';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(f.legal_name) + '<div class="text-xs text-gray-500">Funder #' + escapePortalText(f.id) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.party_type || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.status || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.kyc_status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td></tr>';
+                }).join('');
+            } catch (e) {
+                rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>';
+                funderRows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>';
+            }
         }
         function escapePortalText(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
         function resetEmployeeForm() {
@@ -1304,6 +1335,32 @@
                 await loadPortalAccess();
             } catch(e) { msg.textContent = e.message; }
             finally { btn.disabled = false; btn.innerHTML = 'Create portal login'; }
+        }
+
+        async function inviteFunderPortal() {
+            const funderId = Number(document.getElementById('portalFunderSelect').value);
+            const username = document.getElementById('portalFunderUsername').value.trim();
+            const password = document.getElementById('portalFunderPassword').value;
+            const msg = document.getElementById('portalFunderMessage');
+            const btn = document.getElementById('portalFunderInviteBtn');
+            msg.className = 'text-xs rounded-lg p-3 bg-red-500/10 text-red-300';
+            msg.classList.remove('hidden');
+            if (!funderId || !username || !password) { msg.textContent = 'Select a funder and enter a username and password.'; return; }
+            btn.disabled = true;
+            btn.textContent = 'Creating login…';
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', {
+                    body: { action: 'create_funder_account', funder_id: funderId, username, password }
+                });
+                if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); }
+                if (!data?.success) throw new Error(data?.error || 'Unable to create funder portal login.');
+                msg.className = 'text-xs rounded-lg p-3 bg-emerald-500/10 text-emerald-300';
+                msg.textContent = data.message || 'Short-term funder login created.';
+                document.getElementById('portalFunderUsername').value = '';
+                document.getElementById('portalFunderPassword').value = '';
+                await loadPortalAccess();
+            } catch (e) { msg.textContent = e.message; }
+            finally { btn.disabled = false; btn.textContent = 'Create funder portal login'; }
         }
 
         async function setPortalAccountStatus(userId, action) {
