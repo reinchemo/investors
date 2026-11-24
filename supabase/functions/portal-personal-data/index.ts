@@ -691,15 +691,21 @@ Deno.serve(async (req) => {
         return {...c,capital_received:capitalReceived,principal_repaid:principalRepaid,return_paid:returnAlreadyPaid,active_capital:activeCapital,return_type:returnType,day_count_basis:basis,display_rate:rate,gross_return:gross,estimated_deductions:totalDeductions,net_return:net,maturity_total:maturityTotal,verified_receipts:verifiedReceipts,settlements:paid};
       });
       let renewalElections:any[] = [];
+      let funderDocuments:any[] = [];
       if (funder) {
         const {data:renewalRows,error:renewalError}=await admin.from("funding_renewal_elections")
           .select("id,source_commitment_id,election_type,requested_amount,target_opportunity_id,status,decision_reason,new_commitment_id,created_at,approved_at,processed_at")
           .eq("funder_id",funder.id).order("created_at",{ascending:false}).limit(200);
         if (renewalError) return jsonResponse({error:"Unable to load your maturity instructions."},500);
         renewalElections=renewalRows||[];
+        const {data:docs,error:docsError}=await admin.from("funding_documents")
+          .select("id,document_type,original_filename,mime_type,file_size_bytes,expiry_date,review_status,review_reason,uploaded_at")
+          .eq("funder_id",funder.id).order("uploaded_at",{ascending:false}).limit(100);
+        if(docsError)return jsonResponse({error:"Unable to load your KYC document status."},500);
+        funderDocuments=docs||[];
       }
       const portfolioWithRenewals=portfolio.map((item:any)=>({...item,renewal_election:renewalElections.find((e:any)=>e.source_commitment_id===item.id)||null}));
-      return jsonResponse({success:true,investor,funder,opportunities:opportunities||[],commitments:portfolioWithRenewals,renewal_elections:renewalElections,receipts,settlements,live_offers_enabled:true,legal_notice:"Only approved published opportunities are shown. Only verified receipts count as invested capital. Figures are based on each commitment's locked terms snapshot and do not constitute a guarantee."});
+      return jsonResponse({success:true,investor,funder,opportunities:opportunities||[],commitments:portfolioWithRenewals,renewal_elections:renewalElections,documents:funderDocuments,receipts,settlements,live_offers_enabled:true,legal_notice:"Only approved published opportunities are shown. Only verified receipts count as invested capital. Figures are based on each commitment's locked terms snapshot and do not constitute a guarantee."});
     }
 
     // ==========================================
