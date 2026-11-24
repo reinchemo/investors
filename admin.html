@@ -138,7 +138,7 @@
     </nav>
 
     <!-- MAIN CONTAINER -->
-    <main class="max-w-[1400px] mx-auto p-4 md:p-8">
+    <main class="w-full max-w-none mx-auto p-4 md:p-6 xl:p-8">
 
         <!-- ========================================== -->
         <!-- VIEW 1: ADMINISTRATOR LIST                 -->
@@ -436,13 +436,13 @@
             </div>
         </div>
 
-        <div id="view-portal-access" class="view-section">
+        <div id="view-portal-access" class="view-section w-full max-w-none">
           <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-7">
             <div><h1 class="text-2xl font-bold text-white"><i class="fas fa-id-card text-cyan-400 mr-2"></i> Employee Management & Portal Access</h1><p class="text-sm text-gray-400 mt-1">Register employees, maintain their records and manage personal portal logins.</p></div>
             <button onclick="switchView('view-list')" class="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white"><i class="fas fa-arrow-left mr-2"></i>Back to administrators</button>
           </div>
-          <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
-            <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5">
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-6 items-stretch">
+            <div class="xl:col-span-4 bg-[#181c2e] border border-gray-800 rounded-xl p-5">
               <div class="flex justify-between items-center mb-4"><div><h3 id="employeeFormTitle" class="font-semibold text-white">Register employee</h3><p class="text-xs text-gray-400 mt-1">Employee details. Login is created separately.</p></div><button onclick="resetEmployeeForm()" class="text-xs text-cyan-300">Clear</button></div>
               <input type="hidden" id="portalEmployeeId">
               <label class="block text-xs text-gray-400 mb-2">Employee number *</label><input id="portalEmployeeNumber" placeholder="EMP-006" maxlength="40" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
@@ -454,12 +454,12 @@
               <label class="block text-xs text-gray-400 mb-2">Payment method</label><select id="portalEmployeePaymentMethod" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4"><option value="">Not specified</option><option value="bank">Bank</option><option value="mpesa">M-Pesa</option><option value="cash">Cash</option></select>
               <div id="portalEmployeeMessage" class="hidden text-xs rounded-lg p-3 mb-3"></div><button id="portalEmployeeSaveBtn" onclick="savePortalEmployee()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg py-3 font-bold text-white"><i class="fas fa-user-plus mr-2"></i> Save employee record</button>
             </div>
-            <div class="xl:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
+            <div class="xl:col-span-8 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden min-w-0">
               <div class="p-5 border-b border-gray-800 flex justify-between items-center"><div><h3 class="font-semibold text-white">Employee register</h3><p class="text-xs text-gray-400 mt-1">Manage every employee record and see portal status.</p></div><button onclick="loadPortalAccess()" class="text-cyan-400 text-sm"><i class="fas fa-rotate mr-1"></i>Refresh</button></div>
               <div class="overflow-x-auto"><table class="w-full text-sm min-w-[760px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Employee</th><th class="text-left px-4 py-3">Contact</th><th class="text-left px-4 py-3">Role</th><th class="text-left px-4 py-3">Employment</th><th class="text-left px-4 py-3">Portal</th><th class="text-right px-4 py-3">Manage</th></tr></thead><tbody id="portalAccessRows"><tr><td colspan="6" class="p-6 text-center text-gray-500">Loading employees…</td></tr></tbody></table></div>
             </div>
           </div>
-          <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5"><h3 class="font-semibold text-white mb-1">Create employee portal login</h3><p class="text-xs text-gray-400 mb-4">Only active employees without an account can receive a login.</p><div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end"><div><label class="block text-xs text-gray-400 mb-2">Employee</label><select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></select></div><div><label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalInviteUsername" maxlength="32" placeholder="john.kiptoo" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><div><label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalInvitePassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="bg-cyan-600 hover:bg-cyan-500 rounded-lg py-3 font-bold text-white">Create portal login</button></div><div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div></div>
+          <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4"><div><h3 class="font-semibold text-white mb-1">Create employee portal login</h3><p class="text-xs text-gray-400">Only active employees without an account can receive a login.</p></div><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 items-end flex-1"><div><label class="block text-xs text-gray-400 mb-2">Employee</label><select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></select></div><div><label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalInviteUsername" maxlength="32" placeholder="john.kiptoo" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><div><label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalInvitePassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="bg-cyan-600 hover:bg-cyan-500 rounded-lg py-3 font-bold text-white">Create portal login</button></div><div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div></div>
         </div>
 
         <!-- ========================================== -->
