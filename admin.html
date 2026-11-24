@@ -463,15 +463,24 @@
           <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mt-6">
             <section class="xl:col-span-7 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
               <div class="p-5 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="font-semibold text-white"><i class="fas fa-hand-holding-usd text-amber-400 mr-2"></i>Short-term funder register</h3><p class="text-xs text-gray-400 mt-1">Funder profiles created in Funding Management appear here automatically.</p></div><a href="funding.html" class="text-sm text-cyan-300 hover:text-cyan-200">Open Funding Management <i class="fas fa-arrow-up-right-from-square ml-1"></i></a></div>
-              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Funder</th><th class="text-left px-4 py-3">Type</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">KYC</th><th class="text-left px-4 py-3">Portal access</th></tr></thead><tbody id="portalFunderRows"><tr><td colspan="5" class="p-6 text-center text-gray-500">Loading funders…</td></tr></tbody></table></div>
+              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Funder</th><th class="text-left px-4 py-3">Type</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">KYC</th><th class="text-left px-4 py-3">Portal access</th><th class="text-right px-4 py-3">Manage</th></tr></thead><tbody id="portalFunderRows"><tr><td colspan="6" class="p-6 text-center text-gray-500">Loading funders…</td></tr></tbody></table></div>
             </section>
-            <section class="xl:col-span-5 bg-[#181c2e] border border-gray-800 rounded-xl p-5">
-              <h3 class="font-semibold text-white mb-1"><i class="fas fa-key text-amber-400 mr-2"></i>Create short-term funder login</h3><p class="text-xs text-gray-400 mb-4">Register the funder profile first in Funding Management, then create its portal login here.</p>
-              <label class="block text-xs text-gray-400 mb-2">Short-term funder</label><select id="portalFunderSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></select>
-              <label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalFunderUsername" maxlength="32" placeholder="funder.username" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
-              <label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalFunderPassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
-              <button id="portalFunderInviteBtn" onclick="inviteFunderPortal()" class="w-full bg-amber-600 hover:bg-amber-500 rounded-lg py-3 font-bold text-white">Create funder portal login</button>
-              <div id="portalFunderMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div>
+            <section class="xl:col-span-5 space-y-5">
+              <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5">
+                <h3 class="font-semibold text-white mb-1"><i class="fas fa-user-plus text-amber-400 mr-2"></i>Register short-term funder</h3><p class="text-xs text-gray-400 mb-4">Create the funder profile here. It will also appear in Funding Management for KYC and approval.</p>
+                <label class="block text-xs text-gray-400 mb-2">Legal name *</label><input id="portalNewFunderName" maxlength="180" placeholder="Individual or registered company name" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+                <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs text-gray-400 mb-2">Contact person</label><input id="portalNewFunderContact" placeholder="Contact name" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></div><div><label class="block text-xs text-gray-400 mb-2">Funder type</label><select id="portalNewFunderType" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"><option value="individual">Individual</option><option value="company">Company</option></select></div></div>
+                <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs text-gray-400 mb-2">Email</label><input id="portalNewFunderEmail" type="email" placeholder="Email address" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></div><div><label class="block text-xs text-gray-400 mb-2">Phone</label><input id="portalNewFunderPhone" placeholder="Phone number" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></div></div>
+                <label class="block text-xs text-gray-400 mb-2">Notes</label><textarea id="portalNewFunderNotes" rows="2" maxlength="2000" placeholder="Optional notes" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></textarea>
+                <button id="portalNewFunderSaveBtn" onclick="registerShortTermFunder()" class="w-full bg-amber-600 hover:bg-amber-500 rounded-lg py-3 font-bold text-white">Register funder</button><div id="portalNewFunderMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div>
+              </div>
+              <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5">
+                <h3 class="font-semibold text-white mb-1"><i class="fas fa-key text-amber-400 mr-2"></i>Create short-term funder login</h3><p class="text-xs text-gray-400 mb-4">Only profiles not closed or suspended and without an existing login can receive portal access.</p>
+                <label class="block text-xs text-gray-400 mb-2">Short-term funder</label><select id="portalFunderSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></select>
+                <label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalFunderUsername" maxlength="32" placeholder="funder.username" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+                <label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalFunderPassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+                <button id="portalFunderInviteBtn" onclick="inviteFunderPortal()" class="w-full bg-amber-600 hover:bg-amber-500 rounded-lg py-3 font-bold text-white">Create funder portal login</button><div id="portalFunderMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div>
+              </div>
             </section>
           </div>
         </div>
@@ -1250,16 +1259,16 @@
                     return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(s.full_name) + '<div class="text-xs text-gray-500">' + escapePortalText(s.employee_number) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.email || '—') + '<div class="text-xs text-gray-500">' + escapePortalText(s.phone || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.role || 'Employee') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right"><button onclick="editPortalEmployee(' + s.id + ')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">Edit</button>' + (link ? ' <button onclick="setPortalAccountStatus(\\'' + link.user.id + '\\',\\'' + (status === 'active' ? 'suspend' : 'activate') + '\\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '') + '</td></tr>';
                 }).join('');
                 funderSelect.innerHTML = '<option value="">Select eligible funder…</option>' + portalFunderCache.filter(f => !['closed','suspended'].includes(String(f.status || '').toLowerCase()) && !funderAccounts.has(Number(f.id))).map(f => '<option value="' + f.id + '">' + escapePortalText(f.legal_name) + ' · ' + escapePortalText(f.party_type || 'Funder') + '</option>').join('');
-                if (!portalFunderCache.length) funderRows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">No short-term funder profiles found. Register a funder in Funding Management first.</td></tr>';
+                if (!portalFunderCache.length) funderRows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">No short-term funder profiles found. Register a funder in Funding Management first.</td></tr>';
                 else funderRows.innerHTML = portalFunderCache.map(f => {
                     const link = funderAccounts.get(Number(f.id));
                     const status = link?.account?.account_status || 'Not created';
                     const statusClass = status === 'active' ? 'text-emerald-400' : status === 'suspended' ? 'text-rose-400' : 'text-gray-500';
-                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(f.legal_name) + '<div class="text-xs text-gray-500">Funder #' + escapePortalText(f.id) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.party_type || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.status || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.kyc_status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td></tr>';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(f.legal_name) + '<div class="text-xs text-gray-500">Funder #' + escapePortalText(f.id) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.party_type || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.status || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.kyc_status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right">' + (link ? '<button onclick="setPortalAccountStatus(\\'' + link.user.id + '\\',\\'' + (status === 'active' ? 'suspend' : 'activate') + '\\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '<span class="text-xs text-gray-500">No login</span>') + '</td></tr>';
                 }).join('');
             } catch (e) {
                 rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>';
-                funderRows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>';
+                funderRows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>';
             }
         }
         function escapePortalText(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1335,6 +1344,38 @@
                 await loadPortalAccess();
             } catch(e) { msg.textContent = e.message; }
             finally { btn.disabled = false; btn.innerHTML = 'Create portal login'; }
+        }
+
+        async function registerShortTermFunder() {
+            const legalName = document.getElementById('portalNewFunderName').value.trim();
+            const msg = document.getElementById('portalNewFunderMessage');
+            const btn = document.getElementById('portalNewFunderSaveBtn');
+            msg.className = 'text-xs rounded-lg p-3 bg-red-500/10 text-red-300';
+            msg.classList.remove('hidden');
+            if (!legalName) { msg.textContent = 'Enter the funder legal name.'; return; }
+            btn.disabled = true;
+            btn.textContent = 'Registering…';
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('funding-management', {
+                    body: {
+                        action: 'create_party',
+                        legal_name: legalName,
+                        contact_name: document.getElementById('portalNewFunderContact').value.trim(),
+                        party_type: document.getElementById('portalNewFunderType').value,
+                        email: document.getElementById('portalNewFunderEmail').value.trim(),
+                        phone: document.getElementById('portalNewFunderPhone').value.trim(),
+                        notes: document.getElementById('portalNewFunderNotes').value.trim()
+                    }
+                });
+                if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); }
+                if (!data?.success) throw new Error(data?.error || 'Unable to register short-term funder.');
+                msg.className = 'text-xs rounded-lg p-3 bg-emerald-500/10 text-emerald-300';
+                msg.textContent = 'Funder registered. Complete KYC and required approvals in Funding Management before activation.';
+                ['portalNewFunderName','portalNewFunderContact','portalNewFunderEmail','portalNewFunderPhone','portalNewFunderNotes'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('portalNewFunderType').value = 'individual';
+                await loadPortalAccess();
+            } catch (e) { msg.textContent = e.message; }
+            finally { btn.disabled = false; btn.textContent = 'Register funder'; }
         }
 
         async function inviteFunderPortal() {
