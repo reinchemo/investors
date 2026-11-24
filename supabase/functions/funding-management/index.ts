@@ -27,6 +27,19 @@ Deno.serve(async(req)=>{
     if(error)console.error("Funding audit log failed",error);
   };
   const listTables:Record<string,string>={parties:"funding_parties",opportunities:"funding_opportunities",commitments:"funding_commitments",receipts:"funding_receipts",settlements:"funding_settlements",allocations:"funding_project_allocations",ledger:"funding_liability_ledger",documents:"funding_documents",renewals:"funding_renewal_elections"};
+  if(action==="investor_signed_agreement_url"){
+    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,funder_id,account_status").eq("user_id",user.id).maybeSingle();
+    if(!portal||portal.account_status!=="active"||(!portal.investor_id&&!portal.funder_id))return out({error:"An active funder portal account is required."},403);
+    let funderId=Number(portal.funder_id||0);
+    if(!funderId&&portal.investor_id){const {data:party,error}=await admin.from("funding_parties").select("id").eq("investor_id",portal.investor_id).maybeSingle();if(error)throw error;funderId=Number(party?.id||0);}
+    const id=Number(body.commitment_id);
+    const {data:commit,error}=await admin.from("funding_commitments").select("id,agreement_document_path").eq("id",id).eq("funder_id",funderId).maybeSingle();
+    if(error)throw error;
+    if(!commit||!commit.agreement_document_path)return out({error:"No signed agreement is available for this funding contract."},404);
+    const {data,error:signedError}=await admin.storage.from("funding-private").createSignedUrl(commit.agreement_document_path,300);
+    if(signedError)throw signedError;
+    return out({success:true,url:data.signedUrl,expires_in:300});
+  }
   if(action==="investor_request_renewal"){
     const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,funder_id,account_status").eq("user_id",user.id).maybeSingle();
     if(!portal||portal.account_status!=="active"||(!portal.investor_id&&!portal.funder_id))return out({error:"An active funder portal account is required."},403);
