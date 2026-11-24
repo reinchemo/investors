@@ -62,8 +62,8 @@ Deno.serve(async(req)=>{
     if(error)throw error;await audit("commitment",data.id,"investor_interest_submitted",null,data);return out({success:true,record:data,kyc_status:party.kyc_status});
   }
   if(action==="investor_submit_commitment"){
-    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,account_status").eq("user_id",user.id).maybeSingle();
-    if(!portal||portal.account_status!=="active"||!portal.investor_id)return out({error:"An active investor portal account is required."},403);
+    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,funder_id,account_status").eq("user_id",user.id).maybeSingle();
+    if(!portal||portal.account_status!=="active"||(!portal.investor_id&&!portal.funder_id))return out({error:"An active short-term funder or investor portal account is required."},403);
     const id=Number(body.id);
     const {data:investorParty}=portal.funder_id
       ? await admin.from("funding_parties").select("id,kyc_status,status").eq("id",portal.funder_id).maybeSingle()
