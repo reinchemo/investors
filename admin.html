@@ -153,7 +153,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <button onclick="switchView('view-portal-access')" class="flex-1 md:flex-none px-4 py-2 bg-cyan-600/15 border border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20 text-sm font-medium rounded-lg transition"><i class="fas fa-id-card mr-2"></i> Employee Portal Access</button>
-                    <button onclick="switchView('view-role')" class="flex-1 md:flex-none px-4 py-2 bg-transparent border border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 text-sm font-medium rounded-lg transition">
+                    <button type="button" onclick="openRoleCreator()" class="flex-1 md:flex-none px-4 py-2 bg-transparent border border-indigo-500 text-indigo-400 hover:bg-indigo-500/10 text-sm font-medium rounded-lg transition">
                         <i class="fas fa-shield-alt mr-2"></i> Create Role
                     </button>
                     <button onclick="switchView('view-add')" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition shadow-lg shadow-blue-500/30">
@@ -441,8 +441,8 @@
             <div><h1 class="text-2xl font-bold text-white"><i class="fas fa-id-card text-cyan-400 mr-2"></i> Employee Management & Portal Access</h1><p class="text-sm text-gray-400 mt-1">Register employees, maintain their records and manage personal portal logins.</p></div>
             <button onclick="switchView('view-list')" class="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white"><i class="fas fa-arrow-left mr-2"></i>Back to administrators</button>
           </div>
-          <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4 items-start">
-            <div class="xl:col-span-4 bg-[#181c2e] border border-gray-800 rounded-xl p-4">
+          <div class="grid grid-cols-1 gap-4 mb-4 items-start">
+            <div class="order-2 bg-[#181c2e] border border-gray-800 rounded-xl p-4">
               <div class="flex justify-between items-center mb-4"><div><h3 id="employeeFormTitle" class="font-semibold text-white">Register employee</h3><p class="text-xs text-gray-400 mt-1">Employee details. Login is created separately.</p></div><button onclick="resetEmployeeForm()" class="text-xs text-cyan-300">Clear</button></div>
               <input type="hidden" id="portalEmployeeId">
               <label class="block text-xs text-gray-400 mb-2">Employee number *</label><input id="portalEmployeeNumber" placeholder="EMP-006" maxlength="40" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
@@ -454,7 +454,7 @@
               <label class="block text-xs text-gray-400 mb-2">Payment method</label><select id="portalEmployeePaymentMethod" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4"><option value="">Not specified</option><option value="bank">Bank</option><option value="mpesa">M-Pesa</option><option value="cash">Cash</option></select>
               <div id="portalEmployeeMessage" class="hidden text-xs rounded-lg p-3 mb-3"></div><button id="portalEmployeeSaveBtn" onclick="savePortalEmployee()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg py-3 font-bold text-white"><i class="fas fa-user-plus mr-2"></i> Save employee record</button>
             </div>
-            <div class="xl:col-span-8 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden min-w-0">
+            <div class="order-1 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden min-w-0">
               <div class="px-4 py-3 border-b border-gray-800 flex justify-between items-center"><div><h3 class="font-semibold text-white">Employee register</h3><p class="text-xs text-gray-400 mt-1">Manage every employee record and see portal status.</p></div><button onclick="loadPortalAccess()" class="text-cyan-400 text-sm"><i class="fas fa-rotate mr-1"></i>Refresh</button></div>
               <div class="overflow-x-auto"><table class="w-full text-sm min-w-[760px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Employee</th><th class="text-left px-4 py-3">Contact</th><th class="text-left px-4 py-3">Role</th><th class="text-left px-4 py-3">Employment</th><th class="text-left px-4 py-3">Portal</th><th class="text-right px-4 py-3">Manage</th></tr></thead><tbody id="portalAccessRows"><tr><td colspan="6" class="p-6 text-center text-gray-500">Loading employees…</td></tr></tbody></table></div>
             </div>
@@ -745,6 +745,16 @@
         async function logout() {
             await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
+        }
+
+        function openRoleCreator() {
+            const roleView = document.getElementById('view-role');
+            if (!roleView) {
+                alert('The role creation panel could not be found. Please refresh the administrator page.');
+                return;
+            }
+            switchView('view-role');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function switchView(viewId) {
