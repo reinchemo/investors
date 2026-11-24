@@ -481,8 +481,9 @@ Deno.serve(async (request: Request): Promise<Response> => {
       if (!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username)) return jsonResponse(400, { error: "Username must be 3–32 characters and use letters, numbers, dots, underscores or hyphens." }, origin);
       if (password.length < 8 || password.length > 128) return jsonResponse(400, { error: "Set a password between 8 and 128 characters." }, origin);
       if (!validId(staffId)) return jsonResponse(400, { error: "Select a valid employee record." }, origin);
-      const { data: staffRecord, error: staffError } = await supabaseAdmin.from("staff").select("id, full_name, phone, deleted_at").eq("id", staffId).maybeSingle();
+      const { data: staffRecord, error: staffError } = await supabaseAdmin.from("staff").select("id, full_name, phone, status, deleted_at").eq("id", staffId).maybeSingle();
       if (staffError || !staffRecord || staffRecord.deleted_at) return jsonResponse(404, { error: "The active employee record could not be found." }, origin);
+      if (staffRecord.status !== "active") return jsonResponse(409, { error: "Only active employees can receive a portal login." }, origin);
       const { data: linked } = await supabaseAdmin.from("personal_portal_accounts").select("user_id").eq("staff_id", staffId).maybeSingle();
       if (linked) return jsonResponse(409, { error: "This employee already has a portal account." }, origin);
       const { data: usernameExists, error: usernameError } = await supabaseAdmin.from("profiles").select("id").ilike("username", username).maybeSingle();
