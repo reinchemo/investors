@@ -649,7 +649,7 @@ Deno.serve(async (req) => {
       let receipts:any[] = [];
       let settlements:any[] = [];
       if (funder) {
-        const commitResult = await admin.from("funding_commitments").select("id,opportunity_id,principal_amount,currency_code,agreed_return_rate,term_days,maturity_date,status,agreement_reference,signed_at,terms_locked_at,terms_snapshot,return_type,day_count_basis,tax_rate_snapshot,created_at,accepted_at")
+        const commitResult = await admin.from("funding_commitments").select("id,opportunity_id,principal_amount,currency_code,agreed_return_rate,term_days,maturity_date,status,agreement_reference,signed_at,terms_locked_at,terms_snapshot,return_type,day_count_basis,tax_rate_snapshot,created_at,accepted_at,agreement_document_path")
           .eq("funder_id",funder.id).order("created_at",{ascending:false}).limit(500);
         if (commitResult.error) return jsonResponse({ error: "Unable to load your funding commitments." }, 500);
         commitments = commitResult.data || [];
@@ -704,7 +704,7 @@ Deno.serve(async (req) => {
         if(docsError)return jsonResponse({error:"Unable to load your KYC document status."},500);
         funderDocuments=docs||[];
       }
-      const portfolioWithRenewals=portfolio.map((item:any)=>({...item,renewal_election:renewalElections.find((e:any)=>e.source_commitment_id===item.id)||null}));
+      const portfolioWithRenewals=portfolio.map((item:any)=>({...item,has_signed_agreement:!!item.agreement_document_path,agreement_document_path:undefined,renewal_election:renewalElections.find((e:any)=>e.source_commitment_id===item.id)||null}));
       return jsonResponse({success:true,investor,funder,opportunities:opportunities||[],commitments:portfolioWithRenewals,renewal_elections:renewalElections,documents:funderDocuments,receipts,settlements,live_offers_enabled:true,legal_notice:"Only approved published opportunities are shown. Only verified receipts count as invested capital. Figures are based on each commitment's locked terms snapshot and do not constitute a guarantee."});
     }
 
