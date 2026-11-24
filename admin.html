@@ -748,9 +748,13 @@
         }
 
         function switchView(viewId) {
+            const targetView = document.getElementById(viewId);
+            if (!targetView) { console.error('Admin view not found:', viewId); return; }
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            document.getElementById('profileDropdown').classList.remove('open');
+            targetView.classList.add('active');
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileDropdown) profileDropdown.classList.remove('open');
+            if (viewId === 'view-list') loadUsers();
 
             if (viewId === 'view-add') {
                 document.getElementById('newAdminName').value = '';
@@ -785,15 +789,19 @@
                 return false;
             }
 
-            const {
-                data: ur
-            } = await supabaseClient
+            const { data: userRoleRows, error: roleCheckError } = await supabaseClient
                 .from('user_roles')
                 .select('role_id, roles(is_full_admin, name)')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
+                .eq('user_id', session.user.id);
 
-            if (!ur || !ur.roles || !ur.roles.is_full_admin) {
+            if (roleCheckError) {
+                console.error('Unable to verify administrator role:', roleCheckError);
+                document.body.innerHTML = '<h1 style="text-align:center;margin-top:20vh;color:#f0a89f;">Unable to verify access</h1><p style="text-align:center;color:#7f9bb8;">Please refresh or contact the system administrator.</p>';
+                return false;
+            }
+            const hasFullAdminAccess = (userRoleRows || []).some(row => row.roles && row.roles.is_full_admin === true);
+
+            if (!hasFullAdminAccess) {
                 document.body.innerHTML = '<h1 style="text-align:center; margin-top:20vh; color:#f0a89f;">Access Denied</h1><p style="text-align:center; color:#7f9bb8;">You must be a Full Administrator to view this page.</p>';
                 return false;
             }
@@ -908,62 +916,55 @@
 
         async function loadUsers() {
             const tbody = document.getElementById('usersTableBody');
-            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading users...</td></tr>';
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Loading administrators...</td></tr>';
 
             try {
-                const {
-                    data: profiles,
-                    error: profErr
-                } = await supabaseClient.from('profiles').select('id, full_name, email, phone');
-                if (profErr) throw profErr;
+                const { data: profiles, error: profErr } = await supabaseClient
+                    .from('profiles')
+                    .select('id, full_name, email, phone')
+                    .order('full_name', { ascending: true });
+                if (profErr) throw new Error('Could not load profiles: ' + profErr.message);
 
-                const {
-                    data: userRoles,
-                    error: urErr
-                } = await supabaseClient.from('user_roles').select('user_id, roles(name)');
-                if (urErr) throw urErr;
+                const { data: userRoles, error: urErr } = await supabaseClient
+                    .from('user_roles')
+                    .select('user_id, roles(name, is_full_admin)');
+                if (urErr) console.warn('Could not load administrator role labels:', urErr.message);
 
-                // Fetch Auth Users to get last_sign_in_at via the RPC
-                const {
-                    data: authUsers,
-                    error: authErr
-                } = await supabaseClient.rpc('get_user_emails_and_logins');
+                const { data: authUsers, error: authErr } = await supabaseClient.rpc('get_user_emails_and_logins');
+                if (authErr) console.warn('Last-login details unavailable:', authErr.message);
 
                 const lastLoginMap = {};
-                if (!authErr && authUsers) {
-                    authUsers.forEach(u => {
-                        if (u.last_sign_in_at) {
-                            lastLoginMap[u.id] = u.last_sign_in_at;
-                        }
-                    });
-                }
+                (authUsers || []).forEach(u => {
+                    if (u.last_sign_in_at) lastLoginMap[u.id] = u.last_sign_in_at;
+                });
 
-                allUsers = profiles.map(profile => {
-                    const roleRecord = userRoles.find(ur => ur.user_id === profile.id);
+                allUsers = (profiles || []).map(profile => {
+                    const assignments = (userRoles || []).filter(ur => ur.user_id === profile.id);
+                    const roleRecord = assignments.find(ur => ur.roles && ur.roles.is_full_admin) || assignments[0];
                     const roleName = roleRecord && roleRecord.roles ? roleRecord.roles.name : 'Unassigned';
-
-                    let formattedLogin = 'Never';
-                    if (lastLoginMap[profile.id]) {
-                        const d = new Date(lastLoginMap[profile.id]);
-                        formattedLogin = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                    }
-
+                    const loginDate = lastLoginMap[profile.id];
+                    const formattedLogin = loginDate
+                        ? new Date(loginDate).toLocaleDateString() + ' ' + new Date(loginDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : 'Never';
                     return {
                         id: profile.id,
-                        full_name: profile.full_name,
-                        email: profile.email,
+                        full_name: profile.full_name || '',
+                        email: profile.email || '',
                         phone: profile.phone || '',
-                        roleName: roleName,
+                        roleName,
                         lastLogin: formattedLogin
                     };
                 });
 
+                if (!allUsers.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-amber-300">No profiles are visible to this administrator. Check the profiles table access policy.</td></tr>';
+                    return;
+                }
                 renderUsers();
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Error: ${err.message}</td></tr>`;
+                console.error('Administrator list failed:', err);
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-red-400">Unable to load administrator list: ' + escapePortalText(err.message || String(err)) + '</td></tr>';
             }
         }
 
@@ -1000,7 +1001,7 @@
                 else if (u.roleName !== 'Unassigned') badgeClass = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
 
                 const displayName = u.full_name || 'N/A';
-                const username = u.email.split('@')[0];
+                const username = (u.email || 'unknown').split('@')[0];
 
                 return `
                 <tr class="table-row-striped transition-colors">
