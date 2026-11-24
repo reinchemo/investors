@@ -421,6 +421,59 @@ Deno.serve(async (request: Request): Promise<Response> => {
       );
     }
 
+    if (action === "create_staff") {
+      const fullName = typeof body.full_name === "string" ? body.full_name.trim() : "";
+      const employeeNumber = typeof body.employee_number === "string" ? body.employee_number.trim() : "";
+      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+      const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+      const role = typeof body.role === "string" && body.role.trim() ? body.role.trim() : "Employee";
+      if (!fullName || fullName.length > 150 || !employeeNumber || employeeNumber.length > 40) return jsonResponse(400, { error: "Full name and employee number are required." }, origin);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return jsonResponse(400, { error: "Enter a valid email address." }, origin);
+      const { data: employee, error } = await supabaseAdmin.from("staff").insert({
+        full_name: fullName, employee_number: employeeNumber, email: email || null, phone: phone || null,
+        role, status: "active", start_date: typeof body.start_date === "string" && body.start_date ? body.start_date : new Date().toISOString().slice(0, 10),
+        address: typeof body.address === "string" && body.address.trim() ? body.address.trim().slice(0, 250) : null,
+        payment_method: typeof body.payment_method === "string" && body.payment_method ? body.payment_method : null,
+        notes: "Created through STARLINK Employee Portal Access"
+      }).select("id,employee_number,full_name,email,phone,role,status,start_date,address,payment_method").single();
+      if (error) {
+        if (error.code === "23505") return jsonResponse(409, { error: "That employee number already exists." }, origin);
+        console.error("Employee creation failed:", error.message);
+        return jsonResponse(500, { error: "Unable to create employee record." }, origin);
+      }
+      await writeAuditLog({ actor: user.id, action: "EMPLOYEE_RECORD_CREATED", entityId: String(employee.id), before: null, after: employee, ipAddress: request.headers.get("x-forwarded-for"), deviceInfo: request.headers.get("user-agent") });
+      return jsonResponse(200, { success: true, employee, message: "Employee record created. Create their portal login separately when ready." }, origin);
+    }
+
+    if (action === "update_staff") {
+      const staffId = Number(body.staff_id);
+      const fullName = typeof body.full_name === "string" ? body.full_name.trim() : "";
+      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+      const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+      const role = typeof body.role === "string" && body.role.trim() ? body.role.trim() : "Employee";
+      const status = body.status === "inactive" ? "inactive" : "active";
+      if (!Number.isSafeInteger(staffId) || staffId <= 0 || !fullName || fullName.length > 150) return jsonResponse(400, { error: "Select an employee and enter a valid full name." }, origin);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return jsonResponse(400, { error: "Enter a valid email address." }, origin);
+      const { data: before, error: findError } = await supabaseAdmin.from("staff").select("id,employee_number,full_name,email,phone,role,status,start_date,address,payment_method,deleted_at").eq("id", staffId).is("deleted_at", null).maybeSingle();
+      if (findError || !before) return jsonResponse(404, { error: "Employee record not found." }, origin);
+      const update = {
+        full_name: fullName, email: email || null, phone: phone || null, role, status,
+        start_date: typeof body.start_date === "string" && body.start_date ? body.start_date : null,
+        address: typeof body.address === "string" && body.address.trim() ? body.address.trim().slice(0, 250) : null,
+        payment_method: typeof body.payment_method === "string" && body.payment_method ? body.payment_method : null,
+        end_date: status === "inactive" && before.status === "active" ? new Date().toISOString().slice(0, 10) : status === "active" ? null : undefined,
+        updated_at: new Date().toISOString(), updated_by: user.id
+      };
+      if (update.end_date === undefined) delete (update as Record<string, unknown>).end_date;
+      const { data: employee, error } = await supabaseAdmin.from("staff").update(update).eq("id", staffId).select("id,employee_number,full_name,email,phone,role,status,start_date,end_date,address,payment_method").single();
+      if (error) {
+        console.error("Employee update failed:", error.message);
+        return jsonResponse(500, { error: "Unable to update employee record." }, origin);
+      }
+      await writeAuditLog({ actor: user.id, action: "EMPLOYEE_RECORD_UPDATED", entityId: String(staffId), before, after: employee, ipAddress: request.headers.get("x-forwarded-for"), deviceInfo: request.headers.get("user-agent") });
+      return jsonResponse(200, { success: true, employee, message: "Employee record updated." }, origin);
+    }
+
     if (action === "create_employee_account") {
       const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : "";
       const password = typeof body.password === "string" ? body.password : "";
