@@ -461,11 +461,11 @@
           </div>
           <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-4"><div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4"><div><h3 class="font-semibold text-white mb-1">Create employee portal login</h3><p class="text-xs text-gray-400">Only active employees without an account can receive a login.</p></div><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 items-end flex-1"><div><label class="block text-xs text-gray-400 mb-2">Employee</label><select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></select></div><div><label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalInviteUsername" maxlength="32" placeholder="john.kiptoo" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><div><label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalInvitePassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="bg-cyan-600 hover:bg-cyan-500 rounded-lg py-3 font-bold text-white">Create portal login</button></div><div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div></div>
           <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mt-4">
-            <section class="xl:col-span-7 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
+            <section class="xl:col-span-12 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
               <div class="p-5 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="font-semibold text-white"><i class="fas fa-hand-holding-usd text-amber-400 mr-2"></i>Short-term funder register</h3><p class="text-xs text-gray-400 mt-1">Funder profiles created in Funding Management appear here automatically.</p></div><a href="funding.html" class="text-sm text-cyan-300 hover:text-cyan-200">Open Funding Management <i class="fas fa-arrow-up-right-from-square ml-1"></i></a></div>
               <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Funder</th><th class="text-left px-4 py-3">Type</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">KYC</th><th class="text-left px-4 py-3">Portal access</th><th class="text-right px-4 py-3">Manage</th></tr></thead><tbody id="portalFunderRows"><tr><td colspan="6" class="p-6 text-center text-gray-500">Loading funders…</td></tr></tbody></table></div>
             </section>
-            <section class="xl:col-span-5 space-y-4">
+            <section class="xl:col-span-12 grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
               <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5">
                 <h3 class="font-semibold text-white mb-1"><i class="fas fa-user-plus text-amber-400 mr-2"></i>Register short-term funder</h3><p class="text-xs text-gray-400 mb-4">Create the funder profile here. It will also appear in Funding Management for KYC and approval.</p>
                 <label class="block text-xs text-gray-400 mb-2">Legal name *</label><input id="portalNewFunderName" maxlength="180" placeholder="Individual or registered company name" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
@@ -750,17 +750,49 @@
         function openRoleCreator() {
             const roleView = document.getElementById('view-role');
             if (!roleView) {
-                alert('The role creation panel could not be found. Please refresh the administrator page.');
+                console.error('Create Role panel #view-role is missing from admin.html');
+                alert('Create Role is unavailable because its panel could not be loaded. Please contact the administrator.');
                 return;
             }
-            switchView('view-role');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Explicitly activate the role workspace before rendering its controls.
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            roleView.classList.add('active');
+            roleView.style.display = 'block';
+            currentRoleId = null;
+
+            const name = document.getElementById('roleName');
+            const description = document.getElementById('roleDesc');
+            const saveButton = document.getElementById('saveRoleBtn');
+            const errorBox = document.getElementById('roleError');
+            if (name) { name.value = ''; name.disabled = false; }
+            if (description) description.value = '';
+            if (saveButton) saveButton.innerHTML = '<i class="fas fa-save mr-2"></i> Create Role';
+            if (errorBox) errorBox.classList.add('hidden');
+
+            try {
+                buildMatrix();
+                const matrix = document.getElementById('matrixBody');
+                if (!matrix || !matrix.children.length) {
+                    throw new Error('The permissions list could not be rendered.');
+                }
+            } catch (error) {
+                console.error('Unable to render role permissions:', error);
+                if (errorBox) {
+                    errorBox.textContent = error.message || 'Unable to load role permissions.';
+                    errorBox.classList.remove('hidden');
+                }
+            }
+
+            requestAnimationFrame(() => {
+                roleView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
         }
 
         function switchView(viewId) {
             const targetView = document.getElementById(viewId);
             if (!targetView) { console.error('Admin view not found:', viewId); return; }
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => { v.classList.remove('active'); v.style.display = ''; });
             targetView.classList.add('active');
             const profileDropdown = document.getElementById('profileDropdown');
             if (profileDropdown) profileDropdown.classList.remove('open');
@@ -782,10 +814,9 @@
                 document.getElementById('saveRoleBtn').innerHTML = '<i class="fas fa-save mr-2"></i> Create Role';
                 buildMatrix();
             }
-            if (viewId === 'view-portal-access') { loadPortalAccess(); }
-            if (viewId === 'view-settings') {
-                loadSettings();
-            }
+            if (viewId === 'view-portal-access') loadPortalAccess();
+            if (viewId === 'view-settings') loadSettings();
+            requestAnimationFrame(() => targetView.scrollIntoView({ behavior: 'smooth', block: 'start' }));
         }
 
         async function checkAuth() {
