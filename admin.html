@@ -438,30 +438,28 @@
 
         <div id="view-portal-access" class="view-section">
           <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-7">
-            <div><h1 class="text-2xl font-bold text-white"><i class="fas fa-id-card text-cyan-400 mr-2"></i> Employee Portal Access</h1>
-            <p class="text-sm text-gray-400 mt-1">Create username/password logins for employees and manage their access.</p></div>
+            <div><h1 class="text-2xl font-bold text-white"><i class="fas fa-id-card text-cyan-400 mr-2"></i> Employee Management & Portal Access</h1><p class="text-sm text-gray-400 mt-1">Register employees, maintain their records and manage personal portal logins.</p></div>
             <button onclick="switchView('view-list')" class="px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white"><i class="fas fa-arrow-left mr-2"></i>Back to administrators</button>
           </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
-            <div class="lg:col-span-1 bg-[#181c2e] border border-gray-800 rounded-xl p-5">
-              <h3 class="font-semibold text-white mb-1">Invite an employee</h3>
-              <p class="text-xs text-gray-400 mb-5">Choose an existing staff record and create a username/password. No email invitation is sent.</p>
-              <label class="block text-xs text-gray-400 mb-2">Employee</label>
-              <select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4"></select>
-              <label class="block text-xs text-gray-400 mb-2">Username</label>
-              <input id="portalInviteUsername" type="text" autocomplete="off" placeholder="e.g. john.kiptoo" maxlength="32" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4">
-              <label class="block text-xs text-gray-400 mb-2">Temporary password</label>
-              <input id="portalInvitePassword" type="password" autocomplete="new-password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4">
-              <p class="text-[11px] text-gray-500 -mt-2 mb-4">No email or invitation is sent. Give the credentials directly to the employee using a secure method.</p>
-              <div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mb-3"></div>
-              <button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:brightness-110 rounded-lg py-3 font-bold text-white"><i class="fas fa-paper-plane mr-2"></i> Send portal invitation</button>
-              <p class="text-[11px] text-gray-500 mt-3">No shared or administrator-known password is created. Each employee sets a private password through the secure invitation link.</p>
+          <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+            <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5">
+              <div class="flex justify-between items-center mb-4"><div><h3 id="employeeFormTitle" class="font-semibold text-white">Register employee</h3><p class="text-xs text-gray-400 mt-1">Employee details. Login is created separately.</p></div><button onclick="resetEmployeeForm()" class="text-xs text-cyan-300">Clear</button></div>
+              <input type="hidden" id="portalEmployeeId">
+              <label class="block text-xs text-gray-400 mb-2">Employee number *</label><input id="portalEmployeeNumber" placeholder="EMP-006" maxlength="40" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+              <label class="block text-xs text-gray-400 mb-2">Full name *</label><input id="portalEmployeeName" placeholder="Full name" maxlength="150" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+              <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs text-gray-400 mb-2">Email</label><input id="portalEmployeeEmail" type="email" placeholder="Email" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></div><div><label class="block text-xs text-gray-400 mb-2">Phone</label><input id="portalEmployeePhone" placeholder="Phone" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></div></div>
+              <label class="block text-xs text-gray-400 mb-2">Job title / Role</label><input id="portalEmployeeRole" placeholder="e.g. Operations Officer" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+              <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs text-gray-400 mb-2">Start date</label><input id="portalEmployeeStartDate" type="date" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"></div><div><label class="block text-xs text-gray-400 mb-2">Status</label><select id="portalEmployeeStatus" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3"><option value="active">Active</option><option value="inactive">Inactive</option></select></div></div>
+              <label class="block text-xs text-gray-400 mb-2">Address</label><input id="portalEmployeeAddress" maxlength="250" placeholder="Address" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-3">
+              <label class="block text-xs text-gray-400 mb-2">Payment method</label><select id="portalEmployeePaymentMethod" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4"><option value="">Not specified</option><option value="bank">Bank</option><option value="mpesa">M-Pesa</option><option value="cash">Cash</option></select>
+              <div id="portalEmployeeMessage" class="hidden text-xs rounded-lg p-3 mb-3"></div><button id="portalEmployeeSaveBtn" onclick="savePortalEmployee()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg py-3 font-bold text-white"><i class="fas fa-user-plus mr-2"></i> Save employee record</button>
             </div>
-            <div class="lg:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
-              <div class="p-5 border-b border-gray-800 flex justify-between items-center"><div><h3 class="font-semibold text-white">Portal access register</h3><p class="text-xs text-gray-400 mt-1">Accounts linked to employee records.</p></div><button onclick="loadPortalAccess()" class="text-cyan-400 text-sm"><i class="fas fa-rotate mr-1"></i>Refresh</button></div>
-              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[620px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Employee</th><th class="text-left px-4 py-3">Username</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Last login</th><th class="text-right px-4 py-3">Action</th></tr></thead><tbody id="portalAccessRows"><tr><td colspan="5" class="p-6 text-center text-gray-500">Loading portal accounts…</td></tr></tbody></table></div>
+            <div class="xl:col-span-2 bg-[#181c2e] border border-gray-800 rounded-xl overflow-hidden">
+              <div class="p-5 border-b border-gray-800 flex justify-between items-center"><div><h3 class="font-semibold text-white">Employee register</h3><p class="text-xs text-gray-400 mt-1">Manage every employee record and see portal status.</p></div><button onclick="loadPortalAccess()" class="text-cyan-400 text-sm"><i class="fas fa-rotate mr-1"></i>Refresh</button></div>
+              <div class="overflow-x-auto"><table class="w-full text-sm min-w-[760px]"><thead class="bg-[#22273c] text-gray-400 text-xs uppercase"><tr><th class="text-left px-4 py-3">Employee</th><th class="text-left px-4 py-3">Contact</th><th class="text-left px-4 py-3">Role</th><th class="text-left px-4 py-3">Employment</th><th class="text-left px-4 py-3">Portal</th><th class="text-right px-4 py-3">Manage</th></tr></thead><tbody id="portalAccessRows"><tr><td colspan="6" class="p-6 text-center text-gray-500">Loading employees…</td></tr></tbody></table></div>
             </div>
           </div>
+          <div class="bg-[#181c2e] border border-gray-800 rounded-xl p-5"><h3 class="font-semibold text-white mb-1">Create employee portal login</h3><p class="text-xs text-gray-400 mb-4">Only active employees without an account can receive a login.</p><div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end"><div><label class="block text-xs text-gray-400 mb-2">Employee</label><select id="portalStaffSelect" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></select></div><div><label class="block text-xs text-gray-400 mb-2">Username</label><input id="portalInviteUsername" maxlength="32" placeholder="john.kiptoo" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><div><label class="block text-xs text-gray-400 mb-2">Temporary password</label><input id="portalInvitePassword" type="password" placeholder="At least 8 characters" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white"></div><button id="portalInviteBtn" onclick="inviteEmployeePortal()" class="bg-cyan-600 hover:bg-cyan-500 rounded-lg py-3 font-bold text-white">Create portal login</button></div><div id="portalInviteMessage" class="hidden text-xs rounded-lg p-3 mt-3"></div></div>
         </div>
 
         <!-- ========================================== -->
@@ -1206,50 +1204,106 @@
             }
         };
 
+        let portalStaffCache = [];
         async function loadPortalAccess() {
             const rows = document.getElementById('portalAccessRows');
             const staffSelect = document.getElementById('portalStaffSelect');
-            rows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">Loading…</td></tr>';
+            rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">Loading…</td></tr>';
             try {
-                const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', { body: { action: 'list_users', page: 1, per_page: 100 } });
-                if (error) throw error;
-                if (!data?.success) throw new Error(data?.error || 'Unable to load portal accounts.');
-                const staff = data.staff || [];
-                const users = data.users || [];
-                const linked = users.filter(u => u.portal_account?.staff_id);
-                const linkedIds = new Set(linked.map(u => Number(u.portal_account.staff_id)));
-                staffSelect.innerHTML = '<option value="">Select employee…</option>' + staff.filter(s => !linkedIds.has(Number(s.id))).map(s => '<option value="' + s.id + '">' + (s.employee_number || ('EMP-' + s.id)) + ' · ' + s.full_name + '</option>').join('');
-                if (!linked.length) rows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-500">No employee portal accounts have been created yet.</td></tr>';
-                else rows.innerHTML = linked.map(u => {
-                    const p = u.portal_account, employee = staff.find(s => Number(s.id) === Number(p.staff_id));
-                    const status = p.account_status || 'active';
-                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + (employee?.full_name || u.full_name || 'Employee') + '<div class="text-xs text-gray-500">' + (employee?.employee_number || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + (u.username || '—') + '</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ' + (status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400') + '">' + status + '</span></td><td class="px-4 py-3 text-gray-400 text-xs">' + (u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : 'Never') + '</td><td class="px-4 py-3 text-right"><button onclick="setPortalAccountStatus(\'' + u.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">' + (status === 'active' ? 'Suspend' : 'Activate') + '</button></td></tr>';
+                const [{ data: staffData, error: staffError }, { data: portalData, error: portalError }] = await Promise.all([
+                    supabaseClient.functions.invoke('staff-management', { body: { action: 'list_staff' } }),
+                    supabaseClient.functions.invoke('manage-personal-portal-account', { body: { action: 'list_users', page: 1, per_page: 100 } })
+                ]);
+                if (staffError) throw staffError;
+                if (portalError) throw portalError;
+                if (!staffData?.success) throw new Error(staffData?.error || 'Unable to load employee records.');
+                if (!portalData?.success) throw new Error(portalData?.error || 'Unable to load portal accounts.');
+                portalStaffCache = staffData.staff || [];
+                const users = portalData.users || [];
+                const accounts = new Map(users.filter(u => u.portal_account?.staff_id).map(u => [Number(u.portal_account.staff_id), { user: u, account: u.portal_account }]));
+                staffSelect.innerHTML = '<option value="">Select active employee…</option>' + portalStaffCache.filter(s => s.status === 'active' && !accounts.has(Number(s.id))).map(s => '<option value="' + s.id + '">' + escapePortalText(s.employee_number) + ' · ' + escapePortalText(s.full_name) + '</option>').join('');
+                if (!portalStaffCache.length) rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">No employee records found. Register your first employee.</td></tr>';
+                else rows.innerHTML = portalStaffCache.map(s => {
+                    const link = accounts.get(Number(s.id));
+                    const status = link?.account?.account_status || 'Not created';
+                    const statusClass = status === 'active' ? 'text-emerald-400' : status === 'suspended' ? 'text-rose-400' : 'text-gray-500';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(s.full_name) + '<div class="text-xs text-gray-500">' + escapePortalText(s.employee_number) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.email || '—') + '<div class="text-xs text-gray-500">' + escapePortalText(s.phone || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.role || 'Employee') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + status + '</td><td class="px-4 py-3 text-right"><button onclick="editPortalEmployee(' + s.id + ')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">Edit</button>' + (link ? ' <button onclick="setPortalAccountStatus(\'' + link.user.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '') + '</td></tr>';
                 }).join('');
-            } catch (e) { rows.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">' + e.message + '</td></tr>'; }
+            } catch (e) { rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>'; }
         }
-
+        function escapePortalText(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function resetEmployeeForm() {
+            ['portalEmployeeId','portalEmployeeNumber','portalEmployeeName','portalEmployeeEmail','portalEmployeePhone','portalEmployeeRole','portalEmployeeStartDate','portalEmployeeAddress'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('portalEmployeeStatus').value = 'active';
+            document.getElementById('portalEmployeePaymentMethod').value = '';
+            document.getElementById('portalEmployeeNumber').disabled = false;
+            document.getElementById('employeeFormTitle').textContent = 'Register employee';
+            document.getElementById('portalEmployeeSaveBtn').innerHTML = '<i class="fas fa-user-plus mr-2"></i> Save employee record';
+            document.getElementById('portalEmployeeMessage').classList.add('hidden');
+        }
+        function editPortalEmployee(id) {
+            const s = portalStaffCache.find(x => Number(x.id) === Number(id)); if (!s) return;
+            document.getElementById('portalEmployeeId').value = s.id;
+            document.getElementById('portalEmployeeNumber').value = s.employee_number || '';
+            document.getElementById('portalEmployeeNumber').disabled = true;
+            document.getElementById('portalEmployeeName').value = s.full_name || '';
+            document.getElementById('portalEmployeeEmail').value = s.email || '';
+            document.getElementById('portalEmployeePhone').value = s.phone || '';
+            document.getElementById('portalEmployeeRole').value = s.role || '';
+            document.getElementById('portalEmployeeStartDate').value = s.start_date || '';
+            document.getElementById('portalEmployeeStatus').value = s.status || 'active';
+            document.getElementById('portalEmployeeAddress').value = s.address || '';
+            document.getElementById('portalEmployeePaymentMethod').value = s.payment_method || '';
+            document.getElementById('employeeFormTitle').textContent = 'Edit employee record';
+            document.getElementById('portalEmployeeSaveBtn').innerHTML = '<i class="fas fa-save mr-2"></i> Update employee';
+            document.getElementById('portalEmployeeMessage').classList.add('hidden');
+            document.getElementById('portalEmployeeName').focus();
+        }
+        async function savePortalEmployee() {
+            const id = document.getElementById('portalEmployeeId').value;
+            const payload = {
+                action: id ? 'update_staff' : 'create_staff',
+                staff_id: id ? Number(id) : undefined,
+                employee_number: document.getElementById('portalEmployeeNumber').value.trim(),
+                full_name: document.getElementById('portalEmployeeName').value.trim(),
+                email: document.getElementById('portalEmployeeEmail').value.trim(),
+                phone: document.getElementById('portalEmployeePhone').value.trim(),
+                role: document.getElementById('portalEmployeeRole').value.trim(),
+                start_date: document.getElementById('portalEmployeeStartDate').value,
+                status: document.getElementById('portalEmployeeStatus').value,
+                address: document.getElementById('portalEmployeeAddress').value.trim(),
+                payment_method: document.getElementById('portalEmployeePaymentMethod').value
+            };
+            const msg = document.getElementById('portalEmployeeMessage'), btn = document.getElementById('portalEmployeeSaveBtn');
+            msg.className = 'text-xs rounded-lg p-3 mb-3 bg-red-500/10 text-red-300'; msg.classList.remove('hidden');
+            if (!payload.full_name || (!id && !payload.employee_number)) { msg.textContent = 'Employee number and full name are required.'; return; }
+            btn.disabled = true; btn.textContent = id ? 'Updating…' : 'Saving…';
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', { body: payload });
+                if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); }
+                if (!data?.success) throw new Error(data?.error || 'Unable to save employee record.');
+                msg.className = 'text-xs rounded-lg p-3 mb-3 bg-emerald-500/10 text-emerald-300'; msg.textContent = data.message || 'Employee record saved.';
+                resetEmployeeForm(); await loadPortalAccess();
+            } catch(e) { msg.textContent = e.message; }
+            finally { btn.disabled = false; btn.innerHTML = id ? '<i class="fas fa-save mr-2"></i> Update employee' : '<i class="fas fa-user-plus mr-2"></i> Save employee record'; }
+        }
         async function inviteEmployeePortal() {
             const staffId = Number(document.getElementById('portalStaffSelect').value);
             const username = document.getElementById('portalInviteUsername').value.trim();
             const password = document.getElementById('portalInvitePassword').value;
             const msg = document.getElementById('portalInviteMessage'), btn = document.getElementById('portalInviteBtn');
-            msg.className = 'text-xs rounded-lg p-3 mb-3 bg-red-500/10 text-red-300'; msg.classList.remove('hidden');
-            if (!staffId || !username || !password) { msg.textContent = 'Choose an employee and enter a username and password.'; return; }
-            btn.disabled = true; btn.textContent = 'Sending invitation…';
+            msg.className = 'text-xs rounded-lg p-3 bg-red-500/10 text-red-300'; msg.classList.remove('hidden');
+            if (!staffId || !username || !password) { msg.textContent = 'Select an employee and enter a username and password.'; return; }
+            btn.disabled = true; btn.textContent = 'Creating login…';
             try {
                 const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', { body: { action: 'create_employee_account', staff_id: staffId, username, password } });
-                if (error) {
-                    let message = error.message;
-                    try { const detail = await error.context.json(); message = detail.error || message; } catch (_) {}
-                    throw new Error(message);
-                }
-                if (!data?.success) throw new Error(data?.error || 'Invitation failed.');
-                msg.className = 'text-xs rounded-lg p-3 mb-3 bg-emerald-500/10 text-emerald-300'; msg.textContent = data.message || 'Invitation sent.';
-                document.getElementById('portalInviteUsername').value = '';
-                document.getElementById('portalInvitePassword').value = '';
+                if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); }
+                if (!data?.success) throw new Error(data?.error || 'Unable to create portal login.');
+                msg.className = 'text-xs rounded-lg p-3 bg-emerald-500/10 text-emerald-300'; msg.textContent = data.message || 'Portal login created.';
+                document.getElementById('portalInviteUsername').value = ''; document.getElementById('portalInvitePassword').value = '';
                 await loadPortalAccess();
-            } catch (e) { msg.textContent = e.message; }
-            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Send portal invitation'; }
+            } catch(e) { msg.textContent = e.message; }
+            finally { btn.disabled = false; btn.innerHTML = 'Create portal login'; }
         }
 
         async function setPortalAccountStatus(userId, action) {
