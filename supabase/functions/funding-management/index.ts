@@ -229,6 +229,30 @@ Deno.serve(async(req)=>{
     const {data,error}=await admin.from("investors").select("id,name,investor_number,email,phone,status").is("deleted_at",null).order("name").limit(1000);
     if(error)throw error;return out({success:true,records:data||[]});
   }
+  if(action==="investor_create_document_upload"){
+    const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,funder_id,account_status").eq("user_id",user.id).maybeSingle();
+    if(!portal||portal.account_status!=="active"||(!portal.investor_id&&!portal.funder_id))return out({error:"An active funder portal account is required."},403);
+    let funderId=Number(portal.funder_id||0);
+    if(!funderId&&portal.investor_id){
+      const {data:investor}=await admin.from("investors").select("id,name,email,phone").eq("id",portal.investor_id).is("deleted_at",null).maybeSingle();
+      if(!investor)return out({error:"Linked investor profile not found."},404);
+      const {data:existing,error:existingError}=await admin.from("funding_parties").select("id").eq("investor_id",investor.id).maybeSingle();
+      if(existingError)throw existingError;
+      if(existing)funderId=Number(existing.id);
+      else {const {data:created,error:createError}=await admin.from("funding_parties").insert({investor_id:investor.id,legal_name:investor.name,contact_name:investor.name,email:investor.email,phone:investor.phone,party_type:"individual",kyc_status:"not_started",status:"draft"}).select("id").single();if(createError)throw createError;funderId=Number(created.id);}
+    }
+    const filename=String(body.filename||"").replace(/[^a-zA-Z0-9._-]/g,"_").slice(0,120),mime=String(body.mime_type||""),size=Number(body.file_size_bytes);
+    const type=String(body.document_type||"identity");
+    if(!filename||!["application/pdf","image/jpeg","image/png"].includes(mime)||!Number.isSafeInteger(size)||size<1||size>10485760)return out({error:"Only PDF, JPG or PNG documents up to 10 MB are accepted."},400);
+    if(!["identity","company_registration","beneficial_ownership","payment_account","consent","other"].includes(type))return out({error:"Choose a valid KYC document type."},400);
+    const path=funderId+"/"+crypto.randomUUID()+"-"+filename;
+    const {data:signed,error:signedError}=await admin.storage.from("funding-private").createSignedUploadUrl(path);
+    if(signedError)throw signedError;
+    const {data:doc,error:docError}=await admin.from("funding_documents").insert({funder_id:funderId,document_type:type,object_path:path,original_filename:filename,mime_type:mime,file_size_bytes:size,expiry_date:body.expiry_date||null,uploaded_by:user.id}).select("id,funder_id,document_type,original_filename,mime_type,file_size_bytes,expiry_date,review_status,uploaded_at").single();
+    if(docError)throw docError;
+    await audit("document",doc.id,"funder_uploaded_kyc_document",null,{...doc,object_path:"[private]"});
+    return out({success:true,document:doc,signed_upload:signed,path});
+  }
   if(action==="create_document_upload"){
     if(!(await need("edit")))return out({error:"Funding edit permission required."},403);
     const funderId=Number(body.funder_id),filename=String(body.filename||"").replace(/[^a-zA-Z0-9._-]/g,"_").slice(0,120),mime=String(body.mime_type||"");
