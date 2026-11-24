@@ -592,6 +592,7 @@
                   '<div class="funding-metrics"><div><small>Agreed principal</small><strong>'+cash(c.principal_amount,c.currency_code)+'</strong></div><div><small>Verified funds received</small><strong>'+cash(received,c.currency_code)+'</strong></div><div><small>Return rate</small><strong>'+safe(c.display_rate)+'% '+(c.return_type==="annualised_simple"?"p.a.":"total")+'</strong></div><div><small>Tenure</small><strong>'+safe(c.term_days)+' days</strong></div><div><small>Estimated net return</small><strong class="green">'+cash(net,c.currency_code)+'</strong></div><div><small>Maturity date</small><strong>'+dateText(c.maturity_date)+'</strong></div></div>'+
                   '<div class="funding-calculation"><span>Gross return '+cash(gross,c.currency_code)+'</span><span>Estimated deductions '+cash(deductions,c.currency_code)+'</span><strong>Projected total at maturity '+cash(Number(c.active_capital||0)+net,c.currency_code)+'</strong></div>'+
                   maturityAction+
+                  (c.has_signed_agreement?'<button class="btn" onclick="openFundingAgreement('+Number(c.id)+')">View signed agreement</button>':'')+
                   (c.status==="interested" ? '<button class="btn funding-primary" onclick="submitFundingCommitment('+Number(c.id)+')" '+(data.funder?.kyc_status!=="verified"?"disabled":"")+'>Submit commitment</button>' : '')+
                   (c.status==="interested"&&data.funder?.kyc_status!=="verified" ? '<p class="funding-hint">Complete and verify KYC before submitting a formal commitment.</p>' : '')+
                   '<p class="funding-hint">Only verified receipts count as invested capital. Return figures use the locked terms snapshot and remain estimates until settlement.</p></article>';
@@ -644,6 +645,12 @@
             const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_submit_commitment",id}});
             if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit commitment.");
             alert("Commitment submitted for agreement preparation.");await loadInvestments();
+        };
+
+        window.openFundingAgreement = async function(commitmentId) {
+            const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_signed_agreement_url",commitment_id:commitmentId}});
+            if(error||!data?.success)return alert(data?.error||error?.message||"Unable to open signed agreement.");
+            window.open(data.url,"_blank","noopener,noreferrer");
         };
 
         window.uploadFundingKycDocument = async function() {
