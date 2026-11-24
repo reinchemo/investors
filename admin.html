@@ -1322,7 +1322,7 @@
                     const link = accounts.get(Number(s.id));
                     const status = link?.account?.account_status || 'Not created';
                     const statusClass = status === 'active' ? 'text-emerald-400' : status === 'suspended' ? 'text-rose-400' : 'text-gray-500';
-                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(s.full_name) + '<div class="text-xs text-gray-500">' + escapePortalText(s.employee_number) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.email || '—') + '<div class="text-xs text-gray-500">' + escapePortalText(s.phone || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.role || 'Employee') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right"><button onclick="editPortalEmployee(' + s.id + ')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">Edit</button>' + (link ? ' <button onclick="setPortalAccountStatus(\'' + link.user.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '') + '</td></tr>';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(s.full_name) + '<div class="text-xs text-gray-500">' + escapePortalText(s.employee_number) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.email || '—') + '<div class="text-xs text-gray-500">' + escapePortalText(s.phone || '') + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.role || 'Employee') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(s.status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right"><button onclick="editPortalEmployee(' + s.id + ')" class="text-xs px-3 py-2 rounded border border-gray-700 hover:border-cyan-500 text-cyan-300">Edit</button>' + (link ? ' <button onclick="openPortalPasswordReset(\'' + link.user.id + '\',\'' + escapePortalText(s.full_name).replace(/'/g, '&#39;') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-cyan-300">Reset password</button> <button onclick="setPortalAccountStatus(\'' + link.user.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '') + '</td></tr>';
                 }).join('');
                 funderSelect.innerHTML = '<option value="">Select eligible funder…</option>' + portalFunderCache.filter(f => !['closed','suspended'].includes(String(f.status || '').toLowerCase()) && !funderAccounts.has(Number(f.id))).map(f => '<option value="' + f.id + '">' + escapePortalText(f.legal_name) + ' · ' + escapePortalText(f.party_type || 'Funder') + '</option>').join('');
                 if (!portalFunderCache.length) funderRows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500">No short-term funder profiles found. Register a funder in Funding Management first.</td></tr>';
@@ -1330,7 +1330,7 @@
                     const link = funderAccounts.get(Number(f.id));
                     const status = link?.account?.account_status || 'Not created';
                     const statusClass = status === 'active' ? 'text-emerald-400' : status === 'suspended' ? 'text-rose-400' : 'text-gray-500';
-                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(f.legal_name) + '<div class="text-xs text-gray-500">Funder #' + escapePortalText(f.id) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.party_type || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.status || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.kyc_status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right">' + (link ? '<button onclick="setPortalAccountStatus(\'' + link.user.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '<span class="text-xs text-gray-500">No login</span>') + '</td></tr>';
+                    return '<tr class="border-t border-gray-800"><td class="px-4 py-3 text-white">' + escapePortalText(f.legal_name) + '<div class="text-xs text-gray-500">Funder #' + escapePortalText(f.id) + '</div></td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.party_type || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.status || '—') + '</td><td class="px-4 py-3 text-gray-300">' + escapePortalText(f.kyc_status || '—') + '</td><td class="px-4 py-3 ' + statusClass + '">' + escapePortalText(status) + '</td><td class="px-4 py-3 text-right">' + (link ? '<button onclick="openPortalPasswordReset(\'' + link.user.id + '\',\'' + escapePortalText(f.legal_name).replace(/'/g, '&#39;') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-cyan-300">Reset password</button> <button onclick="setPortalAccountStatus(\'' + link.user.id + '\',\'' + (status === 'active' ? 'suspend' : 'activate') + '\')" class="text-xs px-3 py-2 rounded border border-gray-700 text-amber-300">' + (status === 'active' ? 'Suspend login' : 'Activate login') + '</button>' : '<span class="text-xs text-gray-500">No login</span>') + '</td></tr>';
                 }).join('');
             } catch (e) {
                 rows.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400">' + escapePortalText(e.message) + '</td></tr>';
@@ -1470,6 +1470,45 @@
             finally { btn.disabled = false; btn.textContent = 'Create funder portal login'; }
         }
 
+        function openPortalPasswordReset(userId, displayName) {
+            document.getElementById('passwordResetUserId').value = userId;
+            document.getElementById('passwordResetName').textContent = displayName || 'Portal user';
+            document.getElementById('passwordResetNew').value = '';
+            document.getElementById('passwordResetConfirm').value = '';
+            document.getElementById('passwordResetMessage').classList.add('hidden');
+            document.getElementById('passwordResetModal').classList.remove('hidden');
+            document.getElementById('passwordResetNew').focus();
+        }
+        function closePortalPasswordReset() {
+            document.getElementById('passwordResetModal').classList.add('hidden');
+            document.getElementById('passwordResetUserId').value = '';
+        }
+        async function submitPortalPasswordReset() {
+            const userId = document.getElementById('passwordResetUserId').value;
+            const password = document.getElementById('passwordResetNew').value;
+            const confirmPassword = document.getElementById('passwordResetConfirm').value;
+            const msg = document.getElementById('passwordResetMessage');
+            const btn = document.getElementById('passwordResetSave');
+            msg.className = 'text-xs rounded-lg p-3 bg-red-500/10 text-red-300'; msg.classList.remove('hidden');
+            if (!userId) { msg.textContent = 'Select a portal account first.'; return; }
+            if (password.length < 8 || password.length > 128) { msg.textContent = 'Password must be between 8 and 128 characters.'; return; }
+            if (password !== confirmPassword) { msg.textContent = 'The passwords do not match.'; return; }
+            if (!confirm('Reset the password for ' + document.getElementById('passwordResetName').textContent + '?')) return;
+            btn.disabled = true; btn.textContent = 'Resetting…';
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', {
+                    body: { action: 'reset_password', user_id: userId, new_password: password }
+                });
+                if (error) { let m = error.message; try { m = (await error.context.json()).error || m; } catch (_) {} throw new Error(m); }
+                if (!data?.success) throw new Error(data?.error || 'Unable to reset password.');
+                msg.className = 'text-xs rounded-lg p-3 bg-emerald-500/10 text-emerald-300';
+                msg.textContent = 'Password reset successfully. Share the new password securely with the account holder.';
+                document.getElementById('passwordResetNew').value = '';
+                document.getElementById('passwordResetConfirm').value = '';
+            } catch (e) { msg.textContent = e.message; }
+            finally { btn.disabled = false; btn.textContent = 'Reset password'; }
+        }
+
         async function setPortalAccountStatus(userId, action) {
             if (!confirm(action === 'suspend' ? 'Suspend this employee portal account?' : 'Reactivate this employee portal account?')) return;
             const { data, error } = await supabaseClient.functions.invoke('manage-personal-portal-account', { body: { action, user_id: userId } });
@@ -1539,6 +1578,16 @@
             }
         })();
     </script>
+    <div id="passwordResetModal" class="hidden fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4">
+      <div class="w-full max-w-md bg-[#181c2e] border border-gray-700 rounded-2xl shadow-2xl p-6">
+        <div class="flex items-start justify-between gap-4 mb-5"><div><h2 class="text-lg font-bold text-white">Reset portal password</h2><p id="passwordResetName" class="text-sm text-gray-400 mt-1">Portal user</p></div><button type="button" onclick="closePortalPasswordReset()" class="text-gray-400 hover:text-white" aria-label="Close"><i class="fas fa-times"></i></button></div>
+        <input type="hidden" id="passwordResetUserId">
+        <label class="block text-xs text-gray-400 mb-2" for="passwordResetNew">New password</label><input id="passwordResetNew" type="password" autocomplete="new-password" minlength="8" maxlength="128" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white mb-4" placeholder="At least 8 characters">
+        <label class="block text-xs text-gray-400 mb-2" for="passwordResetConfirm">Confirm new password</label><input id="passwordResetConfirm" type="password" autocomplete="new-password" minlength="8" maxlength="128" class="w-full bg-[#111424] border border-gray-700 rounded-lg p-3 text-white">
+        <div id="passwordResetMessage" class="hidden mt-4 text-xs rounded-lg p-3"></div>
+        <div class="flex justify-end gap-2 mt-6"><button type="button" onclick="closePortalPasswordReset()" class="px-4 py-2 rounded-lg border border-gray-700 text-gray-300">Cancel</button><button id="passwordResetSave" type="button" onclick="submitPortalPasswordReset()" class="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold">Reset password</button></div>
+      </div>
+    </div>
 </body>
 
 </html>
