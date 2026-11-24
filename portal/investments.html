@@ -560,6 +560,8 @@
             const commitments = Array.isArray(data.commitments) ? data.commitments : [];
             const opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
             const documents = Array.isArray(data.documents) ? data.documents : [];
+            const reminders = Array.isArray(data.notifications) ? data.notifications : [];
+            const reminderHtml = reminders.length ? '<div class="funding-kyc"><strong>Maturity reminders</strong>'+reminders.map(n=>'<p><strong>'+safe(n.title)+'</strong><br>'+safe(n.body)+' <button class="btn" onclick="markFundingReminderRead('+Number(n.id)+')">Mark read</button></p>').join("")+'</div>' : '';
             const cash = (value,currency="KES") => new Intl.NumberFormat("en-KE",{style:"currency",currency,maximumFractionDigits:2}).format(Number(value||0));
             const verified = commitments.filter(c => Number(c.capital_received || 0) > 0);
             const totalsByCurrency = {};
@@ -613,6 +615,7 @@
             return '<section class="funding-section" id="short-term-funding"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
               '<div class="funding-summary"><div class="funding-stat"><small>Total verified capital received</small><strong>'+totalInvestedHtml+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+projectedNetHtml+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
               '<div class="funding-kyc"><strong>KYC status:</strong> '+safe(statusLabel(data.funder?.kyc_status||"Not started"))+' · '+safe(data.funder?.status||"No funder profile")+'. A verified profile is required before a formal commitment can be submitted.</div>'+
+              reminderHtml+
               '<div class="funding-offer"><h3>Complete your KYC documents</h3><p class="funding-hint">Upload identity or company registration evidence, beneficial ownership where applicable, payment account proof and consent. Documents are stored privately and reviewed by an authorised administrator.</p><div class="funding-metrics"><div><small>Document type</small><select id="funder-kyc-type"><option value="identity">Identity document</option><option value="company_registration">Company registration</option><option value="beneficial_ownership">Beneficial ownership</option><option value="payment_account">Payment account proof</option><option value="consent">Consent</option><option value="other">Other</option></select></div><div><small>Expiry date (if applicable)</small><input id="funder-kyc-expiry" type="date"></div><div><small>PDF, JPG or PNG (max 10 MB)</small><input id="funder-kyc-file" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div></div><button class="btn funding-primary" onclick="uploadFundingKycDocument()">Upload document securely</button><div class="funding-hint">'+(documents.length?documents.map(d=>'<p>'+safe(d.document_type.replaceAll("_"," "))+' · '+safe(d.original_filename)+' · '+safe(statusLabel(d.review_status))+(d.review_reason?' · '+safe(d.review_reason):'')+'</p>').join(""):'No KYC documents uploaded yet.')+'</div></div>'+
               '<div class="section-head"><h2>Your funding portfolio</h2><p>Principal, locked return terms, estimated deductions, maturity and settlement progress.</p></div>'+commitmentRows+
               '<div class="section-head"><h2>Approved funding opportunities</h2><p>Compare terms and calculate a potential return before expressing interest.</p></div>'+offerCards+
@@ -645,6 +648,12 @@
             const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_submit_commitment",id}});
             if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit commitment.");
             alert("Commitment submitted for agreement preparation.");await loadInvestments();
+        };
+
+        window.markFundingReminderRead = async function(id) {
+            const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_mark_funding_notification_read",id}});
+            if(error||!data?.success)return alert(data?.error||error?.message||"Unable to update reminder.");
+            await loadInvestments();
         };
 
         window.openFundingAgreement = async function(commitmentId) {
