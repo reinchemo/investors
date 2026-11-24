@@ -27,6 +27,16 @@ Deno.serve(async(req)=>{
     if(error)console.error("Funding audit log failed",error);
   };
   const listTables:Record<string,string>={parties:"funding_parties",opportunities:"funding_opportunities",commitments:"funding_commitments",receipts:"funding_receipts",settlements:"funding_settlements",allocations:"funding_project_allocations",ledger:"funding_liability_ledger",documents:"funding_documents",renewals:"funding_renewal_elections"};
+  if(action==="investor_mark_funding_notification_read"){
+    const id=Number(body.id);
+    if(!Number.isSafeInteger(id))return out({error:"A valid reminder is required."},400);
+    const {data,error}=await admin.from("notifications").update({read_at:new Date().toISOString()})
+      .eq("id",id).eq("recipient_user_id",user.id).eq("kind","funding_maturity")
+      .is("read_at",null).select("id").maybeSingle();
+    if(error)throw error;
+    if(!data)return out({error:"Reminder not found or already marked as read."},404);
+    return out({success:true,record:data});
+  }
   if(action==="investor_signed_agreement_url"){
     const {data:portal}=await admin.from("personal_portal_accounts").select("investor_id,funder_id,account_status").eq("user_id",user.id).maybeSingle();
     if(!portal||portal.account_status!=="active"||(!portal.investor_id&&!portal.funder_id))return out({error:"An active funder portal account is required."},403);
