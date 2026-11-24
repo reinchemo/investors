@@ -559,6 +559,7 @@
         function renderFundingSection(data) {
             const commitments = Array.isArray(data.commitments) ? data.commitments : [];
             const opportunities = Array.isArray(data.opportunities) ? data.opportunities : [];
+            const documents = Array.isArray(data.documents) ? data.documents : [];
             const cash = (value,currency="KES") => new Intl.NumberFormat("en-KE",{style:"currency",currency,maximumFractionDigits:2}).format(Number(value||0));
             const verified = commitments.filter(c => Number(c.capital_received || 0) > 0);
             const totalsByCurrency = {};
@@ -611,6 +612,7 @@
             return '<section class="funding-section" id="short-term-funding"><div class="funding-heading"><div><div class="eyebrow">PRODUCT B · SHORT-TERM BUSINESS FUNDING</div><h2>My Short-Term Funding</h2><p>Separate from your ordinary shareholding and equity contributions.</p></div><span class="funding-private">🔒 PRIVATE INVESTOR VIEW</span></div>'+
               '<div class="funding-summary"><div class="funding-stat"><small>Total verified capital received</small><strong>'+totalInvestedHtml+'</strong></div><div class="funding-stat"><small>Estimated net return</small><strong class="green">'+projectedNetHtml+'</strong></div><div class="funding-stat"><small>Active funding contracts</small><strong>'+activeCount+'</strong></div></div>'+
               '<div class="funding-kyc"><strong>KYC status:</strong> '+safe(statusLabel(data.funder?.kyc_status||"Not started"))+' · '+safe(data.funder?.status||"No funder profile")+'. A verified profile is required before a formal commitment can be submitted.</div>'+
+              '<div class="funding-offer"><h3>Complete your KYC documents</h3><p class="funding-hint">Upload identity or company registration evidence, beneficial ownership where applicable, payment account proof and consent. Documents are stored privately and reviewed by an authorised administrator.</p><div class="funding-metrics"><div><small>Document type</small><select id="funder-kyc-type"><option value="identity">Identity document</option><option value="company_registration">Company registration</option><option value="beneficial_ownership">Beneficial ownership</option><option value="payment_account">Payment account proof</option><option value="consent">Consent</option><option value="other">Other</option></select></div><div><small>Expiry date (if applicable)</small><input id="funder-kyc-expiry" type="date"></div><div><small>PDF, JPG or PNG (max 10 MB)</small><input id="funder-kyc-file" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></div></div><button class="btn funding-primary" onclick="uploadFundingKycDocument()">Upload document securely</button><div class="funding-hint">'+(documents.length?documents.map(d=>'<p>'+safe(d.document_type.replaceAll("_"," "))+' · '+safe(d.original_filename)+' · '+safe(statusLabel(d.review_status))+(d.review_reason?' · '+safe(d.review_reason):'')+'</p>').join(""):'No KYC documents uploaded yet.')+'</div></div>'+
               '<div class="section-head"><h2>Your funding portfolio</h2><p>Principal, locked return terms, estimated deductions, maturity and settlement progress.</p></div>'+commitmentRows+
               '<div class="section-head"><h2>Approved funding opportunities</h2><p>Compare terms and calculate a potential return before expressing interest.</p></div>'+offerCards+
               '<div class="notice"><strong>Important:</strong> Fixed total-period returns are calculated once for the whole term. Annualised returns use simple pro-rating on the approved day-count basis. Compounding is not applied. Taxes and deductions are shown only when they are part of approved, signed terms. Projected returns are not guarantees.</div></section>';
@@ -642,6 +644,20 @@
             const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_submit_commitment",id}});
             if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit commitment.");
             alert("Commitment submitted for agreement preparation.");await loadInvestments();
+        };
+
+        window.uploadFundingKycDocument = async function() {
+            const file=document.getElementById("funder-kyc-file")?.files?.[0];
+            const type=document.getElementById("funder-kyc-type")?.value||"identity";
+            const expiry=document.getElementById("funder-kyc-expiry")?.value||null;
+            if(!file)return alert("Choose a document first.");
+            if(!["application/pdf","image/jpeg","image/png"].includes(file.type)||file.size>10*1024*1024)return alert("Upload a PDF, JPG or PNG file up to 10 MB.");
+            const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_create_document_upload",filename:file.name,mime_type:file.type,file_size_bytes:file.size,document_type:type,expiry_date:expiry}});
+            if(error||!data?.success)return alert(data?.error||error?.message||"Unable to prepare secure upload.");
+            const {error:uploadError}=await supabaseClient.storage.from("funding-private").uploadToSignedUrl(data.path,data.signed_upload.token,file,{contentType:file.type,upsert:false});
+            if(uploadError)return alert("The secure upload failed: "+uploadError.message);
+            alert("Document uploaded securely. It is now awaiting administrator review.");
+            await loadInvestments();
         };
 
         window.submitFundingMaturityInstruction = async function(sourceCommitmentId) {
