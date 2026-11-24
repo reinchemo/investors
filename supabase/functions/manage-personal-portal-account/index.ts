@@ -590,6 +590,44 @@ Deno.serve(async (request: Request): Promise<Response> => {
 
     const before = existing ?? null;
 
+    if (action === "reset_password") {
+      const newPassword = typeof body.new_password === "string" ? body.new_password : "";
+      if (newPassword.length < 8 || newPassword.length > 128) {
+        return jsonResponse(400, { error: "Set a password between 8 and 128 characters." }, origin);
+      }
+      if (!existing) {
+        return jsonResponse(404, { error: "No personal portal account exists for this user." }, origin);
+      }
+      if (targetUserId === user.id) {
+        return jsonResponse(400, { error: "Use your own account security settings to change your password." }, origin);
+      }
+      const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
+        targetUserId,
+        { password: newPassword },
+      );
+      if (passwordError) {
+        console.error("Portal password reset failed:", passwordError.message);
+        return jsonResponse(500, { error: "Unable to reset this portal password." }, origin);
+      }
+      const { error: auditError } = await supabaseAdmin.from("audit_log").insert({
+        actor: user.id,
+        action: "PORTAL_ACCOUNT_PASSWORD_RESET",
+        module: "Personal Portal Accounts",
+        entity_id: existing.id,
+        record_before: { user_id: targetUserId, password_changed: false },
+        record_after: { user_id: targetUserId, password_changed: true, reset_at: new Date().toISOString() },
+        changed_fields: ["password"],
+        reason: "Administrator-initiated portal password reset",
+        ip_address: request.headers.get("x-forwarded-for"),
+        device_info: request.headers.get("user-agent"),
+      });
+      if (auditError) {
+        console.error("Password reset audit failed:", auditError.message);
+        return jsonResponse(500, { error: "Password was changed, but the audit record failed. Contact system support." }, origin);
+      }
+      return jsonResponse(200, { success: true, message: "Portal password reset successfully." }, origin);
+    }
+
     // =====================================================
     // ACTION 2: SUSPEND OR ACTIVATE
     // =====================================================
