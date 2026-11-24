@@ -580,9 +580,17 @@
                 const gross = Number(c.gross_return || 0) * ratio;
                 const deductions = Number(c.estimated_deductions || 0) * ratio;
                 const net = Number(c.net_return || 0) * ratio;
+                const election = c.renewal_election || null;
+                const canElect = ["matured","overdue","partially_settled"].includes(c.status);
+                const opportunityOptions = opportunities.map(o=>'<option value="'+Number(o.id)+'">'+safe(o.reference_code)+' · '+safe(o.title)+'</option>').join("");
+                const maturityAction = canElect ? (election
+                  ? '<div class="funding-kyc"><strong>Maturity instruction:</strong> '+safe(statusLabel(election.status))+' · '+safe(election.election_type.replaceAll("_"," "))+(election.new_commitment_id?' · New contract #'+Number(election.new_commitment_id):'')+(election.decision_reason?' · '+safe(election.decision_reason):'')+'</div>'
+                  : '<div class="funding-kyc"><strong>Maturity instruction</strong><p class="funding-hint">Available principal '+cash(Math.max(0,Number(c.capital_received||0)-Number(c.principal_repaid||0)),c.currency_code)+' · Estimated outstanding return '+cash(Math.max(0,Number(c.net_return||0)-Number(c.return_paid||0)),c.currency_code)+'</p><div class="funding-metrics"><div><small>Choose what happens next</small><select id="maturity-type-'+Number(c.id)+'"><option value="withdraw">Withdraw principal and return</option><option value="reinvest_principal">Reinvest principal only</option><option value="reinvest_principal_and_return">Reinvest principal plus return</option><option value="reinvest_partial">Reinvest part of the amount</option></select></div><div><small>New opportunity (for reinvestment)</small><select id="maturity-opportunity-'+Number(c.id)+'"><option value="">Select opportunity</option>'+opportunityOptions+'</select></div><div><small>Partial amount (only for partial reinvestment)</small><input id="maturity-amount-'+Number(c.id)+'" type="number" min="1" step="0.01" placeholder="Amount to reinvest"></div></div><button class="btn funding-primary" onclick="submitFundingMaturityInstruction('+Number(c.id)+')">Submit maturity instruction</button><p class="funding-hint">No automatic renewal. A new agreement is required and the reinvestment is not processed until the agreement is verified.</p></div>')
+                  : "");
                 return '<article class="funding-contract"><div class="funding-contract-head"><div><span class="funding-ref">'+safe(terms.reference_code || ("FUND-"+c.id))+'</span><h3>'+safe(terms.title || "Short-term funding")+'</h3><p>'+safe(terms.funding_purpose || "Business funding")+'</p></div><span class="funding-state">'+safe(statusLabel(c.status))+'</span></div>'+
                   '<div class="funding-metrics"><div><small>Agreed principal</small><strong>'+cash(c.principal_amount,c.currency_code)+'</strong></div><div><small>Verified funds received</small><strong>'+cash(received,c.currency_code)+'</strong></div><div><small>Return rate</small><strong>'+safe(c.display_rate)+'% '+(c.return_type==="annualised_simple"?"p.a.":"total")+'</strong></div><div><small>Tenure</small><strong>'+safe(c.term_days)+' days</strong></div><div><small>Estimated net return</small><strong class="green">'+cash(net,c.currency_code)+'</strong></div><div><small>Maturity date</small><strong>'+dateText(c.maturity_date)+'</strong></div></div>'+
                   '<div class="funding-calculation"><span>Gross return '+cash(gross,c.currency_code)+'</span><span>Estimated deductions '+cash(deductions,c.currency_code)+'</span><strong>Projected total at maturity '+cash(Number(c.active_capital||0)+net,c.currency_code)+'</strong></div>'+
+                  maturityAction+
                   (c.status==="interested" ? '<button class="btn funding-primary" onclick="submitFundingCommitment('+Number(c.id)+')" '+(data.funder?.kyc_status!=="verified"?"disabled":"")+'>Submit commitment</button>' : '')+
                   (c.status==="interested"&&data.funder?.kyc_status!=="verified" ? '<p class="funding-hint">Complete and verify KYC before submitting a formal commitment.</p>' : '')+
                   '<p class="funding-hint">Only verified receipts count as invested capital. Return figures use the locked terms snapshot and remain estimates until settlement.</p></article>';
@@ -634,6 +642,23 @@
             const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:{action:"investor_submit_commitment",id}});
             if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit commitment.");
             alert("Commitment submitted for agreement preparation.");await loadInvestments();
+        };
+
+        window.submitFundingMaturityInstruction = async function(sourceCommitmentId) {
+            const kind=document.getElementById("maturity-type-"+sourceCommitmentId)?.value||"";
+            const target=document.getElementById("maturity-opportunity-"+sourceCommitmentId)?.value||"";
+            const partial=Number(document.getElementById("maturity-amount-"+sourceCommitmentId)?.value||0);
+            if(kind!=="withdraw"&&!target)return alert("Select the new approved funding opportunity.");
+            if(kind==="reinvest_partial"&&(!Number.isFinite(partial)||partial<=0))return alert("Enter the amount you want to reinvest.");
+            const labels={withdraw:"withdraw principal and return",reinvest_principal:"reinvest principal only",reinvest_principal_and_return:"reinvest principal plus return",reinvest_partial:"reinvest part of the maturity amount"};
+            if(!confirm("Submit your instruction to "+labels[kind]+"? This is a request for review, not an automatic payout or renewal."))return;
+            const payload={action:"investor_request_renewal",source_commitment_id:sourceCommitmentId,election_type:kind};
+            if(kind!=="withdraw")payload.target_opportunity_id=Number(target);
+            if(kind==="reinvest_partial")payload.requested_amount=partial;
+            const {data,error}=await supabaseClient.functions.invoke("funding-management",{body:payload});
+            if(error||!data?.success)return alert(data?.error||error?.message||"Unable to submit maturity instruction.");
+            alert("Your maturity instruction has been submitted for review.");
+            await loadInvestments();
         };
 
         function renderFunderOnly(fundingData) {
